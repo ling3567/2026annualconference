@@ -1093,7 +1093,7 @@ input.error, select.error, textarea.error {
 
 <script>
 // ===== Google Apps Script Web App URL =====
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwvpshcYeRDSoymV9aDLuGPVEqR9cayiMYSHonx7eopyAUwO2k_4A1BbN4US0pgBRJO/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzO1ISncs0C98qt1OONNQ1lDM50VHWum_KTwyDUffemezWnKs6-0UQq3o9leUNp0l-t/exec';
 
 let keywords = [];
 
@@ -1157,12 +1157,20 @@ function toggleOtherProf() {
 
 // ===== WORD COUNT =====
 function countWords(text) {
-  text = text.trim();
-  if (!text) return 0;
-  const chinese = (text.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length;
-  const nonChinese = text.replace(/[\u4e00-\u9fff\u3400-\u4dbf\s]/g, ' ').trim();
-  const english = nonChinese ? nonChinese.split(/\s+/).filter(w => w.length > 0).length : 0;
-  return chinese + english;
+  if (!text || !text.trim()) return 0;
+  // 移除 Markdown 符號（**bold**、*italic* 等）
+  text = text.replace(/\*+/g, '');
+  // 中文字元（每字算1）
+  const chineseMatches = text.match(/[\u2e80-\u9fff\uf900-\ufaff]/g) || [];
+  const chineseCount = chineseMatches.length;
+  // 移除中文字元與全形/半形標點後，計算英文單詞數
+  const stripped = text
+    .replace(/[\u2e80-\u9fff\uf900-\ufaff]/g, ' ')   // 移除中文
+    .replace(/[\u0021-\u002f\u003a-\u0040\u005b-\u0060\u007b-\u007e]/g, ' ') // 半形標點
+    .replace(/[\u2000-\u206f\u2e00-\u2e7f\u3000-\u303f\uff01-\uff0f\uff1a-\uff20\uff3b-\uff40\uff5b-\uff65\ufe30-\ufe4f]/g, ' ') // 全形標點
+    .trim();
+  const englishWords = stripped ? stripped.split(/\s+/).filter(w => w.length > 0) : [];
+  return chineseCount + englishWords.length;
 }
 function getAbstractText() {
   return ['absMotivation','absMethod','absResult','absConclusion']
