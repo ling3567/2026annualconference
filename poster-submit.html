@@ -1,0 +1,1471 @@
+Submission · HTML
+Copy
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海報論文投稿系統 | 台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1565C0;
+  --primary-light: #e3f2fd;
+  --primary-mid: #42a5f5;
+  --success: #2e7d32;
+  --success-light: #e8f5e9;
+  --warning: #e65100;
+  --warning-light: #fff3e0;
+  --danger: #c62828;
+  --danger-light: #ffebee;
+  --hero-from: #0d47a1;
+  --hero-to: #1976d2;
+  --card-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  --radius: 12px;
+  --font: 'Noto Sans TC', 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+}
+ 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+body {
+  font-family: var(--font);
+  background: #f0f4f8;
+  color: #1a1a2e;
+  line-height: 1.7;
+}
+ 
+/* ===== HERO ===== */
+.hero {
+  background: linear-gradient(135deg, var(--hero-from) 0%, var(--hero-to) 100%);
+  color: white;
+  padding: 2.5rem 1.5rem 3rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.07) 0%, transparent 60%),
+              radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 50%);
+}
+.hero-inner { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+.assoc-name {
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  letter-spacing: 0.1em;
+  opacity: 0.85;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+.event-title {
+  font-size: clamp(1.3rem, 4vw, 2rem);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.page-subtitle {
+  font-size: clamp(1.1rem, 3vw, 1.6rem);
+  font-weight: 700;
+  color: #ffd54f;
+  margin-bottom: 1.5rem;
+}
+.hero-meta {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.hero-badge {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 24px;
+  padding: 0.4rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+}
+.hero-badge span { margin-right: 0.4rem; }
+ 
+/* ===== NOTICE BAR ===== */
+.notice-bar {
+  background: #fff8e1;
+  border-bottom: 3px solid #ffa000;
+  padding: 0.75rem 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #5d4037;
+  font-weight: 500;
+}
+.notice-bar a { color: var(--primary); text-decoration: underline; }
+ 
+/* ===== MAIN LAYOUT ===== */
+.main-wrap {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem 3rem;
+}
+ 
+/* ===== SECTION CARD ===== */
+.section-card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: var(--primary-light);
+  border-bottom: 2px solid var(--primary-mid);
+}
+.section-icon { font-size: 1.4rem; }
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.section-body { padding: 1.5rem; }
+ 
+/* ===== FORM ELEMENTS ===== */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 0.4rem;
+  color: #333;
+}
+label .req {
+  color: var(--danger);
+  margin-left: 0.25rem;
+}
+label .hint {
+  font-weight: 400;
+  color: #666;
+  font-size: 0.82rem;
+  margin-left: 0.4rem;
+}
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: var(--font);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: white;
+  color: #1a1a2e;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(21,101,192,0.12);
+}
+input.valid, select.valid, textarea.valid {
+  border-color: var(--success);
+}
+input.error, select.error, textarea.error {
+  border-color: var(--danger);
+  background: #fff8f8;
+}
+.field-msg {
+  font-size: 0.82rem;
+  margin-top: 0.3rem;
+  min-height: 1.1em;
+}
+.field-msg.ok { color: var(--success); }
+.field-msg.err { color: var(--danger); }
+.field-msg.info { color: #555; }
+ 
+/* ===== CATEGORY CARDS ===== */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+}
+.cat-option {
+  position: relative;
+}
+.cat-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0; height: 0;
+}
+.cat-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  background: #fafafa;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+.cat-label:hover {
+  border-color: var(--primary-mid);
+  background: var(--primary-light);
+  transform: translateY(-1px);
+}
+.cat-option input:checked + .cat-label {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 0 0 2px rgba(21,101,192,0.15);
+}
+.cat-letter {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--primary);
+  min-width: 1.4rem;
+}
+.cat-text strong { display: block; color: #1a1a2e; }
+.cat-text em { font-style: normal; color: #555; font-size: 0.82rem; }
+ 
+/* ===== AUTHOR TABLE ===== */
+.author-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+.author-table th {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  border: 1px solid #cce0f5;
+}
+.author-table td {
+  padding: 0.45rem 0.5rem;
+  border: 1px solid #e0e0e0;
+  vertical-align: middle;
+}
+.author-table input[type="text"],
+.author-table input[type="email"] {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.87rem;
+}
+.author-table select {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.87rem;
+}
+.author-row.first-author td { background: #fffde7; }
+.author-row .drag-handle {
+  cursor: grab;
+  color: #aaa;
+  font-size: 1.1rem;
+  padding: 0 0.25rem;
+  user-select: none;
+}
+.author-row .drag-handle:active { cursor: grabbing; }
+.remove-btn {
+  background: none;
+  border: none;
+  color: #e53935;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.remove-btn:hover { background: #ffebee; }
+.add-author-btn {
+  margin-top: 0.75rem;
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1.5px dashed var(--primary-mid);
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background 0.2s, transform 0.15s;
+}
+.add-author-btn:hover { background: #bbdefb; transform: translateY(-1px); }
+.author-note {
+  font-size: 0.82rem;
+  color: #666;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--warning-light);
+  border-left: 3px solid var(--warning);
+  border-radius: 4px;
+}
+ 
+/* ===== WORD COUNT ===== */
+.abstract-wrap { position: relative; }
+.word-count-bar {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.count-label { font-size: 0.82rem; color: #555; white-space: nowrap; }
+.count-bar-bg {
+  flex: 1;
+  height: 8px;
+  background: #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.count-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s, background 0.3s;
+  background: var(--success);
+}
+.count-number {
+  font-size: 0.9rem;
+  font-weight: 700;
+  min-width: 3.5rem;
+  text-align: right;
+}
+.count-number.ok { color: var(--success); }
+.count-number.warn { color: var(--warning); }
+.count-number.over { color: var(--danger); }
+ 
+/* ===== MEMBER CHECK ===== */
+.member-check-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+.check-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.check-status.ok { background: var(--success-light); color: var(--success); }
+.check-status.fail { background: var(--danger-light); color: var(--danger); }
+.check-status.pending { background: #f5f5f5; color: #777; }
+ 
+/* ===== CHECKLIST PANEL ===== */
+.checklist-panel {
+  background: #fafbff;
+  border: 2px solid var(--primary-mid);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.checklist-panel h3 {
+  font-size: 0.95rem;
+  color: var(--primary);
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.check-items { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; }
+.check-items li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+}
+.check-icon { font-size: 1rem; min-width: 1.2rem; }
+.check-items li.pass { color: var(--success); }
+.check-items li.fail { color: var(--danger); }
+.check-items li.pending { color: #999; }
+ 
+/* ===== SUBMIT AREA ===== */
+.submit-area { text-align: center; }
+.submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: linear-gradient(135deg, #1565C0, #0d47a1);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 0.9rem 3rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(21,101,192,0.35);
+  letter-spacing: 0.05em;
+}
+.submit-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(21,101,192,0.4);
+}
+.submit-btn:disabled {
+  background: linear-gradient(135deg, #90a4ae, #78909c);
+  cursor: not-allowed;
+  box-shadow: none;
+  filter: none; transform: none;
+}
+.submit-note {
+  margin-top: 0.75rem;
+  font-size: 0.83rem;
+  color: #666;
+}
+.submit-note.err { color: var(--danger); font-weight: 600; }
+ 
+/* ===== SUCCESS OVERLAY ===== */
+.success-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+.success-overlay.show { display: flex; }
+.success-box {
+  background: white;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+}
+.success-icon { font-size: 3.5rem; margin-bottom: 0.75rem; }
+.success-box h2 { font-size: 1.4rem; color: var(--success); margin-bottom: 0.5rem; }
+.success-box p { color: #555; font-size: 0.93rem; line-height: 1.6; }
+.success-box .ref-num {
+  display: inline-block;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
+  padding: 0.35rem 1rem;
+  border-radius: 20px;
+  margin: 0.75rem 0;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+}
+.close-success-btn {
+  margin-top: 1.25rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 0.65rem 2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+}
+ 
+/* ===== LOADING ===== */
+.spinner {
+  display: inline-block;
+  width: 1em; height: 1em;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+ 
+/* ===== TABS ===== */
+.abstract-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+.abstract-tab {
+  padding: 0.4rem 1rem;
+  border: 1.5px solid #ccc;
+  border-radius: 20px;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: var(--font);
+  font-weight: 600;
+  transition: background 0.15s, border-color 0.15s;
+}
+.abstract-tab.active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+ 
+/* ===== HELPER BITS ===== */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+.field-section-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid #eee;
+}
+.inline-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
+.tag {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 20px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.tag-remove { cursor: pointer; opacity: 0.6; }
+.tag-remove:hover { opacity: 1; }
+.keyword-input-wrap { display: flex; gap: 0.5rem; }
+.keyword-input-wrap input { flex: 1; }
+.add-kw-btn {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1.5px solid var(--primary-mid);
+  border-radius: 8px;
+  padding: 0 1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  white-space: nowrap;
+}
+.add-kw-btn:hover { background: #bbdefb; }
+.info-box {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: #1a3a6c;
+  margin-bottom: 1rem;
+}
+.info-box ul { padding-left: 1.2rem; margin-top: 0.3rem; }
+.info-box li { margin-bottom: 0.2rem; }
+.file-upload-area {
+  border: 2px dashed #bbb;
+  border-radius: 10px;
+  padding: 1.25rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+  background: #fafafa;
+}
+.file-upload-area:hover, .file-upload-area.dragover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.file-upload-area input[type="file"] {
+  position: absolute; inset: 0;
+  opacity: 0; cursor: pointer;
+  width: 100%; height: 100%;
+}
+.file-icon { font-size: 2rem; margin-bottom: 0.4rem; }
+.file-name {
+  font-weight: 600;
+  color: var(--success);
+  font-size: 0.88rem;
+  margin-top: 0.4rem;
+}
+.upload-label { font-size: 0.88rem; color: #666; }
+.upload-label strong { color: var(--primary); }
+ 
+/* ===== PROFESSION GRID ===== */
+.profession-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+.prof-option {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border: 1.5px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  background: #fafafa;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.prof-option:hover { border-color: var(--primary-mid); background: var(--primary-light); }
+.prof-option input[type="radio"] { width: auto; margin: 0; accent-color: var(--primary); }
+.prof-option input[type="radio"]:checked + span { font-weight: 700; color: var(--primary); }
+.prof-option:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.prof-other { border-style: dashed; }
+ 
+/* ===== PREVIEW OVERLAY ===== */
+.preview-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 999;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1.5rem 1rem;
+  overflow-y: auto;
+}
+.preview-overlay.show { display: flex; }
+.preview-box {
+  background: white;
+  border-radius: 16px;
+  max-width: 720px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+  overflow: hidden;
+  margin: auto;
+}
+.preview-header {
+  background: linear-gradient(135deg, var(--hero-from), var(--hero-to));
+  color: white;
+  padding: 1.25rem 1.5rem;
+}
+.preview-header h2 { font-size: 1.2rem; margin-bottom: 0.3rem; }
+.preview-header p { font-size: 0.85rem; opacity: 0.88; }
+.preview-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.preview-section { border: 1px solid #e8eaf6; border-radius: 10px; overflow: hidden; }
+.preview-section-title {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid #c5d8f5;
+}
+.preview-rows { padding: 0.5rem 0; }
+.preview-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.88rem;
+  border-bottom: 1px solid #f5f5f5;
+}
+.preview-row:last-child { border-bottom: none; }
+.preview-row-label {
+  min-width: 6rem;
+  color: #777;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.preview-row-value { color: #1a1a2e; white-space: pre-wrap; word-break: break-word; }
+.preview-abstract .preview-row { flex-direction: column; gap: 0.25rem; }
+.preview-abstract .preview-row-label { min-width: auto; }
+.preview-abstract .preview-row-value { background: #f9f9f9; padding: 0.5rem 0.75rem; border-radius: 6px; line-height: 1.65; }
+.preview-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 2px solid #e0e0e0;
+  background: #fafafa;
+}
+.preview-back-btn {
+  background: white;
+  border: 1.5px solid #ccc;
+  border-radius: 24px;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  color: #555;
+  transition: background 0.15s;
+}
+.preview-back-btn:hover { background: #f0f0f0; }
+.preview-confirm-btn {
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 0.65rem 2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  box-shadow: 0 3px 10px rgba(46,125,50,0.35);
+  transition: filter 0.2s, transform 0.15s;
+}
+.preview-confirm-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+.preview-confirm-btn:disabled { background: #90a4ae; box-shadow: none; cursor: not-allowed; }
+ 
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .two-col, .three-col { grid-template-columns: 1fr; }
+  .category-grid { grid-template-columns: 1fr; }
+  .author-table thead { display: none; }
+  .author-table tr { display: block; margin-bottom: 0.75rem; border: 1px solid #ddd; border-radius: 8px; padding: 0.5rem; }
+  .author-table td { display: flex; flex-direction: column; border: none; padding: 0.25rem 0; }
+  .author-table td::before { content: attr(data-label); font-size: 0.78rem; color: #888; font-weight: 600; }
+  .submit-btn { padding: 0.8rem 1.8rem; font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+ 
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <p class="assoc-name">🏥 台灣醫事聯合臨床技能發展學會</p>
+    <h1 class="event-title">2026年會員大會暨學術研討會</h1>
+    <p class="page-subtitle">📄 海報論文線上投稿系統</p>
+    <div class="hero-meta">
+      <div class="hero-badge"><span>📅</span>發表日期：2026年8月15日(六)</div>
+      <div class="hero-badge"><span>📬</span>截稿日期：2026年6月15日(一)</div>
+      <div class="hero-badge"><span>📢</span>錄取通知：7月15日前</div>
+    </div>
+  </div>
+</div>
+ 
+<!-- NOTICE -->
+<div class="notice-bar">
+  聯絡方式：秘書處楊依玲小姐：(06)2812811 轉57426
+</div>
+ 
+<div class="main-wrap">
+ 
+  <!-- 投稿規範說明 -->
+  <div class="section-card">
+    <div class="section-header">
+      <span class="section-icon">📋</span>
+      <span class="section-title">投稿規範快覽</span>
+    </div>
+    <div class="section-body">
+      <div class="info-box">
+        <strong>📌 投稿前請確認：</strong>
+        <ul>
+          <li>作者群中<strong>至少1位為本會會員</strong>且已完成當年度會費繳納，方可參加優秀海報獎評選</li>
+          <li>每位會員投稿篇數<strong>至多3篇</strong></li>
+          <li>論文摘要字數<strong>不超過500字</strong>（中文或英文均可），以純文字撰寫，勿含框線圖表</li>
+          <li>入選優秀海報者，第一作者需於8月15日研討會當日出席解說</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+ 
+  <form id="submitForm" novalidate>
+ 
+    <!-- STEP 1: 投稿類別 -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-icon">🗂️</span>
+        <span class="section-title">STEP 1 — 投稿類別</span>
+      </div>
+      <div class="section-body">
+        <div class="form-group">
+          <label>請選擇投稿類別<span class="req">*</span><span class="hint">（請擇一勾選）</span></label>
+          <div class="category-grid" id="categoryGrid">
+            <div class="cat-option">
+              <input type="radio" name="category" id="catA" value="A">
+              <label class="cat-label" for="catA">
+                <span class="cat-letter">A</span>
+                <div class="cat-text">
+                  <strong>Clinical Skills Education, Simulation &amp; IPL</strong>
+                  <em>臨床技能教育、模擬教學與跨專業學習</em>
+                </div>
+              </label>
+            </div>
+            <div class="cat-option">
+              <input type="radio" name="category" id="catB" value="B">
+              <label class="cat-label" for="catB">
+                <span class="cat-letter">B</span>
+                <div class="cat-text">
+                  <strong>Assessment, Entrustment &amp; CBME</strong>
+                  <em>評量、信任決策與能力導向教育</em>
+                </div>
+              </label>
+            </div>
+            <div class="cat-option">
+              <input type="radio" name="category" id="catC" value="C">
+              <label class="cat-label" for="catC">
+                <span class="cat-letter">C</span>
+                <div class="cat-text">
+                  <strong>Humanism, Wellbeing &amp; Professional Identity</strong>
+                  <em>人文素養、醫療韌性與專業認同</em>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class="field-msg err" id="categoryMsg"></div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- STEP 2: 論文資訊 -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-icon">📝</span>
+        <span class="section-title">STEP 2 — 論文基本資訊</span>
+      </div>
+      <div class="section-body">
+        <div class="form-group">
+          <label for="paperTitle">論文題目<span class="req">*</span></label>
+          <input type="text" id="paperTitle" placeholder="請輸入完整論文題目（中文或英文）" maxlength="200">
+          <div class="field-msg" id="titleMsg"></div>
+        </div>
+        <div class="form-group">
+          <label>關鍵字<span class="req">*</span><span class="hint">（請輸入3至5個關鍵字）</span></label>
+          <div class="keyword-input-wrap">
+            <input type="text" id="kwInput" placeholder="輸入關鍵字後按「新增」" maxlength="30">
+            <button type="button" class="add-kw-btn" onclick="addKeyword()">＋ 新增</button>
+          </div>
+          <div class="inline-tags" id="kwTags"></div>
+          <div class="field-msg" id="kwMsg"></div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- STEP 3: 作者群 -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-icon">👥</span>
+        <span class="section-title">STEP 3 — 作者群</span>
+      </div>
+      <div class="section-body">
+        <div class="author-note">
+          請依序填寫第一作者及共同作者，格式範例：<strong>王小明¹、陳大華²、李美玲¹</strong>（數字上標代表服務單位編號）。<br>
+          參加優秀海報獎評選者，作者群中至少1位需為本會會員且已完成<strong>當年度</strong>會費繳納。
+        </div>
+        <div class="form-group" style="margin-top:0.75rem">
+          <label for="authorField">作者群<span class="req">*</span><span class="hint">（請填入所有作者姓名，含服務單位標註）</span></label>
+          <textarea id="authorField" rows="3" placeholder="例：王小明¹、陳大華²、李美玲¹&#10;¹臺灣大學醫學院&#10;²奇美醫療財團法人奇美醫院" oninput="runChecks()"></textarea>
+          <div class="field-msg" id="authorMsg"></div>
+        </div>
+ 
+        <!-- 會員資格確認 -->
+        <div class="form-group">
+          <label>作者群中的會員資格狀態<span class="req">*</span></label>
+          <div class="info-box" style="margin-bottom:0.75rem;margin-top:0.4rem;font-size:0.83rem">
+            ℹ️ 若投稿時年費尚未開始收取，請於<strong>發表前</strong>完成當年度會費繳納，方具優秀海報獎評選資格。
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.6rem;margin-top:0.3rem">
+            <label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;cursor:pointer;padding:0.6rem 0.9rem;border:1.5px solid #ddd;border-radius:8px;transition:border-color 0.15s,background 0.15s" id="memberLabel-paid">
+              <input type="radio" name="memberConfirm" value="paid" onchange="runChecks()" style="width:auto;margin-top:0.2rem;accent-color:var(--success)">
+              <span><strong style="color:var(--success)">✅ 是會員，且已完成當年度會費繳納</strong><br><span style="font-size:0.82rem;color:#555">具優秀海報獎評選資格</span></span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;cursor:pointer;padding:0.6rem 0.9rem;border:1.5px solid #ddd;border-radius:8px;transition:border-color 0.15s,background 0.15s" id="memberLabel-pending">
+              <input type="radio" name="memberConfirm" value="pending" onchange="runChecks()" style="width:auto;margin-top:0.2rem;accent-color:#f57c00">
+              <span><strong style="color:#e65100">🕐 是會員，但年費尚未繳納</strong><br><span style="font-size:0.82rem;color:#555">請於發表前（2026年8月15日前）完成繳納，方具評選資格；否則僅供參展</span></span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;cursor:pointer;padding:0.6rem 0.9rem;border:1.5px solid #ddd;border-radius:8px;transition:border-color 0.15s,background 0.15s" id="memberLabel-none">
+              <input type="radio" name="memberConfirm" value="none" onchange="runChecks()" style="width:auto;margin-top:0.2rem;accent-color:var(--danger)">
+              <span><strong style="color:var(--danger)">❌ 作者群中無本會會員</strong><br><span style="font-size:0.82rem;color:#555">投稿後僅供參展，不參加優秀海報獎評選</span></span>
+            </label>
+          </div>
+          <div class="field-msg" id="memberMsg"></div>
+        </div>
+ 
+        <!-- 聯絡作者 -->
+        <div style="margin-top:1rem">
+          <p class="field-section-title">📮 通訊作者 / 投稿聯絡人</p>
+          <div class="two-col">
+            <div class="form-group">
+              <label for="contactName">姓名<span class="req">*</span></label>
+              <input type="text" id="contactName" placeholder="請輸入姓名">
+              <div class="field-msg" id="contactNameMsg"></div>
+            </div>
+            <div class="form-group">
+              <label for="contactEmail">Email<span class="req">*</span><span class="hint">（系統通知將寄至此信箱）</span></label>
+              <input type="email" id="contactEmail" placeholder="example@hospital.org.tw">
+              <div class="field-msg" id="contactEmailMsg"></div>
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label for="contactPhone">聯絡電話<span class="req">*</span></label>
+              <input type="tel" id="contactPhone" placeholder="09xx-xxxxxx 或 (0x)xxxx-xxxx">
+              <div class="field-msg" id="contactPhoneMsg"></div>
+            </div>
+            <div class="form-group">
+              <label for="contactUnit">服務單位<span class="req">*</span></label>
+              <input type="text" id="contactUnit" placeholder="醫院/學校/機構名稱">
+              <div class="field-msg" id="contactUnitMsg"></div>
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label for="contactDept">服務部門<span class="req">*</span></label>
+              <input type="text" id="contactDept" placeholder="例：教學部、護理部、內科部..." oninput="runChecks()">
+              <div class="field-msg" id="contactDeptMsg"></div>
+            </div>
+            <div class="form-group">
+              <label for="contactTitle">職稱<span class="req">*</span></label>
+              <input type="text" id="contactTitle" placeholder="例：主治醫師、護理師、助理教授..." oninput="runChecks()">
+              <div class="field-msg" id="contactTitleMsg"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>通訊作者職類<span class="req">*</span><span class="hint">（請擇一勾選）</span></label>
+            <div class="profession-grid" id="professionGrid">
+              <label class="prof-option"><input type="radio" name="profession" value="西醫" onchange="runChecks()"><span>西醫</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="牙醫" onchange="runChecks()"><span>牙醫</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="中醫" onchange="runChecks()"><span>中醫</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="藥事" onchange="runChecks()"><span>藥事</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="醫事放射" onchange="runChecks()"><span>醫事放射</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="醫事檢驗" onchange="runChecks()"><span>醫事檢驗</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="牙體技術" onchange="runChecks()"><span>牙體技術</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="護理" onchange="runChecks()"><span>護理</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="營養" onchange="runChecks()"><span>營養</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="呼吸治療" onchange="runChecks()"><span>呼吸治療</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="聽力" onchange="runChecks()"><span>聽力</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="物理治療" onchange="runChecks()"><span>物理治療</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="職能治療" onchange="runChecks()"><span>職能治療</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="臨床心理" onchange="runChecks()"><span>臨床心理</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="諮商心理" onchange="runChecks()"><span>諮商心理</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="語言治療" onchange="runChecks()"><span>語言治療</span></label>
+              <label class="prof-option"><input type="radio" name="profession" value="專科護理師" onchange="runChecks()"><span>專科護理師</span></label>
+              <label class="prof-option prof-other">
+                <input type="radio" name="profession" value="其他" onchange="runChecks();toggleOtherProf()"><span>其他：</span>
+                <input type="text" id="profOtherText" placeholder="請填寫" style="width:8rem;margin-left:0.3rem;padding:0.2rem 0.5rem;font-size:0.85rem;border:1px solid #ccc;border-radius:5px;display:none" oninput="runChecks()">
+              </label>
+            </div>
+            <div class="field-msg" id="professionMsg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- STEP 4: 論文摘要 -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-icon">📄</span>
+        <span class="section-title">STEP 4 — 論文摘要</span>
+      </div>
+      <div class="section-body">
+        <div class="info-box">
+          依投稿格式，摘要需包含下列五大項目，字數合計<strong>不超過500字</strong>（純文字，勿含表格圖表）。<br>
+          請在下方各欄位分別填寫，系統將自動累計總字數。
+        </div>
+ 
+        <div class="abstract-tabs" id="abstractTabs" style="display:none"></div>
+ 
+        <!-- 分項填寫 -->
+        <div id="allFields">
+          <div class="form-group">
+            <label for="absMotivation">研究動機<span class="req">*</span></label>
+            <textarea id="absMotivation" rows="3" placeholder="說明研究動機、背景與目的..." oninput="updateWordCount()"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="absMethod">研究方法<span class="req">*</span></label>
+            <textarea id="absMethod" rows="3" placeholder="描述研究設計、對象、工具與方法..." oninput="updateWordCount()"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="absResult">研究結果<span class="req">*</span></label>
+            <textarea id="absResult" rows="3" placeholder="說明主要研究發現與數據..." oninput="updateWordCount()"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="absConclusion">結論<span class="req">*</span></label>
+            <textarea id="absConclusion" rows="3" placeholder="陳述研究結論與對臨床/教育的意涵..." oninput="updateWordCount()"></textarea>
+          </div>
+        </div>
+ 
+        <!-- 字數計算 -->
+        <div class="word-count-bar">
+          <span class="count-label">目前字數：</span>
+          <div class="count-bar-bg">
+            <div class="count-bar-fill" id="countBarFill" style="width:0%"></div>
+          </div>
+          <span class="count-number pending" id="countNumber">0 / 500</span>
+        </div>
+        <div class="field-msg" id="abstractMsg"></div>
+      </div>
+    </div>
+ 
+    <!-- STEP 5: 上傳附件 -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-icon">📎</span>
+        <span class="section-title">STEP 5 — 上傳附件</span>
+      </div>
+      <div class="section-body">
+        <div class="form-group">
+          <label>著作授權書 PDF<span class="req">*</span><span class="hint">（請下載範本簽名後掃描，.pdf，上限 10MB）</span></label>
+          <div class="file-upload-area" id="pdfArea">
+            <input type="file" id="pdfFile" accept=".pdf" onchange="handleFile('pdfFile','pdfArea','pdfName','pdfMsg')">
+            <div class="file-icon">📃</div>
+            <p class="upload-label">拖曳或點擊<strong>上傳 PDF 著作授權書</strong></p>
+            <p class="file-name" id="pdfName"></p>
+          </div>
+          <div class="field-msg" id="pdfMsg"></div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- STEP 6: 確認送出 -->
+    <div class="checklist-panel">
+      <h3>✅ 投稿前自動檢核清單</h3>
+      <ul class="check-items" id="checkList">
+        <li id="chk-category" class="pending"><span class="check-icon">⬜</span>已選擇投稿類別</li>
+        <li id="chk-title" class="pending"><span class="check-icon">⬜</span>論文題目已填寫</li>
+        <li id="chk-keyword" class="pending"><span class="check-icon">⬜</span>關鍵字 3～5 個</li>
+        <li id="chk-author" class="pending"><span class="check-icon">⬜</span>作者群已填寫</li>
+        <li id="chk-member" class="pending"><span class="check-icon">⬜</span>已確認會員資格狀態</li>
+        <li id="chk-contact" class="pending"><span class="check-icon">⬜</span>通訊作者資訊完整（含服務部門、職稱）</li>
+        <li id="chk-profession" class="pending"><span class="check-icon">⬜</span>通訊作者職類已選擇</li>
+        <li id="chk-abstract" class="pending"><span class="check-icon">⬜</span>摘要已填寫且不超過 500 字</li>
+        <li id="chk-pdf" class="pending"><span class="check-icon">⬜</span>已上傳著作授權書 PDF</li>
+      </ul>
+    </div>
+ 
+    <div class="submit-area">
+      <button type="button" class="submit-btn" id="previewBtn" onclick="openPreview()" disabled>
+        <span id="btnIcon">🚫</span>
+        <span id="btnText">請完成所有必填項目</span>
+      </button>
+      <p class="submit-note" id="submitNote">請完成以上所有欄位，系統將自動解鎖「預覽並送出」按鈕</p>
+    </div>
+ 
+  </form>
+</div>
+ 
+<!-- PREVIEW OVERLAY -->
+<div class="preview-overlay" id="previewOverlay">
+  <div class="preview-box">
+    <div class="preview-header">
+      <h2>📋 投稿資料預覽確認</h2>
+      <p>請仔細核對以下資料，確認無誤後再按「確認送出」。</p>
+    </div>
+    <div class="preview-body" id="previewBody">
+      <!-- injected by JS -->
+    </div>
+    <div class="preview-footer">
+      <button class="preview-back-btn" onclick="closePreview()">← 返回修改</button>
+      <button class="preview-confirm-btn" id="confirmSubmitBtn" onclick="submitForm()">
+        <span id="confirmBtnIcon">🚀</span> 確認送出
+      </button>
+    </div>
+  </div>
+</div>
+ 
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-box">
+    <div class="success-icon">🎉</div>
+    <h2>投稿成功！</h2>
+    <p>您的投稿已完成送出，系統將寄出確認信至您填寫的聯絡 Email。</p>
+    <p>投稿編號：</p>
+    <div class="ref-num" id="refNum">TCS2026-000000</div>
+    <p>請保存此編號，預計於 <strong>約3個工作天</strong> 內收到學會確認回覆信。</p>
+    <p style="margin-top:0.5rem;font-size:0.82rem;color:#888">錄取結果將於 <strong>2026年7月15日前</strong> 以Email個別通知。</p>
+    <button class="close-success-btn" onclick="closeSuccess()">確認</button>
+  </div>
+</div>
+ 
+<script>
+// ===== Google Apps Script Web App URL =====
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwvpshcYeRDSoymV9aDLuGPVEqR9cayiMYSHonx7eopyAUwO2k_4A1BbN4US0pgBRJO/exec';
+ 
+let keywords = [];
+ 
+// ===== HELPERS =====
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+ 
+// ===== KEYWORDS =====
+function addKeyword() {
+  const inp = document.getElementById('kwInput');
+  const kw = inp.value.trim();
+  if (!kw) return;
+  if (keywords.length >= 5) { setMsg('kwMsg','最多5個關鍵字','err'); return; }
+  if (keywords.includes(kw)) { setMsg('kwMsg','關鍵字已存在','err'); return; }
+  setMsg('kwMsg','','');
+  keywords.push(kw);
+  inp.value = '';
+  renderKeywords();
+  runChecks();
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement.id === 'kwInput') {
+    e.preventDefault(); addKeyword();
+  }
+});
+function removeKeyword(kw) {
+  keywords = keywords.filter(k => k !== kw);
+  renderKeywords(); runChecks();
+}
+function renderKeywords() {
+  document.getElementById('kwTags').innerHTML = keywords.map(kw =>
+    `<span class="tag">${esc(kw)}<span class="tag-remove" onclick="removeKeyword('${esc(kw)}')">✕</span></span>`
+  ).join('');
+}
+ 
+// ===== PROFESSION OTHER TOGGLE =====
+function toggleOtherProf() {
+  const sel = document.querySelector('input[name="profession"]:checked');
+  const otherInp = document.getElementById('profOtherText');
+  if (sel && sel.value === '其他') {
+    otherInp.style.display = '';
+    otherInp.focus();
+  } else {
+    otherInp.style.display = 'none';
+    otherInp.value = '';
+  }
+}
+ 
+// ===== WORD COUNT =====
+function countWords(text) {
+  text = text.trim();
+  if (!text) return 0;
+  const chinese = (text.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length;
+  const nonChinese = text.replace(/[\u4e00-\u9fff\u3400-\u4dbf\s]/g, ' ').trim();
+  const english = nonChinese ? nonChinese.split(/\s+/).filter(w => w.length > 0).length : 0;
+  return chinese + english;
+}
+function getAbstractText() {
+  return ['absMotivation','absMethod','absResult','absConclusion']
+    .map(id => document.getElementById(id).value).join(' ');
+}
+function updateWordCount() {
+  const text = getAbstractText();
+  const count = countWords(text);
+  const max = 500;
+  const pct = Math.min(count / max * 100, 100);
+  const fill = document.getElementById('countBarFill');
+  const num = document.getElementById('countNumber');
+  num.textContent = `${count} / ${max}`;
+  if (count === 0) {
+    fill.style.width = '0%'; fill.style.background = '#ddd';
+    num.className = 'count-number pending';
+  } else if (count <= 450) {
+    fill.style.width = pct + '%'; fill.style.background = 'var(--success)';
+    num.className = 'count-number ok';
+  } else if (count <= 500) {
+    fill.style.width = pct + '%'; fill.style.background = '#ffa000';
+    num.className = 'count-number warn';
+  } else {
+    fill.style.width = '100%'; fill.style.background = 'var(--danger)';
+    num.className = 'count-number over';
+  }
+  runChecks();
+}
+ 
+// ===== FILE UPLOAD =====
+function handleFile(inputId, areaId, nameId, msgId) {
+  const file = document.getElementById(inputId).files[0];
+  const nameEl = document.getElementById(nameId);
+  if (!file) { nameEl.textContent = ''; return; }
+  if (file.size > 10 * 1024 * 1024) {
+    setMsg(msgId,'檔案超過10MB限制','err'); nameEl.textContent = ''; return;
+  }
+  nameEl.textContent = '✅ ' + file.name;
+  setMsg(msgId,'',''); runChecks();
+}
+const pdfAreaEl = document.getElementById('pdfArea');
+pdfAreaEl.addEventListener('dragover', e => { e.preventDefault(); pdfAreaEl.classList.add('dragover'); });
+pdfAreaEl.addEventListener('dragleave', () => pdfAreaEl.classList.remove('dragover'));
+pdfAreaEl.addEventListener('drop', e => {
+  e.preventDefault(); pdfAreaEl.classList.remove('dragover');
+  if (e.dataTransfer.files.length) {
+    document.getElementById('pdfFile').files = e.dataTransfer.files;
+    handleFile('pdfFile','pdfArea','pdfName','pdfMsg');
+  }
+});
+ 
+// ===== VALIDATION =====
+function setCheck(id, pass, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (pass === null) { el.className = 'pending'; el.querySelector('.check-icon').textContent = '⬜'; }
+  else if (pass)    { el.className = 'pass';    el.querySelector('.check-icon').textContent = '✅'; }
+  else              { el.className = 'fail';    el.querySelector('.check-icon').textContent = '❌'; }
+  if (msg !== undefined) el.childNodes[el.childNodes.length-1].textContent = ' ' + msg;
+}
+function setMsg(id, msg, type) {
+  const el = document.getElementById(id); if (!el) return;
+  el.textContent = msg; el.className = 'field-msg ' + (type||'');
+}
+ 
+function runChecks() {
+  let allPass = true;
+ 
+  // Category
+  const cat = document.querySelector('input[name="category"]:checked');
+  const catOk = !!cat;
+  setCheck('chk-category', catOk, catOk ? `已選擇 ${cat.value} 類` : '請選擇投稿類別');
+  if (!catOk) allPass = false;
+ 
+  // Title
+  const title = document.getElementById('paperTitle').value.trim();
+  const titleOk = title.length >= 5;
+  setCheck('chk-title', titleOk, titleOk ? `「${title.substring(0,20)}${title.length>20?'...':''}」` : '論文題目至少5字');
+  if (!titleOk) allPass = false;
+ 
+  // Keywords
+  const kwOk = keywords.length >= 3 && keywords.length <= 5;
+  setCheck('chk-keyword', kwOk, `目前 ${keywords.length} 個（需 3～5 個）`);
+  if (!kwOk) allPass = false;
+ 
+  // Authors
+  const authorText = document.getElementById('authorField').value.trim();
+  const authorOk = authorText.length >= 2;
+  setCheck('chk-author', authorOk, authorOk ? '作者群已填寫' : '請填寫作者群');
+  if (!authorOk) allPass = false;
+ 
+  // Member
+  const memberVal = document.querySelector('input[name="memberConfirm"]:checked');
+  const memberOk = !!memberVal;
+  let memberDesc = '請選擇會員資格狀態';
+  if (memberVal) {
+    if (memberVal.value === 'paid') memberDesc = '✅ 會員且已繳年費（具評選資格）';
+    else if (memberVal.value === 'pending') memberDesc = '🕐 會員但年費尚未繳納（請於發表前完成）';
+    else memberDesc = '❌ 無會員（僅供參展）';
+  }
+  setCheck('chk-member', memberOk, memberDesc);
+  if (!memberOk) allPass = false;
+ 
+  // Contact
+  const cn = document.getElementById('contactName').value.trim();
+  const ce = document.getElementById('contactEmail').value.trim();
+  const cp = document.getElementById('contactPhone').value.trim();
+  const cu = document.getElementById('contactUnit').value.trim();
+  const cd = document.getElementById('contactDept').value.trim();
+  const ct = document.getElementById('contactTitle').value.trim();
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ce);
+  const contactOk = cn && emailValid && cp && cu && cd && ct;
+  setCheck('chk-contact', contactOk, contactOk ? ce : '請填寫完整通訊作者資訊（含部門、職稱）');
+  if (!contactOk) allPass = false;
+ 
+  // Profession
+  const profVal = document.querySelector('input[name="profession"]:checked');
+  let profOk = false;
+  if (profVal) {
+    profOk = profVal.value === '其他'
+      ? document.getElementById('profOtherText').value.trim().length > 0
+      : true;
+  }
+  const profDisplay = profVal ? (profVal.value==='其他'?`其他：${document.getElementById('profOtherText').value.trim()}`:profVal.value) : '';
+  setCheck('chk-profession', profOk, profOk ? profDisplay : '請選擇通訊作者職類');
+  if (!profOk) allPass = false;
+ 
+  // Abstract
+  const absText = getAbstractText();
+  const wordCount = countWords(absText);
+  const hasContent = ['absMotivation','absMethod','absResult','absConclusion'].every(id => document.getElementById(id).value.trim());
+  const absOk = hasContent && wordCount > 0 && wordCount <= 500;
+  setCheck('chk-abstract', absOk, absOk ? `${wordCount} 字（符合規定）` : (wordCount > 500 ? `${wordCount} 字，超過500字限制！` : '請填寫所有摘要欄位'));
+  if (!absOk) allPass = false;
+ 
+  // PDF
+  const pdfFile = document.getElementById('pdfFile').files[0];
+  const pdfOk = !!pdfFile;
+  setCheck('chk-pdf', pdfOk, pdfOk ? pdfFile.name : '請上傳 PDF 著作授權書');
+  if (!pdfOk) allPass = false;
+ 
+  // Update button
+  const btn = document.getElementById('previewBtn');
+  const note = document.getElementById('submitNote');
+  if (allPass) {
+    btn.disabled = false;
+    document.getElementById('btnIcon').textContent = '👁️';
+    document.getElementById('btnText').textContent = '預覽並送出';
+    note.textContent = '所有欄位符合規定，請按「預覽並送出」確認資料後送出';
+    note.style.color = 'var(--success)';
+  } else {
+    btn.disabled = true;
+    document.getElementById('btnIcon').textContent = '🚫';
+    document.getElementById('btnText').textContent = '請完成所有必填項目';
+    note.textContent = '請完成以上所有欄位，系統將自動解鎖「預覽並送出」按鈕';
+    note.style.color = '#666';
+  }
+  return allPass;
+}
+ 
+// ===== INPUT EVENT LISTENERS =====
+['paperTitle','contactName','contactEmail','contactPhone','contactUnit','contactDept','contactTitle','authorField'].forEach(id => {
+  document.getElementById(id).addEventListener('input', runChecks);
+});
+document.querySelectorAll('input[name="category"]').forEach(r => r.addEventListener('change', runChecks));
+document.querySelectorAll('input[name="memberConfirm"]').forEach(r => r.addEventListener('change', runChecks));
+document.querySelectorAll('input[name="profession"]').forEach(r => r.addEventListener('change', runChecks));
+document.getElementById('profOtherText').addEventListener('input', runChecks);
+ 
+// ===== PREVIEW =====
+function pRow(label, value) {
+  return `<div class="preview-row"><span class="preview-row-label">${label}</span><span class="preview-row-value">${esc(String(value||'（未填寫）'))}</span></div>`;
+}
+function pSection(title, html) {
+  return `<div class="preview-section"><div class="preview-section-title">${title}</div><div class="preview-rows">${html}</div></div>`;
+}
+ 
+function openPreview() {
+  if (!runChecks()) return;
+  const cat = document.querySelector('input[name="category"]:checked').value;
+  const catLabels = {
+    A:'A類 — 臨床技能教育、模擬教學與跨專業學習',
+    B:'B類 — 評量、信任決策與能力導向教育',
+    C:'C類 — 人文素養、醫療韌性與專業認同'
+  };
+  const profVal = document.querySelector('input[name="profession"]:checked');
+  const profDisplay = profVal.value === '其他'
+    ? `其他：${document.getElementById('profOtherText').value.trim()}` : profVal.value;
+  const memberVal = document.querySelector('input[name="memberConfirm"]:checked');
+  let memberDisplay = '';
+  if (memberVal.value === 'paid') memberDisplay = '✅ 是會員且已完成當年度會費繳納（具評選資格）';
+  else if (memberVal.value === 'pending') memberDisplay = '🕐 是會員，年費尚未繳納（請於發表前完成繳納）';
+  else memberDisplay = '❌ 無會員（僅供參展）';
+  const absIds = ['absMotivation','absMethod','absResult','absConclusion'];
+  const absLabels = ['研究動機','研究方法','研究結果','結論'];
+  const wordCount = countWords(getAbstractText());
+  const pdfFile = document.getElementById('pdfFile').files[0];
+ 
+  const absRows = absIds.map((id, i) => {
+    const val = document.getElementById(id).value.trim();
+    return `<div class="preview-row"><span class="preview-row-label">【${absLabels[i]}】</span><span class="preview-row-value">${esc(val||'（未填寫）')}</span></div>`;
+  }).join('');
+ 
+  const html = [
+    pSection('📌 投稿類別', pRow('類別', catLabels[cat]||cat)),
+    pSection('📝 論文基本資訊',
+      pRow('論文題目', document.getElementById('paperTitle').value.trim()) +
+      pRow('關鍵字', keywords.join('、'))
+    ),
+    pSection('👥 作者群',
+      pRow('作者群', document.getElementById('authorField').value.trim()) +
+      pRow('會員資格', memberDisplay)
+    ),
+    pSection('📮 通訊作者',
+      pRow('姓名', document.getElementById('contactName').value.trim()) +
+      pRow('Email', document.getElementById('contactEmail').value.trim()) +
+      pRow('聯絡電話', document.getElementById('contactPhone').value.trim()) +
+      pRow('服務單位', document.getElementById('contactUnit').value.trim()) +
+      pRow('服務部門', document.getElementById('contactDept').value.trim()) +
+      pRow('職稱', document.getElementById('contactTitle').value.trim()) +
+      pRow('職類', profDisplay)
+    ),
+    `<div class="preview-section preview-abstract">
+      <div class="preview-section-title">📄 論文摘要（${wordCount} 字）</div>
+      <div class="preview-rows">${absRows}</div>
+    </div>`,
+    pSection('📎 附件', pRow('著作授權書 PDF', pdfFile ? pdfFile.name : '（未上傳）'))
+  ].join('');
+ 
+  document.getElementById('previewBody').innerHTML = html;
+  const overlay = document.getElementById('previewOverlay');
+  overlay.classList.add('show');
+  overlay.scrollTop = 0;
+}
+ 
+function closePreview() {
+  document.getElementById('previewOverlay').classList.remove('show');
+}
+ 
+// ===== SUBMIT =====
+async function submitForm() {
+  const confirmBtn = document.getElementById('confirmSubmitBtn');
+  confirmBtn.disabled = true;
+  confirmBtn.innerHTML = `<span class="spinner"></span> 資料送出中...`;
+ 
+  const cat = document.querySelector('input[name="category"]:checked').value;
+  const profVal = document.querySelector('input[name="profession"]:checked');
+  const profDisplay = profVal.value === '其他'
+    ? `其他：${document.getElementById('profOtherText').value.trim()}` : profVal.value;
+ 
+  const absText = ['absMotivation','absMethod','absResult','absConclusion']
+    .map(id => {
+      const labels = {absMotivation:'研究動機', absMethod:'研究方法', absResult:'研究結果', absConclusion:'結論'};
+      return `【${labels[id]}】${document.getElementById(id).value}`;
+    }).join('\n\n');
+ 
+  // PDF → base64
+  const pdfFile = document.getElementById('pdfFile').files[0];
+  let pdfBase64 = '';
+  let pdfFileName = '';
+  if (pdfFile) {
+    pdfFileName = pdfFile.name;
+    pdfBase64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // result 格式: "data:application/pdf;base64,XXXXXX"，只取逗號後面
+        resolve(reader.result.split(',')[1]);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(pdfFile);
+    });
+  }
+ 
+  const payload = {
+    timestamp: new Date().toISOString(),
+    category: cat,
+    paperTitle: document.getElementById('paperTitle').value.trim(),
+    keywords: keywords.join('、'),
+    authors: document.getElementById('authorField').value.trim(),
+    memberConfirmed: (() => {
+      const v = document.querySelector('input[name="memberConfirm"]:checked')?.value;
+      return v==='paid'?'會員已繳年費':v==='pending'?'會員未繳年費':'非會員';
+    })(),
+    contactName: document.getElementById('contactName').value.trim(),
+    contactEmail: document.getElementById('contactEmail').value.trim(),
+    contactPhone: document.getElementById('contactPhone').value.trim(),
+    contactUnit: document.getElementById('contactUnit').value.trim(),
+    contactDept: document.getElementById('contactDept').value.trim(),
+    contactTitle: document.getElementById('contactTitle').value.trim(),
+    profession: profDisplay,
+    abstract: absText,
+    wordCount: countWords(absText),
+    pdfFileName: pdfFileName,
+    pdfBase64: pdfBase64,
+    status: '待審查',
+  };
+ 
+  try {
+    let success = false;
+    if (APPS_SCRIPT_URL !== 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec') {
+      // 使用 URLSearchParams 送出（Apps Script doPost 用 e.parameter 接收）
+      const body = new URLSearchParams();
+      Object.entries(payload).forEach(([k, v]) => body.append(k, v));
+      const resp = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: body,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+      const json = await resp.json();
+      if (json.result === 'success') success = true;
+      else throw new Error(json.message || '伺服器回傳錯誤');
+    } else {
+      // Demo 模式
+      await new Promise(r => setTimeout(r, 1800));
+      success = true;
+    }
+ 
+    if (success) {
+      closePreview();
+      const ref = 'TCS2026-' + Date.now().toString().slice(-6);
+      document.getElementById('refNum').textContent = ref;
+      document.getElementById('successOverlay').classList.add('show');
+    }
+  } catch(err) {
+    alert('投稿送出失敗，請稍後再試或聯絡秘書處。\n錯誤：' + err.message);
+    confirmBtn.disabled = false;
+    confirmBtn.innerHTML = '🚀 確認送出';
+  }
+}
+ 
+function closeSuccess() {
+  document.getElementById('successOverlay').classList.remove('show');
+}
+ 
+// ===== INIT =====
+updateWordCount();
+runChecks();
+</script>
+</body>
+</html>
