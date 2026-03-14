@@ -1,6 +1,3 @@
-Submission · HTML
-Copy
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -25,16 +22,16 @@ Copy
   --radius: 12px;
   --font: 'Noto Sans TC', 'Microsoft JhengHei', '微軟正黑體', sans-serif;
 }
- 
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
- 
+
 body {
   font-family: var(--font);
   background: #f0f4f8;
   color: #1a1a2e;
   line-height: 1.7;
 }
- 
+
 /* ===== HERO ===== */
 .hero {
   background: linear-gradient(135deg, var(--hero-from) 0%, var(--hero-to) 100%);
@@ -87,7 +84,7 @@ body {
   backdrop-filter: blur(4px);
 }
 .hero-badge span { margin-right: 0.4rem; }
- 
+
 /* ===== NOTICE BAR ===== */
 .notice-bar {
   background: #fff8e1;
@@ -99,14 +96,14 @@ body {
   font-weight: 500;
 }
 .notice-bar a { color: var(--primary); text-decoration: underline; }
- 
+
 /* ===== MAIN LAYOUT ===== */
 .main-wrap {
   max-width: 900px;
   margin: 2rem auto;
   padding: 0 1rem 3rem;
 }
- 
+
 /* ===== SECTION CARD ===== */
 .section-card {
   background: white;
@@ -130,7 +127,7 @@ body {
   color: var(--primary);
 }
 .section-body { padding: 1.5rem; }
- 
+
 /* ===== FORM ELEMENTS ===== */
 .form-group {
   margin-bottom: 1.25rem;
@@ -187,7 +184,7 @@ input.error, select.error, textarea.error {
 .field-msg.ok { color: var(--success); }
 .field-msg.err { color: var(--danger); }
 .field-msg.info { color: #555; }
- 
+
 /* ===== CATEGORY CARDS ===== */
 .category-grid {
   display: grid;
@@ -233,7 +230,7 @@ input.error, select.error, textarea.error {
 }
 .cat-text strong { display: block; color: #1a1a2e; }
 .cat-text em { font-style: normal; color: #555; font-size: 0.82rem; }
- 
+
 /* ===== AUTHOR TABLE ===== */
 .author-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
 .author-table th {
@@ -302,7 +299,7 @@ input.error, select.error, textarea.error {
   border-left: 3px solid var(--warning);
   border-radius: 4px;
 }
- 
+
 /* ===== WORD COUNT ===== */
 .abstract-wrap { position: relative; }
 .word-count-bar {
@@ -338,7 +335,7 @@ input.error, select.error, textarea.error {
 .count-number.ok { color: var(--success); }
 .count-number.warn { color: var(--warning); }
 .count-number.over { color: var(--danger); }
- 
+
 /* ===== MEMBER CHECK ===== */
 .member-check-row {
   display: flex;
@@ -358,7 +355,7 @@ input.error, select.error, textarea.error {
 .check-status.ok { background: var(--success-light); color: var(--success); }
 .check-status.fail { background: var(--danger-light); color: var(--danger); }
 .check-status.pending { background: #f5f5f5; color: #777; }
- 
+
 /* ===== CHECKLIST PANEL ===== */
 .checklist-panel {
   background: #fafbff;
@@ -387,7 +384,7 @@ input.error, select.error, textarea.error {
 .check-items li.pass { color: var(--success); }
 .check-items li.fail { color: var(--danger); }
 .check-items li.pending { color: #999; }
- 
+
 /* ===== SUBMIT AREA ===== */
 .submit-area { text-align: center; }
 .submit-btn {
@@ -425,7 +422,7 @@ input.error, select.error, textarea.error {
   color: #666;
 }
 .submit-note.err { color: var(--danger); font-weight: 600; }
- 
+
 /* ===== SUCCESS OVERLAY ===== */
 .success-overlay {
   display: none;
@@ -472,7 +469,7 @@ input.error, select.error, textarea.error {
   cursor: pointer;
   font-family: var(--font);
 }
- 
+
 /* ===== LOADING ===== */
 .spinner {
   display: inline-block;
@@ -483,7 +480,7 @@ input.error, select.error, textarea.error {
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
- 
+
 /* ===== TABS ===== */
 .abstract-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
 .abstract-tab {
@@ -502,7 +499,7 @@ input.error, select.error, textarea.error {
   border-color: var(--primary);
   color: var(--primary);
 }
- 
+
 /* ===== HELPER BITS ===== */
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
@@ -584,36 +581,55 @@ input.error, select.error, textarea.error {
 }
 .upload-label { font-size: 0.88rem; color: #666; }
 .upload-label strong { color: var(--primary); }
- 
+
 /* ===== PROFESSION GRID ===== */
 .profession-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.45rem;
   margin-top: 0.4rem;
 }
 .prof-option {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.4rem 0.85rem;
+  padding: 0.45rem 0.75rem;
   border: 1.5px solid #ddd;
-  border-radius: 20px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.88rem;
   background: #fafafa;
   transition: border-color 0.15s, background 0.15s;
   user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .prof-option:hover { border-color: var(--primary-mid); background: var(--primary-light); }
-.prof-option input[type="radio"] { width: auto; margin: 0; accent-color: var(--primary); }
+.prof-option input[type="radio"] { width: auto; flex-shrink: 0; margin: 0; accent-color: var(--primary); }
 .prof-option input[type="radio"]:checked + span { font-weight: 700; color: var(--primary); }
 .prof-option:has(input:checked) {
   border-color: var(--primary);
   background: var(--primary-light);
 }
-.prof-other { border-style: dashed; }
- 
+.prof-other {
+  border-style: dashed;
+  grid-column: span 2;
+  white-space: normal;
+}
+.prof-other input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.85rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: var(--font);
+}
+@media (max-width: 640px) {
+  .profession-grid { grid-template-columns: repeat(2, 1fr); }
+  .prof-other { grid-column: span 2; }
+}
+
 /* ===== PREVIEW OVERLAY ===== */
 .preview-overlay {
   display: none;
@@ -708,7 +724,7 @@ input.error, select.error, textarea.error {
 }
 .preview-confirm-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
 .preview-confirm-btn:disabled { background: #90a4ae; box-shadow: none; cursor: not-allowed; }
- 
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 640px) {
   .two-col, .three-col { grid-template-columns: 1fr; }
@@ -722,7 +738,7 @@ input.error, select.error, textarea.error {
 </style>
 </head>
 <body>
- 
+
 <!-- HERO -->
 <div class="hero">
   <div class="hero-inner">
@@ -736,14 +752,14 @@ input.error, select.error, textarea.error {
     </div>
   </div>
 </div>
- 
+
 <!-- NOTICE -->
 <div class="notice-bar">
   聯絡方式：秘書處楊依玲小姐：(06)2812811 轉57426
 </div>
- 
+
 <div class="main-wrap">
- 
+
   <!-- 投稿規範說明 -->
   <div class="section-card">
     <div class="section-header">
@@ -762,9 +778,9 @@ input.error, select.error, textarea.error {
       </div>
     </div>
   </div>
- 
+
   <form id="submitForm" novalidate>
- 
+
     <!-- STEP 1: 投稿類別 -->
     <div class="section-card">
       <div class="section-header">
@@ -810,7 +826,7 @@ input.error, select.error, textarea.error {
         </div>
       </div>
     </div>
- 
+
     <!-- STEP 2: 論文資訊 -->
     <div class="section-card">
       <div class="section-header">
@@ -824,17 +840,17 @@ input.error, select.error, textarea.error {
           <div class="field-msg" id="titleMsg"></div>
         </div>
         <div class="form-group">
-          <label>關鍵字<span class="req">*</span><span class="hint">（請輸入3至5個關鍵字）</span></label>
+          <label for="kwInput">關鍵字<span class="req">*</span><span class="hint">（3至5個，可逐一輸入或一次貼入，以「、」或「,」分隔）</span></label>
           <div class="keyword-input-wrap">
-            <input type="text" id="kwInput" placeholder="輸入關鍵字後按「新增」" maxlength="30">
-            <button type="button" class="add-kw-btn" onclick="addKeyword()">＋ 新增</button>
+            <input type="text" id="kwInput" placeholder="例：成人學習理論、數位模擬、動脈導管置放">
+            <button type="button" class="add-kw-btn" onclick="addKeywords()">＋ 新增</button>
           </div>
           <div class="inline-tags" id="kwTags"></div>
           <div class="field-msg" id="kwMsg"></div>
         </div>
       </div>
     </div>
- 
+
     <!-- STEP 3: 作者群 -->
     <div class="section-card">
       <div class="section-header">
@@ -851,12 +867,18 @@ input.error, select.error, textarea.error {
           <textarea id="authorField" rows="3" placeholder="例：王小明¹、陳大華²、李美玲¹&#10;¹臺灣大學醫學院&#10;²奇美醫療財團法人奇美醫院" oninput="runChecks()"></textarea>
           <div class="field-msg" id="authorMsg"></div>
         </div>
- 
+
+        <div class="form-group">
+          <label for="memberNameField">作者群中屬於本會會員者<span class="hint">（請填寫會員姓名，非會員請填「無」）</span><span class="req">*</span></label>
+          <input type="text" id="memberNameField" placeholder="例：王小明、李美玲（多人請以頓號分隔）；非會員請填「無」" oninput="runChecks()">
+          <div class="field-msg" id="memberNameMsg"></div>
+        </div>
+
         <!-- 會員資格確認 -->
         <div class="form-group">
           <label>作者群中的會員資格狀態<span class="req">*</span></label>
           <div class="info-box" style="margin-bottom:0.75rem;margin-top:0.4rem;font-size:0.83rem">
-            ℹ️ 若投稿時年費尚未開始收取，請於<strong>發表前</strong>完成當年度會費繳納，方具優秀海報獎評選資格。
+            ℹ️ 若投稿時年費尚未開始收取，請於<strong>2026年6月30日前</strong>完成當年度會費繳納，方具優秀海報獎評選資格。
           </div>
           <div style="display:flex;flex-direction:column;gap:0.6rem;margin-top:0.3rem">
             <label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;cursor:pointer;padding:0.6rem 0.9rem;border:1.5px solid #ddd;border-radius:8px;transition:border-color 0.15s,background 0.15s" id="memberLabel-paid">
@@ -865,7 +887,7 @@ input.error, select.error, textarea.error {
             </label>
             <label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;cursor:pointer;padding:0.6rem 0.9rem;border:1.5px solid #ddd;border-radius:8px;transition:border-color 0.15s,background 0.15s" id="memberLabel-pending">
               <input type="radio" name="memberConfirm" value="pending" onchange="runChecks()" style="width:auto;margin-top:0.2rem;accent-color:#f57c00">
-              <span><strong style="color:#e65100">🕐 是會員，但年費尚未繳納</strong><br><span style="font-size:0.82rem;color:#555">請於發表前（2026年8月15日前）完成繳納，方具評選資格；否則僅供參展</span></span>
+              <span><strong style="color:#e65100">🕐 是會員，但年費尚未繳納</strong><br><span style="font-size:0.82rem;color:#555">請於 <strong>2026年6月30日前</strong> 完成繳納，方具評選資格；否則僅供參展</span></span>
             </label>
             <label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;cursor:pointer;padding:0.6rem 0.9rem;border:1.5px solid #ddd;border-radius:8px;transition:border-color 0.15s,background 0.15s" id="memberLabel-none">
               <input type="radio" name="memberConfirm" value="none" onchange="runChecks()" style="width:auto;margin-top:0.2rem;accent-color:var(--danger)">
@@ -874,7 +896,7 @@ input.error, select.error, textarea.error {
           </div>
           <div class="field-msg" id="memberMsg"></div>
         </div>
- 
+
         <!-- 聯絡作者 -->
         <div style="margin-top:1rem">
           <p class="field-section-title">📮 通訊作者 / 投稿聯絡人</p>
@@ -936,7 +958,7 @@ input.error, select.error, textarea.error {
               <label class="prof-option"><input type="radio" name="profession" value="專科護理師" onchange="runChecks()"><span>專科護理師</span></label>
               <label class="prof-option prof-other">
                 <input type="radio" name="profession" value="其他" onchange="runChecks();toggleOtherProf()"><span>其他：</span>
-                <input type="text" id="profOtherText" placeholder="請填寫" style="width:8rem;margin-left:0.3rem;padding:0.2rem 0.5rem;font-size:0.85rem;border:1px solid #ccc;border-radius:5px;display:none" oninput="runChecks()">
+                <input type="text" id="profOtherText" placeholder="請填寫" style="display:none" oninput="runChecks()">
               </label>
             </div>
             <div class="field-msg" id="professionMsg"></div>
@@ -944,7 +966,7 @@ input.error, select.error, textarea.error {
         </div>
       </div>
     </div>
- 
+
     <!-- STEP 4: 論文摘要 -->
     <div class="section-card">
       <div class="section-header">
@@ -956,9 +978,9 @@ input.error, select.error, textarea.error {
           依投稿格式，摘要需包含下列五大項目，字數合計<strong>不超過500字</strong>（純文字，勿含表格圖表）。<br>
           請在下方各欄位分別填寫，系統將自動累計總字數。
         </div>
- 
+
         <div class="abstract-tabs" id="abstractTabs" style="display:none"></div>
- 
+
         <!-- 分項填寫 -->
         <div id="allFields">
           <div class="form-group">
@@ -978,7 +1000,7 @@ input.error, select.error, textarea.error {
             <textarea id="absConclusion" rows="3" placeholder="陳述研究結論與對臨床/教育的意涵..." oninput="updateWordCount()"></textarea>
           </div>
         </div>
- 
+
         <!-- 字數計算 -->
         <div class="word-count-bar">
           <span class="count-label">目前字數：</span>
@@ -990,7 +1012,7 @@ input.error, select.error, textarea.error {
         <div class="field-msg" id="abstractMsg"></div>
       </div>
     </div>
- 
+
     <!-- STEP 5: 上傳附件 -->
     <div class="section-card">
       <div class="section-header">
@@ -1010,7 +1032,7 @@ input.error, select.error, textarea.error {
         </div>
       </div>
     </div>
- 
+
     <!-- STEP 6: 確認送出 -->
     <div class="checklist-panel">
       <h3>✅ 投稿前自動檢核清單</h3>
@@ -1026,7 +1048,7 @@ input.error, select.error, textarea.error {
         <li id="chk-pdf" class="pending"><span class="check-icon">⬜</span>已上傳著作授權書 PDF</li>
       </ul>
     </div>
- 
+
     <div class="submit-area">
       <button type="button" class="submit-btn" id="previewBtn" onclick="openPreview()" disabled>
         <span id="btnIcon">🚫</span>
@@ -1034,10 +1056,10 @@ input.error, select.error, textarea.error {
       </button>
       <p class="submit-note" id="submitNote">請完成以上所有欄位，系統將自動解鎖「預覽並送出」按鈕</p>
     </div>
- 
+
   </form>
 </div>
- 
+
 <!-- PREVIEW OVERLAY -->
 <div class="preview-overlay" id="previewOverlay">
   <div class="preview-box">
@@ -1056,46 +1078,58 @@ input.error, select.error, textarea.error {
     </div>
   </div>
 </div>
- 
+
 <!-- SUCCESS OVERLAY -->
 <div class="success-overlay" id="successOverlay">
   <div class="success-box">
     <div class="success-icon">🎉</div>
     <h2>投稿成功！</h2>
     <p>您的投稿已完成送出，系統將寄出確認信至您填寫的聯絡 Email。</p>
-    <p>投稿編號：</p>
-    <div class="ref-num" id="refNum">TCS2026-000000</div>
-    <p>請保存此編號，預計於 <strong>約3個工作天</strong> 內收到學會確認回覆信。</p>
+    <p style="margin-top:0.5rem">預計於 <strong>約3個工作天</strong> 內收到學會確認回覆信。</p>
     <p style="margin-top:0.5rem;font-size:0.82rem;color:#888">錄取結果將於 <strong>2026年7月15日前</strong> 以Email個別通知。</p>
     <button class="close-success-btn" onclick="closeSuccess()">確認</button>
   </div>
 </div>
- 
+
 <script>
 // ===== Google Apps Script Web App URL =====
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwvpshcYeRDSoymV9aDLuGPVEqR9cayiMYSHonx7eopyAUwO2k_4A1BbN4US0pgBRJO/exec';
- 
+
 let keywords = [];
- 
+
 // ===== HELPERS =====
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
- 
+
 // ===== KEYWORDS =====
-function addKeyword() {
+function addKeywords() {
   const inp = document.getElementById('kwInput');
-  const kw = inp.value.trim();
-  if (!kw) return;
-  if (keywords.length >= 5) { setMsg('kwMsg','最多5個關鍵字','err'); return; }
-  if (keywords.includes(kw)) { setMsg('kwMsg','關鍵字已存在','err'); return; }
-  setMsg('kwMsg','','');
-  keywords.push(kw);
+  const raw = inp.value.trim();
+  if (!raw) return;
+  // 支援頓號、逗號、comma 分隔批次貼入
+  const parts = raw.split(/[、，,]+/).map(s => s.trim()).filter(s => s.length > 0);
+  let added = 0;
+  parts.forEach(kw => {
+    if (keywords.length >= 5) return;
+    if (keywords.includes(kw)) return;
+    keywords.push(kw);
+    added++;
+  });
   inp.value = '';
+  if (keywords.length > 5) {
+    keywords = keywords.slice(0, 5);
+    setMsg('kwMsg', '關鍵字最多5個，已自動截取前5個', 'err');
+  } else {
+    setMsg('kwMsg', '', '');
+  }
   renderKeywords();
   runChecks();
 }
+// 保留舊名相容（Enter 鍵觸發）
+function addKeyword() { addKeywords(); }
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.activeElement.id === 'kwInput') {
-    e.preventDefault(); addKeyword();
+    e.preventDefault(); addKeywords();
   }
 });
 function removeKeyword(kw) {
@@ -1107,7 +1141,7 @@ function renderKeywords() {
     `<span class="tag">${esc(kw)}<span class="tag-remove" onclick="removeKeyword('${esc(kw)}')">✕</span></span>`
   ).join('');
 }
- 
+
 // ===== PROFESSION OTHER TOGGLE =====
 function toggleOtherProf() {
   const sel = document.querySelector('input[name="profession"]:checked');
@@ -1120,7 +1154,7 @@ function toggleOtherProf() {
     otherInp.value = '';
   }
 }
- 
+
 // ===== WORD COUNT =====
 function countWords(text) {
   text = text.trim();
@@ -1157,7 +1191,7 @@ function updateWordCount() {
   }
   runChecks();
 }
- 
+
 // ===== FILE UPLOAD =====
 function handleFile(inputId, areaId, nameId, msgId) {
   const file = document.getElementById(inputId).files[0];
@@ -1179,7 +1213,7 @@ pdfAreaEl.addEventListener('drop', e => {
     handleFile('pdfFile','pdfArea','pdfName','pdfMsg');
   }
 });
- 
+
 // ===== VALIDATION =====
 function setCheck(id, pass, msg) {
   const el = document.getElementById(id);
@@ -1193,33 +1227,39 @@ function setMsg(id, msg, type) {
   const el = document.getElementById(id); if (!el) return;
   el.textContent = msg; el.className = 'field-msg ' + (type||'');
 }
- 
+
 function runChecks() {
   let allPass = true;
- 
+
   // Category
   const cat = document.querySelector('input[name="category"]:checked');
   const catOk = !!cat;
   setCheck('chk-category', catOk, catOk ? `已選擇 ${cat.value} 類` : '請選擇投稿類別');
   if (!catOk) allPass = false;
- 
+
   // Title
   const title = document.getElementById('paperTitle').value.trim();
   const titleOk = title.length >= 5;
   setCheck('chk-title', titleOk, titleOk ? `「${title.substring(0,20)}${title.length>20?'...':''}」` : '論文題目至少5字');
   if (!titleOk) allPass = false;
- 
+
   // Keywords
   const kwOk = keywords.length >= 3 && keywords.length <= 5;
   setCheck('chk-keyword', kwOk, `目前 ${keywords.length} 個（需 3～5 個）`);
   if (!kwOk) allPass = false;
- 
+
   // Authors
   const authorText = document.getElementById('authorField').value.trim();
   const authorOk = authorText.length >= 2;
   setCheck('chk-author', authorOk, authorOk ? '作者群已填寫' : '請填寫作者群');
   if (!authorOk) allPass = false;
- 
+
+  // Member names
+  const memberNameText = document.getElementById('memberNameField').value.trim();
+  const memberNameOk = memberNameText.length >= 1;
+  setCheck('chk-author', authorOk && memberNameOk, authorOk && memberNameOk ? '作者群及會員姓名已填寫' : (!authorOk ? '請填寫作者群' : '請填寫會員姓名（非會員填「無」）'));
+  if (!memberNameOk) allPass = false;
+
   // Member
   const memberVal = document.querySelector('input[name="memberConfirm"]:checked');
   const memberOk = !!memberVal;
@@ -1231,7 +1271,7 @@ function runChecks() {
   }
   setCheck('chk-member', memberOk, memberDesc);
   if (!memberOk) allPass = false;
- 
+
   // Contact
   const cn = document.getElementById('contactName').value.trim();
   const ce = document.getElementById('contactEmail').value.trim();
@@ -1243,7 +1283,7 @@ function runChecks() {
   const contactOk = cn && emailValid && cp && cu && cd && ct;
   setCheck('chk-contact', contactOk, contactOk ? ce : '請填寫完整通訊作者資訊（含部門、職稱）');
   if (!contactOk) allPass = false;
- 
+
   // Profession
   const profVal = document.querySelector('input[name="profession"]:checked');
   let profOk = false;
@@ -1255,7 +1295,7 @@ function runChecks() {
   const profDisplay = profVal ? (profVal.value==='其他'?`其他：${document.getElementById('profOtherText').value.trim()}`:profVal.value) : '';
   setCheck('chk-profession', profOk, profOk ? profDisplay : '請選擇通訊作者職類');
   if (!profOk) allPass = false;
- 
+
   // Abstract
   const absText = getAbstractText();
   const wordCount = countWords(absText);
@@ -1263,13 +1303,13 @@ function runChecks() {
   const absOk = hasContent && wordCount > 0 && wordCount <= 500;
   setCheck('chk-abstract', absOk, absOk ? `${wordCount} 字（符合規定）` : (wordCount > 500 ? `${wordCount} 字，超過500字限制！` : '請填寫所有摘要欄位'));
   if (!absOk) allPass = false;
- 
+
   // PDF
   const pdfFile = document.getElementById('pdfFile').files[0];
   const pdfOk = !!pdfFile;
   setCheck('chk-pdf', pdfOk, pdfOk ? pdfFile.name : '請上傳 PDF 著作授權書');
   if (!pdfOk) allPass = false;
- 
+
   // Update button
   const btn = document.getElementById('previewBtn');
   const note = document.getElementById('submitNote');
@@ -1288,16 +1328,16 @@ function runChecks() {
   }
   return allPass;
 }
- 
+
 // ===== INPUT EVENT LISTENERS =====
-['paperTitle','contactName','contactEmail','contactPhone','contactUnit','contactDept','contactTitle','authorField'].forEach(id => {
+['paperTitle','contactName','contactEmail','contactPhone','contactUnit','contactDept','contactTitle','authorField','memberNameField'].forEach(id => {
   document.getElementById(id).addEventListener('input', runChecks);
 });
 document.querySelectorAll('input[name="category"]').forEach(r => r.addEventListener('change', runChecks));
 document.querySelectorAll('input[name="memberConfirm"]').forEach(r => r.addEventListener('change', runChecks));
 document.querySelectorAll('input[name="profession"]').forEach(r => r.addEventListener('change', runChecks));
 document.getElementById('profOtherText').addEventListener('input', runChecks);
- 
+
 // ===== PREVIEW =====
 function pRow(label, value) {
   return `<div class="preview-row"><span class="preview-row-label">${label}</span><span class="preview-row-value">${esc(String(value||'（未填寫）'))}</span></div>`;
@@ -1305,7 +1345,7 @@ function pRow(label, value) {
 function pSection(title, html) {
   return `<div class="preview-section"><div class="preview-section-title">${title}</div><div class="preview-rows">${html}</div></div>`;
 }
- 
+
 function openPreview() {
   if (!runChecks()) return;
   const cat = document.querySelector('input[name="category"]:checked').value;
@@ -1326,12 +1366,12 @@ function openPreview() {
   const absLabels = ['研究動機','研究方法','研究結果','結論'];
   const wordCount = countWords(getAbstractText());
   const pdfFile = document.getElementById('pdfFile').files[0];
- 
+
   const absRows = absIds.map((id, i) => {
     const val = document.getElementById(id).value.trim();
     return `<div class="preview-row"><span class="preview-row-label">【${absLabels[i]}】</span><span class="preview-row-value">${esc(val||'（未填寫）')}</span></div>`;
   }).join('');
- 
+
   const html = [
     pSection('📌 投稿類別', pRow('類別', catLabels[cat]||cat)),
     pSection('📝 論文基本資訊',
@@ -1340,6 +1380,7 @@ function openPreview() {
     ),
     pSection('👥 作者群',
       pRow('作者群', document.getElementById('authorField').value.trim()) +
+      pRow('會員姓名', document.getElementById('memberNameField').value.trim()) +
       pRow('會員資格', memberDisplay)
     ),
     pSection('📮 通訊作者',
@@ -1357,34 +1398,34 @@ function openPreview() {
     </div>`,
     pSection('📎 附件', pRow('著作授權書 PDF', pdfFile ? pdfFile.name : '（未上傳）'))
   ].join('');
- 
+
   document.getElementById('previewBody').innerHTML = html;
   const overlay = document.getElementById('previewOverlay');
   overlay.classList.add('show');
   overlay.scrollTop = 0;
 }
- 
+
 function closePreview() {
   document.getElementById('previewOverlay').classList.remove('show');
 }
- 
+
 // ===== SUBMIT =====
 async function submitForm() {
   const confirmBtn = document.getElementById('confirmSubmitBtn');
   confirmBtn.disabled = true;
   confirmBtn.innerHTML = `<span class="spinner"></span> 資料送出中...`;
- 
+
   const cat = document.querySelector('input[name="category"]:checked').value;
   const profVal = document.querySelector('input[name="profession"]:checked');
   const profDisplay = profVal.value === '其他'
     ? `其他：${document.getElementById('profOtherText').value.trim()}` : profVal.value;
- 
+
   const absText = ['absMotivation','absMethod','absResult','absConclusion']
     .map(id => {
       const labels = {absMotivation:'研究動機', absMethod:'研究方法', absResult:'研究結果', absConclusion:'結論'};
       return `【${labels[id]}】${document.getElementById(id).value}`;
     }).join('\n\n');
- 
+
   // PDF → base64
   const pdfFile = document.getElementById('pdfFile').files[0];
   let pdfBase64 = '';
@@ -1401,13 +1442,14 @@ async function submitForm() {
       reader.readAsDataURL(pdfFile);
     });
   }
- 
+
   const payload = {
     timestamp: new Date().toISOString(),
     category: cat,
     paperTitle: document.getElementById('paperTitle').value.trim(),
     keywords: keywords.join('、'),
     authors: document.getElementById('authorField').value.trim(),
+    memberNames: document.getElementById('memberNameField').value.trim(),
     memberConfirmed: (() => {
       const v = document.querySelector('input[name="memberConfirm"]:checked')?.value;
       return v==='paid'?'會員已繳年費':v==='pending'?'會員未繳年費':'非會員';
@@ -1419,13 +1461,16 @@ async function submitForm() {
     contactDept: document.getElementById('contactDept').value.trim(),
     contactTitle: document.getElementById('contactTitle').value.trim(),
     profession: profDisplay,
-    abstract: absText,
-    wordCount: countWords(absText),
+    absMotivation: document.getElementById('absMotivation').value.trim(),
+    absMethod: document.getElementById('absMethod').value.trim(),
+    absResult: document.getElementById('absResult').value.trim(),
+    absConclusion: document.getElementById('absConclusion').value.trim(),
+    wordCount: countWords(getAbstractText()),
     pdfFileName: pdfFileName,
     pdfBase64: pdfBase64,
     status: '待審查',
   };
- 
+
   try {
     let success = false;
     if (APPS_SCRIPT_URL !== 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec') {
@@ -1445,11 +1490,9 @@ async function submitForm() {
       await new Promise(r => setTimeout(r, 1800));
       success = true;
     }
- 
+
     if (success) {
       closePreview();
-      const ref = 'TCS2026-' + Date.now().toString().slice(-6);
-      document.getElementById('refNum').textContent = ref;
       document.getElementById('successOverlay').classList.add('show');
     }
   } catch(err) {
@@ -1458,11 +1501,11 @@ async function submitForm() {
     confirmBtn.innerHTML = '🚀 確認送出';
   }
 }
- 
+
 function closeSuccess() {
   document.getElementById('successOverlay').classList.remove('show');
 }
- 
+
 // ===== INIT =====
 updateWordCount();
 runChecks();
