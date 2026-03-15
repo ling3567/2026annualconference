@@ -744,18 +744,18 @@ input.error, select.error, textarea.error {
   <div class="hero-inner">
     <p class="assoc-name">🏥 台灣醫事聯合臨床技能發展學會</p>
     <h1 class="event-title">2026年會員大會暨學術研討會</h1>
-    <p class="page-subtitle">📄 海報論文線上投稿系統</p>
+    <p class="page-subtitle">📄 海報論文線上投稿</p>
     <div class="hero-meta">
       <div class="hero-badge"><span>📅</span>發表日期：2026年8月15日(六)</div>
       <div class="hero-badge"><span>📬</span>截稿日期：2026年6月15日(一)</div>
-      <div class="hero-badge"><span>📢</span>錄取通知：7月15日前</div>
+      <div class="hero-badge"><span>📢</span>錄取通知：預定7月15日(三)前</div>
     </div>
   </div>
 </div>
 
 <!-- NOTICE -->
 <div class="notice-bar">
-  聯絡方式：秘書處楊依玲小姐：(06)2812811 轉57426
+  聯絡方式：秘書處楊依玲小姐　(06)2812811 轉57426
 </div>
 
 <div class="main-wrap">
@@ -878,20 +878,21 @@ input.error, select.error, textarea.error {
         <div class="form-group">
           <label>作者群中的會員資格狀態<span class="req">*</span></label>
           <div class="info-box" style="margin-bottom:0.75rem;margin-top:0.4rem;font-size:0.83rem">
-            ℹ️ 若投稿時年費尚未開始收取，請於<strong>2026年6月30日前</strong>完成當年度會費繳納，方具優秀海報獎評選資格。
+            ℹ️ 作者群中至少1名為本會會員，並於 <strong>2026年6月15日(一)前</strong>完成當年度會費繳納，方具優秀海報論文獎評選資格。<br>
+            未完成繳納或無會員者，仍可投稿並參展，但不列入評選。
           </div>
           <div style="display:flex;flex-direction:column;gap:0.6rem;margin-top:0.3rem">
             <label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;cursor:pointer;padding:0.6rem 0.9rem;border:1.5px solid #ddd;border-radius:8px;transition:border-color 0.15s,background 0.15s" id="memberLabel-paid">
               <input type="radio" name="memberConfirm" value="paid" onchange="runChecks()" style="width:auto;margin-top:0.2rem;accent-color:var(--success)">
-              <span><strong style="color:var(--success)">✅ 是會員，且已完成當年度會費繳納</strong><br><span style="font-size:0.82rem;color:#555">具優秀海報獎評選資格</span></span>
+              <span><strong style="color:var(--success)">● 是會員，且已完成當年度會費繳納</strong><br><span style="font-size:0.82rem;color:#555">具優秀海報論文獎評選資格</span></span>
             </label>
             <label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;cursor:pointer;padding:0.6rem 0.9rem;border:1.5px solid #ddd;border-radius:8px;transition:border-color 0.15s,background 0.15s" id="memberLabel-pending">
               <input type="radio" name="memberConfirm" value="pending" onchange="runChecks()" style="width:auto;margin-top:0.2rem;accent-color:#f57c00">
-              <span><strong style="color:#e65100">🕐 是會員，但年費尚未繳納</strong><br><span style="font-size:0.82rem;color:#555">請於 <strong>2026年6月30日前</strong> 完成繳納，方具評選資格；否則僅供參展</span></span>
+              <span><strong style="color:#e65100">● 是會員，但尚未繳費</strong><br><span style="font-size:0.82rem;color:#555">請於 <strong>2026年6月15日前</strong>完成繳納，方具評選資格；否則僅供參展</span></span>
             </label>
             <label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;cursor:pointer;padding:0.6rem 0.9rem;border:1.5px solid #ddd;border-radius:8px;transition:border-color 0.15s,background 0.15s" id="memberLabel-none">
               <input type="radio" name="memberConfirm" value="none" onchange="runChecks()" style="width:auto;margin-top:0.2rem;accent-color:var(--danger)">
-              <span><strong style="color:var(--danger)">❌ 作者群中無本會會員</strong><br><span style="font-size:0.82rem;color:#555">投稿後僅供參展，不參加優秀海報獎評選</span></span>
+              <span><strong style="color:var(--danger)">● 非會員</strong><br><span style="font-size:0.82rem;color:#555">投稿後僅供參展，不參加優秀海報獎評選</span></span>
             </label>
           </div>
           <div class="field-msg" id="memberMsg"></div>
@@ -1022,6 +1023,10 @@ input.error, select.error, textarea.error {
       <div class="section-body">
         <div class="form-group">
           <label>著作授權書 PDF<span class="req">*</span><span class="hint">（請下載範本簽名後掃描，.pdf，上限 10MB）</span></label>
+          <div class="info-box" style="font-size:0.83rem;margin-bottom:0.6rem">
+            📎 上傳前請將檔案命名為：<strong>著作授權書-通訊作者姓名</strong><br>
+            例如：<code style="background:#e3f2fd;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.9em">著作授權書-王小明.pdf</code>
+          </div>
           <div class="file-upload-area" id="pdfArea">
             <input type="file" id="pdfFile" accept=".pdf" onchange="handleFile('pdfFile','pdfArea','pdfName','pdfMsg')">
             <div class="file-icon">📃</div>
@@ -1093,7 +1098,7 @@ input.error, select.error, textarea.error {
 
 <script>
 // ===== Google Apps Script Web App URL =====
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyK81LzwEJihEDDTVThRomyivJMr726MajRF5lEw6HhcbqTJR0sVgVfifU_3KZyIuLe/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyND0aKajNAyBGWPDtClmfbadl0lhEYzKTd1Kjead2sz6TPxO7QQ0DbpTMEduSHAAtW/exec';
 
 let keywords = [];
 
