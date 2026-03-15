@@ -1098,7 +1098,7 @@ input.error, select.error, textarea.error {
 
 <script>
 // ===== Google Apps Script Web App URL =====
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyND0aKajNAyBGWPDtClmfbadl0lhEYzKTd1Kjead2sz6TPxO7QQ0DbpTMEduSHAAtW/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdppunk_BTiZN2ShWpJilr5FGnCrN4BB6QPD_miImF5pObEZxe3wSAQaj5VuWbnF3m/exec';
 
 let keywords = [];
 
@@ -1163,19 +1163,19 @@ function toggleOtherProf() {
 // ===== WORD COUNT =====
 function countWords(text) {
   if (!text || !text.trim()) return 0;
-  // 移除 Markdown 符號（**bold**、*italic* 等）
+  // 移除 Markdown 符號
   text = text.replace(/\*+/g, '');
-  // 中文字元（每字算1）
-  const chineseMatches = text.match(/[\u2e80-\u9fff\uf900-\ufaff]/g) || [];
-  const chineseCount = chineseMatches.length;
-  // 移除中文字元與全形/半形標點後，計算英文單詞數
-  const stripped = text
-    .replace(/[\u2e80-\u9fff\uf900-\ufaff]/g, ' ')   // 移除中文
-    .replace(/[\u0021-\u002f\u003a-\u0040\u005b-\u0060\u007b-\u007e]/g, ' ') // 半形標點
-    .replace(/[\u2000-\u206f\u2e00-\u2e7f\u3000-\u303f\uff01-\uff0f\uff1a-\uff20\uff3b-\uff40\uff5b-\uff65\ufe30-\ufe4f]/g, ' ') // 全形標點
-    .trim();
-  const englishWords = stripped ? stripped.split(/\s+/).filter(w => w.length > 0) : [];
-  return chineseCount + englishWords.length;
+  // 1. CJK 漢字（每字算1）
+  const cjkCount = (text.match(/[\u2e80-\u9fff\uf900-\ufaff]/g) || []).length;
+  // 2. 全形標點符號（Word 將其計入字數）
+  const fullPunctCount = (text.match(/[\u3000-\u303f\uff00-\uffef\ufe30-\ufe4f]/g) || []).length;
+  // 3. 英文詞與數字詞（以空白/半形標點分隔，含小數如75.4、連字號如mini-CEX）
+  let s = text.replace(/[\u2e80-\u9fff\uf900-\ufaff]/g, ' ');         // 移除中文
+  s = s.replace(/[\u3000-\u303f\uff00-\uffef\ufe30-\ufe4f]/g, ' ');   // 移除全形標點
+  s = s.replace(/[,;:!?()\[\]{}\'"\/\\@#$\^&*+=<>|~`]/g, ' ');        // 移除半形標點
+  s = s.replace(/%/g, '');                                              // 移除百分號（數字保留）
+  const tokens = s.split(/\s+/).filter(w => w.length > 0 && /[a-zA-Z0-9]/.test(w)).map(w => w.replace(/^[.\-]+|[.\-]+$/g, '')).filter(w => w.length > 0);
+  return cjkCount + fullPunctCount + tokens.length;
 }
 function getAbstractText() {
   return ['absMotivation','absMethod','absResult','absConclusion']
