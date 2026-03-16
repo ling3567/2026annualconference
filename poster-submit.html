@@ -813,7 +813,26 @@ input.error, select.error, textarea.error {
 .preview-confirm-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
 .preview-confirm-btn:disabled { background: #90a4ae; box-shadow: none; cursor: not-allowed; }
 
-/* ===== RESPONSIVE ===== */
+/* Ethics checkbox */
+#ethicsCard:has(input:checked) {
+  border-color: var(--success);
+  background: var(--success-light);
+}
+#ethicsCard:has(input:checked) .card-radio {
+  border-color: var(--success);
+  background: var(--success);
+}
+#ethicsCard:has(input:checked) .card-radio::after {
+  content: '✓';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 900;
+  background: transparent;
+}
+#ethicsCard:has(input:checked) .card-title { color: var(--success); font-weight: 700; }
 @media (max-width: 768px) {
   .main-wrap { margin: 1rem auto; padding: 0 0.75rem 2rem; }
   .section-body { padding: 1rem; }
@@ -985,8 +1004,11 @@ input.error, select.error, textarea.error {
         </div>
 
         <div class="form-group">
-          <label for="memberNameField">作者群中屬於本會會員者<span class="hint">（請填寫會員姓名，非會員請填「無」）</span><span class="req">*</span></label>
-          <input type="text" id="memberNameField" placeholder="例：王小明、李美玲（多人請以頓號分隔）；非會員請填「無」" oninput="runChecks()">
+          <label for="memberNameField">作者群中屬於本會會員者<span class="req">*</span></label>
+          <div class="info-box" style="font-size:0.83rem;margin-bottom:0.5rem">
+            請填寫作者群中 <strong>1 位</strong>本會會員姓名（如有多位會員，擇一填寫即可）；非會員請填「<strong>無</strong>」
+          </div>
+          <input type="text" id="memberNameField" placeholder="例：王小明（僅填1人）或填「無」" oninput="validateMemberName(this);runChecks()">
           <div class="field-msg" id="memberNameMsg"></div>
         </div>
 
@@ -1029,6 +1051,9 @@ input.error, select.error, textarea.error {
         <!-- 聯絡作者 -->
         <div style="margin-top:1rem">
           <p class="field-section-title">📮 通訊作者 / 投稿聯絡人</p>
+          <div class="info-box" style="font-size:0.83rem;margin-bottom:0.75rem;margin-top:0.25rem">
+            📢 <strong>投稿通訊作者即為報告者</strong>，入選優秀海報者需於 2026年8月15日研討會當日出席解說。
+          </div>
           <div class="two-col">
             <div class="form-group">
               <label for="contactName">姓名<span class="req">*</span></label>
@@ -1168,7 +1193,29 @@ input.error, select.error, textarea.error {
       </div>
     </div>
 
-    <!-- STEP 6: 確認送出 -->
+    <!-- STEP 6: 學術倫理聲明 -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-icon">📜</span>
+        <span class="section-title">STEP 6 — 學術倫理聲明</span>
+      </div>
+      <div class="section-body">
+        <div class="info-box" style="background:#fff8e1;border-left-color:#f9a825;color:#5d4037;margin-bottom:1rem">
+          <strong>⚠️ 學術倫理聲明</strong><br>
+          論文投稿者應恪遵學術倫理，如經查證違反情節屬實，本會將撤回其錄取資格及相關獎勵。
+        </div>
+        <label class="option-card" id="ethicsCard" style="cursor:pointer">
+          <input type="checkbox" id="ethicsCheck" onchange="runChecks()" style="position:absolute;opacity:0;width:0;height:0">
+          <div class="card-radio" id="ethicsRadio" style="border-radius:4px"></div>
+          <div class="card-body">
+            <div class="card-title">本人已閱讀並同意遵守學術倫理規範，確認投稿內容為原創著作，未侵犯他人著作權或違反學術倫理。</div>
+          </div>
+        </label>
+        <div class="field-msg" id="ethicsMsg"></div>
+      </div>
+    </div>
+
+    <!-- STEP 7: 確認送出 -->
     <div class="checklist-panel">
       <h3>✅ 投稿前自動檢核清單</h3>
       <ul class="check-items" id="checkList">
@@ -1181,6 +1228,9 @@ input.error, select.error, textarea.error {
         <li id="chk-profession" class="pending"><span class="check-icon">⬜</span>通訊作者職類已選擇</li>
         <li id="chk-abstract" class="pending"><span class="check-icon">⬜</span>摘要已填寫且不超過 500 字</li>
         <li id="chk-pdf" class="pending"><span class="check-icon">⬜</span>已上傳著作授權書 PDF</li>
+        <li id="chk-ethics" class="pending"><span class="check-icon">⬜</span>已確認學術倫理聲明</li>
+        <li id="chk-duplicate" class="pending"><span class="check-icon">⬜</span>重複投稿檢查</li>
+        <li id="chk-limit" class="pending"><span class="check-icon">⬜</span>投稿篇數未超過3篇限制</li>
       </ul>
     </div>
 
@@ -1453,7 +1503,30 @@ function runChecks() {
   setCheck('chk-pdf', pdfOk, pdfOk ? pdfFile.name : '請上傳 PDF 著作授權書');
   if (!pdfOk) allPass = false;
 
-  // Update button
+  // Ethics
+  const ethicsOk = document.getElementById('ethicsCheck').checked;
+  setCheck('chk-ethics', ethicsOk, ethicsOk ? '已確認學術倫理聲明' : '請勾選學術倫理聲明');
+  if (!ethicsOk) allPass = false;
+
+  // Duplicate & limit: triggered by title/memberName input, maintain async result
+  const titleVal  = document.getElementById('paperTitle').value.trim();
+  const memberVal2 = document.getElementById('memberNameField').value.trim();
+  if (!titleVal) {
+    setCheck('chk-duplicate', null, '請先填寫論文題目');
+    allPass = false;
+  } else {
+    const dupStatus = document.getElementById('chk-duplicate').className;
+    if (dupStatus === 'pending') allPass = false;
+    if (dupStatus === 'fail') allPass = false;
+  }
+  if (!memberVal2) {
+    setCheck('chk-limit', null, '請先填寫會員姓名');
+    allPass = false;
+  } else {
+    const limStatus = document.getElementById('chk-limit').className;
+    if (limStatus === 'pending') allPass = false;
+    if (limStatus === 'fail') allPass = false;
+  }
   const btn = document.getElementById('previewBtn');
   const note = document.getElementById('submitNote');
   if (allPass) {
@@ -1476,10 +1549,92 @@ function runChecks() {
 ['paperTitle','contactName','contactEmail','contactPhone','contactUnit','contactDept','contactTitle','authorField','memberNameField'].forEach(id => {
   document.getElementById(id).addEventListener('input', runChecks);
 });
+document.getElementById('contactEmail').addEventListener('change', runChecks);
 document.querySelectorAll('input[name="category"]').forEach(r => r.addEventListener('change', runChecks));
 document.querySelectorAll('input[name="memberConfirm"]').forEach(r => r.addEventListener('change', runChecks));
 document.querySelectorAll('input[name="profession"]').forEach(r => r.addEventListener('change', runChecks));
 document.getElementById('profOtherText').addEventListener('input', runChecks);
+document.getElementById('ethicsCheck').addEventListener('change', runChecks);
+
+// ===== 會員姓名驗證（限1人或「無」）=====
+function validateMemberName(inp) {
+  const val = inp.value.trim();
+  const msg = document.getElementById('memberNameMsg');
+  // 偵測是否含頓號或逗號（多人）
+  if (val && val !== '無' && /[、,，]/.test(val)) {
+    msg.textContent = '⚠️ 請僅填寫 1 位會員姓名，如有多位請擇一填寫';
+    msg.className = 'field-msg err';
+    inp.style.borderColor = 'var(--warning)';
+  } else {
+    msg.textContent = '';
+    msg.className = 'field-msg';
+    inp.style.borderColor = '';
+  }
+}
+// 觸發時機：論文題目 或 會員姓名 欄位變更時
+let dupCheckTimer = null;
+function scheduleDupCheck() {
+  clearTimeout(dupCheckTimer);
+  dupCheckTimer = setTimeout(checkSubmissionAsync, 800);
+}
+document.getElementById('paperTitle').addEventListener('input', scheduleDupCheck);
+document.getElementById('memberNameField').addEventListener('input', scheduleDupCheck);
+
+let lastCheckedTitle = '';
+let lastCheckedMember = '';
+
+async function checkSubmissionAsync() {
+  const title      = document.getElementById('paperTitle').value.trim();
+  const memberName = document.getElementById('memberNameField').value.trim();
+
+  // 未填寫時保持 pending
+  if (!title) {
+    setCheck('chk-duplicate', null, '請先填寫論文題目');
+    setCheck('chk-limit', null, '請先填寫會員姓名');
+    runChecks(); return;
+  }
+
+  const sameTitle  = title === lastCheckedTitle;
+  const sameMember = memberName === lastCheckedMember;
+  if (sameTitle && sameMember) return;
+  lastCheckedTitle  = title;
+  lastCheckedMember = memberName;
+
+  if (APPS_SCRIPT_URL === 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec') {
+    setCheck('chk-duplicate', true, '（示範模式）');
+    setCheck('chk-limit',    true, '（示範模式）');
+    runChecks(); return;
+  }
+
+  try {
+    const params = '?action=checkSubmission'
+      + '&title='      + encodeURIComponent(title)
+      + '&memberName=' + encodeURIComponent(memberName);
+    const resp = await fetch(APPS_SCRIPT_URL + params);
+    const json = await resp.json();
+    if (json.result !== 'success') throw new Error(json.message);
+
+    // 重複投稿：同論文題目已有紀錄
+    if (json.titleCount > 0) {
+      setCheck('chk-duplicate', false, `❌ 此論文題目已有投稿紀錄，請確認是否重複送出`);
+    } else {
+      setCheck('chk-duplicate', true, '無重複投稿');
+    }
+
+    // 3篇限制：同會員姓名已達3篇
+    if (!memberName || memberName === '無') {
+      setCheck('chk-limit', true, '非會員，不受3篇限制');
+    } else if (json.memberCount >= 3) {
+      setCheck('chk-limit', false, `❌ 會員「${memberName}」已投稿 ${json.memberCount} 篇，已達3篇上限`);
+    } else {
+      setCheck('chk-limit', true, `會員「${memberName}」目前已投稿 ${json.memberCount} 篇（上限3篇）`);
+    }
+  } catch(e) {
+    setCheck('chk-duplicate', true, '（查詢失敗，略過）');
+    setCheck('chk-limit',    true, '（查詢失敗，略過）');
+  }
+  runChecks();
+}
 
 // ===== PREVIEW =====
 function pRow(label, value) {
