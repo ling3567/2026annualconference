@@ -1131,8 +1131,9 @@ input.error, select.error, textarea.error {
       </div>
       <div class="section-body">
         <div class="info-box">
-          依投稿格式，摘要需包含下列五大項目，字數合計<strong>不超過500字</strong>（純文字，勿含表格圖表）。<br>
-          請在下方各欄位分別填寫，系統將自動累計總字數。
+          依投稿格式，摘要需包含下列四大項目，字數合計<strong>不超過500字</strong>（純文字，勿含表格圖表）。<br>
+          請在下方各欄位分別填寫，系統將自動累計字數。<br>
+          <span style="font-size:0.82rem;color:#666">📌 字數統計為系統自動計算，與 Word 可能略有差異。</span>
         </div>
 
         <div class="abstract-tabs" id="abstractTabs" style="display:none"></div>
@@ -1208,7 +1209,7 @@ input.error, select.error, textarea.error {
           <input type="checkbox" id="ethicsCheck" onchange="runChecks()" style="position:absolute;opacity:0;width:0;height:0">
           <div class="card-radio" id="ethicsRadio" style="border-radius:4px"></div>
           <div class="card-body">
-            <div class="card-title">本人已閱讀並同意遵守學術倫理規範，確認投稿內容為原創著作，未侵犯他人著作權或違反學術倫理。</div>
+            <div class="card-title">本人已閱讀並同意遵守學術倫理規範，確認本投稿內容為原創著作，未侵犯他人著作權，亦未違反學術倫理。</div>
           </div>
         </label>
         <div class="field-msg" id="ethicsMsg"></div>
@@ -1343,40 +1344,39 @@ function toggleOtherProf() {
 // ===== WORD COUNT =====
 function countWords(text) {
   if (!text || !text.trim()) return 0;
-  // 移除 Markdown 符號
   text = text.replace(/\*+/g, '');
-  // 1. CJK 漢字（每字算1）
-  const cjkCount = (text.match(/[\u2e80-\u9fff\uf900-\ufaff]/g) || []).length;
-  // 2. 全形標點符號（Word 將其計入字數）
-  const fullPunctCount = (text.match(/[\u3000-\u303f\uff00-\uffef\ufe30-\ufe4f]/g) || []).length;
-  // 3. 英文詞與數字詞（以空白/半形標點分隔，含小數如75.4、連字號如mini-CEX）
-  let s = text.replace(/[\u2e80-\u9fff\uf900-\ufaff]/g, ' ');         // 移除中文
-  s = s.replace(/[\u3000-\u303f\uff00-\uffef\ufe30-\ufe4f]/g, ' ');   // 移除全形標點
-  s = s.replace(/[,;:!?()\[\]{}\'"\/\\@#$\^&*+=<>|~`]/g, ' ');        // 移除半形標點
-  s = s.replace(/%/g, '');                                              // 移除百分號（數字保留）
-  const tokens = s.split(/\s+/).filter(w => w.length > 0 && /[a-zA-Z0-9]/.test(w)).map(w => w.replace(/^[.\-]+|[.\-]+$/g, '')).filter(w => w.length > 0);
-  return cjkCount + fullPunctCount + tokens.length;
+  // 全形字元：CJK漢字 + 全形標點（每個算1，對應Word「全形字」）
+  const fullCount = (text.match(/[\u4e00-\u9fff\uf900-\ufaff\u3000-\u303f\uff00-\uffef\ufe30-\ufe4f]/g) || []).length;
+  // 半形詞：把CJK和全形字元替換成空格後，以空格分詞，含英數的片段每個算1（對應Word「半形字」詞數）
+  let s = text.replace(/[\u4e00-\u9fff\uf900-\ufaff]/g, ' ');
+  s = s.replace(/[\u3000-\u303f\uff00-\uffef\ufe30-\ufe4f]/g, ' ');
+  const halfCount = s.split(/\s+/).filter(w => w.length > 0 && /[a-zA-Z0-9]/.test(w)).length;
+  return fullCount + halfCount;
 }
 function getAbstractText() {
   return ['absMotivation','absMethod','absResult','absConclusion']
     .map(id => document.getElementById(id).value).join(' ');
 }
 function updateWordCount() {
-  const text = getAbstractText();
+  const text  = getAbstractText();
   const count = countWords(text);
-  const max = 500;
-  const pct = Math.min(count / max * 100, 100);
+  const DISPLAY_MAX = 500;  // 顯示上限
+  const ACTUAL_MAX  = 520;  // 實際阻擋（緩衝區）
+  const pct = Math.min(count / DISPLAY_MAX * 100, 100);
   const fill = document.getElementById('countBarFill');
-  const num = document.getElementById('countNumber');
-  num.textContent = `${count} / ${max}`;
+  const num  = document.getElementById('countNumber');
+  num.textContent = `${count} / ${DISPLAY_MAX}`;
   if (count === 0) {
     fill.style.width = '0%'; fill.style.background = '#ddd';
     num.className = 'count-number pending';
   } else if (count <= 450) {
     fill.style.width = pct + '%'; fill.style.background = 'var(--success)';
     num.className = 'count-number ok';
-  } else if (count <= 500) {
+  } else if (count <= DISPLAY_MAX) {
     fill.style.width = pct + '%'; fill.style.background = '#ffa000';
+    num.className = 'count-number warn';
+  } else if (count <= ACTUAL_MAX) {
+    fill.style.width = '100%'; fill.style.background = '#ffa000';
     num.className = 'count-number warn';
   } else {
     fill.style.width = '100%'; fill.style.background = 'var(--danger)';
@@ -1493,8 +1493,8 @@ function runChecks() {
   const absText = getAbstractText();
   const wordCount = countWords(absText);
   const hasContent = ['absMotivation','absMethod','absResult','absConclusion'].every(id => document.getElementById(id).value.trim());
-  const absOk = hasContent && wordCount > 0 && wordCount <= 500;
-  setCheck('chk-abstract', absOk, absOk ? `${wordCount} 字（符合規定）` : (wordCount > 500 ? `${wordCount} 字，超過500字限制！` : '請填寫所有摘要欄位'));
+  const absOk = hasContent && wordCount > 0 && wordCount <= 520;
+  setCheck('chk-abstract', absOk, absOk ? `${wordCount} 字（符合規定）` : (wordCount > 520 ? `${wordCount} 字，超過500字限制！` : '請填寫所有摘要欄位'));
   if (!absOk) allPass = false;
 
   // PDF
