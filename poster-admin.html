@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投稿編號管理 | TSMCSD 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1565C0;
+  --primary-light: #e3f2fd;
+  --success: #2e7d32;
+  --success-light: #e8f5e9;
+  --danger: #c62828;
+  --danger-light: #ffebee;
+  --warning: #e65100;
+  --warning-light: #fff3e0;
+  --font: 'Noto Sans TC','Microsoft JhengHei',sans-serif;
+  --radius: 10px;
+  --shadow: 0 2px 10px rgba(0,0,0,0.10);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: #f0f4f8; color: #1a1a2e; line-height: 1.6; }
+
+.header {
+  background: linear-gradient(135deg, #0d47a1, #1976d2);
+  color: white;
+  padding: 1.5rem 2rem;
+}
+.header h1 { font-size: 1.3rem; font-weight: 900; }
+.header p  { font-size: 0.88rem; opacity: 0.85; margin-top: 0.2rem; }
+
+.main { max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem 3rem; }
+
+/* Setup card */
+.setup-card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.setup-card h2 { font-size: 1rem; color: var(--primary); margin-bottom: 0.75rem; }
+.setup-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.setup-row input {
+  flex: 1; min-width: 320px;
+  padding: 0.6rem 0.9rem;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-family: var(--font);
+}
+.setup-row input:focus { outline: none; border-color: var(--primary); }
+.btn {
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; filter: none; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-success { background: var(--success); color: white; }
+.btn-warning { background: var(--warning); color: white; }
+.btn-danger  { background: var(--danger);  color: white; }
+
+/* Info bar */
+.info-bar {
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  display: none;
+}
+.info-bar.show { display: block; }
+.info-bar.info    { background: var(--primary-light); color: var(--primary); border-left: 4px solid var(--primary); }
+.info-bar.success { background: var(--success-light); color: var(--success); border-left: 4px solid var(--success); }
+.info-bar.error   { background: var(--danger-light);  color: var(--danger);  border-left: 4px solid var(--danger); }
+.info-bar.warning { background: var(--warning-light); color: var(--warning); border-left: 4px solid var(--warning); }
+
+/* Table area */
+.table-card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 2px solid #e3f2fd;
+  background: #fafbff;
+}
+.table-toolbar h2 { font-size: 1rem; color: var(--primary); }
+.toolbar-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+.legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1.25rem;
+  background: #f9f9f9;
+  border-bottom: 1px solid #eee;
+  font-size: 0.8rem;
+}
+.legend-item { display: flex; align-items: center; gap: 0.35rem; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-unchanged { background: #ccc; }
+.dot-changed   { background: #f57c00; }
+.dot-error     { background: var(--danger); }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead th {
+  background: var(--primary);
+  color: white;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  font-weight: 700;
+  white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid #eee; transition: background 0.1s; }
+tbody tr:hover { background: #f5f8ff; }
+tbody tr.changed { background: #fff8e1; }
+tbody tr.error-row { background: #fff0f0; }
+td { padding: 0.5rem 0.75rem; vertical-align: middle; }
+td.seq { text-align: center; color: #999; font-size: 0.8rem; width: 2.5rem; }
+td.old-id { color: #888; font-size: 0.82rem; white-space: nowrap; }
+td.new-id-cell { min-width: 240px; }
+td.new-id-cell input {
+  width: 100%;
+  padding: 0.35rem 0.6rem;
+  border: 1.5px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: var(--font);
+  transition: border-color 0.15s;
+}
+td.new-id-cell input:focus { outline: none; border-color: var(--primary); }
+td.new-id-cell input.modified { border-color: #f57c00; background: #fffde7; }
+td.paper-title { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333; }
+td.category { text-align: center; }
+.cat-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--primary-light);
+  color: var(--primary);
+}
+td.status-cell { white-space: nowrap; }
+.status-icon { font-size: 0.9rem; }
+td.contact { color: #555; font-size: 0.82rem; white-space: nowrap; }
+
+/* Progress */
+.progress-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  justify-content: center;
+  align-items: center;
+}
+.progress-overlay.show { display: flex; }
+.progress-box {
+  background: white;
+  border-radius: 14px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+.progress-box h3 { margin-bottom: 1rem; color: var(--primary); }
+.progress-bar-bg {
+  height: 10px;
+  background: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 5px;
+  transition: width 0.3s;
+}
+.progress-text { font-size: 0.88rem; color: #666; }
+
+/* Footer summary */
+.summary-bar {
+  display: none;
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.summary-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.stat { font-size: 0.88rem; }
+.stat strong { font-size: 1.1rem; }
+.stat.total  strong { color: var(--primary); }
+.stat.changed-count strong { color: var(--warning); }
+.stat.done   strong { color: var(--success); }
+.stat.err    strong { color: var(--danger); }
+
+.spinner {
+  display: inline-block;
+  width: 1em; height: 1em;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🛠️ 投稿編號管理系統</h1>
+  <p>台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會</p>
+</div>
+
+<div class="main">
+
+  <!-- 設定區 -->
+  <div class="setup-card">
+    <h2>⚙️ 連線設定</h2>
+    <div class="setup-row">
+      <input type="text" id="scriptUrl" placeholder="請貼入 Apps Script 網頁應用程式 URL"
+        value="https://script.google.com/macros/s/AKfycbzdppunk_BTiZN2ShWpJilr5FGnCrN4BB6QPD_miImF5pObEZxe3wSAQaj5VuWbnF3m/exec">
+      <button class="btn btn-primary" onclick="loadSubmissions()">📥 載入投稿清單</button>
+    </div>
+  </div>
+
+  <div class="info-bar" id="infoBar"></div>
+
+  <!-- 投稿清單表格 -->
+  <div class="table-card" id="tableCard" style="display:none">
+    <div class="table-toolbar">
+      <h2 id="tableTitle">投稿清單</h2>
+      <div class="toolbar-actions">
+        <button class="btn btn-warning" onclick="autoRenumber()" id="autoBtn">🔢 自動重新編號</button>
+        <button class="btn btn-success" onclick="confirmAndUpdate()" id="updateBtn">🚀 全部更新 PDF＋Sheet</button>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="dot dot-unchanged"></div>未修改</div>
+      <div class="legend-item"><div class="dot dot-changed"></div>已修改（待更新）</div>
+      <div class="legend-item"><div class="dot dot-error"></div>更新失敗</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>原始編號</th>
+            <th>新編號（可直接修改）</th>
+            <th>論文題目</th>
+            <th>類別</th>
+            <th>通訊作者</th>
+            <th>狀態</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 統計列 -->
+  <div class="summary-bar" id="summaryBar">
+    <div class="summary-stats">
+      <div class="stat total">總投稿 <strong id="statTotal">0</strong> 筆</div>
+      <div class="stat changed-count">已修改 <strong id="statChanged">0</strong> 筆</div>
+      <div class="stat done">已完成 <strong id="statDone">0</strong> 筆</div>
+      <div class="stat err">失敗 <strong id="statErr">0</strong> 筆</div>
+    </div>
+    <button class="btn btn-primary" onclick="loadSubmissions()">🔄 重新載入</button>
+  </div>
+
+</div>
+
+<!-- 進度視窗 -->
+<div class="progress-overlay" id="progressOverlay">
+  <div class="progress-box">
+    <h3>🔄 更新中，請稍候...</h3>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <p class="progress-text" id="progressText">準備中...</p>
+  </div>
+</div>
+
+<script>
+let submissions = [];   // 從 Sheet 讀取的資料
+let newIds = {};        // rowIndex → 新編號
+
+function getUrl() {
+  return document.getElementById('scriptUrl').value.trim();
+}
+
+function showInfo(msg, type) {
+  const bar = document.getElementById('infoBar');
+  bar.textContent = msg;
+  bar.className = 'info-bar show ' + (type||'info');
+}
+
+// ===== 載入投稿清單 =====
+async function loadSubmissions() {
+  const url = getUrl();
+  if (!url) { showInfo('請填入 Apps Script URL', 'error'); return; }
+
+  showInfo('⏳ 載入中...', 'info');
+  try {
+    const resp = await fetch(url + '?action=getSubmissions');
+    const json = await resp.json();
+    if (json.result !== 'success') throw new Error(json.message);
+
+    submissions = json.data;
+    newIds = {};
+    renderTable();
+    document.getElementById('tableCard').style.display = '';
+    document.getElementById('summaryBar').style.display = 'flex';
+    showInfo(`✅ 已載入 ${submissions.length} 筆投稿`, 'success');
+    updateStats();
+  } catch(err) {
+    showInfo('❌ 載入失敗：' + err.message, 'error');
+  }
+}
+
+// ===== 渲染表格 =====
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  document.getElementById('tableTitle').textContent = `投稿清單（共 ${submissions.length} 筆）`;
+
+  submissions.forEach((row, i) => {
+    const oldId  = row[0] || '';   // A欄
+    const ts     = row[1] || '';   // B欄
+    const cat    = row[2] || '';   // C欄
+    const title  = row[3] || '';   // D欄
+    const name   = row[8] || '';   // I欄 通訊作者
+    const curNew = newIds[i] !== undefined ? newIds[i] : oldId;
+    const isModified = curNew !== oldId;
+
+    const tr = document.createElement('tr');
+    if (isModified) tr.classList.add('changed');
+    tr.id = 'row-' + i;
+
+    tr.innerHTML = `
+      <td class="seq">${i+1}</td>
+      <td class="old-id">${esc(oldId)}</td>
+      <td class="new-id-cell">
+        <input type="text" value="${esc(curNew)}" id="newid-${i}"
+          oninput="onIdChange(${i}, this.value)"
+          class="${isModified?'modified':''}">
+      </td>
+      <td class="paper-title" title="${esc(title)}">${esc(title)}</td>
+      <td class="category"><span class="cat-badge">${esc(cat)}</span></td>
+      <td class="contact">${esc(name)}</td>
+      <td class="status-cell" id="status-${i}"><span class="status-icon">⬜</span> 待更新</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  updateStats();
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+function onIdChange(i, val) {
+  newIds[i] = val.trim();
+  const inp = document.getElementById('newid-' + i);
+  const oldId = submissions[i][0] || '';
+  const isModified = newIds[i] !== oldId;
+  inp.className = isModified ? 'modified' : '';
+  const tr = document.getElementById('row-' + i);
+  if (isModified) tr.classList.add('changed');
+  else tr.classList.remove('changed');
+  updateStats();
+}
+
+// ===== 自動重新編號 =====
+function autoRenumber() {
+  if (submissions.length === 0) return;
+  if (!confirm('將依「類別→投稿時間」順序，對所有投稿重新產生編號，確定繼續？')) return;
+
+  // 依類別分組，同類別內依投稿時間排序
+  const groups = {};
+  submissions.forEach((row, i) => {
+    const cat = (row[2] || 'X').replace('類','').trim();
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push({ i, row });
+  });
+
+  // 類別排序
+  const sortedCats = Object.keys(groups).sort();
+  sortedCats.forEach(cat => {
+    groups[cat].sort((a, b) => {
+      const ta = new Date(a.row[1] || 0).getTime();
+      const tb = new Date(b.row[1] || 0).getTime();
+      return ta - tb;
+    });
+    groups[cat].forEach((item, seq) => {
+      const seqStr   = String(seq + 1).padStart(2, '0');
+      const unit     = getUnitAbbr(item.row[11] || '');  // L欄=服務單位
+      const prof     = getProfShort(item.row[14] || ''); // O欄=職類
+      const name     = (item.row[8] || '').replace(/\s/g,''); // I欄=姓名
+      newIds[item.i] = cat + '-' + seqStr + '-' + unit + '-' + prof + '-' + name;
+    });
+  });
+
+  renderTable();
+  showInfo(`✅ 已自動重新編號 ${submissions.length} 筆，請確認後按「全部更新」`, 'success');
+}
+
+// ===== 確認並批次更新 =====
+async function confirmAndUpdate() {
+  const changedCount = submissions.filter((_, i) => {
+    const nid = newIds[i] !== undefined ? newIds[i] : submissions[i][0];
+    return nid !== submissions[i][0];
+  }).length;
+
+  if (changedCount === 0) {
+    showInfo('⚠️ 沒有任何編號被修改', 'warning');
+    return;
+  }
+  if (!confirm(`共有 ${changedCount} 筆編號已修改。\n\n將執行：\n• 重新產生摘要審核 PDF（含新編號）\n• 刪除舊 PDF\n• 更新 Google Sheet\n\n此操作無法復原，確定繼續？`)) return;
+
+  // 準備更新列表
+  const updateList = submissions.map((row, i) => ({
+    rowIndex: i + 2,             // Sheet 列號（+2 因為有標題列且從1開始）
+    oldId: row[0] || '',
+    newId: newIds[i] !== undefined ? newIds[i] : (row[0] || ''),
+    data: {
+      category:     row[2]  || '',
+      paperTitle:   row[3]  || '',
+      keywords:     row[4]  || '',
+      authors:      row[5]  || '',
+      absMotivation: row[15] || '',
+      absMethod:     row[16] || '',
+      absResult:     row[17] || '',
+      absConclusion: row[18] || '',
+      wordCount:     row[19] || '',
+      status:        row[23] || '待審查',
+    }
+  }));
+
+  // 顯示進度視窗
+  const overlay  = document.getElementById('progressOverlay');
+  const fill     = document.getElementById('progressFill');
+  const progText = document.getElementById('progressText');
+  overlay.classList.add('show');
+
+  let done = 0, err = 0;
+  const total = updateList.length;
+
+  for (const item of updateList) {
+    progText.textContent = `處理中 ${done + err + 1} / ${total}：${item.newId}`;
+    fill.style.width = ((done + err) / total * 100) + '%';
+
+    setRowStatus(item.rowIndex - 2, '⏳', '更新中...');
+    try {
+      const body = new URLSearchParams();
+      body.append('action', 'renumberSubmission');
+      body.append('rowIndex', item.rowIndex);
+      body.append('oldId', item.oldId);
+      body.append('newId', item.newId);
+      body.append('data', JSON.stringify(item.data));
+
+      const resp = await fetch(getUrl(), { method: 'POST', body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      const json = await resp.json();
+
+      if (json.result === 'success') {
+        done++;
+        setRowStatus(item.rowIndex - 2, '✅', '完成');
+        // 更新本地資料的編號
+        submissions[item.rowIndex - 2][0] = item.newId;
+        if (json.newPdfUrl) submissions[item.rowIndex - 2][22] = json.newPdfUrl;
+      } else {
+        throw new Error(json.message);
+      }
+    } catch(e) {
+      err++;
+      setRowStatus(item.rowIndex - 2, '❌', '失敗：' + e.message);
+      document.getElementById('row-' + (item.rowIndex - 2)).classList.add('error-row');
+    }
+  }
+
+  fill.style.width = '100%';
+  progText.textContent = `完成！成功 ${done} 筆，失敗 ${err} 筆`;
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    newIds = {};
+    renderTable();
+    updateStats();
+    if (err === 0) showInfo(`🎉 全部 ${done} 筆更新完成！`, 'success');
+    else showInfo(`⚠️ ${done} 筆成功，${err} 筆失敗，請查看紅色列`, 'warning');
+  }, 1500);
+}
+
+function setRowStatus(i, icon, text) {
+  const cell = document.getElementById('status-' + i);
+  if (cell) cell.innerHTML = `<span class="status-icon">${icon}</span> ${text}`;
+}
+
+function updateStats() {
+  const total   = submissions.length;
+  const changed = submissions.filter((_, i) => {
+    const nid = newIds[i] !== undefined ? newIds[i] : submissions[i][0];
+    return nid !== submissions[i][0];
+  }).length;
+  document.getElementById('statTotal').textContent   = total;
+  document.getElementById('statChanged').textContent = changed;
+}
+
+// ===== 單位縮寫（與 Apps Script 相同邏輯）=====
+function getUnitAbbr(unit) {
+  if (!unit) return '未知';
+  const map = {
+    '亞東':'亞東','奇美':'奇美','台大':'台大','臺大':'台大','長庚':'長庚',
+    '馬偕':'馬偕','成大':'成大','高醫':'高醫','中山':'中山','榮總':'榮總',
+    '北榮':'北榮','中榮':'中榮','高榮':'高榮','屏基':'屏基','彰基':'彰基',
+    '嘉基':'嘉基','慈濟':'慈濟','新光':'新光','國泰':'國泰','萬芳':'萬芳',
+    '輔大':'輔大','陽明':'陽明','北醫':'北醫','中國醫':'中醫',
+  };
+  for (const key in map) { if (unit.indexOf(key) !== -1) return map[key]; }
+  const chars = unit.match(/[\u4e00-\u9fff]/g);
+  return chars ? chars.slice(0,2).join('') : unit.substring(0,2);
+}
+
+function getProfShort(prof) {
+  const map = {
+    '西醫':'西醫','牙醫':'牙醫','中醫':'中醫','藥事':'藥事',
+    '醫事放射':'放射','醫事檢驗':'檢驗','牙體技術':'牙技',
+    '護理':'護理','營養':'營養','呼吸治療':'呼吸','聽力':'聽力',
+    '物理治療':'物治','職能治療':'職治','臨床心理':'臨心',
+    '諮商心理':'諮心','語言治療':'語治','專科護理師':'專護',
+  };
+  for (const key in map) { if (prof.indexOf(key) !== -1) return map[key]; }
+  return prof.substring(0,2);
+}
+</script>
+</body>
+</html>
