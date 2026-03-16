@@ -646,11 +646,12 @@ async function doUpdate() {
   const progText = document.getElementById('progressText');
   overlay.classList.add('show');
 
+  const total = updateList.length;
   let done=0, err=0;
   for (const item of updateList) {
-    progText.textContent = `處理中 ${done+err+1} / ${updateList.length}：${item.newId}`;
-    fill.style.width = ((done+err)/updateList.length*100)+'%';
-    setRowStatus(item.rowIndex-2, '⏳', '更新中...');
+    progText.textContent = `處理中 ${done+err+1} / ${total}：${item.newId}`;
+    fill.style.width = ((done+err)/total*100)+'%';
+    setRowStatus(item.i, '⏳', '更新中...');
     try {
       const body = new URLSearchParams();
       body.append('action','renumberSubmission');
@@ -680,7 +681,7 @@ async function doUpdate() {
     newIds={};
     renderTable();
     updateStats();
-    if (err===0) showInfo(`🎉 全部 ${done} 筆更新完成！`,'success');
+    if (err===0) showInfo(`🎉 ${done} 筆更新完成！`,'success');
     else showInfo(`⚠️ ${done} 筆成功，${err} 筆失敗，請查看紅色列`,'warning');
   }, 1500);
 }
