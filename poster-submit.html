@@ -582,17 +582,95 @@ input.error, select.error, textarea.error {
 .upload-label { font-size: 0.88rem; color: #666; }
 .upload-label strong { color: var(--primary); }
 
-/* ===== PROFESSION GRID ===== */
-.profession-grid {
+/* ===== UNIFIED OPTION CARDS ===== */
+/* 統一三種選項（投稿類別、會員資格、職類）的卡片樣式 */
+.option-card-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.option-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #fafafa;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  position: relative;
+  user-select: none;
+}
+.option-card:hover {
+  border-color: var(--primary-mid);
+  background: var(--primary-light);
+}
+.option-card input[type="radio"] {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+/* 自訂圓形指示器 */
+.option-card .card-radio {
+  width: 18px; height: 18px;
+  border: 2px solid #bbb;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.15s, background 0.15s;
+  background: white;
+}
+.option-card .card-radio::after {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.15s;
+}
+.option-card input:checked ~ .card-body .card-radio,
+.option-card:has(input:checked) .card-radio {
+  border-color: var(--primary);
+}
+.option-card:has(input:checked) .card-radio::after {
+  background: var(--primary);
+}
+.option-card:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 0 0 2px rgba(21,101,192,0.12);
+}
+.option-card .card-body { flex: 1; }
+.option-card .card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  line-height: 1.4;
+}
+.option-card .card-desc {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.2rem;
+  line-height: 1.4;
+}
+/* 類別卡片大字母 */
+.option-card .cat-letter-new {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--primary);
+  min-width: 1.6rem;
+  line-height: 1;
+  margin-top: 0.1rem;
+}
+.prof-pill-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.45rem;
   margin-top: 0.4rem;
 }
-.prof-option {
+.prof-pill {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   padding: 0.45rem 0.75rem;
   border: 1.5px solid #ddd;
   border-radius: 8px;
@@ -601,33 +679,43 @@ input.error, select.error, textarea.error {
   background: #fafafa;
   transition: border-color 0.15s, background 0.15s;
   user-select: none;
-  white-space: nowrap;
-  overflow: hidden;
 }
-.prof-option:hover { border-color: var(--primary-mid); background: var(--primary-light); }
-.prof-option input[type="radio"] { width: auto; flex-shrink: 0; margin: 0; accent-color: var(--primary); }
-.prof-option input[type="radio"]:checked + span { font-weight: 700; color: var(--primary); }
-.prof-option:has(input:checked) {
-  border-color: var(--primary);
-  background: var(--primary-light);
+.prof-pill:hover { border-color: var(--primary-mid); background: var(--primary-light); }
+.prof-pill input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.prof-pill .pill-dot {
+  width: 14px; height: 14px;
+  border: 2px solid #bbb;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  transition: border-color 0.15s;
 }
-.prof-other {
-  border-style: dashed;
-  grid-column: span 2;
-  white-space: normal;
+.prof-pill .pill-dot::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.15s;
 }
-.prof-other input[type="text"] {
-  flex: 1;
-  min-width: 0;
-  padding: 0.2rem 0.5rem;
+.prof-pill:has(input:checked) { border-color: var(--primary); background: var(--primary-light); }
+.prof-pill:has(input:checked) .pill-dot { border-color: var(--primary); }
+.prof-pill:has(input:checked) .pill-dot::after { background: var(--primary); }
+.prof-pill:has(input:checked) .pill-text { font-weight: 700; color: var(--primary); }
+.prof-pill-other { border-style: dashed; grid-column: span 2; }
+.prof-pill-other input[type="text"] {
+  flex: 1; min-width: 0;
+  padding: 0.15rem 0.5rem;
   font-size: 0.85rem;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-family: var(--font);
 }
 @media (max-width: 640px) {
-  .profession-grid { grid-template-columns: repeat(2, 1fr); }
-  .prof-other { grid-column: span 2; }
+  .prof-pill-grid { grid-template-columns: repeat(2, 1fr); }
+  .prof-pill-other { grid-column: span 2; }
 }
 
 /* ===== PREVIEW OVERLAY ===== */
@@ -821,37 +909,34 @@ input.error, select.error, textarea.error {
       <div class="section-body">
         <div class="form-group">
           <label>請選擇投稿類別<span class="req">*</span><span class="hint">（請擇一勾選）</span></label>
-          <div class="category-grid" id="categoryGrid">
-            <div class="cat-option">
-              <input type="radio" name="category" id="catA" value="A">
-              <label class="cat-label" for="catA">
-                <span class="cat-letter">A</span>
-                <div class="cat-text">
-                  <strong>Clinical Skills Education, Simulation &amp; IPL</strong>
-                  <em>臨床技能教育、模擬教學與跨專業學習</em>
-                </div>
-              </label>
-            </div>
-            <div class="cat-option">
-              <input type="radio" name="category" id="catB" value="B">
-              <label class="cat-label" for="catB">
-                <span class="cat-letter">B</span>
-                <div class="cat-text">
-                  <strong>Assessment, Entrustment &amp; CBME</strong>
-                  <em>評量、信任決策與能力導向教育</em>
-                </div>
-              </label>
-            </div>
-            <div class="cat-option">
-              <input type="radio" name="category" id="catC" value="C">
-              <label class="cat-label" for="catC">
-                <span class="cat-letter">C</span>
-                <div class="cat-text">
-                  <strong>Humanism, Wellbeing &amp; Professional Identity</strong>
-                  <em>人文素養、醫療韌性與專業認同</em>
-                </div>
-              </label>
-            </div>
+          <div class="option-card-group" id="categoryGrid">
+            <label class="option-card">
+              <input type="radio" name="category" id="catA" value="A" onchange="runChecks()">
+              <div class="card-radio"></div>
+              <div class="card-body">
+                <span class="cat-letter-new">A</span>
+                <div class="card-title">Clinical Skills Education, Simulation &amp; IPL</div>
+                <div class="card-desc">臨床技能教育、模擬教學與跨專業學習</div>
+              </div>
+            </label>
+            <label class="option-card">
+              <input type="radio" name="category" id="catB" value="B" onchange="runChecks()">
+              <div class="card-radio"></div>
+              <div class="card-body">
+                <span class="cat-letter-new">B</span>
+                <div class="card-title">Assessment, Entrustment &amp; CBME</div>
+                <div class="card-desc">評量、信任決策與能力導向教育</div>
+              </div>
+            </label>
+            <label class="option-card">
+              <input type="radio" name="category" id="catC" value="C" onchange="runChecks()">
+              <div class="card-radio"></div>
+              <div class="card-body">
+                <span class="cat-letter-new">C</span>
+                <div class="card-title">Humanism, Wellbeing &amp; Professional Identity</div>
+                <div class="card-desc">人文素養、醫療韌性與專業認同</div>
+              </div>
+            </label>
           </div>
           <div class="field-msg err" id="categoryMsg"></div>
         </div>
@@ -912,18 +997,30 @@ input.error, select.error, textarea.error {
             ℹ️ 作者群中至少1名為本會會員，並於 <strong>2026年6月15日(一)前</strong>完成當年度會費繳納，方具優秀海報論文獎評選資格。<br>
             未完成繳納或無會員者，仍可投稿並參展，但不列入評選。
           </div>
-          <div style="display:flex;flex-direction:column;gap:0.6rem;margin-top:0.3rem">
-            <label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;cursor:pointer;padding:0.6rem 0.9rem;border:1.5px solid #ddd;border-radius:8px;transition:border-color 0.15s,background 0.15s" id="memberLabel-paid">
-              <input type="radio" name="memberConfirm" value="paid" onchange="runChecks()" style="width:auto;margin-top:0.2rem;accent-color:var(--success)">
-              <span><strong style="color:var(--success)">● 是會員，且已完成當年度會費繳納</strong><br><span style="font-size:0.82rem;color:#555">具優秀海報論文獎評選資格</span></span>
+          <div class="option-card-group" style="margin-top:0.3rem">
+            <label class="option-card" id="memberLabel-paid">
+              <input type="radio" name="memberConfirm" value="paid" onchange="runChecks()">
+              <div class="card-radio" style="border-color:#2e7d32"></div>
+              <div class="card-body">
+                <div class="card-title" style="color:var(--success)">是會員，且已完成當年度會費繳納</div>
+                <div class="card-desc">具優秀海報論文獎評選資格</div>
+              </div>
             </label>
-            <label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;cursor:pointer;padding:0.6rem 0.9rem;border:1.5px solid #ddd;border-radius:8px;transition:border-color 0.15s,background 0.15s" id="memberLabel-pending">
-              <input type="radio" name="memberConfirm" value="pending" onchange="runChecks()" style="width:auto;margin-top:0.2rem;accent-color:#f57c00">
-              <span><strong style="color:#e65100">● 是會員，但尚未繳費</strong><br><span style="font-size:0.82rem;color:#555">請於 <strong>2026年6月15日前</strong>完成繳納，方具評選資格；否則僅供參展</span></span>
+            <label class="option-card" id="memberLabel-pending">
+              <input type="radio" name="memberConfirm" value="pending" onchange="runChecks()">
+              <div class="card-radio" style="border-color:#e65100"></div>
+              <div class="card-body">
+                <div class="card-title" style="color:#e65100">是會員，但尚未繳費</div>
+                <div class="card-desc">請於 <strong>2026年6月15日前</strong>完成繳納，方具評選資格；否則僅供參展</div>
+              </div>
             </label>
-            <label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;cursor:pointer;padding:0.6rem 0.9rem;border:1.5px solid #ddd;border-radius:8px;transition:border-color 0.15s,background 0.15s" id="memberLabel-none">
-              <input type="radio" name="memberConfirm" value="none" onchange="runChecks()" style="width:auto;margin-top:0.2rem;accent-color:var(--danger)">
-              <span><strong style="color:var(--danger)">● 非會員</strong><br><span style="font-size:0.82rem;color:#555">投稿後僅供參展，不參加優秀海報獎評選</span></span>
+            <label class="option-card" id="memberLabel-none">
+              <input type="radio" name="memberConfirm" value="none" onchange="runChecks()">
+              <div class="card-radio" style="border-color:#c62828"></div>
+              <div class="card-body">
+                <div class="card-title" style="color:var(--danger)">非會員</div>
+                <div class="card-desc">投稿後僅供參展，不參加優秀海報獎評選</div>
+              </div>
             </label>
           </div>
           <div class="field-msg" id="memberMsg"></div>
@@ -970,26 +1067,28 @@ input.error, select.error, textarea.error {
           </div>
           <div class="form-group">
             <label>通訊作者職類<span class="req">*</span><span class="hint">（請擇一勾選）</span></label>
-            <div class="profession-grid" id="professionGrid">
-              <label class="prof-option"><input type="radio" name="profession" value="西醫" onchange="runChecks()"><span>西醫</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="牙醫" onchange="runChecks()"><span>牙醫</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="中醫" onchange="runChecks()"><span>中醫</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="藥事" onchange="runChecks()"><span>藥事</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="醫事放射" onchange="runChecks()"><span>醫事放射</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="醫事檢驗" onchange="runChecks()"><span>醫事檢驗</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="牙體技術" onchange="runChecks()"><span>牙體技術</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="護理" onchange="runChecks()"><span>護理</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="營養" onchange="runChecks()"><span>營養</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="呼吸治療" onchange="runChecks()"><span>呼吸治療</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="聽力" onchange="runChecks()"><span>聽力</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="物理治療" onchange="runChecks()"><span>物理治療</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="職能治療" onchange="runChecks()"><span>職能治療</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="臨床心理" onchange="runChecks()"><span>臨床心理</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="諮商心理" onchange="runChecks()"><span>諮商心理</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="語言治療" onchange="runChecks()"><span>語言治療</span></label>
-              <label class="prof-option"><input type="radio" name="profession" value="專科護理師" onchange="runChecks()"><span>專科護理師</span></label>
-              <label class="prof-option prof-other">
-                <input type="radio" name="profession" value="其他" onchange="runChecks();toggleOtherProf()"><span>其他：</span>
+            <div class="prof-pill-grid" id="professionGrid">
+              <label class="prof-pill"><input type="radio" name="profession" value="西醫" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">西醫</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="牙醫" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">牙醫</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="中醫" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">中醫</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="藥事" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">藥事</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="醫事放射" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">醫事放射</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="醫事檢驗" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">醫事檢驗</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="牙體技術" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">牙體技術</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="護理" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">護理</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="營養" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">營養</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="呼吸治療" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">呼吸治療</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="聽力" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">聽力</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="物理治療" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">物理治療</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="職能治療" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">職能治療</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="臨床心理" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">臨床心理</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="諮商心理" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">諮商心理</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="語言治療" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">語言治療</span></label>
+              <label class="prof-pill"><input type="radio" name="profession" value="專科護理師" onchange="runChecks()"><span class="pill-dot"></span><span class="pill-text">專科護理師</span></label>
+              <label class="prof-pill prof-pill-other">
+                <input type="radio" name="profession" value="其他" onchange="runChecks();toggleOtherProf()">
+                <span class="pill-dot"></span>
+                <span class="pill-text">其他：</span>
                 <input type="text" id="profOtherText" placeholder="請填寫" style="display:none" oninput="runChecks()">
               </label>
             </div>
@@ -1120,7 +1219,7 @@ input.error, select.error, textarea.error {
   <div class="success-box">
     <div class="success-icon">🎉</div>
     <h2>投稿成功！</h2>
-    <p>您的投稿已完成送出，系統將寄出確認信至您填寫的聯絡 Email。</p>
+    <p>您的投稿已完成送出。</p>
     <p style="margin-top:0.5rem">預計於 <strong>約3個工作天</strong> 內收到學會確認回覆信。</p>
     <p style="margin-top:0.5rem;font-size:0.82rem;color:#888">錄取結果將於 <strong>2026年7月15日前</strong> 以Email個別通知。</p>
     <button class="close-success-btn" onclick="closeSuccess()">確認</button>
