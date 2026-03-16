@@ -303,7 +303,7 @@ td.contact { color: #555; font-size: 0.82rem; white-space: nowrap; }
   font-size: 0.8rem; color: var(--warning); margin-top: 0.6rem;
   padding: 0.5rem 0.75rem; background: var(--warning-light); border-radius: 6px;
 }
-.btn-sm { padding: 0.4rem 0.9rem; font-size: 0.82rem; }
+.btn-sm { padding: 0.4rem 0.9rem; font-size: 0.82rem; display: inline-block; }
 </style>
 </head>
 <body>
@@ -497,8 +497,16 @@ function renderTable() {
       <td class="category"><span class="cat-badge">${esc(cat)}</span></td>
       <td class="contact">${esc(name)}</td>
       <td class="status-cell" id="status-${i}"><span class="status-icon">⬜</span> 待更新</td>
-      <td><button class="btn btn-warning btn-sm" onclick="openSingleEdit(${i})">✏️ 單筆</button></td>
+      <td style="text-align:center"></td>
     `;
+
+    // 單筆按鈕用 DOM 方式建立，避免 template literal 問題
+    const editTd = tr.lastElementChild;
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn btn-warning btn-sm';
+    editBtn.textContent = '✏️ 單筆';
+    editBtn.addEventListener('click', (function(idx){ return function(){ openSingleEdit(idx); }; })(i));
+    editTd.appendChild(editBtn);
     tbody.appendChild(tr);
   });
   updateStats();
