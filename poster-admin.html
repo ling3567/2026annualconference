@@ -353,7 +353,6 @@ td.contact { color: #555; font-size: 0.82rem; white-space: nowrap; }
             <th>類別</th>
             <th>通訊作者</th>
             <th>狀態</th>
-            <th style="min-width:80px;text-align:center">單筆修改</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -498,16 +497,7 @@ function renderTable() {
       <td class="category"><span class="cat-badge">${esc(cat)}</span></td>
       <td class="contact">${esc(name)}</td>
       <td class="status-cell" id="status-${i}"><span class="status-icon">⬜</span> 待更新</td>
-      <td style="text-align:center;min-width:80px;vertical-align:middle"></td>
     `;
-
-    // 單筆按鈕用 DOM 方式建立，避免 template literal 問題
-    const editTd = tr.lastElementChild;
-    const editBtn = document.createElement('button');
-    editBtn.className = 'btn btn-warning btn-sm';
-    editBtn.textContent = '✏️ 單筆';
-    editBtn.addEventListener('click', (function(idx){ return function(){ openSingleEdit(idx); }; })(i));
-    editTd.appendChild(editBtn);
     tbody.appendChild(tr);
   });
   updateStats();
@@ -581,46 +571,50 @@ function autoRenumber() {
 function confirmAndUpdate() {
   const allIds = getAllNewIds();
   const dupSet = findDuplicates(allIds);
-  const changedCount = submissions.filter((row,i) => allIds[i] !== (row[0]||'')).length;
-  if (changedCount === 0) { showInfo('⚠️ 沒有任何編號被修改', 'warning'); return; }
+  // 只取有修改的筆
+  const changedList = submissions.map((row, i) => ({ row, i, oldId: row[0]||'', newId: allIds[i] }))
+    .filter(item => item.newId !== item.oldId);
 
-  // 建立預覽表格
+  if (changedList.length === 0) { showInfo('⚠️ 沒有任何編號被修改', 'warning'); return; }
+
+  // 建立預覽表格（只顯示有修改的筆）
   const table = document.getElementById('previewTable');
   table.innerHTML = `<thead><tr>
-    <th>#</th><th>論文題目</th><th>類別</th><th>通訊作者</th>
+    <th>序</th><th>論文題目</th><th>類別</th><th>通訊作者</th>
     <th>舊編號</th><th>新編號</th>
   </tr></thead>`;
   const tbody = document.createElement('tbody');
-  submissions.forEach((row, i) => {
-    const oldId = row[0]||'';
-    const newId = allIds[i];
-    const isDup = dupSet.has(newId);
+  changedList.forEach((item, seq) => {
+    const isDup = dupSet.has(item.newId);
     const tr = document.createElement('tr');
     if (isDup) tr.classList.add('dup-row');
     tr.innerHTML = `
-      <td>${i+1}</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(row[3]||'')}">${esc(row[3]||'')}</td>
-      <td>${esc(row[2]||'')}</td>
-      <td>${esc(row[8]||'')}</td>
-      <td style="color:#999;font-size:0.82rem">${esc(oldId)}</td>
-      <td style="font-weight:700;color:${isDup?'var(--warning)':'var(--success)'}">${esc(newId)}${isDup?'<span class="dup-tag">⚠️重複</span>':''}</td>
+      <td>${seq+1}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(item.row[3]||'')}">${esc(item.row[3]||'')}</td>
+      <td>${esc(item.row[2]||'')}</td>
+      <td>${esc(item.row[8]||'')}</td>
+      <td style="color:#999;font-size:0.82rem">${esc(item.oldId)}</td>
+      <td style="font-weight:700;color:${isDup?'var(--warning)':'var(--success)'}">${esc(item.newId)}${isDup?'<span class="dup-tag">⚠️重複</span>':''}</td>
     `;
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
 
+  // 更新 modal 標題顯示筆數
+  document.querySelector('#previewModal .modal-header h2').textContent =
+    `📋 送出前確認：共 ${changedList.length} 筆編號變更`;
+
   // 重複警告
   const warnBar = document.getElementById('dupWarningBar');
   const confirmBtn = document.getElementById('confirmUpdateBtn');
-  if (dupSet.size > 0) {
-    warnBar.textContent = `⚠️ 發現 ${dupSet.size} 個重複編號（橘色列），請返回修改後再送出`;
+  const dupInChanged = changedList.filter(item => dupSet.has(item.newId)).length;
+  if (dupInChanged > 0) {
+    warnBar.textContent = `⚠️ 發現 ${dupInChanged} 個重複編號（橘色列），請返回修改後再送出`;
     warnBar.classList.add('show');
     confirmBtn.disabled = true;
-    confirmBtn.title = '請先修正重複編號';
   } else {
     warnBar.classList.remove('show');
     confirmBtn.disabled = false;
-    confirmBtn.title = '';
   }
 
   document.getElementById('previewModal').classList.add('show');
@@ -630,19 +624,22 @@ function closePreviewModal() {
   document.getElementById('previewModal').classList.remove('show');
 }
 
-// ===== 執行全部更新 =====
+// ===== 執行全部更新（只處理有修改的筆）=====
 async function doUpdate() {
   closePreviewModal();
   const allIds = getAllNewIds();
-  const updateList = submissions.map((row,i) => ({
-    rowIndex: i+2, oldId: row[0]||'', newId: allIds[i],
-    data: {
-      category: row[2]||'', paperTitle: row[3]||'', keywords: row[4]||'',
-      authors: row[5]||'', absMotivation: row[15]||'', absMethod: row[16]||'',
-      absResult: row[17]||'', absConclusion: row[18]||'', wordCount: row[19]||'',
-      status: row[23]||'待審查',
-    }
-  }));
+  const updateList = submissions
+    .map((row, i) => ({
+      rowIndex: i + 2, oldId: row[0]||'', newId: allIds[i],
+      i,
+      data: {
+        category: row[2]||'', paperTitle: row[3]||'', keywords: row[4]||'',
+        authors: row[5]||'', absMotivation: row[15]||'', absMethod: row[16]||'',
+        absResult: row[17]||'', absConclusion: row[18]||'', wordCount: row[19]||'',
+        status: row[23]||'待審查',
+      }
+    }))
+    .filter(item => item.newId !== item.oldId);  // 只處理有修改的
 
   const overlay  = document.getElementById('progressOverlay');
   const fill     = document.getElementById('progressFill');
@@ -666,14 +663,14 @@ async function doUpdate() {
       const json = await resp.json();
       if (json.result==='success') {
         done++;
-        setRowStatus(item.rowIndex-2,'✅','完成');
-        submissions[item.rowIndex-2][0] = item.newId;
-        if (json.newPdfUrl) submissions[item.rowIndex-2][22] = json.newPdfUrl;
+        setRowStatus(item.i, '✅', '完成');
+        submissions[item.i][0] = item.newId;
+        if (json.newPdfUrl) submissions[item.i][22] = json.newPdfUrl;
       } else throw new Error(json.message);
     } catch(e) {
       err++;
-      setRowStatus(item.rowIndex-2,'❌','失敗：'+e.message);
-      document.getElementById('row-'+(item.rowIndex-2)).classList.add('error-row');
+      setRowStatus(item.i, '❌', '失敗：'+e.message);
+      document.getElementById('row-'+item.i).classList.add('error-row');
     }
   }
   fill.style.width='100%';
