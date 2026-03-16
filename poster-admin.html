@@ -303,7 +303,8 @@ td.contact { color: #555; font-size: 0.82rem; white-space: nowrap; }
   font-size: 0.8rem; color: var(--warning); margin-top: 0.6rem;
   padding: 0.5rem 0.75rem; background: var(--warning-light); border-radius: 6px;
 }
-.btn-sm { padding: 0.4rem 0.9rem; font-size: 0.82rem; display: inline-block; }
+.btn-sm { padding: 0.4rem 0.9rem; font-size: 0.82rem; display: inline-block; min-width: 60px; }
+.btn-warning { background: var(--warning); color: white; }
 </style>
 </head>
 <body>
@@ -352,7 +353,7 @@ td.contact { color: #555; font-size: 0.82rem; white-space: nowrap; }
             <th>類別</th>
             <th>通訊作者</th>
             <th>狀態</th>
-            <th>單筆修改</th>
+            <th style="min-width:80px;text-align:center">單筆修改</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -497,7 +498,7 @@ function renderTable() {
       <td class="category"><span class="cat-badge">${esc(cat)}</span></td>
       <td class="contact">${esc(name)}</td>
       <td class="status-cell" id="status-${i}"><span class="status-icon">⬜</span> 待更新</td>
-      <td style="text-align:center"></td>
+      <td style="text-align:center;min-width:80px;vertical-align:middle"></td>
     `;
 
     // 單筆按鈕用 DOM 方式建立，避免 template literal 問題
@@ -708,8 +709,11 @@ async function doSingleEdit() {
   const newId = document.getElementById('seNewId').value.trim();
   if (!newId) { alert('請填入新編號'); return; }
   const row = submissions[i];
-  const oldId = row[0]||'';
+  const oldId = row[0] || '';
   if (newId === oldId) { closeSingleEdit(); return; }
+
+  // 確認視窗
+  if (!confirm(`確定要修改第 ${i+1} 筆編號嗎？\n\n舊編號：${oldId}\n新編號：${newId}\n\n⚠️ 舊 PDF 將保留，新 PDF 另外產生。`)) return;
 
   const saveBtn = document.getElementById('seSaveBtn');
   saveBtn.disabled = true;
@@ -717,32 +721,40 @@ async function doSingleEdit() {
 
   try {
     const body = new URLSearchParams();
-    body.append('action','renumberSubmission');
-    body.append('rowIndex', i+2);
+    body.append('action', 'renumberSubmission');
+    body.append('rowIndex', i + 2);
     body.append('oldId', oldId);
     body.append('newId', newId);
-    body.append('keepOld','true');   // 保留舊 PDF
+    body.append('keepOld', 'true');
     body.append('data', JSON.stringify({
-      category: row[2]||'', paperTitle: row[3]||'', keywords: row[4]||'',
-      authors: row[5]||'', absMotivation: row[15]||'', absMethod: row[16]||'',
-      absResult: row[17]||'', absConclusion: row[18]||'', wordCount: row[19]||'',
-      status: row[23]||'待審查',
+      category:      row[2]  || '',
+      paperTitle:    row[3]  || '',
+      keywords:      row[4]  || '',
+      authors:       row[5]  || '',
+      absMotivation: row[15] || '',
+      absMethod:     row[16] || '',
+      absResult:     row[17] || '',
+      absConclusion: row[18] || '',
+      wordCount:     row[19] || '',
+      status:        row[23] || '待審查',
     }));
-    const resp = await fetch(getUrl(), { method:'POST', body, headers:{'Content-Type':'application/x-www-form-urlencoded'} });
+    const resp = await fetch(getUrl(), { method: 'POST', body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
     const json = await resp.json();
-    if (json.result!=='success') throw new Error(json.message);
+    if (json.result !== 'success') throw new Error(json.message);
 
+    // 只更新這一筆
     submissions[i][0] = newId;
     if (json.newPdfUrl) submissions[i][22] = json.newPdfUrl;
     newIds[i] = newId;
     closeSingleEdit();
     renderTable();
     updateStats();
-    showInfo(`✅ 第 ${i+1} 筆已更新為 ${newId}（舊 PDF 保留）`, 'success');
+    setRowStatus(i, '✅', '已更新');
+    showInfo(`✅ 第 ${i+1} 筆已更新為「${newId}」（舊 PDF 保留）`, 'success');
   } catch(e) {
     saveBtn.disabled = false;
-    saveBtn.textContent = '🔄 更新此筆';
-    showInfo('❌ 更新失敗：' + e.message, 'error');
+    saveBtn.innerHTML = '🔄 更新此筆';
+    alert('❌ 更新失敗：' + e.message);
   }
 }
 
