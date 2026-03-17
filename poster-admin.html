@@ -335,6 +335,7 @@ td.contact { color: #555; font-size: 0.82rem; white-space: nowrap; }
       <div class="toolbar-actions">
         <button class="btn btn-warning" onclick="autoRenumber()" id="autoBtn">🔢 自動重新編號</button>
         <button class="btn btn-success" onclick="confirmAndUpdate()" id="updateBtn">🚀 全部更新 PDF＋Sheet</button>
+        <button class="btn" style="background:#6a1b9a;color:white" onclick="openFinalPdfModal()" id="finalPdfBtn">📄 產生正式收錄 PDF</button>
       </div>
     </div>
     <div class="legend">
@@ -346,6 +347,7 @@ td.contact { color: #555; font-size: 0.82rem; white-space: nowrap; }
       <table>
         <thead>
           <tr>
+            <th style="width:2.5rem;text-align:center"><input type="checkbox" id="checkAll" onchange="toggleCheckAll(this)" title="全選"></th>
             <th>#</th>
             <th>原始編號</th>
             <th>新編號（可直接修改）</th>
@@ -428,6 +430,40 @@ td.contact { color: #555; font-size: 0.82rem; white-space: nowrap; }
   </div>
 </div>
 
+<!-- 正式收錄 PDF Modal -->
+<div class="single-edit-modal" id="finalPdfModal">
+  <div class="single-edit-box" style="max-width:600px">
+    <div class="modal-header" style="background:linear-gradient(135deg,#6a1b9a,#4a148c);color:white;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between">
+      <h2 style="font-size:1rem">📄 產生正式收錄 PDF</h2>
+      <button onclick="closeFinalPdfModal()" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+    <div class="single-edit-body">
+      <div class="info-box" style="background:#f3e5f5;border-left-color:#6a1b9a;color:#4a148c;margin-bottom:1rem;font-size:0.85rem">
+        正式收錄 PDF 包含完整作者資訊，供錄取後對外使用。<br>
+        審查用 PDF（匿名）將予以保留，不會被刪除。
+      </div>
+      <div style="margin-bottom:0.75rem">
+        <label style="font-size:0.88rem;font-weight:600;color:#555;display:block;margin-bottom:0.4rem">產生範圍</label>
+        <div style="display:flex;flex-direction:column;gap:0.4rem">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.9rem">
+            <input type="radio" name="finalPdfRange" value="all" checked> 全部投稿（共 <span id="finalPdfTotal">0</span> 筆）
+          </label>
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.9rem">
+            <input type="radio" name="finalPdfRange" value="selected"> 僅勾選的筆數（<span id="finalPdfSelected">0</span> 筆）
+          </label>
+        </div>
+      </div>
+      <div class="single-edit-note" style="font-size:0.8rem">
+        ⚠️ 正式 PDF 將存入 Drive「2026正式收錄PDF」資料夾，不覆蓋審查用 PDF。
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:0.75rem;padding:1rem 1.5rem;border-top:1px solid #eee;background:#fafafa">
+      <button class="btn" onclick="closeFinalPdfModal()" style="background:#eee;color:#333">取消</button>
+      <button class="btn" id="doFinalPdfBtn" onclick="doGenerateFinalPdf()" style="background:#6a1b9a;color:white">📄 開始產生</button>
+    </div>
+  </div>
+</div>
+
 <script>
 let submissions = [];
 let newIds = {};
@@ -485,6 +521,7 @@ function renderTable() {
     tr.id = 'row-' + i;
 
     tr.innerHTML = `
+      <td style="text-align:center"><input type="checkbox" class="row-check" data-i="${i}" onchange="updateFinalPdfCount()"></td>
       <td class="seq">${i+1}</td>
       <td class="old-id">${esc(oldId)}</td>
       <td class="new-id-cell">
@@ -556,11 +593,8 @@ function autoRenumber() {
   Object.keys(groups).sort().forEach(cat => {
     groups[cat].sort((a,b) => new Date(a.row[1]||0) - new Date(b.row[1]||0));
     groups[cat].forEach((item, seq) => {
-      const seqStr = String(seq+1).padStart(2,'0');
-      const unit   = getUnitAbbr(item.row[11]||'');
-      const prof   = getProfShort(item.row[14]||'');
-      const name   = (item.row[8]||'').replace(/\s/g,'');
-      newIds[item.i] = cat+'-'+seqStr+'-'+unit+'-'+prof+'-'+name;
+      const seqStr = String(seq + 1).padStart(2, '0');
+      newIds[item.i] = cat + '-' + seqStr;
     });
   });
   renderTable();
@@ -768,7 +802,98 @@ function updateStats() {
   document.getElementById('statChanged').textContent = changed;
 }
 
-// ===== 單位/職類縮寫 =====
+// ===== 正式收錄 PDF =====
+function toggleCheckAll(cb) {
+  document.querySelectorAll('.row-check').forEach(c => c.checked = cb.checked);
+  updateFinalPdfCount();
+}
+
+function updateFinalPdfCount() {
+  const checked = document.querySelectorAll('.row-check:checked').length;
+  document.getElementById('finalPdfSelected').textContent = checked;
+  document.getElementById('finalPdfTotal').textContent = submissions.length;
+}
+
+function openFinalPdfModal() {
+  if (submissions.length === 0) { showInfo('請先載入投稿清單', 'warning'); return; }
+  updateFinalPdfCount();
+  document.getElementById('finalPdfModal').classList.add('show');
+}
+
+function closeFinalPdfModal() {
+  document.getElementById('finalPdfModal').classList.remove('show');
+}
+
+async function doGenerateFinalPdf() {
+  const range = document.querySelector('input[name="finalPdfRange"]:checked').value;
+  let targets = [];
+  if (range === 'all') {
+    targets = submissions.map((row, i) => i);
+  } else {
+    targets = Array.from(document.querySelectorAll('.row-check:checked')).map(c => parseInt(c.dataset.i));
+  }
+  if (targets.length === 0) { alert('請先勾選要產生的筆數'); return; }
+  if (!confirm(`確定要為 ${targets.length} 筆投稿產生正式收錄 PDF？\n\n正式 PDF 將存入「2026正式收錄PDF」資料夾。`)) return;
+
+  closeFinalPdfModal();
+  const overlay  = document.getElementById('progressOverlay');
+  const fill     = document.getElementById('progressFill');
+  const progText = document.getElementById('progressText');
+  overlay.classList.add('show');
+
+  let done = 0, err = 0;
+  const total = targets.length;
+
+  for (const i of targets) {
+    const row = submissions[i];
+    const id  = row[0] || '';
+    progText.textContent = `產生正式 PDF ${done+err+1} / ${total}：${id}`;
+    fill.style.width = ((done+err)/total*100) + '%';
+    setRowStatus(i, '⏳', '產生中...');
+    try {
+      const body = new URLSearchParams();
+      body.append('action', 'generateFinalPdf');
+      body.append('rowIndex', i + 2);
+      body.append('submissionId', id);
+      body.append('data', JSON.stringify({
+        category:      row[2]  || '',
+        paperTitle:    row[3]  || '',
+        keywords:      row[4]  || '',
+        authors:       row[5]  || '',
+        memberNames:   row[6]  || '',
+        contactName:   row[8]  || '',
+        contactEmail:  row[9]  || '',
+        contactPhone:  row[10] || '',
+        contactUnit:   row[11] || '',
+        contactDept:   row[12] || '',
+        contactTitle:  row[13] || '',
+        profession:    row[14] || '',
+        absMotivation: row[15] || '',
+        absMethod:     row[16] || '',
+        absResult:     row[17] || '',
+        absConclusion: row[18] || '',
+      }));
+      const resp = await fetch(getUrl(), { method: 'POST', body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      const json = await resp.json();
+      if (json.result !== 'success') throw new Error(json.message);
+      done++;
+      setRowStatus(i, '✅', '正式PDF已產生');
+    } catch(e) {
+      err++;
+      setRowStatus(i, '❌', '失敗：' + e.message);
+    }
+  }
+
+  fill.style.width = '100%';
+  progText.textContent = `完成！成功 ${done} 筆，失敗 ${err} 筆`;
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    if (err === 0) showInfo(`🎉 ${done} 筆正式收錄 PDF 已產生，存入「2026正式收錄PDF」資料夾`, 'success');
+    else showInfo(`⚠️ ${done} 筆成功，${err} 筆失敗`, 'warning');
+  }, 1500);
+}
+
+
 function getUnitAbbr(unit) {
   if (!unit) return '未知';
   const map = {'亞東':'亞東','奇美':'奇美','台大':'台大','臺大':'台大','長庚':'長庚','馬偕':'馬偕','成大':'成大','高醫':'高醫','中山':'中山','榮總':'榮總','北榮':'北榮','中榮':'中榮','高榮':'高榮','屏基':'屏基','彰基':'彰基','嘉基':'嘉基','慈濟':'慈濟','新光':'新光','國泰':'國泰','萬芳':'萬芳','輔大':'輔大','陽明':'陽明','北醫':'北醫','中國醫':'中醫'};
