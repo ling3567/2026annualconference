@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>海報論文投稿系統 | 台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會</title>
+<title>海報論文投稿 | 台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -713,6 +713,19 @@ input.error, select.error, textarea.error {
   border-radius: 5px;
   font-family: var(--font);
 }
+.sup-btn {
+  padding: 0.15rem 0.45rem;
+  border: 1.5px solid #ccc;
+  border-radius: 5px;
+  background: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: var(--font);
+  color: var(--primary);
+  transition: background 0.12s, border-color 0.12s;
+  line-height: 1.4;
+}
+.sup-btn:hover { background: var(--primary-light); border-color: var(--primary); }
 @media (max-width: 640px) {
   .prof-pill-grid { grid-template-columns: repeat(2, 1fr); }
   .prof-pill-other { grid-column: span 2; }
@@ -999,6 +1012,20 @@ input.error, select.error, textarea.error {
         </div>
         <div class="form-group" style="margin-top:0.75rem">
           <label for="authorField">作者群<span class="req">*</span><span class="hint">（請填入所有作者姓名，含服務單位標註）</span></label>
+          <div style="margin-bottom:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+            <span style="font-size:0.8rem;color:#666">上標數字快速輸入：</span>
+            <span id="supBtns" style="display:flex;gap:0.3rem;flex-wrap:wrap">
+              <button type="button" class="sup-btn" onclick="insertSup('¹')" title="插入上標1">¹</button>
+              <button type="button" class="sup-btn" onclick="insertSup('²')" title="插入上標2">²</button>
+              <button type="button" class="sup-btn" onclick="insertSup('³')" title="插入上標3">³</button>
+              <button type="button" class="sup-btn" onclick="insertSup('⁴')" title="插入上標4">⁴</button>
+              <button type="button" class="sup-btn" onclick="insertSup('⁵')" title="插入上標5">⁵</button>
+              <button type="button" class="sup-btn" onclick="insertSup('⁶')" title="插入上標6">⁶</button>
+              <button type="button" class="sup-btn" onclick="insertSup('⁷')" title="插入上標7">⁷</button>
+              <button type="button" class="sup-btn" onclick="insertSup('⁸')" title="插入上標8">⁸</button>
+              <button type="button" class="sup-btn" onclick="insertSup('⁹')" title="插入上標9">⁹</button>
+            </span>
+          </div>
           <textarea id="authorField" rows="3" placeholder="例：王小明¹、陳大華²、李美玲¹&#10;¹臺灣大學醫學院&#10;²奇美醫療財團法人奇美醫院" oninput="runChecks()"></textarea>
           <div class="field-msg" id="authorMsg"></div>
         </div>
@@ -1570,6 +1597,17 @@ document.querySelectorAll('input[name="memberConfirm"]').forEach(r => r.addEvent
 document.querySelectorAll('input[name="profession"]').forEach(r => r.addEventListener('change', runChecks));
 document.getElementById('profOtherText').addEventListener('input', runChecks);
 document.getElementById('ethicsCheck').addEventListener('change', runChecks);
+
+// ===== 上標數字快速插入 =====
+function insertSup(char) {
+  const ta = document.getElementById('authorField');
+  const start = ta.selectionStart;
+  const end   = ta.selectionEnd;
+  ta.value = ta.value.substring(0, start) + char + ta.value.substring(end);
+  ta.selectionStart = ta.selectionEnd = start + char.length;
+  ta.focus();
+  runChecks();
+}
 
 // ===== 會員姓名驗證（限1人或「無」）=====
 function validateMemberName(inp) {
