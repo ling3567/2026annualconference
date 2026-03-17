@@ -1309,9 +1309,32 @@ input.error, select.error, textarea.error {
   </div>
 </div>
 
+<!-- 截止後關閉頁面 -->
+<div class="success-overlay" id="closedOverlay" style="background:rgba(0,0,0,0.75);z-index:9999">
+  <div class="success-box" style="border-top:5px solid #c62828">
+    <div class="success-icon">🔒</div>
+    <h2 style="color:#c62828">投稿已截止</h2>
+    <p style="margin-top:0.5rem">本次海報論文投稿已於 <strong>2026年6月15日</strong> 截止，</p>
+    <p style="margin-top:0.25rem">系統目前不受理新投稿，感謝您的參與。</p>
+    <p style="margin-top:1rem;font-size:0.85rem;color:#888">如有疑問，請聯繫學會秘書處楊依玲小姐<br>（06）2812811 轉 57426</p>
+  </div>
+</div>
+
 <script>
 // ===== Google Apps Script Web App URL =====
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdppunk_BTiZN2ShWpJilr5FGnCrN4BB6QPD_miImF5pObEZxe3wSAQaj5VuWbnF3m/exec';
+
+// ===== 截止日期控制（台灣時間 2026/6/15 23:59）=====
+const DEADLINE = new Date('2026-06-16T05:00:00+08:00');
+(function checkDeadline() {
+  if (new Date() > DEADLINE) {
+    document.getElementById('closedOverlay').classList.add('show');
+    // 停用所有表單輸入
+    document.querySelectorAll('input, textarea, button, select').forEach(el => {
+      el.disabled = true;
+    });
+  }
+})();
 
 let keywords = [];
 
