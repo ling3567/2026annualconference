@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>海報論文投稿 | 台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會</title>
+<title>海報論文投稿系統 | 台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1026,7 +1026,7 @@ input.error, select.error, textarea.error {
               <button type="button" class="sup-btn" onclick="insertSup('⁹')" title="插入上標9">⁹</button>
             </span>
           </div>
-          <textarea id="authorField" rows="3" placeholder="例：王小明¹、陳大華²、李美玲¹&#10;¹臺灣大學醫學院&#10;²奇美醫療財團法人奇美醫院" oninput="runChecks()"></textarea>
+          <textarea id="authorField" rows="3" placeholder="例：王小明¹、陳大華²、李美玲¹&#10;¹國立台灣大學醫學院附設醫院 藥劑部&#10;²奇美醫療財團法人奇美醫院 護理部" oninput="runChecks()"></textarea>
           <div class="field-msg" id="authorMsg"></div>
         </div>
 
@@ -1205,13 +1205,17 @@ input.error, select.error, textarea.error {
       </div>
       <div class="section-body">
         <div class="form-group">
-          <label>著作授權書 PDF<span class="req">*</span><span class="hint">（請下載範本簽名後掃描，.pdf，上限 10MB）</span></label>
+          <label>著作授權書 PDF<span class="req">*</span></label>
           <div class="info-box" style="font-size:0.83rem;margin-bottom:0.6rem">
-            📎 上傳前請將檔案命名為：<strong>著作授權書-通訊作者姓名</strong><br>
-            例如：<code style="background:#e3f2fd;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.9em">著作授權書-王小明.pdf</code>
+            請上傳已簽署之著作授權書。尚未填寫者，請先
+            <a href="https://docs.google.com/document/d/1Gv8216g_T6Uit64SPMIpQ0eTuVcgxE8P/edit?usp=drive_link&ouid=110154126406238074226&rtpof=true&sd=true"
+               target="_blank"
+               style="color:var(--primary);font-weight:700;text-decoration:underline">點選此處下載範本</a>
+            完成簽署後再上傳。（限 PDF，10MB 內）<br>
+            📎 檔案請命名為：<strong>著作授權書－通訊作者姓名</strong>，例如：<code style="background:#e3f2fd;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.9em">著作授權書-王小明.pdf</code>
           </div>
           <div class="file-upload-area" id="pdfArea">
-            <input type="file" id="pdfFile" accept=".pdf" onchange="handleFile('pdfFile','pdfArea','pdfName','pdfMsg')">
+            <input type="file" id="pdfFile" accept=".pdf,application/pdf" onchange="handleFile('pdfFile','pdfArea','pdfName','pdfMsg')">
             <div class="file-icon">📃</div>
             <p class="upload-label">拖曳或點擊<strong>上傳 PDF 著作授權書</strong></p>
             <p class="file-name" id="pdfName"></p>
@@ -1418,6 +1422,12 @@ function handleFile(inputId, areaId, nameId, msgId) {
   const file = document.getElementById(inputId).files[0];
   const nameEl = document.getElementById(nameId);
   if (!file) { nameEl.textContent = ''; return; }
+  if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+    setMsg(msgId,'僅接受 PDF 格式檔案，請重新選擇','err');
+    nameEl.textContent = '';
+    document.getElementById(inputId).value = '';
+    return;
+  }
   if (file.size > 10 * 1024 * 1024) {
     setMsg(msgId,'檔案超過10MB限制','err'); nameEl.textContent = ''; return;
   }
@@ -1856,6 +1866,50 @@ async function submitForm() {
 
 function closeSuccess() {
   document.getElementById('successOverlay').classList.remove('show');
+  resetForm();
+}
+
+function resetForm() {
+  // 清空所有文字欄位
+  ['paperTitle','authorField','memberNameField','contactName','contactEmail',
+   'contactPhone','contactUnit','contactDept','contactTitle',
+   'absMotivation','absMethod','absResult','absConclusion'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  // 清空 radio 選項
+  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+  // 清空關鍵字
+  document.getElementById('kwInput').value = '';
+  document.getElementById('kwTags').innerHTML = '';
+  // 清空附件
+  document.getElementById('pdfFile').value = '';
+  document.getElementById('pdfName').textContent = '';
+  setMsg('pdfMsg','','');
+  // 清空職業其他欄位
+  const otherText = document.getElementById('profOtherText');
+  if (otherText) { otherText.value = ''; otherText.style.display = 'none'; }
+  // 清空學術倫理勾選
+  document.getElementById('ethicsCheck').checked = false;
+  // 重置檢核清單
+  document.querySelectorAll('.check-items li').forEach(li => {
+    li.className = 'pending';
+    li.querySelector('.check-icon').textContent = '⬜';
+  });
+  // 重置字數進度條
+  document.getElementById('countBarFill').style.width = '0%';
+  document.getElementById('countBarFill').style.background = '#ddd';
+  document.getElementById('countNumber').textContent = '0 / 500';
+  document.getElementById('countNumber').className = 'count-number pending';
+  // 重置送出按鈕
+  const previewBtn = document.getElementById('previewBtn');
+  if (previewBtn) { previewBtn.disabled = true; }
+  // 重置重複檢查快取
+  lastCheckedTitle = '';
+  lastCheckedMember = '';
+  // 捲回頁面頂端
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  runChecks();
 }
 
 // ===== INIT =====
