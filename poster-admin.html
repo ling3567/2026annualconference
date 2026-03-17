@@ -521,7 +521,7 @@ function renderTable() {
     tr.id = 'row-' + i;
 
     tr.innerHTML = `
-      <td style="text-align:center"><input type="checkbox" class="row-check" data-i="${i}" onchange="updateFinalPdfCount()"></td>
+      <td style="text-align:center" id="chk-td-${i}"></td>
       <td class="seq">${i+1}</td>
       <td class="old-id">${esc(oldId)}</td>
       <td class="new-id-cell">
@@ -536,6 +536,14 @@ function renderTable() {
       <td class="status-cell" id="status-${i}"><span class="status-icon">⬜</span> 待更新</td>
     `;
     tbody.appendChild(tr);
+
+    // 用 DOM 方式建立 checkbox，確保事件正確綁定
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.className = 'row-check';
+    chk.dataset.i = i;
+    chk.addEventListener('change', updateFinalPdfCount);
+    document.getElementById('chk-td-' + i).appendChild(chk);
   });
   updateStats();
 }
@@ -939,57 +947,6 @@ async function loadSubmissions() {
   } catch(err) {
     showInfo('❌ 載入失敗：' + err.message, 'error');
   }
-}
-
-// ===== 渲染表格 =====
-function renderTable() {
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = '';
-  document.getElementById('tableTitle').textContent = `投稿清單（共 ${submissions.length} 筆）`;
-
-  submissions.forEach((row, i) => {
-    const oldId  = row[0] || '';   // A欄
-    const ts     = row[1] || '';   // B欄
-    const cat    = row[2] || '';   // C欄
-    const title  = row[3] || '';   // D欄
-    const name   = row[8] || '';   // I欄 通訊作者
-    const curNew = newIds[i] !== undefined ? newIds[i] : oldId;
-    const isModified = curNew !== oldId;
-
-    const tr = document.createElement('tr');
-    if (isModified) tr.classList.add('changed');
-    tr.id = 'row-' + i;
-
-    tr.innerHTML = `
-      <td class="seq">${i+1}</td>
-      <td class="old-id">${esc(oldId)}</td>
-      <td class="new-id-cell">
-        <input type="text" value="${esc(curNew)}" id="newid-${i}"
-          oninput="onIdChange(${i}, this.value)"
-          class="${isModified?'modified':''}">
-      </td>
-      <td class="paper-title" title="${esc(title)}">${esc(title)}</td>
-      <td class="category"><span class="cat-badge">${esc(cat)}</span></td>
-      <td class="contact">${esc(name)}</td>
-      <td class="status-cell" id="status-${i}"><span class="status-icon">⬜</span> 待更新</td>
-    `;
-    tbody.appendChild(tr);
-  });
-  updateStats();
-}
-
-function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
-
-function onIdChange(i, val) {
-  newIds[i] = val.trim();
-  const inp = document.getElementById('newid-' + i);
-  const oldId = submissions[i][0] || '';
-  const isModified = newIds[i] !== oldId;
-  inp.className = isModified ? 'modified' : '';
-  const tr = document.getElementById('row-' + i);
-  if (isModified) tr.classList.add('changed');
-  else tr.classList.remove('changed');
-  updateStats();
 }
 
 // ===== 自動重新編號 =====
