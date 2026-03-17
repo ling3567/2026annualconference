@@ -977,7 +977,7 @@ input.error, select.error, textarea.error {
         <div class="form-group">
           <label for="kwInput">關鍵字<span class="req">*</span><span class="hint">（3至5個，可逐一輸入或一次貼入，以「、」或「,」分隔）</span></label>
           <div class="keyword-input-wrap">
-            <input type="text" id="kwInput" placeholder="例：成人學習理論、數位模擬、動脈導管置放">
+            <input type="text" id="kwInput" placeholder="例：臨床技能教育、OSCE、CBME">
             <button type="button" class="add-kw-btn" onclick="addKeywords()">＋ 新增</button>
           </div>
           <div class="inline-tags" id="kwTags"></div>
@@ -1270,8 +1270,9 @@ input.error, select.error, textarea.error {
   <div class="success-box">
     <div class="success-icon">🎉</div>
     <h2>投稿成功！</h2>
-    <p>您的投稿已完成送出。</p>
-    <p style="margin-top:0.5rem">預計於 <strong>約3個工作天</strong> 內收到學會確認回覆信。</p>
+    <p>投稿資料已成功送出。</p>
+    <p style="margin-top:0.5rem">學會將於 <strong>3 個工作天</strong>內寄發投稿確認信。收到確認信後，始完成投稿作業。</p>
+    <p style="margin-top:0.5rem">若逾期未收到，請與學會秘書處聯繫。</p>
     <p style="margin-top:0.5rem;font-size:0.82rem;color:#888">錄取結果將於 <strong>2026年7月15日前</strong> 以Email個別通知。</p>
     <button class="close-success-btn" onclick="closeSuccess()">確認</button>
   </div>
@@ -1509,18 +1510,32 @@ function runChecks() {
   if (!ethicsOk) allPass = false;
 
   // Duplicate & limit: triggered by title/memberName input, maintain async result
-  const titleVal  = document.getElementById('paperTitle').value.trim();
+  const titleVal   = document.getElementById('paperTitle').value.trim();
   const memberVal2 = document.getElementById('memberNameField').value.trim();
+
   if (!titleVal) {
-    setCheck('chk-duplicate', null, '請先填寫論文題目');
+    // 題目未填：保持預設 pending 文字，不顯示提示，只阻擋送出
+    const el = document.getElementById('chk-duplicate');
+    if (el && el.className !== 'pass' && el.className !== 'fail') {
+      el.className = 'pending';
+      el.querySelector('.check-icon').textContent = '⬜';
+      el.childNodes[el.childNodes.length-1].textContent = ' 重複投稿檢查';
+    }
     allPass = false;
   } else {
     const dupStatus = document.getElementById('chk-duplicate').className;
     if (dupStatus === 'pending') allPass = false;
     if (dupStatus === 'fail') allPass = false;
   }
+
   if (!memberVal2) {
-    setCheck('chk-limit', null, '請先填寫會員姓名');
+    // 會員姓名未填：保持預設 pending 文字
+    const el = document.getElementById('chk-limit');
+    if (el && el.className !== 'pass' && el.className !== 'fail') {
+      el.className = 'pending';
+      el.querySelector('.check-icon').textContent = '⬜';
+      el.childNodes[el.childNodes.length-1].textContent = ' 投稿篇數未超過3篇限制';
+    }
     allPass = false;
   } else {
     const limStatus = document.getElementById('chk-limit').className;
@@ -1575,10 +1590,12 @@ function validateMemberName(inp) {
 let dupCheckTimer = null;
 function scheduleDupCheck() {
   clearTimeout(dupCheckTimer);
-  dupCheckTimer = setTimeout(checkSubmissionAsync, 800);
+  dupCheckTimer = setTimeout(checkSubmissionAsync, 400);
 }
 document.getElementById('paperTitle').addEventListener('input', scheduleDupCheck);
+document.getElementById('paperTitle').addEventListener('blur', checkSubmissionAsync);
 document.getElementById('memberNameField').addEventListener('input', scheduleDupCheck);
+document.getElementById('memberNameField').addEventListener('blur', checkSubmissionAsync);
 
 let lastCheckedTitle = '';
 let lastCheckedMember = '';
@@ -1587,10 +1604,8 @@ async function checkSubmissionAsync() {
   const title      = document.getElementById('paperTitle').value.trim();
   const memberName = document.getElementById('memberNameField').value.trim();
 
-  // 未填寫時保持 pending
+  // 未填寫時直接返回，由 runChecks 維持預設文字
   if (!title) {
-    setCheck('chk-duplicate', null, '請先填寫論文題目');
-    setCheck('chk-limit', null, '請先填寫會員姓名');
     runChecks(); return;
   }
 
@@ -1630,8 +1645,9 @@ async function checkSubmissionAsync() {
       setCheck('chk-limit', true, `會員「${memberName}」目前已投稿 ${json.memberCount} 篇（上限3篇）`);
     }
   } catch(e) {
-    setCheck('chk-duplicate', true, '（查詢失敗，略過）');
-    setCheck('chk-limit',    true, '（查詢失敗，略過）');
+    // 查詢失敗：標示為警告，不自動通過，需要投稿者確認後才能送出
+    setCheck('chk-duplicate', false, '⚠️ 重複投稿查詢失敗，請稍後再試或確認網路連線');
+    setCheck('chk-limit',    false, '⚠️ 篇數限制查詢失敗，請稍後再試或確認網路連線');
   }
   runChecks();
 }
