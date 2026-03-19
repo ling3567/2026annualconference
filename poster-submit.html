@@ -827,10 +827,43 @@ input.error, select.error, textarea.error {
 .preview-confirm-btn:disabled { background: #90a4ae; box-shadow: none; cursor: not-allowed; }
 
 /* Ethics checkbox */
-#ethicsCard:has(input:checked) {
+#coauthorConsentCard:has(input:checked) {
   border-color: var(--success);
   background: var(--success-light);
 }
+#coauthorConsentCard:has(input:checked) .card-radio {
+  border-color: var(--success);
+  background: var(--success);
+}
+#coauthorConsentCard:has(input:checked) .card-radio::after {
+  content: '✓';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 900;
+  background: transparent;
+}
+#coauthorConsentCard:has(input:checked) .card-title { color: var(--success); font-weight: 700; }
+  border-color: var(--success);
+  background: var(--success-light);
+}
+#pdfConsentCard:has(input:checked) .card-radio {
+  border-color: var(--success);
+  background: var(--success);
+}
+#pdfConsentCard:has(input:checked) .card-radio::after {
+  content: '✓';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 900;
+  background: transparent;
+}
+#pdfConsentCard:has(input:checked) .card-title { color: var(--success); font-weight: 700; }
 #ethicsCard:has(input:checked) .card-radio {
   border-color: var(--success);
   background: var(--success);
@@ -1044,7 +1077,7 @@ input.error, select.error, textarea.error {
           <label>作者群中的會員資格狀態<span class="req">*</span></label>
           <div class="info-box" style="margin-bottom:0.75rem;margin-top:0.4rem;font-size:0.83rem">
             ℹ️ 作者群中至少1名為本會會員，並於 <strong>2026年6月15日(一)前</strong>完成當年度會費繳納，方具優秀海報論文獎評選資格。<br>
-            未完成繳納或無會員者，仍可投稿並參展，但不列入評選。
+            本年度會費繳納將另行公告通知；未完成繳納或無會員者，仍可投稿，惟須經審查通過後方可參展，且不列入評選。
           </div>
           <div class="option-card-group" style="margin-top:0.3rem">
             <label class="option-card" id="memberLabel-paid">
@@ -1068,7 +1101,7 @@ input.error, select.error, textarea.error {
               <div class="card-radio" style="border-color:#c62828"></div>
               <div class="card-body">
                 <div class="card-title" style="color:var(--danger)">非會員</div>
-                <div class="card-desc">投稿後僅供參展，不參加優秀海報獎評選</div>
+                <div class="card-desc">須經審查通過後方可參展，不列入優秀海報論文獎評選</div>
               </div>
             </label>
           </div>
@@ -1197,57 +1230,45 @@ input.error, select.error, textarea.error {
       </div>
     </div>
 
-    <!-- STEP 5: 上傳附件 -->
-    <div class="section-card">
-      <div class="section-header">
-        <span class="section-icon">📎</span>
-        <span class="section-title">STEP 5 — 上傳附件</span>
-      </div>
-      <div class="section-body">
-        <div class="form-group">
-          <label>著作授權書 PDF<span class="req">*</span></label>
-          <div class="info-box" style="font-size:0.83rem;margin-bottom:0.6rem">
-            請上傳已簽署之著作授權書。尚未填寫者，請先
-            <a href="https://docs.google.com/document/d/1Gv8216g_T6Uit64SPMIpQ0eTuVcgxE8P/edit?usp=drive_link&ouid=110154126406238074226&rtpof=true&sd=true"
-               target="_blank"
-               style="color:var(--primary);font-weight:700;text-decoration:underline">點選此處下載範本</a>
-            完成簽署後再上傳。（限 PDF，10MB 內）<br>
-            📎 檔案請命名為：<strong>著作授權書－通訊作者姓名</strong>，例如：<code style="background:#e3f2fd;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.9em">著作授權書-王小明.pdf</code>
-          </div>
-          <div class="file-upload-area" id="pdfArea">
-            <input type="file" id="pdfFile" accept=".pdf,application/pdf" onchange="handleFile('pdfFile','pdfArea','pdfName','pdfMsg')">
-            <div class="file-icon">📃</div>
-            <p class="upload-label">拖曳或點擊<strong>上傳 PDF 著作授權書</strong></p>
-            <p class="file-name" id="pdfName"></p>
-          </div>
-          <div class="field-msg" id="pdfMsg"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 6: 學術倫理聲明 -->
+    <!-- STEP 5: 聲明與確認 -->
     <div class="section-card">
       <div class="section-header">
         <span class="section-icon">📜</span>
-        <span class="section-title">STEP 6 — 學術倫理聲明</span>
+        <span class="section-title">STEP 5 — 學術倫理與著作授權聲明</span>
       </div>
       <div class="section-body">
         <div class="info-box" style="background:#fff8e1;border-left-color:#f9a825;color:#5d4037;margin-bottom:1rem">
           <strong>⚠️ 學術倫理聲明</strong><br>
           論文投稿者應恪遵學術倫理，如經查證違反情節屬實，本會將撤回其錄取資格及相關獎勵。
         </div>
-        <label class="option-card" id="ethicsCard" style="cursor:pointer">
-          <input type="checkbox" id="ethicsCheck" onchange="runChecks()" style="position:absolute;opacity:0;width:0;height:0">
-          <div class="card-radio" id="ethicsRadio" style="border-radius:4px"></div>
-          <div class="card-body">
-            <div class="card-title">本人已閱讀並同意遵守學術倫理規範，確認本投稿內容為原創著作，未侵犯他人著作權，亦未違反學術倫理。</div>
-          </div>
-        </label>
+        <div style="display:flex;flex-direction:column;gap:0.6rem">
+          <label class="option-card" id="ethicsCard" style="cursor:pointer">
+            <input type="checkbox" id="ethicsCheck" onchange="runChecks()" style="position:absolute;opacity:0;width:0;height:0">
+            <div class="card-radio" id="ethicsRadio" style="border-radius:4px"></div>
+            <div class="card-body">
+              <div class="card-title">本人已閱讀並同意遵守學術倫理規範，確認本投稿內容為原創著作，未侵犯他人著作權，亦未違反學術倫理。</div>
+            </div>
+          </label>
+          <label class="option-card" id="pdfConsentCard" style="cursor:pointer">
+            <input type="checkbox" id="pdfConsentCheck" onchange="runChecks()" style="position:absolute;opacity:0;width:0;height:0">
+            <div class="card-radio" id="pdfConsentRadio" style="border-radius:4px"></div>
+            <div class="card-body">
+              <div class="card-title">本人同意由<strong>台灣醫事聯合臨床技能發展學會</strong>將此篇文章提供 PDF 檔供年會與會者下載。</div>
+            </div>
+          </label>
+          <label class="option-card" id="coauthorConsentCard" style="cursor:pointer">
+            <input type="checkbox" id="coauthorConsentCheck" onchange="runChecks()" style="position:absolute;opacity:0;width:0;height:0">
+            <div class="card-radio" id="coauthorConsentRadio" style="border-radius:4px"></div>
+            <div class="card-body">
+              <div class="card-title">本人確認已取得所有共同作者之同意授權投稿，並已充分告知本投稿相關內容與授權事項。</div>
+            </div>
+          </label>
+        </div>
         <div class="field-msg" id="ethicsMsg"></div>
       </div>
     </div>
 
-    <!-- STEP 7: 確認送出 -->
+    <!-- STEP 6: 確認送出 -->
     <div class="checklist-panel">
       <h3>✅ 投稿前自動檢核清單</h3>
       <ul class="check-items" id="checkList">
@@ -1259,8 +1280,9 @@ input.error, select.error, textarea.error {
         <li id="chk-contact" class="pending"><span class="check-icon">⬜</span>通訊作者資訊完整（含服務部門、職稱）</li>
         <li id="chk-profession" class="pending"><span class="check-icon">⬜</span>通訊作者職類已選擇</li>
         <li id="chk-abstract" class="pending"><span class="check-icon">⬜</span>摘要已填寫且不超過 500 字</li>
-        <li id="chk-pdf" class="pending"><span class="check-icon">⬜</span>已上傳著作授權書 PDF</li>
         <li id="chk-ethics" class="pending"><span class="check-icon">⬜</span>已確認學術倫理聲明</li>
+        <li id="chk-consent" class="pending"><span class="check-icon">⬜</span>已同意 PDF 公開下載聲明</li>
+        <li id="chk-coauthor" class="pending"><span class="check-icon">⬜</span>已確認共同作者同意授權</li>
         <li id="chk-duplicate" class="pending"><span class="check-icon">⬜</span>重複投稿檢查</li>
         <li id="chk-limit" class="pending"><span class="check-icon">⬜</span>投稿篇數未超過3篇限制</li>
       </ul>
@@ -1460,17 +1482,6 @@ function handleFile(inputId, areaId, nameId, msgId) {
   nameEl.textContent = '✅ ' + file.name;
   setMsg(msgId,'',''); runChecks();
 }
-const pdfAreaEl = document.getElementById('pdfArea');
-pdfAreaEl.addEventListener('dragover', e => { e.preventDefault(); pdfAreaEl.classList.add('dragover'); });
-pdfAreaEl.addEventListener('dragleave', () => pdfAreaEl.classList.remove('dragover'));
-pdfAreaEl.addEventListener('drop', e => {
-  e.preventDefault(); pdfAreaEl.classList.remove('dragover');
-  if (e.dataTransfer.files.length) {
-    document.getElementById('pdfFile').files = e.dataTransfer.files;
-    handleFile('pdfFile','pdfArea','pdfName','pdfMsg');
-  }
-});
-
 // ===== VALIDATION =====
 function setCheck(id, pass, msg) {
   const el = document.getElementById(id);
@@ -1561,16 +1572,18 @@ function runChecks() {
   setCheck('chk-abstract', absOk, absOk ? `${wordCount} 字（符合規定）` : (wordCount > 520 ? `${wordCount} 字，超過500字限制！` : '請填寫所有摘要欄位'));
   if (!absOk) allPass = false;
 
-  // PDF
-  const pdfFile = document.getElementById('pdfFile').files[0];
-  const pdfOk = !!pdfFile;
-  setCheck('chk-pdf', pdfOk, pdfOk ? pdfFile.name : '請上傳 PDF 著作授權書');
-  if (!pdfOk) allPass = false;
-
   // Ethics
   const ethicsOk = document.getElementById('ethicsCheck').checked;
   setCheck('chk-ethics', ethicsOk, ethicsOk ? '已確認學術倫理聲明' : '請勾選學術倫理聲明');
   if (!ethicsOk) allPass = false;
+
+  const consentOk = document.getElementById('pdfConsentCheck').checked;
+  setCheck('chk-consent', consentOk, consentOk ? '已同意 PDF 公開下載聲明' : '請勾選 PDF 公開下載同意聲明');
+  if (!consentOk) allPass = false;
+
+  const coauthorOk = document.getElementById('coauthorConsentCheck').checked;
+  setCheck('chk-coauthor', coauthorOk, coauthorOk ? '已確認共同作者同意授權' : '請勾選共同作者同意授權聲明');
+  if (!coauthorOk) allPass = false;
 
   // Duplicate & limit: triggered by title/memberName input, maintain async result
   const titleVal   = document.getElementById('paperTitle').value.trim();
@@ -1633,6 +1646,8 @@ document.querySelectorAll('input[name="memberConfirm"]').forEach(r => r.addEvent
 document.querySelectorAll('input[name="profession"]').forEach(r => r.addEventListener('change', runChecks));
 document.getElementById('profOtherText').addEventListener('input', runChecks);
 document.getElementById('ethicsCheck').addEventListener('change', runChecks);
+document.getElementById('pdfConsentCheck').addEventListener('change', runChecks);
+document.getElementById('coauthorConsentCheck').addEventListener('change', runChecks);
 
 // ===== 上標數字快速插入 =====
 function insertSup(char) {
@@ -1753,7 +1768,6 @@ function openPreview() {
   const absIds = ['absMotivation','absMethod','absResult','absConclusion'];
   const absLabels = ['研究動機','研究方法','研究結果','結論'];
   const wordCount = countWords(getAbstractText());
-  const pdfFile = document.getElementById('pdfFile').files[0];
 
   const absRows = absIds.map((id, i) => {
     const val = document.getElementById(id).value.trim();
@@ -1784,7 +1798,6 @@ function openPreview() {
       <div class="preview-section-title">📄 論文摘要（${wordCount} 字）</div>
       <div class="preview-rows">${absRows}</div>
     </div>`,
-    pSection('📎 附件', pRow('著作授權書 PDF', pdfFile ? pdfFile.name : '（未上傳）'))
   ].join('');
 
   document.getElementById('previewBody').innerHTML = html;
@@ -1814,23 +1827,6 @@ async function submitForm() {
       return `【${labels[id]}】${document.getElementById(id).value}`;
     }).join('\n\n');
 
-  // PDF → base64
-  const pdfFile = document.getElementById('pdfFile').files[0];
-  let pdfBase64 = '';
-  let pdfFileName = '';
-  if (pdfFile) {
-    pdfFileName = pdfFile.name;
-    pdfBase64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        // result 格式: "data:application/pdf;base64,XXXXXX"，只取逗號後面
-        resolve(reader.result.split(',')[1]);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(pdfFile);
-    });
-  }
-
   const payload = {
     timestamp: new Date().toISOString(),
     category: cat,
@@ -1854,8 +1850,6 @@ async function submitForm() {
     absResult: document.getElementById('absResult').value.trim(),
     absConclusion: document.getElementById('absConclusion').value.trim(),
     wordCount: countWords(getAbstractText()),
-    pdfFileName: pdfFileName,
-    pdfBase64: pdfBase64,
     status: '待審查',
   };
 
@@ -1908,15 +1902,13 @@ function resetForm() {
   // 清空關鍵字
   document.getElementById('kwInput').value = '';
   document.getElementById('kwTags').innerHTML = '';
-  // 清空附件
-  document.getElementById('pdfFile').value = '';
-  document.getElementById('pdfName').textContent = '';
-  setMsg('pdfMsg','','');
   // 清空職業其他欄位
   const otherText = document.getElementById('profOtherText');
   if (otherText) { otherText.value = ''; otherText.style.display = 'none'; }
-  // 清空學術倫理勾選
+  // 清空聲明勾選
   document.getElementById('ethicsCheck').checked = false;
+  document.getElementById('pdfConsentCheck').checked = false;
+  document.getElementById('coauthorConsentCheck').checked = false;
   // 重置檢核清單
   document.querySelectorAll('.check-items li').forEach(li => {
     li.className = 'pending';
