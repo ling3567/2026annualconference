@@ -259,7 +259,7 @@ canvas{max-height:240px;}
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>投稿編號</th><th>論文題目</th><th>通訊作者</th><th>作者群</th><th>填寫會員姓名</th><th>目前狀態</th><th>修改繳費狀態</th><th>修正會員姓名</th><th>備註（附加於確認信）</th></tr></thead>
+              <thead><tr><th>投稿編號</th><th>論文題目</th><th>通訊作者</th><th>作者群</th><th>填寫會員姓名</th><th>目前狀態</th><th>修改繳費狀態</th><th>修正會員姓名</th><th>備註（可用 {備註} 插入信件）</th></tr></thead>
               <tbody id="memberBody"></tbody>
             </table>
           </div>
@@ -357,13 +357,11 @@ canvas{max-height:240px;}
         </div>
         <div class="card">
           <div class="card-header">
-            <h2>🔍 單一機構職類分析</h2>
-            <select id="hospSelect" onchange="renderHospProf()" style="padding:0.4rem 0.75rem;border:1.5px solid #ccc;border-radius:8px;font-size:0.85rem;font-family:var(--font);">
-              <option value="">— 請選擇機構 —</option>
-            </select>
+            <h2>🔍 機構 × 職類交叉分析</h2>
+            <input type="text" id="crossSearch" placeholder="搜尋機構或職類..." oninput="renderCrossTable()" style="padding:0.4rem 0.75rem;border:1.5px solid #ccc;border-radius:8px;font-size:0.85rem;font-family:var(--font);">
           </div>
-          <div class="card-body" id="hospProfBody">
-            <p style="color:#aaa;font-size:0.88rem">請從上方選擇機構，即可查看該機構各職類投稿篇數。</p>
+          <div class="table-wrap" id="crossTableWrap">
+            <p style="padding:1rem;color:#aaa;font-size:0.88rem">載入資料後自動顯示。</p>
           </div>
         </div>
       </div>
@@ -424,7 +422,7 @@ canvas{max-height:240px;}
       </div>
       <div style="margin-bottom:0.75rem">
         <label style="font-size:0.85rem;font-weight:700;color:#333;display:block;margin-bottom:0.3rem">✏️ 信件內容（可直接修改）</label>
-        <div style="font-size:0.78rem;color:#888;margin-bottom:0.4rem">可用變數：<code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{姓名}</code> <code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{題目}</code> <code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{類別}</code></div>
+        <div style="font-size:0.78rem;color:#888;margin-bottom:0.4rem">可用變數：<code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{姓名}</code> <code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{題目}</code> <code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{類別}</code> <code style="background:#fff3e0;padding:0.1rem 0.35rem;border-radius:4px;color:#e65100">{備註}</code>（來自會員頁面備註欄）</div>
         <textarea id="mailTemplate" rows="16" style="width:100%;padding:0.75rem;border:1.5px solid #ccc;border-radius:8px;font-size:0.88rem;font-family:var(--font);line-height:1.8;resize:vertical;"></textarea>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
@@ -684,8 +682,7 @@ function refreshMailPreview() {
   }
   sel.forEach(i => {
     const r = submissions[i];
-    const note = memberNotes[i] ? ('\n\n【備註】' + memberNotes[i]) : '';
-    const body = buildMail(r, tmpl, note);
+    const body = buildMail(r, tmpl, memberNotes[i]||'');
     const div = document.createElement('div');
     div.style.cssText = 'margin-bottom:1rem;border:1px solid #ddd;border-radius:8px;overflow:hidden';
     div.innerHTML = `<div style="background:#e3f2fd;padding:0.45rem 0.75rem;font-size:0.78rem;color:var(--primary);font-weight:700">${esc(r[8]||'')} &lt;${esc(r[9]||'')}&gt;</div>
@@ -694,13 +691,12 @@ function refreshMailPreview() {
   });
 }
 
-function buildMail(r, tmpl, extraNote) {
-  let t = (tmpl || MAIL_TEMPLATES.general)
+function buildMail(r, tmpl, note) {
+  return (tmpl || MAIL_TEMPLATES.general)
     .replace(/\{姓名\}/g, r[8]||'')
     .replace(/\{題目\}/g, r[3]||'')
-    .replace(/\{類別\}/g, r[2]||'');
-  if(extraNote) t += extraNote;
-  return t;
+    .replace(/\{類別\}/g, r[2]||'')
+    .replace(/\{備註\}/g, note||'');
 }
 
 async function sendEmails() {
@@ -709,8 +705,7 @@ async function sendEmails() {
   closeModal('mailModal');
   await runProgress(sel, async (i) => {
     const r = submissions[i];
-    const note = memberNotes[i] ? ('\n\n【備註】' + memberNotes[i]) : '';
-    const mailBody = buildMail(r, tmpl, note);
+    const mailBody = buildMail(r, tmpl, memberNotes[i]||'');
     const body = new URLSearchParams();
     body.append('action','sendConfirmEmail');
     body.append('rowIndex', i+2);
@@ -979,45 +974,91 @@ function renderHospTable(data){
     tr.innerHTML=`<td><strong>${esc(u)}</strong></td><td style="text-align:center;font-weight:700;color:var(--primary)">${cnt}</td><td style="font-size:0.78rem;color:#888">${esc(ids||'—')}</td>`;
     tbody.appendChild(tr);
   });
+  renderCrossTable();
 }
 
-function renderHospProf() {
-  const unit = document.getElementById('hospSelect').value;
-  const body = document.getElementById('hospProfBody');
-  if(!unit){ body.innerHTML='<p style="color:#aaa;font-size:0.88rem">請從上方選擇機構，即可查看該職類投稿篇數。</p>'; return; }
-  const rows = submissions.filter(r => (r[11]||'').startsWith(unit));
-  if(!rows.length){ body.innerHTML='<p style="color:#aaa">查無資料</p>'; return; }
-  const profMap = {};
-  rows.forEach(r => {
+function renderCrossTable() {
+  if(!submissions.length) return;
+  const q = (document.getElementById('crossSearch')||{value:''}).value.toLowerCase();
+
+  // 收集所有機構和職類
+  const unitProfMap = {}; // unit → { prof → {total,A,B,C} }
+  submissions.forEach(r => {
+    const u = (r[11]||'').split(/[\n,，]/)[0].trim();
     const p = r[14]||'（未填）';
-    if(!profMap[p]) profMap[p]={total:0,A:0,B:0,C:0};
-    profMap[p].total++;
-    const c=(r[2]||'').replace('類','').trim();
-    if(profMap[p][c]!==undefined) profMap[p][c]++;
+    const c = (r[2]||'').replace('類','').trim();
+    if(!u) return;
+    if(!unitProfMap[u]) unitProfMap[u] = {};
+    if(!unitProfMap[u][p]) unitProfMap[u][p] = {total:0,A:0,B:0,C:0};
+    unitProfMap[u][p].total++;
+    if(unitProfMap[u][p][c] !== undefined) unitProfMap[u][p][c]++;
   });
-  const sorted=Object.entries(profMap).sort((a,b)=>b[1].total-a[1].total);
-  body.innerHTML=`<p style="font-size:0.85rem;color:#555;margin-bottom:0.75rem">
-    <strong>${esc(unit)}</strong>共投稿 <strong style="color:var(--primary)">${rows.length}</strong> 篇
-  </p>
-  <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
-    <thead><tr style="background:var(--primary-light)">
-      <th style="padding:0.45rem 0.75rem;text-align:left;color:var(--primary)">職類</th>
-      <th style="padding:0.45rem 0.75rem;text-align:center;color:var(--primary)">合計</th>
-      <th style="padding:0.45rem 0.75rem;text-align:center;color:#1565c0">A類</th>
-      <th style="padding:0.45rem 0.75rem;text-align:center;color:#6a1b9a">B類</th>
-      <th style="padding:0.45rem 0.75rem;text-align:center;color:#2e7d32">C類</th>
-    </tr></thead>
-    <tbody>
-      ${sorted.map(([p,v])=>`<tr style="border-bottom:1px solid #eee">
-        <td style="padding:0.4rem 0.75rem"><strong>${esc(p)}</strong></td>
-        <td style="text-align:center;font-weight:700;color:var(--primary)">${v.total}</td>
+
+  // 篩選
+  let units = Object.keys(unitProfMap);
+  if(q) units = units.filter(u => {
+    if(u.toLowerCase().includes(q)) return true;
+    return Object.keys(unitProfMap[u]).some(p => p.toLowerCase().includes(q));
+  });
+  units.sort();
+
+  const wrap = document.getElementById('crossTableWrap');
+  if(!units.length){ wrap.innerHTML='<p style="padding:1rem;color:#aaa">查無資料</p>'; return; }
+
+  let html = `<table style="width:100%;border-collapse:collapse;font-size:0.82rem">
+    <thead><tr style="background:var(--primary);color:white">
+      <th style="padding:0.5rem 0.75rem;text-align:left;min-width:160px">機構</th>
+      <th style="padding:0.5rem 0.75rem;text-align:left;min-width:100px">職類</th>
+      <th style="padding:0.5rem 0.75rem;text-align:center">小計</th>
+      <th style="padding:0.5rem 0.75rem;text-align:center">A類</th>
+      <th style="padding:0.5rem 0.75rem;text-align:center">B類</th>
+      <th style="padding:0.5rem 0.75rem;text-align:center">C類</th>
+    </tr></thead><tbody>`;
+
+  units.forEach(u => {
+    const profs = unitProfMap[u];
+    // 篩選職類
+    let profKeys = Object.keys(profs);
+    if(q && !u.toLowerCase().includes(q)){
+      profKeys = profKeys.filter(p => p.toLowerCase().includes(q));
+    }
+    profKeys.sort((a,b) => profs[b].total - profs[a].total);
+    if(!profKeys.length) return;
+
+    // 計算機構小計
+    const unitTotal = profKeys.reduce((s,p)=>s+profs[p].total,0);
+    const unitA = profKeys.reduce((s,p)=>s+profs[p].A,0);
+    const unitB = profKeys.reduce((s,p)=>s+profs[p].B,0);
+    const unitC = profKeys.reduce((s,p)=>s+profs[p].C,0);
+
+    // 機構首列（含 rowspan）
+    html += `<tr style="background:#e3f2fd;border-top:2px solid #1565c0">
+      <td style="padding:0.45rem 0.75rem;font-weight:700;color:var(--primary-dark)" rowspan="${profKeys.length+1}">${esc(u)}</td>
+      <td style="padding:0.45rem 0.75rem;font-style:italic;color:#555">合計</td>
+      <td style="padding:0.45rem 0.75rem;text-align:center;font-weight:700;color:var(--primary)">${unitTotal}</td>
+      <td style="padding:0.45rem 0.75rem;text-align:center;font-weight:700">${unitA||'-'}</td>
+      <td style="padding:0.45rem 0.75rem;text-align:center;font-weight:700">${unitB||'-'}</td>
+      <td style="padding:0.45rem 0.75rem;text-align:center;font-weight:700">${unitC||'-'}</td>
+    </tr>`;
+
+    // 各職類列
+    profKeys.forEach(p => {
+      const v = profs[p];
+      html += `<tr style="border-bottom:1px solid #eee">
+        <td style="padding:0.4rem 0.75rem 0.4rem 1.5rem">${esc(p)}</td>
+        <td style="text-align:center;color:var(--primary)">${v.total}</td>
         <td style="text-align:center">${v.A||'-'}</td>
         <td style="text-align:center">${v.B||'-'}</td>
         <td style="text-align:center">${v.C||'-'}</td>
-      </tr>`).join('')}
-    </tbody>
-  </table>`;
+      </tr>`;
+    });
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
 }
+
+// 更新 renderHospTable 同步更新交叉表格
 function filterHosp(){ const q=document.getElementById('hospSearch').value.toLowerCase(); renderHospTable(q?hospData.filter(([u])=>u.toLowerCase().includes(q)):hospData); }
 
 // ===== HELPERS =====
