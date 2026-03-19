@@ -187,7 +187,7 @@ canvas{max-height:240px;}
     <div class="sidebar-section">統計分析</div>
     <div class="nav-item" onclick="gotoPage('page-stats',this)"><span class="nav-icon">📊</span>統計分析</div>
     <div class="sidebar-section">資料維護</div>
-    <div class="nav-item" onclick="gotoPage('page-normalize',this)"><span class="nav-icon">🔧</span>機構名稱正規化</div>
+    <div class="nav-item" onclick="gotoPage('page-normalize',this)"><span class="nav-icon">🔧</span>機構名稱調整更新</div>
     <div class="sidebar-footer">
       <button class="logout-btn" onclick="doLogout()">🚪 登出</button>
     </div>
@@ -259,7 +259,7 @@ canvas{max-height:240px;}
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>投稿編號</th><th>論文題目</th><th>通訊作者</th><th>填寫姓名</th><th>目前狀態</th><th>修改繳費狀態</th><th>修正會員姓名</th><th>備註（信件附加）</th></tr></thead>
+              <thead><tr><th>投稿編號</th><th>論文題目</th><th>通訊作者</th><th>作者群</th><th>填寫會員姓名</th><th>目前狀態</th><th>修改繳費狀態</th><th>修正會員姓名</th><th>備註（附加於確認信）</th></tr></thead>
               <tbody id="memberBody"></tbody>
             </table>
           </div>
@@ -339,13 +339,24 @@ canvas{max-height:240px;}
             </table>
           </div>
         </div>
+        <div class="card">
+          <div class="card-header">
+            <h2>🔍 單一機構職類分析</h2>
+            <select id="hospSelect" onchange="renderHospProf()" style="padding:0.4rem 0.75rem;border:1.5px solid #ccc;border-radius:8px;font-size:0.85rem;font-family:var(--font);">
+              <option value="">— 請選擇機構 —</option>
+            </select>
+          </div>
+          <div class="card-body" id="hospProfBody">
+            <p style="color:#aaa;font-size:0.88rem">請從上方選擇機構，即可查看該機構各職類投稿篇數。</p>
+          </div>
+        </div>
       </div>
 
-      <!-- ===== PAGE: 機構名稱正規化 ===== -->
+      <!-- ===== PAGE: 機構名稱調整更新 ===== -->
       <div class="page" id="page-normalize">
         <div class="card">
           <div class="card-header">
-            <h2>🔧 機構名稱正規化</h2>
+            <h2>🔧 機構名稱調整更新</h2>
             <div class="btn-group">
               <button class="btn btn-primary" onclick="scanUnits()">🔍 掃描現有資料</button>
               <button class="btn btn-success" onclick="applyNormalize()">✅ 批次套用</button>
@@ -386,14 +397,19 @@ canvas{max-height:240px;}
     <div class="modal-header green"><h2>📧 確認信編輯與預覽</h2>
       <button onclick="closeModal('mailModal')" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:0.85rem;color:#555;margin-bottom:0.75rem">共選取 <strong id="mailCount">0</strong> 筆。可直接編輯下方信件內容，所有筆數共用同一信件範本（收件人、論文題目會自動代入）。</p>
-      <div style="background:#e8f5e9;border-left:4px solid var(--success);padding:0.6rem 0.9rem;border-radius:6px;font-size:0.82rem;color:#2e7d32;margin-bottom:1rem">
-        📝 編輯後可點「重新預覽」確認所有信件的呈現效果，確認無誤再發送。
+      <p style="font-size:0.85rem;color:#555;margin-bottom:0.75rem">共選取 <strong id="mailCount">0</strong> 筆。可選擇範本後直接編輯，確認無誤再發送。</p>
+      <div style="margin-bottom:0.75rem;display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+        <span style="font-size:0.85rem;font-weight:700;color:#333">選擇範本：</span>
+        <button class="btn btn-sm btn-primary" onclick="loadTemplate('general')">📧 一般版（有繳費會員）</button>
+        <button class="btn btn-sm" style="background:#e65100;color:white" onclick="loadTemplate('nonmember')">📧 非會員版</button>
       </div>
-      <div style="margin-bottom:1rem">
-        <label style="font-size:0.85rem;font-weight:700;color:#333;display:block;margin-bottom:0.4rem">✏️ 信件範本（可直接編輯）</label>
-        <div style="font-size:0.8rem;color:#888;margin-bottom:0.4rem">可用變數：<code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{姓名}</code> <code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{題目}</code> <code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{類別}</code></div>
-        <textarea id="mailTemplate" rows="14" style="width:100%;padding:0.75rem;border:1.5px solid #ccc;border-radius:8px;font-size:0.88rem;font-family:var(--font);line-height:1.7;resize:vertical;"></textarea>
+      <div style="background:#fff8e1;border-left:4px solid #f9a825;padding:0.5rem 0.9rem;border-radius:6px;font-size:0.8rem;color:#5d4037;margin-bottom:0.75rem">
+        ⚠️ 選擇範本後可直接編輯文字，編輯完成請按「🔄 重新預覽」確認效果，再按「確認發送」。
+      </div>
+      <div style="margin-bottom:0.75rem">
+        <label style="font-size:0.85rem;font-weight:700;color:#333;display:block;margin-bottom:0.3rem">✏️ 信件內容（可直接修改）</label>
+        <div style="font-size:0.78rem;color:#888;margin-bottom:0.4rem">可用變數：<code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{姓名}</code> <code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{題目}</code> <code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{類別}</code></div>
+        <textarea id="mailTemplate" rows="16" style="width:100%;padding:0.75rem;border:1.5px solid #ccc;border-radius:8px;font-size:0.88rem;font-family:var(--font);line-height:1.8;resize:vertical;"></textarea>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
         <button class="btn btn-primary btn-sm" onclick="refreshMailPreview()">🔄 重新預覽</button>
@@ -464,7 +480,7 @@ document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==
 // ===== NAV =====
 const pageNames = {
   'page-overview':'投稿總覽','page-mail':'確認信管理','page-member':'會員繳費狀態',
-  'page-renumber':'投稿編號管理','page-finalpdf':'產生正式收錄 PDF','page-stats':'統計分析','page-normalize':'機構名稱正規化'
+  'page-renumber':'投稿編號管理','page-finalpdf':'產生正式收錄 PDF','page-stats':'統計分析','page-normalize':'機構名稱調整更新'
 };
 function gotoPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -633,8 +649,9 @@ function renderMemberTable() {
     const note = memberNotes[i] || '';
     const corrName = memberNameFix[i] || '';
     tr.innerHTML = `<td style="white-space:nowrap"><strong>${esc(r[0]||'')}</strong></td>
-      <td style="max-width:150px;word-break:break-all;font-size:0.8rem">${esc(r[3]||'')}</td>
+      <td style="max-width:140px;word-break:break-all;font-size:0.8rem">${esc(r[3]||'')}</td>
       <td style="white-space:nowrap">${esc(r[8]||'')}</td>
+      <td style="max-width:160px;font-size:0.78rem;color:#555;word-break:break-all">${esc(r[5]||'')}</td>
       <td><strong>${esc(r[6]||'（無）')}</strong></td>
       <td><span class="badge ${cls}" id="mbadge-${i}">${esc(m)}</span></td>
       <td><select class="edit-select" onchange="onMemberChg(${i},this.value)">
@@ -832,12 +849,61 @@ function renderStats(){
 function renderHospTable(data){
   const tbody=document.getElementById('hospBody');
   tbody.innerHTML='';
+  // 同時更新機構下拉
+  const sel=document.getElementById('hospSelect');
+  const prev=sel.value;
+  sel.innerHTML='<option value="">— 請選擇機構 —</option>';
+  data.forEach(([u])=>{
+    const opt=document.createElement('option');
+    opt.value=u; opt.textContent=u;
+    sel.appendChild(opt);
+  });
+  if(prev) sel.value=prev;
+  // 渲染表格
   data.forEach(([u,cnt])=>{
     const ids=submissions.filter(r=>(r[11]||'').startsWith(u)).map(r=>r[0]).join('、');
     const tr=document.createElement('tr');
     tr.innerHTML=`<td><strong>${esc(u)}</strong></td><td style="text-align:center;font-weight:700;color:var(--primary)">${cnt}</td><td style="font-size:0.78rem;color:#888">${esc(ids||'—')}</td>`;
     tbody.appendChild(tr);
   });
+}
+
+function renderHospProf() {
+  const unit = document.getElementById('hospSelect').value;
+  const body = document.getElementById('hospProfBody');
+  if(!unit){ body.innerHTML='<p style="color:#aaa;font-size:0.88rem">請從上方選擇機構，即可查看該職類投稿篇數。</p>'; return; }
+  const rows = submissions.filter(r => (r[11]||'').startsWith(unit));
+  if(!rows.length){ body.innerHTML='<p style="color:#aaa">查無資料</p>'; return; }
+  const profMap = {};
+  rows.forEach(r => {
+    const p = r[14]||'（未填）';
+    if(!profMap[p]) profMap[p]={total:0,A:0,B:0,C:0};
+    profMap[p].total++;
+    const c=(r[2]||'').replace('類','').trim();
+    if(profMap[p][c]!==undefined) profMap[p][c]++;
+  });
+  const sorted=Object.entries(profMap).sort((a,b)=>b[1].total-a[1].total);
+  body.innerHTML=`<p style="font-size:0.85rem;color:#555;margin-bottom:0.75rem">
+    <strong>${esc(unit)}</strong>共投稿 <strong style="color:var(--primary)">${rows.length}</strong> 篇
+  </p>
+  <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+    <thead><tr style="background:var(--primary-light)">
+      <th style="padding:0.45rem 0.75rem;text-align:left;color:var(--primary)">職類</th>
+      <th style="padding:0.45rem 0.75rem;text-align:center;color:var(--primary)">合計</th>
+      <th style="padding:0.45rem 0.75rem;text-align:center;color:#1565c0">A類</th>
+      <th style="padding:0.45rem 0.75rem;text-align:center;color:#6a1b9a">B類</th>
+      <th style="padding:0.45rem 0.75rem;text-align:center;color:#2e7d32">C類</th>
+    </tr></thead>
+    <tbody>
+      ${sorted.map(([p,v])=>`<tr style="border-bottom:1px solid #eee">
+        <td style="padding:0.4rem 0.75rem"><strong>${esc(p)}</strong></td>
+        <td style="text-align:center;font-weight:700;color:var(--primary)">${v.total}</td>
+        <td style="text-align:center">${v.A||'-'}</td>
+        <td style="text-align:center">${v.B||'-'}</td>
+        <td style="text-align:center">${v.C||'-'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
 }
 function filterHosp(){ const q=document.getElementById('hospSearch').value.toLowerCase(); renderHospTable(q?hospData.filter(([u])=>u.toLowerCase().includes(q)):hospData); }
 
@@ -862,7 +928,7 @@ async function runProgress(items, fn, labelFn, doneFn) {
   setTimeout(()=>{ overlay.classList.remove('show'); if(doneFn) doneFn(); if(err===0) showInfo(`🎉 ${done} 筆操作完成`,'success'); else showInfo(`⚠️ ${done} 筆成功，${err} 筆失敗`,'warning'); },1200);
 }
 
-// ===== 機構名稱正規化 =====
+// ===== 機構名稱調整更新 =====
 let normData = []; // [{unit, count, rows:[i,...], normalized:''}]
 
 function scanUnits() {
@@ -951,7 +1017,7 @@ async function applyNormalize() {
     normData.forEach(d => { d.normalized = ''; });
     scanUnits();
     renderStats();
-    showInfo(`✅ 機構名稱正規化完成`, 'success');
+    showInfo(`✅ 機構名稱調整更新完成`, 'success');
   });
 }
 
