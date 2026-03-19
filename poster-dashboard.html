@@ -283,7 +283,7 @@ canvas{max-height:240px;}
             <table>
               <thead><tr>
                 <th style="width:2.5rem"><input type="checkbox" id="rnChkAll" onchange="toggleRnAll(this)"></th>
-                <th>#</th><th>原始編號</th><th>新編號</th><th>論文題目</th><th>類別</th><th>通訊作者</th><th>狀態</th>
+                <th>#</th><th>原始編號</th><th>新編號</th><th>修改類別</th><th>論文題目</th><th>通訊作者</th><th>狀態</th>
               </tr></thead>
               <tbody id="renumberBody"></tbody>
             </table>
@@ -326,6 +326,22 @@ canvas{max-height:240px;}
         <div class="chart-grid">
           <div class="chart-box"><h3>📊 投稿類別分佈</h3><canvas id="catChart"></canvas></div>
           <div class="chart-box"><h3>👤 職類分佈（前10）</h3><canvas id="profChart"></canvas></div>
+        </div>
+        <!-- 職類詳細分類表格 -->
+        <div class="card">
+          <div class="card-header"><h2>👤 職類投稿明細</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>職類</th>
+                <th style="text-align:center">合計</th>
+                <th style="text-align:center;color:#1565c0">A類</th>
+                <th style="text-align:center;color:#6a1b9a">B類</th>
+                <th style="text-align:center;color:#2e7d32">C類</th>
+              </tr></thead>
+              <tbody id="profDetailBody"></tbody>
+            </table>
+          </div>
         </div>
         <div class="card">
           <div class="card-header">
@@ -493,6 +509,7 @@ function gotoPage(id, el) {
 // ===== DATA =====
 let submissions = [];
 let newIds = {};
+let catChanges = {}; // rowIndex → new category
 let memberChanges = {};
 let memberNotes = {};
 let memberNameFix = {};
@@ -600,35 +617,103 @@ function renderMailTable() {
     tbody.appendChild(tr);
   });
 }
+// ===== 確認信範本 =====
+const MAIL_TEMPLATES = {
+  general: `親愛的 {姓名} 先生／小姐 您好：
+
+感謝您投稿「台灣醫事聯合臨床技能發展學會2026年會員大會暨學術研討會」海報論文。
+
+我們已收到您的投稿資料，相關資訊如下：
+ - 論文題目：{題目}
+ - 投稿類別：{類別}
+
+❖ 審查結果預計於2026年7月15日前以Email另行通知。
+❖ 海報發表相關資訊將於錄取後提供。
+
+如有任何問題，歡迎與秘書處聯繫（06-2812811 分機 57426），謝謝。
+
+台灣醫事聯合臨床技能發展學會 敬上`,
+
+  nonmember: `親愛的 {姓名} 先生／小姐 您好：
+
+感謝您投稿「台灣醫事聯合臨床技能發展學會2026年會員大會暨學術研討會」海報論文。
+
+我們已收到您的投稿資料。經查詢作者群會員資格，目前未符合本會會員條件，故本次投稿將以「非會員」身分受理。
+
+依本會規定，投稿仍可進行審查，並於審查通過後參展，惟不列入優秀海報論文獎評選。
+
+投稿相關資訊如下：
+ - 論文題目：{題目}
+ - 投稿類別：{類別}
+
+❖ 審查結果預計於2026年7月15日前以Email另行通知。
+❖ 海報發表相關資訊將於錄取後提供。
+
+如有任何問題，歡迎與秘書處聯繫（06-2812811 分機 57426），謝謝。
+
+台灣醫事聯合臨床技能發展學會 敬上`
+};
+
+function loadTemplate(type) {
+  document.getElementById('mailTemplate').value = MAIL_TEMPLATES[type];
+  refreshMailPreview();
+}
+
 function selectMail(v){ document.querySelectorAll('.mail-chk').forEach(c=>c.checked=v); }
+
 function openMailPreview() {
   const sel = Array.from(document.querySelectorAll('.mail-chk:checked')).map(c=>parseInt(c.dataset.i));
   if(!sel.length){ showInfo('請先勾選要發送確認信的投稿','warning'); return; }
   document.getElementById('mailCount').textContent = sel.length;
-  const list = document.getElementById('mailPreviewList');
-  list.innerHTML = '';
-  sel.forEach(i => {
-    const r = submissions[i];
-    const div = document.createElement('div');
-    div.style.cssText = 'margin-bottom:1rem;border:1px solid #ddd;border-radius:8px;overflow:hidden';
-    div.innerHTML = `<div style="background:#e3f2fd;padding:0.45rem 0.75rem;font-size:0.78rem;color:var(--primary);font-weight:700">${esc(r[0]||'')} — ${esc(r[8]||'')} &lt;${esc(r[9]||'')}&gt;</div>
-      <div class="mail-preview"><div class="mail-meta">收件人：${esc(r[8]||'')} &lt;${esc(r[9]||'')}&gt;</div><div class="mail-subject">主旨：【TSMCSD 2026年會】海報論文投稿確認通知</div>${esc(buildMail(r))}</div>`;
-    list.appendChild(div);
-  });
+  // 每次開啟確保載入一般版範本
+  if(!document.getElementById('mailTemplate').value){
+    document.getElementById('mailTemplate').value = MAIL_TEMPLATES.general;
+  }
+  refreshMailPreview();
   document.getElementById('mailModal').classList.add('show');
 }
-function buildMail(r){
-  return `${r[8]||''} 您好，\n\n感謝您投稿「2026年台灣醫事聯合臨床技能發展學會年會暨學術研討會」海報論文。\n\n我們已收到您的投稿資料，詳情如下：\n\n　投稿編號：${r[0]||''}\n　論文題目：${r[3]||''}\n　投稿類別：${r[2]||''}\n\n請妥善保存投稿編號，以供後續聯繫使用。\n\n錄取結果將於 2026年7月15日前 以 Email 個別通知。\n如有任何問題，請聯繫學會秘書處楊依玲小姐：(06)2812811 轉 57426。\n\n台灣醫事聯合臨床技能發展學會 敬上`;
+
+function refreshMailPreview() {
+  const sel = Array.from(document.querySelectorAll('.mail-chk:checked')).map(c=>parseInt(c.dataset.i));
+  const tmpl = document.getElementById('mailTemplate').value;
+  const list = document.getElementById('mailPreviewList');
+  list.innerHTML = '';
+  if(!tmpl){
+    list.innerHTML = '<p style="color:#aaa;font-size:0.85rem;padding:0.5rem">請先點選上方範本按鈕，或直接在文字框輸入信件內容。</p>';
+    return;
+  }
+  sel.forEach(i => {
+    const r = submissions[i];
+    const note = memberNotes[i] ? ('\n\n【備註】' + memberNotes[i]) : '';
+    const body = buildMail(r, tmpl, note);
+    const div = document.createElement('div');
+    div.style.cssText = 'margin-bottom:1rem;border:1px solid #ddd;border-radius:8px;overflow:hidden';
+    div.innerHTML = `<div style="background:#e3f2fd;padding:0.45rem 0.75rem;font-size:0.78rem;color:var(--primary);font-weight:700">${esc(r[8]||'')} &lt;${esc(r[9]||'')}&gt;</div>
+      <div style="background:#f9f9f9;padding:0.9rem 1rem;font-size:0.85rem;line-height:1.8;white-space:pre-wrap">${esc(body)}</div>`;
+    list.appendChild(div);
+  });
 }
+
+function buildMail(r, tmpl, extraNote) {
+  let t = (tmpl || MAIL_TEMPLATES.general)
+    .replace(/\{姓名\}/g, r[8]||'')
+    .replace(/\{題目\}/g, r[3]||'')
+    .replace(/\{類別\}/g, r[2]||'');
+  if(extraNote) t += extraNote;
+  return t;
+}
+
 async function sendEmails() {
   const sel = Array.from(document.querySelectorAll('.mail-chk:checked')).map(c=>parseInt(c.dataset.i));
+  const tmpl = document.getElementById('mailTemplate').value;
   closeModal('mailModal');
   await runProgress(sel, async (i) => {
     const r = submissions[i];
+    const note = memberNotes[i] ? ('\n\n【備註】' + memberNotes[i]) : '';
+    const mailBody = buildMail(r, tmpl, note);
     const body = new URLSearchParams();
     body.append('action','sendConfirmEmail');
     body.append('rowIndex', i+2);
-    const mailBody = buildMail(r, document.getElementById('mailTemplate').value);
     body.append('data', JSON.stringify({submissionId:r[0],title:r[3],category:r[2],contactName:r[8],contactEmail:r[9],customBody:mailBody}));
     const resp = await fetch(getUrl(),{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
     const json = await resp.json();
@@ -713,9 +798,13 @@ function renderRenumberTable() {
     tr.innerHTML = `<td style="text-align:center" id="rn-chk-td-${i}"></td>
       <td style="color:#999;font-size:0.78rem">${i+1}</td>
       <td style="color:#888;font-size:0.8rem;white-space:nowrap">${esc(oldId)}</td>
-      <td style="min-width:200px"><input class="new-id-input ${isModified?'modified':''}" value="${esc(curNew)}" id="rnid-${i}" oninput="onRnChange(${i},this.value)">${isDup?'<span class="dup-tag">⚠️重複</span>':''}</td>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r[3]||'')}">${esc(r[3]||'')}</td>
-      <td><span class="badge badge-${catL}">${esc(cat)}</span></td>
+      <td style="min-width:180px"><input class="new-id-input ${isModified?'modified':''}" value="${esc(curNew)}" id="rnid-${i}" oninput="onRnChange(${i},this.value)">${isDup?'<span class="dup-tag">⚠️重複</span>':''}</td>
+      <td><select class="edit-select" id="rncat-${i}" onchange="catChanges[${i}]=this.value;document.getElementById('rn-row-${i}').classList.add('changed')">
+        <option value="A類" ${cat==='A類'?'selected':''}>A 類</option>
+        <option value="B類" ${cat==='B類'?'selected':''}>B 類</option>
+        <option value="C類" ${cat==='C類'?'selected':''}>C 類</option>
+      </select></td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r[3]||'')}">${esc(r[3]||'')}</td>
       <td>${esc(r[8]||'')}</td>
       <td id="rn-status-${i}"><span style="color:#aaa">⬜ 待更新</span></td>`;
     tbody.appendChild(tr);
@@ -772,11 +861,12 @@ function openRenumberPreview(){
 async function doUpdate(){
   closeModal('rnModal');
   const allIds=getAllNewIds();
-  const updateList=submissions.map((r,i)=>({i,rowIndex:i+2,oldId:r[0]||'',newId:allIds[i],data:{category:r[2]||'',paperTitle:r[3]||'',keywords:r[4]||'',authors:r[5]||'',absMotivation:r[15]||'',absMethod:r[16]||'',absResult:r[17]||'',absConclusion:r[18]||'',wordCount:r[19]||'',status:r[21]||'待審查'}})).filter(x=>x.newId!==x.oldId);
+  const updateList=submissions.map((r,i)=>({i,rowIndex:i+2,oldId:r[0]||'',newId:allIds[i],newCat:catChanges[i]||'',data:{category:catChanges[i]||r[2]||'',paperTitle:r[3]||'',keywords:r[4]||'',authors:r[5]||'',absMotivation:r[15]||'',absMethod:r[16]||'',absResult:r[17]||'',absConclusion:r[18]||'',wordCount:r[19]||'',status:r[21]||'待審查'}})).filter(x=>x.newId!==x.oldId||x.newCat);
   await runProgress(updateList, async (item) => {
     const body=new URLSearchParams();
     body.append('action','renumberSubmission'); body.append('rowIndex',item.rowIndex);
     body.append('oldId',item.oldId); body.append('newId',item.newId);
+    if(item.newCat) body.append('newCat', item.newCat);
     body.append('data',JSON.stringify(item.data)); body.append('keepOld','false');
     const resp=await fetch(getUrl(),{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
     const json=await resp.json();
@@ -844,6 +934,29 @@ function renderStats(){
   if(profChartInst) profChartInst.destroy();
   profChartInst=new Chart(document.getElementById('profChart'),{type:'bar',data:{labels:sp.map(p=>p[0]),datasets:[{label:'篇數',data:sp.map(p=>p[1]),backgroundColor:'#1565c0',borderRadius:4}]},options:{plugins:{legend:{display:false}},responsive:true,maintainAspectRatio:true,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
   hospData=Object.entries(hosp).sort((a,b)=>b[1]-a[1]);
+
+  // 職類明細表格
+  const profSorted = Object.entries(prof).sort((a,b)=>b[1]-a[1]);
+  const profDetail = {};
+  submissions.forEach(r=>{
+    const p = r[14]||'（未填）';
+    const c = (r[2]||'').replace('類','').trim();
+    if(!profDetail[p]) profDetail[p]={total:0,A:0,B:0,C:0};
+    profDetail[p].total++;
+    if(profDetail[p][c]!==undefined) profDetail[p][c]++;
+  });
+  const pdTbody = document.getElementById('profDetailBody');
+  pdTbody.innerHTML='';
+  Object.entries(profDetail).sort((a,b)=>b[1].total-a[1].total).forEach(([p,v])=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${esc(p)}</strong></td>
+      <td style="text-align:center;font-weight:700;color:var(--primary)">${v.total}</td>
+      <td style="text-align:center">${v.A||'-'}</td>
+      <td style="text-align:center">${v.B||'-'}</td>
+      <td style="text-align:center">${v.C||'-'}</td>`;
+    pdTbody.appendChild(tr);
+  });
+
   renderHospTable(hospData);
 }
 function renderHospTable(data){
