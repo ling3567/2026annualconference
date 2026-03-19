@@ -791,23 +791,42 @@ input.error, select.error, textarea.error {
 .preview-abstract .preview-row-value { background: #f9f9f9; padding: 0.5rem 0.75rem; border-radius: 6px; line-height: 1.65; }
 .preview-footer {
   display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   padding: 1rem 1.5rem;
   border-top: 2px solid #e0e0e0;
   background: #fafafa;
+  flex-wrap: wrap;
+}
+.preview-footer-warning {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.55rem 0.9rem;
+  background: #fff8e1;
+  border-radius: 8px;
+  border: 1px solid #ffe082;
+  font-size: 0.85rem;
+  color: #e65100;
+  white-space: nowrap;
+}
+.preview-footer-btns {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
 }
 .preview-back-btn {
   background: white;
   border: 1.5px solid #ccc;
   border-radius: 24px;
-  padding: 0.65rem 1.5rem;
+  padding: 0.65rem 1.75rem;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   font-family: var(--font);
   color: #555;
   transition: background 0.15s;
+  white-space: nowrap;
 }
 .preview-back-btn:hover { background: #f0f0f0; }
 .preview-confirm-btn {
@@ -815,18 +834,59 @@ input.error, select.error, textarea.error {
   color: white;
   border: none;
   border-radius: 24px;
-  padding: 0.65rem 2rem;
+  padding: 0.65rem 2.25rem;
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   font-family: var(--font);
   box-shadow: 0 3px 10px rgba(46,125,50,0.35);
   transition: filter 0.2s, transform 0.15s;
+  white-space: nowrap;
 }
 .preview-confirm-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
 .preview-confirm-btn:disabled { background: #90a4ae; box-shadow: none; cursor: not-allowed; }
 
-/* Ethics checkbox */
+/* Ethics & consent checkboxes */
+#ethicsCard:has(input:checked) {
+  border-color: var(--success);
+  background: var(--success-light);
+}
+#ethicsCard:has(input:checked) .card-radio {
+  border-color: var(--success);
+  background: var(--success);
+}
+#ethicsCard:has(input:checked) .card-radio::after {
+  content: '✓';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 900;
+  background: transparent;
+}
+#ethicsCard:has(input:checked) .card-title { color: var(--success); font-weight: 700; }
+
+#pdfConsentCard:has(input:checked) {
+  border-color: var(--success);
+  background: var(--success-light);
+}
+#pdfConsentCard:has(input:checked) .card-radio {
+  border-color: var(--success);
+  background: var(--success);
+}
+#pdfConsentCard:has(input:checked) .card-radio::after {
+  content: '✓';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 900;
+  background: transparent;
+}
+#pdfConsentCard:has(input:checked) .card-title { color: var(--success); font-weight: 700; }
+
 #coauthorConsentCard:has(input:checked) {
   border-color: var(--success);
   background: var(--success-light);
@@ -846,39 +906,6 @@ input.error, select.error, textarea.error {
   background: transparent;
 }
 #coauthorConsentCard:has(input:checked) .card-title { color: var(--success); font-weight: 700; }
-  border-color: var(--success);
-  background: var(--success-light);
-}
-#pdfConsentCard:has(input:checked) .card-radio {
-  border-color: var(--success);
-  background: var(--success);
-}
-#pdfConsentCard:has(input:checked) .card-radio::after {
-  content: '✓';
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 900;
-  background: transparent;
-}
-#pdfConsentCard:has(input:checked) .card-title { color: var(--success); font-weight: 700; }
-#ethicsCard:has(input:checked) .card-radio {
-  border-color: var(--success);
-  background: var(--success);
-}
-#ethicsCard:has(input:checked) .card-radio::after {
-  content: '✓';
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 900;
-  background: transparent;
-}
-#ethicsCard:has(input:checked) .card-title { color: var(--success); font-weight: 700; }
 @media (max-width: 768px) {
   .main-wrap { margin: 1rem auto; padding: 0 0.75rem 2rem; }
   .section-body { padding: 1rem; }
@@ -1310,13 +1337,13 @@ input.error, select.error, textarea.error {
       <!-- injected by JS -->
     </div>
     <div class="preview-footer">
-      <div style="width:100%;text-align:center;margin-bottom:0.75rem;padding:0.6rem 1rem;background:#fff8e1;border-radius:8px;border:1px solid #ffe082;font-size:0.85rem;color:#e65100">
-        ⚠️ 請確認以上資料正確無誤，送出後將無法修改。
+      <div class="preview-footer-warning">⚠️ 請確認以上資料正確無誤，送出後將無法修改。</div>
+      <div class="preview-footer-btns">
+        <button class="preview-back-btn" onclick="closePreview()">← 返回修改</button>
+        <button class="preview-confirm-btn" id="confirmSubmitBtn" onclick="submitForm()">
+          <span id="confirmBtnIcon">🚀</span> 確認送出
+        </button>
       </div>
-      <button class="preview-back-btn" onclick="closePreview()">← 返回修改</button>
-      <button class="preview-confirm-btn" id="confirmSubmitBtn" onclick="submitForm()">
-        <span id="confirmBtnIcon">🚀</span> 確認送出
-      </button>
     </div>
   </div>
 </div>
