@@ -1939,6 +1939,7 @@ function resetForm() {
   // 清空 radio 選項
   document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
   // 清空關鍵字
+  keywords = [];
   document.getElementById('kwInput').value = '';
   document.getElementById('kwTags').innerHTML = '';
   // 清空職業其他欄位
