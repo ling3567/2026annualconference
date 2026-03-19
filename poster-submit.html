@@ -793,7 +793,7 @@ input.error, select.error, textarea.error {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem;
   padding: 1rem 1.5rem;
   border-top: 2px solid #e0e0e0;
   background: #fafafa;
@@ -801,14 +801,15 @@ input.error, select.error, textarea.error {
 }
 .preview-footer-warning {
   flex: 1;
-  min-width: 200px;
+  min-width: 180px;
   padding: 0.55rem 0.9rem;
   background: #fff8e1;
   border-radius: 8px;
   border: 1px solid #ffe082;
   font-size: 0.85rem;
   color: #e65100;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: keep-all;
 }
 .preview-footer-btns {
   display: flex;
@@ -845,6 +846,11 @@ input.error, select.error, textarea.error {
 }
 .preview-confirm-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
 .preview-confirm-btn:disabled { background: #90a4ae; box-shadow: none; cursor: not-allowed; }
+@media (max-width: 540px) {
+  .preview-footer { flex-direction: column; align-items: stretch; }
+  .preview-footer-warning { min-width: unset; }
+  .preview-footer-btns { justify-content: flex-end; }
+}
 
 /* Ethics & consent checkboxes - square checkbox style */
 .ethics-radio {
