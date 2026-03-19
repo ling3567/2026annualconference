@@ -846,16 +846,27 @@ input.error, select.error, textarea.error {
 .preview-confirm-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
 .preview-confirm-btn:disabled { background: #90a4ae; box-shadow: none; cursor: not-allowed; }
 
-/* Ethics & consent checkboxes */
+/* Ethics & consent checkboxes - square checkbox style */
+.ethics-radio {
+  width: 18px; height: 18px;
+  border: 2px solid #bbb;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.15s, background 0.15s;
+  background: white;
+  position: relative;
+}
 #ethicsCard:has(input:checked) {
   border-color: var(--success);
   background: var(--success-light);
 }
-#ethicsCard:has(input:checked) .card-radio {
+#ethicsCard:has(input:checked) .ethics-radio {
   border-color: var(--success);
   background: var(--success);
 }
-#ethicsCard:has(input:checked) .card-radio::after {
+#ethicsCard:has(input:checked) .ethics-radio::after {
   content: '✓';
   position: absolute;
   top: 50%; left: 50%;
@@ -863,7 +874,6 @@ input.error, select.error, textarea.error {
   color: white;
   font-size: 0.7rem;
   font-weight: 900;
-  background: transparent;
 }
 #ethicsCard:has(input:checked) .card-title { color: var(--success); font-weight: 700; }
 
@@ -871,11 +881,11 @@ input.error, select.error, textarea.error {
   border-color: var(--success);
   background: var(--success-light);
 }
-#pdfConsentCard:has(input:checked) .card-radio {
+#pdfConsentCard:has(input:checked) .ethics-radio {
   border-color: var(--success);
   background: var(--success);
 }
-#pdfConsentCard:has(input:checked) .card-radio::after {
+#pdfConsentCard:has(input:checked) .ethics-radio::after {
   content: '✓';
   position: absolute;
   top: 50%; left: 50%;
@@ -883,7 +893,6 @@ input.error, select.error, textarea.error {
   color: white;
   font-size: 0.7rem;
   font-weight: 900;
-  background: transparent;
 }
 #pdfConsentCard:has(input:checked) .card-title { color: var(--success); font-weight: 700; }
 
@@ -891,11 +900,11 @@ input.error, select.error, textarea.error {
   border-color: var(--success);
   background: var(--success-light);
 }
-#coauthorConsentCard:has(input:checked) .card-radio {
+#coauthorConsentCard:has(input:checked) .ethics-radio {
   border-color: var(--success);
   background: var(--success);
 }
-#coauthorConsentCard:has(input:checked) .card-radio::after {
+#coauthorConsentCard:has(input:checked) .ethics-radio::after {
   content: '✓';
   position: absolute;
   top: 50%; left: 50%;
@@ -903,7 +912,6 @@ input.error, select.error, textarea.error {
   color: white;
   font-size: 0.7rem;
   font-weight: 900;
-  background: transparent;
 }
 #coauthorConsentCard:has(input:checked) .card-title { color: var(--success); font-weight: 700; }
 @media (max-width: 768px) {
@@ -1271,21 +1279,21 @@ input.error, select.error, textarea.error {
         <div style="display:flex;flex-direction:column;gap:0.6rem">
           <label class="option-card" id="ethicsCard" style="cursor:pointer">
             <input type="checkbox" id="ethicsCheck" onchange="runChecks()" style="position:absolute;opacity:0;width:0;height:0">
-            <div class="card-radio" id="ethicsRadio" style="border-radius:4px"></div>
+            <div class="ethics-radio" id="ethicsRadio"></div>
             <div class="card-body">
               <div class="card-title">本人已閱讀並同意遵守學術倫理規範，確認本投稿內容為原創著作，未侵犯他人著作權，亦未違反學術倫理。</div>
             </div>
           </label>
           <label class="option-card" id="pdfConsentCard" style="cursor:pointer">
             <input type="checkbox" id="pdfConsentCheck" onchange="runChecks()" style="position:absolute;opacity:0;width:0;height:0">
-            <div class="card-radio" id="pdfConsentRadio" style="border-radius:4px"></div>
+            <div class="ethics-radio" id="pdfConsentRadio"></div>
             <div class="card-body">
               <div class="card-title">本人同意由<strong>台灣醫事聯合臨床技能發展學會</strong>將此篇文章提供 PDF 檔供年會與會者下載。</div>
             </div>
           </label>
           <label class="option-card" id="coauthorConsentCard" style="cursor:pointer">
             <input type="checkbox" id="coauthorConsentCheck" onchange="runChecks()" style="position:absolute;opacity:0;width:0;height:0">
-            <div class="card-radio" id="coauthorConsentRadio" style="border-radius:4px"></div>
+            <div class="ethics-radio" id="coauthorConsentRadio"></div>
             <div class="card-body">
               <div class="card-title">本人確認已取得所有共同作者之同意授權投稿，並已充分告知本投稿相關內容與授權事項。</div>
             </div>
