@@ -91,7 +91,7 @@ thead th{background:var(--primary);color:white;padding:0.5rem 0.7rem;text-align:
 tbody tr{border-bottom:1px solid #eee;transition:background 0.1s;}
 tbody tr:hover{background:#f5f8ff;}
 tbody tr.changed{background:#fff8e1;}
-td{padding:0.45rem 0.7rem;vertical-align:middle;}
+td{padding:0.6rem 0.7rem;vertical-align:middle;}
 .badge{display:inline-block;padding:0.15rem 0.55rem;border-radius:12px;font-size:0.74rem;font-weight:700;}
 .badge-paid   {background:#e8f5e9;color:#2e7d32;}
 .badge-pending{background:#fff3e0;color:#e65100;}
@@ -186,6 +186,8 @@ canvas{max-height:240px;}
     <div class="nav-item" onclick="gotoPage('page-finalpdf',this)"><span class="nav-icon">📄</span>產生正式收錄 PDF</div>
     <div class="sidebar-section">統計分析</div>
     <div class="nav-item" onclick="gotoPage('page-stats',this)"><span class="nav-icon">📊</span>統計分析</div>
+    <div class="sidebar-section">資料維護</div>
+    <div class="nav-item" onclick="gotoPage('page-normalize',this)"><span class="nav-icon">🔧</span>機構名稱正規化</div>
     <div class="sidebar-footer">
       <button class="logout-btn" onclick="doLogout()">🚪 登出</button>
     </div>
@@ -218,7 +220,7 @@ canvas{max-height:240px;}
           <div class="card-header"><h2>📋 最新投稿清單</h2></div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>投稿編號</th><th>論文題目</th><th>類別</th><th>通訊作者</th><th>會員狀態</th><th>確認信</th><th>投稿時間</th></tr></thead>
+              <thead><tr><th>投稿編號</th><th>論文題目</th><th>類別</th><th>通訊作者</th><th>服務單位</th><th>職類</th><th>會員狀態</th><th>確認信</th><th>投稿時間</th></tr></thead>
               <tbody id="overviewBody"></tbody>
             </table>
           </div>
@@ -257,7 +259,7 @@ canvas{max-height:240px;}
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>投稿編號</th><th>論文題目</th><th>通訊作者</th><th>會員姓名</th><th>目前狀態</th><th>修改狀態</th></tr></thead>
+              <thead><tr><th>投稿編號</th><th>論文題目</th><th>通訊作者</th><th>填寫姓名</th><th>目前狀態</th><th>修改繳費狀態</th><th>修正會員姓名</th><th>備註（信件附加）</th></tr></thead>
               <tbody id="memberBody"></tbody>
             </table>
           </div>
@@ -339,17 +341,63 @@ canvas{max-height:240px;}
         </div>
       </div>
 
+      <!-- ===== PAGE: 機構名稱正規化 ===== -->
+      <div class="page" id="page-normalize">
+        <div class="card">
+          <div class="card-header">
+            <h2>🔧 機構名稱正規化</h2>
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="scanUnits()">🔍 掃描現有資料</button>
+              <button class="btn btn-success" onclick="applyNormalize()">✅ 批次套用</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="background:var(--primary-light);border-left:4px solid var(--primary);padding:0.75rem 1rem;border-radius:8px;font-size:0.85rem;color:#1a1a2e;margin-bottom:1rem">
+              📌 點「掃描現有資料」列出所有不同的機構名稱，在「正規化為」欄位填入統一名稱，再按「批次套用」寫回 Sheet。<br>
+              <strong>留空表示不修改。</strong>修改後統計分析的醫院資料將自動正確彙整。
+            </div>
+            <div style="margin-bottom:1rem;display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap">
+              <input type="text" id="normSearch" placeholder="搜尋機構名稱..." oninput="filterNorm()"
+                style="padding:0.45rem 0.8rem;border:1.5px solid #ccc;border-radius:8px;font-size:0.88rem;font-family:var(--font);flex:1;min-width:200px">
+              <span style="font-size:0.85rem;color:#888">共 <strong id="normCount">0</strong> 種機構名稱，<strong id="normDiffCount">0</strong> 筆待修正</span>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>現有機構名稱</th>
+                <th style="text-align:center">出現筆數</th>
+                <th>正規化為（留空不修改）</th>
+                <th>預覽</th>
+              </tr></thead>
+              <tbody id="normBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div><!-- content -->
   </div><!-- main-area -->
 </div><!-- appShell -->
 
 <!-- Mail preview modal -->
 <div class="modal-overlay" id="mailModal">
-  <div class="modal-box">
-    <div class="modal-header green"><h2>📧 確認信預覽</h2>
+  <div class="modal-box" style="max-width:780px">
+    <div class="modal-header green"><h2>📧 確認信編輯與預覽</h2>
       <button onclick="closeModal('mailModal')" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:0.85rem;color:#555;margin-bottom:0.75rem">共選取 <strong id="mailCount">0</strong> 筆，請確認信件內容後再發送。</p>
+      <p style="font-size:0.85rem;color:#555;margin-bottom:0.75rem">共選取 <strong id="mailCount">0</strong> 筆。可直接編輯下方信件內容，所有筆數共用同一信件範本（收件人、論文題目會自動代入）。</p>
+      <div style="background:#e8f5e9;border-left:4px solid var(--success);padding:0.6rem 0.9rem;border-radius:6px;font-size:0.82rem;color:#2e7d32;margin-bottom:1rem">
+        📝 編輯後可點「重新預覽」確認所有信件的呈現效果，確認無誤再發送。
+      </div>
+      <div style="margin-bottom:1rem">
+        <label style="font-size:0.85rem;font-weight:700;color:#333;display:block;margin-bottom:0.4rem">✏️ 信件範本（可直接編輯）</label>
+        <div style="font-size:0.8rem;color:#888;margin-bottom:0.4rem">可用變數：<code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{姓名}</code> <code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{題目}</code> <code style="background:#f0f4f8;padding:0.1rem 0.35rem;border-radius:4px">{類別}</code></div>
+        <textarea id="mailTemplate" rows="14" style="width:100%;padding:0.75rem;border:1.5px solid #ccc;border-radius:8px;font-size:0.88rem;font-family:var(--font);line-height:1.7;resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
+        <button class="btn btn-primary btn-sm" onclick="refreshMailPreview()">🔄 重新預覽</button>
+      </div>
       <div id="mailPreviewList"></div>
     </div>
     <div class="modal-footer">
@@ -416,7 +464,7 @@ document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==
 // ===== NAV =====
 const pageNames = {
   'page-overview':'投稿總覽','page-mail':'確認信管理','page-member':'會員繳費狀態',
-  'page-renumber':'投稿編號管理','page-finalpdf':'產生正式收錄 PDF','page-stats':'統計分析'
+  'page-renumber':'投稿編號管理','page-finalpdf':'產生正式收錄 PDF','page-stats':'統計分析','page-normalize':'機構名稱正規化'
 };
 function gotoPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -430,6 +478,8 @@ function gotoPage(id, el) {
 let submissions = [];
 let newIds = {};
 let memberChanges = {};
+let memberNotes = {};
+let memberNameFix = {};
 let hospData = [];
 let catChartInst = null, profChartInst = null;
 
@@ -503,13 +553,15 @@ function renderOverview() {
     const mCls = m.includes('已繳')?'badge-paid':m.includes('未繳')?'badge-pending':'badge-none';
     const sent2 = (r[21]||'').includes('確認信');
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><strong>${esc(r[0]||'')}</strong></td>
-      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r[3]||'')}">${esc(r[3]||'')}</td>
+    tr.innerHTML = `<td style="white-space:nowrap"><strong>${esc(r[0]||'')}</strong></td>
+      <td style="max-width:200px;min-width:140px;word-break:break-all;line-height:1.4">${esc(r[3]||'')}</td>
       <td><span class="badge badge-${cat.toLowerCase()}">${esc(r[2]||'')}</span></td>
-      <td>${esc(r[8]||'')}</td>
+      <td style="white-space:nowrap">${esc(r[8]||'')}</td>
+      <td style="font-size:0.8rem;max-width:140px;word-break:break-all">${esc(r[11]||'—')}</td>
+      <td style="font-size:0.8rem;white-space:nowrap">${esc(r[14]||'—')}</td>
       <td><span class="badge ${mCls}">${esc(m)}</span></td>
       <td><span class="badge ${sent2?'badge-sent':'badge-unsent'}">${sent2?'✅ 已發送':'⬜ 未發送'}</span></td>
-      <td style="font-size:0.78rem;color:#888">${formatTs(r[1])}</td>`;
+      <td style="font-size:0.78rem;color:#888;white-space:nowrap">${formatTs(r[1])}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -560,7 +612,8 @@ async function sendEmails() {
     const body = new URLSearchParams();
     body.append('action','sendConfirmEmail');
     body.append('rowIndex', i+2);
-    body.append('data', JSON.stringify({submissionId:r[0],title:r[3],category:r[2],contactName:r[8],contactEmail:r[9]}));
+    const mailBody = buildMail(r, document.getElementById('mailTemplate').value);
+    body.append('data', JSON.stringify({submissionId:r[0],title:r[3],category:r[2],contactName:r[8],contactEmail:r[9],customBody:mailBody}));
     const resp = await fetch(getUrl(),{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
     const json = await resp.json();
     if(json.result!=='success') throw new Error(json.message);
@@ -577,16 +630,20 @@ function renderMemberTable() {
     const m = r[7]||'';
     const cls = m.includes('已繳')?'badge-paid':m.includes('未繳')?'badge-pending':'badge-none';
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><strong>${esc(r[0]||'')}</strong></td>
-      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r[3]||'')}</td>
-      <td>${esc(r[8]||'')}</td>
+    const note = memberNotes[i] || '';
+    const corrName = memberNameFix[i] || '';
+    tr.innerHTML = `<td style="white-space:nowrap"><strong>${esc(r[0]||'')}</strong></td>
+      <td style="max-width:150px;word-break:break-all;font-size:0.8rem">${esc(r[3]||'')}</td>
+      <td style="white-space:nowrap">${esc(r[8]||'')}</td>
       <td><strong>${esc(r[6]||'（無）')}</strong></td>
       <td><span class="badge ${cls}" id="mbadge-${i}">${esc(m)}</span></td>
       <td><select class="edit-select" onchange="onMemberChg(${i},this.value)">
         <option value="會員已繳年費" ${m==='會員已繳年費'?'selected':''}>✅ 已繳費</option>
         <option value="會員未繳年費" ${m==='會員未繳年費'?'selected':''}>⏳ 未繳費</option>
         <option value="非會員" ${m==='非會員'?'selected':''}>❌ 非會員</option>
-      </select></td>`;
+      </select></td>
+      <td><input type="text" class="edit-select" style="width:100px" placeholder="如有填錯請更正" value="${esc(corrName)}" oninput="memberNameFix[${i}]=this.value"></td>
+      <td><input type="text" class="edit-select" style="min-width:140px" placeholder="備註（加入信件）" value="${esc(note)}" oninput="memberNotes[${i}]=this.value"></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -597,19 +654,23 @@ function onMemberChg(i,v){
   b.textContent=v;
 }
 async function saveMemberChanges() {
-  const keys = Object.keys(memberChanges);
-  if(!keys.length){ showInfo('沒有任何變更','warning'); return; }
-  if(!confirm(`確定儲存 ${keys.length} 筆繳費狀態？`)) return;
-  await runProgress(keys, async (i) => {
+  const statusKeys = Object.keys(memberChanges);
+  const nameKeys = Object.keys(memberNameFix).filter(k => memberNameFix[k].trim());
+  const total = [...new Set([...statusKeys, ...nameKeys])];
+  if(!total.length){ showInfo('沒有任何變更','warning'); return; }
+  if(!confirm(`確定儲存 ${total.length} 筆變更（繳費狀態 ${statusKeys.length} 筆，姓名修正 ${nameKeys.length} 筆）？`)) return;
+  await runProgress(total, async (i) => {
     const body = new URLSearchParams();
     body.append('action','updateMemberStatus');
     body.append('rowIndex', parseInt(i)+2);
-    body.append('newStatus', memberChanges[i]);
+    if(memberChanges[i]) body.append('newStatus', memberChanges[i]);
+    if(memberNameFix[i]) body.append('newMemberName', memberNameFix[i].trim());
     const resp = await fetch(getUrl(),{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
     const json = await resp.json();
     if(json.result!=='success') throw new Error(json.message);
-    submissions[parseInt(i)][7] = memberChanges[i];
-  }, i => `儲存第 ${parseInt(i)+1} 筆`, () => { memberChanges={}; renderMemberTable(); renderOverview(); });
+    if(memberChanges[i]) submissions[parseInt(i)][7] = memberChanges[i];
+    if(memberNameFix[i]) submissions[parseInt(i)][6] = memberNameFix[i].trim();
+  }, i => `儲存第 ${parseInt(i)+1} 筆`, () => { memberChanges={}; memberNameFix={}; renderMemberTable(); renderOverview(); });
 }
 
 // ===== RENUMBER =====
@@ -799,6 +860,99 @@ async function runProgress(items, fn, labelFn, doneFn) {
   fill.style.width='100%';
   pt.textContent=`完成！成功 ${done} 筆${err?'，失敗 '+err+' 筆':''}`;
   setTimeout(()=>{ overlay.classList.remove('show'); if(doneFn) doneFn(); if(err===0) showInfo(`🎉 ${done} 筆操作完成`,'success'); else showInfo(`⚠️ ${done} 筆成功，${err} 筆失敗`,'warning'); },1200);
+}
+
+// ===== 機構名稱正規化 =====
+let normData = []; // [{unit, count, rows:[i,...], normalized:''}]
+
+function scanUnits() {
+  if(!submissions.length){ showInfo('請先載入資料','warning'); return; }
+  const map = {};
+  submissions.forEach((r,i) => {
+    const u = (r[11]||'').trim();
+    if(!u) return;
+    if(!map[u]) map[u] = { unit:u, count:0, rows:[] };
+    map[u].count++;
+    map[u].rows.push(i);
+  });
+  normData = Object.values(map).sort((a,b) => b.count - a.count);
+  // 保留已有的正規化輸入
+  renderNormTable(normData);
+  document.getElementById('normCount').textContent = normData.length;
+  showInfo(`✅ 掃描完成，共 ${normData.length} 種機構名稱`, 'success');
+}
+
+function renderNormTable(data) {
+  const tbody = document.getElementById('normBody');
+  tbody.innerHTML = '';
+  let diffCount = 0;
+  data.forEach((item, idx) => {
+    const realIdx = normData.indexOf(item);
+    const hasNorm = !!(item.normalized && item.normalized.trim() && item.normalized.trim() !== item.unit);
+    if(hasNorm) diffCount++;
+    const tr = document.createElement('tr');
+    if(hasNorm) tr.style.background = '#e8f5e9';
+    tr.innerHTML = `
+      <td><strong>${esc(item.unit)}</strong></td>
+      <td style="text-align:center"><span style="font-weight:700;color:var(--primary)">${item.count}</span> 筆</td>
+      <td><input type="text" class="edit-select" style="width:100%" placeholder="留空不修改"
+        value="${esc(item.normalized||'')}"
+        oninput="normData[${realIdx}].normalized=this.value; updateNormPreview(${realIdx},this.closest('tr'))">
+      </td>
+      <td id="norm-preview-${realIdx}" style="font-size:0.8rem;color:#888">—</td>`;
+    if(item.normalized && item.normalized.trim()) {
+      tr.querySelector(`#norm-preview-${realIdx}`).textContent = item.normalized.trim() !== item.unit ? `→ ${item.normalized.trim()}` : '（無變更）';
+    }
+    tbody.appendChild(tr);
+  });
+  document.getElementById('normDiffCount').textContent = diffCount;
+}
+
+function updateNormPreview(idx, tr) {
+  const item = normData[idx];
+  const v = (item.normalized||'').trim();
+  const previewEl = tr.querySelector(`#norm-preview-${idx}`);
+  if(!v){ previewEl.textContent='—'; previewEl.style.color='#888'; tr.style.background=''; }
+  else if(v === item.unit){ previewEl.textContent='（無變更）'; previewEl.style.color='#aaa'; tr.style.background=''; }
+  else { previewEl.textContent=`→ ${v}`; previewEl.style.color='var(--success)'; tr.style.background='#e8f5e9'; }
+  // 更新待修正計數
+  const diff = normData.filter(d => d.normalized && d.normalized.trim() && d.normalized.trim() !== d.unit).length;
+  document.getElementById('normDiffCount').textContent = diff;
+}
+
+function filterNorm() {
+  const q = document.getElementById('normSearch').value.toLowerCase();
+  renderNormTable(q ? normData.filter(d => d.unit.toLowerCase().includes(q)) : normData);
+}
+
+async function applyNormalize() {
+  const toUpdate = normData.filter(d => d.normalized && d.normalized.trim() && d.normalized.trim() !== d.unit);
+  if(!toUpdate.length){ showInfo('沒有任何正規化項目，請先在「正規化為」欄位填入新名稱','warning'); return; }
+  const totalRows = toUpdate.reduce((s,d) => s + d.count, 0);
+  if(!confirm(`確定將 ${toUpdate.length} 種機構名稱（共 ${totalRows} 筆）批次正規化？\n此操作將直接修改 Sheet 資料，請確認無誤。`)) return;
+
+  // 展開成逐列更新清單
+  const updates = [];
+  toUpdate.forEach(item => {
+    item.rows.forEach(i => updates.push({ rowIndex: i+2, newUnit: item.normalized.trim(), subIdx: i }));
+  });
+
+  await runProgress(updates, async (item) => {
+    const body = new URLSearchParams();
+    body.append('action', 'updateUnit');
+    body.append('rowIndex', item.rowIndex);
+    body.append('newUnit', item.newUnit);
+    const resp = await fetch(getUrl(), {method:'POST', body, headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    const json = await resp.json();
+    if(json.result !== 'success') throw new Error(json.message);
+    submissions[item.subIdx][11] = item.newUnit;
+  }, item => `更新第 ${item.rowIndex-1} 筆`, () => {
+    // 清空正規化輸入，重新掃描
+    normData.forEach(d => { d.normalized = ''; });
+    scanUnits();
+    renderStats();
+    showInfo(`✅ 機構名稱正規化完成`, 'success');
+  });
 }
 
 function getUnitAbbr(u){ if(!u) return '未知'; const m={'亞東':'亞東','奇美':'奇美','台大':'台大','臺大':'台大','長庚':'長庚','馬偕':'馬偕','成大':'成大','高醫':'高醫','榮總':'榮總','北榮':'北榮','中榮':'中榮','高榮':'高榮','屏基':'屏基','彰基':'彰基','嘉基':'嘉基','慈濟':'慈濟','新光':'新光','國泰':'國泰','萬芳':'萬芳','輔大':'輔大','陽明':'陽明','北醫':'北醫'}; for(const k in m) if(u.indexOf(k)!==-1) return m[k]; const c=u.match(/[\u4e00-\u9fff]/g); return c?c.slice(0,2).join(''):u.substring(0,2); }
