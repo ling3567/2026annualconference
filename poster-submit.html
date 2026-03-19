@@ -1843,6 +1843,10 @@ function openPreview() {
 
 function closePreview() {
   document.getElementById('previewOverlay').classList.remove('show');
+  // 重置送出按鈕狀態，避免第二次開啟預覽時仍顯示「送出中」
+  const confirmBtn = document.getElementById('confirmSubmitBtn');
+  confirmBtn.disabled = false;
+  confirmBtn.innerHTML = '<span id="confirmBtnIcon">🚀</span> 確認送出';
 }
 
 // ===== SUBMIT =====
@@ -1957,6 +1961,11 @@ function resetForm() {
   // 重置送出按鈕
   const previewBtn = document.getElementById('previewBtn');
   if (previewBtn) { previewBtn.disabled = true; }
+  const confirmBtn = document.getElementById('confirmSubmitBtn');
+  if (confirmBtn) {
+    confirmBtn.disabled = false;
+    confirmBtn.innerHTML = '<span id="confirmBtnIcon">🚀</span> 確認送出';
+  }
   // 重置重複檢查快取
   lastCheckedTitle = '';
   lastCheckedMember = '';
