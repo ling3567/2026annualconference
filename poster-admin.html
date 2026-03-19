@@ -681,7 +681,7 @@ async function doUpdate() {
         category: row[2]||'', paperTitle: row[3]||'', keywords: row[4]||'',
         authors: row[5]||'', absMotivation: row[15]||'', absMethod: row[16]||'',
         absResult: row[17]||'', absConclusion: row[18]||'', wordCount: row[19]||'',
-        status: row[23]||'待審查',
+        status: row[21]||'待審查',
       }
     }))
     .filter(item => item.newId !== item.oldId);  // 只處理有修改的
@@ -711,7 +711,7 @@ async function doUpdate() {
         done++;
         setRowStatus(item.i, '✅', '完成');
         submissions[item.i][0] = item.newId;
-        if (json.newPdfUrl) submissions[item.i][22] = json.newPdfUrl;
+        if (json.newPdfUrl) submissions[item.i][20] = json.newPdfUrl;
       } else throw new Error(json.message);
     } catch(e) {
       err++;
@@ -779,7 +779,7 @@ async function doSingleEdit() {
       absResult:     row[17] || '',
       absConclusion: row[18] || '',
       wordCount:     row[19] || '',
-      status:        row[23] || '待審查',
+      status:        row[21] || '待審查',
     }));
     const resp = await fetch(getUrl(), { method: 'POST', body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
     const json = await resp.json();
@@ -787,7 +787,7 @@ async function doSingleEdit() {
 
     // 只更新這一筆
     submissions[i][0] = newId;
-    if (json.newPdfUrl) submissions[i][22] = json.newPdfUrl;
+    if (json.newPdfUrl) submissions[i][20] = json.newPdfUrl;
     newIds[i] = newId;
     closeSingleEdit();
     renderTable();
