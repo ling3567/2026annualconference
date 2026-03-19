@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投稿管理後台 | TSMCSD 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --primary:#1565C0; --primary-dark:#0d47a1; --primary-light:#e3f2fd;
+  --success:#2e7d32; --success-light:#e8f5e9;
+  --danger:#c62828;  --danger-light:#ffebee;
+  --warning:#e65100; --warning-light:#fff3e0;
+  --purple:#6a1b9a;  --purple-light:#f3e5f5;
+  --sidebar:#1a2332; --sidebar-hover:#243447;
+  --font:'Noto Sans TC','Microsoft JhengHei',sans-serif;
+  --radius:10px; --shadow:0 2px 10px rgba(0,0,0,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:#f0f4f8;color:#1a1a2e;line-height:1.6;overflow:hidden;height:100vh;}
+
+/* ===== LOGIN ===== */
+#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#0d47a1,#1565c0,#1976d2);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.login-box{background:white;border-radius:16px;padding:2.5rem 2rem;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;}
+.login-box .logo{font-size:2.5rem;margin-bottom:0.5rem;}
+.login-box h2{font-size:1.1rem;color:var(--primary-dark);margin-bottom:0.25rem;}
+.login-box p{font-size:0.8rem;color:#888;margin-bottom:1.75rem;}
+.login-box input{width:100%;padding:0.75rem 1rem;border:1.5px solid #ddd;border-radius:10px;font-size:0.95rem;font-family:var(--font);margin-bottom:0.75rem;transition:border-color 0.15s;}
+.login-box input:focus{outline:none;border-color:var(--primary);}
+.login-box button{width:100%;padding:0.75rem;background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:white;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;font-family:var(--font);transition:filter 0.15s;}
+.login-box button:hover{filter:brightness(1.1);}
+.login-err{color:var(--danger);font-size:0.85rem;margin-top:0.5rem;min-height:1.2em;}
+
+/* ===== LAYOUT ===== */
+#appShell{display:none;height:100vh;overflow:hidden;}
+#appShell.show{display:flex;}
+
+/* Sidebar */
+.sidebar{width:240px;background:var(--sidebar);color:white;display:flex;flex-direction:column;flex-shrink:0;height:100vh;overflow-y:auto;}
+.sidebar-header{padding:1.25rem 1.25rem 1rem;border-bottom:1px solid rgba(255,255,255,0.08);}
+.sidebar-header .site-name{font-size:0.78rem;color:rgba(255,255,255,0.5);margin-bottom:0.25rem;}
+.sidebar-header .title{font-size:0.95rem;font-weight:700;line-height:1.3;}
+.sidebar-url{padding:0.75rem 1rem;border-bottom:1px solid rgba(255,255,255,0.08);}
+.sidebar-url label{font-size:0.72rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:0.3rem;}
+.sidebar-url input{width:100%;padding:0.35rem 0.6rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;color:white;font-size:0.72rem;font-family:var(--font);}
+.sidebar-url input:focus{outline:none;border-color:rgba(255,255,255,0.5);}
+.sidebar-url button{width:100%;margin-top:0.4rem;padding:0.35rem;background:var(--primary);border:none;border-radius:6px;color:white;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:var(--font);}
+.sidebar-url button:hover{filter:brightness(1.15);}
+.sidebar-section{padding:0.75rem 1rem 0.25rem;font-size:0.7rem;color:rgba(255,255,255,0.35);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:0.6rem;padding:0.65rem 1.25rem;cursor:pointer;font-size:0.88rem;color:rgba(255,255,255,0.75);transition:background 0.15s,color 0.15s;border-left:3px solid transparent;}
+.nav-item:hover{background:var(--sidebar-hover);color:white;}
+.nav-item.active{background:rgba(21,101,192,0.35);color:white;border-left-color:var(--primary);}
+.nav-item .nav-icon{font-size:1rem;width:1.2rem;text-align:center;}
+.sidebar-footer{margin-top:auto;padding:1rem;border-top:1px solid rgba(255,255,255,0.08);}
+.logout-btn{width:100%;padding:0.5rem;background:rgba(198,40,40,0.2);border:1px solid rgba(198,40,40,0.4);border-radius:8px;color:rgba(255,255,255,0.7);font-size:0.82rem;cursor:pointer;font-family:var(--font);}
+.logout-btn:hover{background:rgba(198,40,40,0.4);color:white;}
+
+/* Main area */
+.main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:white;padding:0.75rem 1.5rem;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-size:1rem;font-weight:700;color:var(--primary-dark);}
+.topbar-sub{font-size:0.78rem;color:#888;}
+.content{flex:1;overflow-y:auto;padding:1.25rem 1.5rem 2rem;}
+
+/* ===== SHARED ===== */
+.page{display:none;}.page.active{display:block;}
+.info-bar{padding:0.65rem 1rem;border-radius:8px;font-size:0.85rem;margin-bottom:1rem;display:none;}
+.info-bar.show{display:block;}
+.info-bar.info   {background:var(--primary-light);color:var(--primary);border-left:4px solid var(--primary);}
+.info-bar.success{background:var(--success-light);color:var(--success);border-left:4px solid var(--success);}
+.info-bar.error  {background:var(--danger-light); color:var(--danger); border-left:4px solid var(--danger);}
+.info-bar.warning{background:var(--warning-light);color:var(--warning);border-left:4px solid var(--warning);}
+.card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:1.25rem;overflow:hidden;}
+.card-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;padding:0.9rem 1.25rem;border-bottom:2px solid #e3f2fd;background:#fafbff;}
+.card-header h2{font-size:0.95rem;color:var(--primary);}
+.card-body{padding:1.25rem;}
+.btn{padding:0.5rem 1.1rem;border:none;border-radius:8px;font-size:0.85rem;font-weight:700;font-family:var(--font);cursor:pointer;transition:filter 0.15s,transform 0.1s;white-space:nowrap;}
+.btn:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px);}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;filter:none;}
+.btn-primary{background:var(--primary);color:white;}
+.btn-success{background:var(--success);color:white;}
+.btn-warning{background:var(--warning);color:white;}
+.btn-danger{background:var(--danger);color:white;}
+.btn-purple{background:var(--purple);color:white;}
+.btn-sm{padding:0.3rem 0.7rem;font-size:0.78rem;}
+.btn-group{display:flex;gap:0.5rem;flex-wrap:wrap;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.83rem;}
+thead th{background:var(--primary);color:white;padding:0.5rem 0.7rem;text-align:left;font-weight:700;white-space:nowrap;}
+tbody tr{border-bottom:1px solid #eee;transition:background 0.1s;}
+tbody tr:hover{background:#f5f8ff;}
+tbody tr.changed{background:#fff8e1;}
+td{padding:0.45rem 0.7rem;vertical-align:middle;}
+.badge{display:inline-block;padding:0.15rem 0.55rem;border-radius:12px;font-size:0.74rem;font-weight:700;}
+.badge-paid   {background:#e8f5e9;color:#2e7d32;}
+.badge-pending{background:#fff3e0;color:#e65100;}
+.badge-none   {background:#ffebee;color:#c62828;}
+.badge-sent   {background:#e3f2fd;color:#1565c0;}
+.badge-unsent {background:#f5f5f5;color:#888;}
+.badge-a{background:#e3f2fd;color:#1565c0;}
+.badge-b{background:#f3e5f5;color:#6a1b9a;}
+.badge-c{background:#e8f5e9;color:#2e7d32;}
+.dup-tag{background:var(--warning);color:white;font-size:0.7rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:4px;margin-left:0.35rem;}
+.new-id-input{width:100%;padding:0.3rem 0.55rem;border:1.5px solid #ddd;border-radius:6px;font-size:0.82rem;font-family:var(--font);}
+.new-id-input:focus{outline:none;border-color:var(--primary);}
+.new-id-input.modified{border-color:#f57c00;background:#fffde7;}
+.edit-select{padding:0.28rem 0.5rem;border:1.5px solid #ccc;border-radius:6px;font-size:0.8rem;font-family:var(--font);background:white;cursor:pointer;}
+.edit-select:focus{outline:none;border-color:var(--primary);}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem;margin-bottom:1.25rem;}
+.stat-card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem 1.1rem;text-align:center;}
+.stat-num{font-size:1.8rem;font-weight:900;line-height:1.2;}
+.stat-label{font-size:0.78rem;color:#666;margin-top:0.2rem;}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;}
+@media(max-width:700px){.chart-grid{grid-template-columns:1fr;}}
+.chart-box{background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.25rem;}
+.chart-box h3{font-size:0.9rem;color:var(--primary);margin-bottom:0.75rem;}
+canvas{max-height:240px;}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;justify-content:center;align-items:flex-start;padding:2rem 1rem;overflow-y:auto;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:white;border-radius:14px;max-width:700px;width:100%;margin:auto;box-shadow:0 8px 40px rgba(0,0,0,0.25);overflow:hidden;}
+.modal-header{padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;color:white;}
+.modal-header.blue{background:linear-gradient(135deg,#0d47a1,#1976d2);}
+.modal-header.green{background:linear-gradient(135deg,#2e7d32,#1b5e20);}
+.modal-header.orange{background:linear-gradient(135deg,#e65100,#bf360c);}
+.modal-header.purple{background:linear-gradient(135deg,#6a1b9a,#4a148c);}
+.modal-header h2{font-size:1rem;}
+.modal-body{padding:1.25rem 1.5rem;max-height:65vh;overflow-y:auto;}
+.modal-footer{display:flex;justify-content:flex-end;gap:0.75rem;padding:0.9rem 1.5rem;border-top:1px solid #eee;background:#fafafa;}
+.mail-preview{background:#f9f9f9;border:1px solid #ddd;border-radius:8px;padding:1.1rem;font-size:0.87rem;line-height:1.8;white-space:pre-wrap;}
+.mail-meta{font-size:0.8rem;color:#555;margin-bottom:0.5rem;}
+.mail-subject{font-weight:700;color:var(--primary);margin-bottom:0.75rem;}
+
+/* Progress */
+.progress-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;justify-content:center;align-items:center;}
+.progress-overlay.show{display:flex;}
+.progress-box{background:white;border-radius:14px;padding:2rem;max-width:380px;width:90%;text-align:center;}
+.progress-box h3{margin-bottom:1rem;color:var(--primary);}
+.progress-bar-bg{height:10px;background:#e0e0e0;border-radius:5px;overflow:hidden;margin-bottom:0.75rem;}
+.progress-bar-fill{height:100%;background:var(--primary);border-radius:5px;transition:width 0.3s;}
+.progress-text{font-size:0.85rem;color:#666;}
+.spinner{display:inline-block;width:1em;height:1em;border:2px solid rgba(255,255,255,0.4);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.dup-warning{background:var(--warning-light);border-left:4px solid var(--warning);color:var(--warning);padding:0.6rem 1rem;border-radius:6px;font-size:0.83rem;font-weight:600;margin-bottom:0.75rem;display:none;}
+.dup-warning.show{display:block;}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="logo">🛡️</div>
+    <h2>TSMCSD 2026 管理後台</h2>
+    <p>台灣醫事聯合臨床技能發展學會</p>
+    <input type="password" id="pwInput" placeholder="請輸入管理密碼" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">登入</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="appShell">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="site-name">TSMCSD 2026</div>
+      <div class="title">投稿管理後台</div>
+    </div>
+    <div class="sidebar-url">
+      <label>Apps Script URL</label>
+      <input type="text" id="scriptUrl" placeholder="貼入 URL..."
+        value="https://script.google.com/macros/s/AKfycbzdppunk_BTiZN2ShWpJilr5FGnCrN4BB6QPD_miImF5pObEZxe3wSAQaj5VuWbnF3m/exec">
+      <button onclick="loadAll()">📥 載入資料</button>
+    </div>
+    <div class="sidebar-section">資料管理</div>
+    <div class="nav-item active" onclick="gotoPage('page-overview',this)"><span class="nav-icon">📋</span>投稿總覽</div>
+    <div class="nav-item" onclick="gotoPage('page-mail',this)"><span class="nav-icon">📧</span>確認信管理</div>
+    <div class="nav-item" onclick="gotoPage('page-member',this)"><span class="nav-icon">💰</span>會員繳費狀態</div>
+    <div class="sidebar-section">編號管理</div>
+    <div class="nav-item" onclick="gotoPage('page-renumber',this)"><span class="nav-icon">🔢</span>投稿編號管理</div>
+    <div class="nav-item" onclick="gotoPage('page-finalpdf',this)"><span class="nav-icon">📄</span>產生正式收錄 PDF</div>
+    <div class="sidebar-section">統計分析</div>
+    <div class="nav-item" onclick="gotoPage('page-stats',this)"><span class="nav-icon">📊</span>統計分析</div>
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="doLogout()">🚪 登出</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main-area">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbarTitle">投稿總覽</div>
+        <div class="topbar-sub" id="topbarSub">載入資料後即可操作</div>
+      </div>
+      <div style="font-size:0.8rem;color:#aaa" id="topbarCount"></div>
+    </div>
+    <div class="content">
+      <div class="info-bar" id="infoBar"></div>
+
+      <!-- ===== PAGE: 總覽 ===== -->
+      <div class="page active" id="page-overview">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-num" id="ov-total" style="color:var(--primary)">—</div><div class="stat-label">總投稿篇數</div></div>
+          <div class="stat-card"><div class="stat-num" id="ov-a" style="color:#1565c0">—</div><div class="stat-label">A 類</div></div>
+          <div class="stat-card"><div class="stat-num" id="ov-b" style="color:#6a1b9a">—</div><div class="stat-label">B 類</div></div>
+          <div class="stat-card"><div class="stat-num" id="ov-c" style="color:#2e7d32">—</div><div class="stat-label">C 類</div></div>
+          <div class="stat-card"><div class="stat-num" id="ov-paid" style="color:var(--success)">—</div><div class="stat-label">會員已繳費</div></div>
+          <div class="stat-card"><div class="stat-num" id="ov-pending" style="color:var(--warning)">—</div><div class="stat-label">會員未繳費</div></div>
+          <div class="stat-card"><div class="stat-num" id="ov-sent" style="color:var(--primary)">—</div><div class="stat-label">確認信已發送</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>📋 最新投稿清單</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>投稿編號</th><th>論文題目</th><th>類別</th><th>通訊作者</th><th>會員狀態</th><th>確認信</th><th>投稿時間</th></tr></thead>
+              <tbody id="overviewBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PAGE: 確認信 ===== -->
+      <div class="page" id="page-mail">
+        <div class="card">
+          <div class="card-header">
+            <h2 id="mailTitle">確認信管理</h2>
+            <div class="btn-group">
+              <button class="btn btn-sm btn-primary" onclick="selectMail(true)">全選</button>
+              <button class="btn btn-sm" style="background:#eee;color:#333" onclick="selectMail(false)">取消</button>
+              <button class="btn btn-success" onclick="openMailPreview()">📧 預覽並發送確認信</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th style="width:2.5rem"><input type="checkbox" id="mailCheckAll" onchange="document.querySelectorAll('.mail-chk').forEach(c=>c.checked=this.checked)"></th>
+                <th>投稿編號</th><th>論文題目</th><th>通訊作者</th><th>Email</th><th>投稿時間</th><th>確認信狀態</th>
+              </tr></thead>
+              <tbody id="mailBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PAGE: 會員繳費 ===== -->
+      <div class="page" id="page-member">
+        <div class="card">
+          <div class="card-header">
+            <h2 id="memberTitle">會員繳費狀態管理</h2>
+            <button class="btn btn-success" onclick="saveMemberChanges()">💾 儲存所有變更</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>投稿編號</th><th>論文題目</th><th>通訊作者</th><th>會員姓名</th><th>目前狀態</th><th>修改狀態</th></tr></thead>
+              <tbody id="memberBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PAGE: 重新編號 ===== -->
+      <div class="page" id="page-renumber">
+        <div class="card">
+          <div class="card-header">
+            <h2 id="renumberTitle">投稿編號管理</h2>
+            <div class="btn-group">
+              <button class="btn btn-warning" onclick="autoRenumber()">🔢 自動重新編號</button>
+              <button class="btn btn-success" onclick="openRenumberPreview()">🚀 全部更新 PDF＋Sheet</button>
+            </div>
+          </div>
+          <div style="padding:0.5rem 1.25rem;background:#f9f9f9;border-bottom:1px solid #eee;font-size:0.78rem;display:flex;gap:1.5rem;">
+            <span>⬜ 未修改</span><span style="color:#f57c00">🟠 已修改（待更新）</span><span style="color:var(--danger)">🔴 更新失敗</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th style="width:2.5rem"><input type="checkbox" id="rnChkAll" onchange="toggleRnAll(this)"></th>
+                <th>#</th><th>原始編號</th><th>新編號</th><th>論文題目</th><th>類別</th><th>通訊作者</th><th>狀態</th>
+              </tr></thead>
+              <tbody id="renumberBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PAGE: 正式 PDF ===== -->
+      <div class="page" id="page-finalpdf">
+        <div class="card">
+          <div class="card-header"><h2>📄 產生正式收錄 PDF</h2></div>
+          <div class="card-body">
+            <div style="background:var(--warning-light);border-left:4px solid var(--warning);color:var(--warning);padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.88rem;font-weight:600">
+              ⚠️ 請確認已完成「全部更新 PDF＋Sheet」（重新編號）後，再產生正式收錄 PDF，以確保編號正確。
+            </div>
+            <div style="background:var(--purple-light);border-left:4px solid var(--purple);color:var(--purple);padding:0.75rem 1rem;border-radius:8px;margin-bottom:1.25rem;font-size:0.85rem;">
+              正式收錄 PDF 包含完整作者資訊，供錄取後對外使用。審查用 PDF（匿名）將予以保留。
+            </div>
+            <div style="margin-bottom:1rem">
+              <label style="font-size:0.88rem;font-weight:600;display:block;margin-bottom:0.4rem">產生範圍</label>
+              <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;cursor:pointer"><input type="radio" name="fpRange" value="all" checked> 全部投稿（共 <span id="fpTotal">0</span> 筆）</label>
+              <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer"><input type="radio" name="fpRange" value="selected"> 僅勾選的筆數（<span id="fpSelected">0</span> 筆）</label>
+            </div>
+            <button class="btn btn-purple" onclick="doGenerateFinalPdf()">📄 開始產生正式收錄 PDF</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th style="width:2.5rem"><input type="checkbox" id="fpChkAll" onchange="document.querySelectorAll('.fp-chk').forEach(c=>{c.checked=this.checked;updateFpCount();})"></th>
+                <th>投稿編號</th><th>論文題目</th><th>類別</th><th>通訊作者</th><th>狀態</th>
+              </tr></thead>
+              <tbody id="fpBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PAGE: 統計 ===== -->
+      <div class="page" id="page-stats">
+        <div class="chart-grid">
+          <div class="chart-box"><h3>📊 投稿類別分佈</h3><canvas id="catChart"></canvas></div>
+          <div class="chart-box"><h3>👤 職類分佈（前10）</h3><canvas id="profChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2>🏥 醫院投稿統計</h2>
+            <input type="text" id="hospSearch" placeholder="搜尋醫院..." oninput="filterHosp()" style="padding:0.4rem 0.75rem;border:1.5px solid #ccc;border-radius:8px;font-size:0.85rem;font-family:var(--font);">
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>醫院／機構</th><th style="text-align:center">篇數</th><th>投稿編號</th></tr></thead>
+              <tbody id="hospBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- content -->
+  </div><!-- main-area -->
+</div><!-- appShell -->
+
+<!-- Mail preview modal -->
+<div class="modal-overlay" id="mailModal">
+  <div class="modal-box">
+    <div class="modal-header green"><h2>📧 確認信預覽</h2>
+      <button onclick="closeModal('mailModal')" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:0.85rem;color:#555;margin-bottom:0.75rem">共選取 <strong id="mailCount">0</strong> 筆，請確認信件內容後再發送。</p>
+      <div id="mailPreviewList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('mailModal')" style="background:#eee;color:#333">取消</button>
+      <button class="btn btn-success" onclick="sendEmails()">✅ 確認發送</button>
+    </div>
+  </div>
+</div>
+
+<!-- Renumber preview modal -->
+<div class="modal-overlay" id="rnModal">
+  <div class="modal-box" style="max-width:860px">
+    <div class="modal-header blue"><h2 id="rnModalTitle">📋 送出前確認</h2>
+      <button onclick="closeModal('rnModal')" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer">✕</button></div>
+    <div class="modal-body">
+      <div class="dup-warning" id="rnDupWarn"></div>
+      <table class="preview-table" id="rnPreviewTable" style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+        <thead style="background:#e3f2fd;"><tr>
+          <th style="padding:0.4rem 0.6rem;text-align:left">序</th>
+          <th style="padding:0.4rem 0.6rem;text-align:left">論文題目</th>
+          <th style="padding:0.4rem 0.6rem;text-align:left">舊編號</th>
+          <th style="padding:0.4rem 0.6rem;text-align:left">新編號</th>
+        </tr></thead>
+        <tbody id="rnPreviewBody"></tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('rnModal')" style="background:#eee;color:#333">← 返回修改</button>
+      <button class="btn btn-success" id="rnConfirmBtn" onclick="doUpdate()">✅ 確認無誤，全部更新</button>
+    </div>
+  </div>
+</div>
+
+<!-- Progress -->
+<div class="progress-overlay" id="progressOverlay">
+  <div class="progress-box">
+    <h3>⏳ 處理中...</h3>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+    <p class="progress-text" id="progressText">準備中...</p>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const ADMIN_PASSWORD = 'TSMCSD2026';  // ← 可修改密碼
+
+// ===== LOGIN =====
+function doLogin() {
+  const pw = document.getElementById('pwInput').value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appShell').classList.add('show');
+  } else {
+    document.getElementById('loginErr').textContent = '密碼錯誤，請重新輸入';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+function doLogout() {
+  if (confirm('確定要登出？')) { location.reload(); }
+}
+document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ===== NAV =====
+const pageNames = {
+  'page-overview':'投稿總覽','page-mail':'確認信管理','page-member':'會員繳費狀態',
+  'page-renumber':'投稿編號管理','page-finalpdf':'產生正式收錄 PDF','page-stats':'統計分析'
+};
+function gotoPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = pageNames[id]||'';
+}
+
+// ===== DATA =====
+let submissions = [];
+let newIds = {};
+let memberChanges = {};
+let hospData = [];
+let catChartInst = null, profChartInst = null;
+
+function getUrl() { return document.getElementById('scriptUrl').value.trim(); }
+function showInfo(msg, type) {
+  const b = document.getElementById('infoBar');
+  b.textContent = msg; b.className = 'info-bar show ' + (type||'info');
+}
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatTs(ts){
+  if(!ts) return '—';
+  try{ return new Date(ts).toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); }
+  catch(e){ return ts; }
+}
+
+async function loadAll() {
+  const url = getUrl();
+  if(!url){ showInfo('請填入 Apps Script URL','error'); return; }
+  showInfo('⏳ 載入中...','info');
+  try {
+    const resp = await fetch(url + '?action=getSubmissions');
+    const json = await resp.json();
+    if(json.result !== 'success') throw new Error(json.message);
+    submissions = json.data;
+    newIds = {};
+    memberChanges = {};
+    renderAll();
+    const n = submissions.length;
+    showInfo(`✅ 已載入 ${n} 筆投稿`, 'success');
+    document.getElementById('topbarSub').textContent = `共 ${n} 筆投稿`;
+    document.getElementById('topbarCount').textContent = `最後載入：${new Date().toLocaleTimeString('zh-TW')}`;
+  } catch(e) { showInfo('❌ 載入失敗：' + e.message, 'error'); }
+}
+
+function renderAll() {
+  renderOverview();
+  renderMailTable();
+  renderMemberTable();
+  renderRenumberTable();
+  renderFpTable();
+  renderStats();
+}
+
+// ===== OVERVIEW =====
+function renderOverview() {
+  const n = submissions.length;
+  const cats = {A:0,B:0,C:0};
+  const paid = {paid:0,pending:0};
+  let sent = 0;
+  submissions.forEach(r => {
+    const c = (r[2]||'').replace('類','').trim();
+    if(cats[c]!==undefined) cats[c]++;
+    const m = r[7]||'';
+    if(m.includes('已繳')) paid.paid++;
+    else if(m.includes('未繳')) paid.pending++;
+    if((r[21]||'').includes('確認信')) sent++;
+  });
+  document.getElementById('ov-total').textContent = n;
+  document.getElementById('ov-a').textContent = cats.A;
+  document.getElementById('ov-b').textContent = cats.B;
+  document.getElementById('ov-c').textContent = cats.C;
+  document.getElementById('ov-paid').textContent = paid.paid;
+  document.getElementById('ov-pending').textContent = paid.pending;
+  document.getElementById('ov-sent').textContent = sent;
+
+  const tbody = document.getElementById('overviewBody');
+  tbody.innerHTML = '';
+  submissions.forEach(r => {
+    const cat = (r[2]||'').replace('類','').trim();
+    const m   = r[7]||'';
+    const mCls = m.includes('已繳')?'badge-paid':m.includes('未繳')?'badge-pending':'badge-none';
+    const sent2 = (r[21]||'').includes('確認信');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><strong>${esc(r[0]||'')}</strong></td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r[3]||'')}">${esc(r[3]||'')}</td>
+      <td><span class="badge badge-${cat.toLowerCase()}">${esc(r[2]||'')}</span></td>
+      <td>${esc(r[8]||'')}</td>
+      <td><span class="badge ${mCls}">${esc(m)}</span></td>
+      <td><span class="badge ${sent2?'badge-sent':'badge-unsent'}">${sent2?'✅ 已發送':'⬜ 未發送'}</span></td>
+      <td style="font-size:0.78rem;color:#888">${formatTs(r[1])}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ===== MAIL =====
+function renderMailTable() {
+  const tbody = document.getElementById('mailBody');
+  tbody.innerHTML = '';
+  document.getElementById('mailTitle').textContent = `確認信管理（共 ${submissions.length} 筆）`;
+  submissions.forEach((r,i) => {
+    const sent = (r[21]||'').includes('確認信');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="text-align:center"><input type="checkbox" class="mail-chk" data-i="${i}"></td>
+      <td><strong>${esc(r[0]||'')}</strong></td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r[3]||'')}</td>
+      <td>${esc(r[8]||'')}</td>
+      <td style="font-size:0.8rem;color:#555">${esc(r[9]||'')}</td>
+      <td style="font-size:0.78rem;color:#888">${formatTs(r[1])}</td>
+      <td><span class="badge ${sent?'badge-sent':'badge-unsent'}">${sent?'✅ 已發送':'⬜ 未發送'}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function selectMail(v){ document.querySelectorAll('.mail-chk').forEach(c=>c.checked=v); }
+function openMailPreview() {
+  const sel = Array.from(document.querySelectorAll('.mail-chk:checked')).map(c=>parseInt(c.dataset.i));
+  if(!sel.length){ showInfo('請先勾選要發送確認信的投稿','warning'); return; }
+  document.getElementById('mailCount').textContent = sel.length;
+  const list = document.getElementById('mailPreviewList');
+  list.innerHTML = '';
+  sel.forEach(i => {
+    const r = submissions[i];
+    const div = document.createElement('div');
+    div.style.cssText = 'margin-bottom:1rem;border:1px solid #ddd;border-radius:8px;overflow:hidden';
+    div.innerHTML = `<div style="background:#e3f2fd;padding:0.45rem 0.75rem;font-size:0.78rem;color:var(--primary);font-weight:700">${esc(r[0]||'')} — ${esc(r[8]||'')} &lt;${esc(r[9]||'')}&gt;</div>
+      <div class="mail-preview"><div class="mail-meta">收件人：${esc(r[8]||'')} &lt;${esc(r[9]||'')}&gt;</div><div class="mail-subject">主旨：【TSMCSD 2026年會】海報論文投稿確認通知</div>${esc(buildMail(r))}</div>`;
+    list.appendChild(div);
+  });
+  document.getElementById('mailModal').classList.add('show');
+}
+function buildMail(r){
+  return `${r[8]||''} 您好，\n\n感謝您投稿「2026年台灣醫事聯合臨床技能發展學會年會暨學術研討會」海報論文。\n\n我們已收到您的投稿資料，詳情如下：\n\n　投稿編號：${r[0]||''}\n　論文題目：${r[3]||''}\n　投稿類別：${r[2]||''}\n\n請妥善保存投稿編號，以供後續聯繫使用。\n\n錄取結果將於 2026年7月15日前 以 Email 個別通知。\n如有任何問題，請聯繫學會秘書處楊依玲小姐：(06)2812811 轉 57426。\n\n台灣醫事聯合臨床技能發展學會 敬上`;
+}
+async function sendEmails() {
+  const sel = Array.from(document.querySelectorAll('.mail-chk:checked')).map(c=>parseInt(c.dataset.i));
+  closeModal('mailModal');
+  await runProgress(sel, async (i) => {
+    const r = submissions[i];
+    const body = new URLSearchParams();
+    body.append('action','sendConfirmEmail');
+    body.append('rowIndex', i+2);
+    body.append('data', JSON.stringify({submissionId:r[0],title:r[3],category:r[2],contactName:r[8],contactEmail:r[9]}));
+    const resp = await fetch(getUrl(),{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    const json = await resp.json();
+    if(json.result!=='success') throw new Error(json.message);
+    submissions[i][21] = '確認信已發送';
+  }, r => `發送：${submissions[r][8]||''}`, () => { renderMailTable(); renderOverview(); });
+}
+
+// ===== MEMBER =====
+function renderMemberTable() {
+  const tbody = document.getElementById('memberBody');
+  tbody.innerHTML = '';
+  document.getElementById('memberTitle').textContent = `會員繳費狀態（共 ${submissions.length} 筆）`;
+  submissions.forEach((r,i) => {
+    const m = r[7]||'';
+    const cls = m.includes('已繳')?'badge-paid':m.includes('未繳')?'badge-pending':'badge-none';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><strong>${esc(r[0]||'')}</strong></td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r[3]||'')}</td>
+      <td>${esc(r[8]||'')}</td>
+      <td><strong>${esc(r[6]||'（無）')}</strong></td>
+      <td><span class="badge ${cls}" id="mbadge-${i}">${esc(m)}</span></td>
+      <td><select class="edit-select" onchange="onMemberChg(${i},this.value)">
+        <option value="會員已繳年費" ${m==='會員已繳年費'?'selected':''}>✅ 已繳費</option>
+        <option value="會員未繳年費" ${m==='會員未繳年費'?'selected':''}>⏳ 未繳費</option>
+        <option value="非會員" ${m==='非會員'?'selected':''}>❌ 非會員</option>
+      </select></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function onMemberChg(i,v){
+  memberChanges[i]=v;
+  const b=document.getElementById('mbadge-'+i);
+  b.className='badge '+(v.includes('已繳')?'badge-paid':v.includes('未繳')?'badge-pending':'badge-none');
+  b.textContent=v;
+}
+async function saveMemberChanges() {
+  const keys = Object.keys(memberChanges);
+  if(!keys.length){ showInfo('沒有任何變更','warning'); return; }
+  if(!confirm(`確定儲存 ${keys.length} 筆繳費狀態？`)) return;
+  await runProgress(keys, async (i) => {
+    const body = new URLSearchParams();
+    body.append('action','updateMemberStatus');
+    body.append('rowIndex', parseInt(i)+2);
+    body.append('newStatus', memberChanges[i]);
+    const resp = await fetch(getUrl(),{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    const json = await resp.json();
+    if(json.result!=='success') throw new Error(json.message);
+    submissions[parseInt(i)][7] = memberChanges[i];
+  }, i => `儲存第 ${parseInt(i)+1} 筆`, () => { memberChanges={}; renderMemberTable(); renderOverview(); });
+}
+
+// ===== RENUMBER =====
+function getAllNewIds(){ return submissions.map((_,i)=>newIds[i]!==undefined?newIds[i]:(submissions[i][0]||'')); }
+function findDups(ids){ const c={}; ids.forEach(id=>{if(id)c[id]=(c[id]||0)+1;}); return new Set(Object.keys(c).filter(k=>c[k]>1)); }
+
+function renderRenumberTable() {
+  const tbody = document.getElementById('renumberBody');
+  tbody.innerHTML = '';
+  document.getElementById('renumberTitle').textContent = `投稿編號管理（共 ${submissions.length} 筆）`;
+  const allIds = getAllNewIds();
+  const dups = findDups(allIds);
+  submissions.forEach((r,i) => {
+    const oldId = r[0]||'';
+    const curNew = allIds[i];
+    const isModified = curNew !== oldId;
+    const isDup = dups.has(curNew);
+    const cat = r[2]||'';
+    const catL = cat.replace('類','').trim().toLowerCase();
+    const tr = document.createElement('tr');
+    if(isModified) tr.classList.add('changed');
+    tr.id = 'rn-row-'+i;
+    tr.innerHTML = `<td style="text-align:center" id="rn-chk-td-${i}"></td>
+      <td style="color:#999;font-size:0.78rem">${i+1}</td>
+      <td style="color:#888;font-size:0.8rem;white-space:nowrap">${esc(oldId)}</td>
+      <td style="min-width:200px"><input class="new-id-input ${isModified?'modified':''}" value="${esc(curNew)}" id="rnid-${i}" oninput="onRnChange(${i},this.value)">${isDup?'<span class="dup-tag">⚠️重複</span>':''}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r[3]||'')}">${esc(r[3]||'')}</td>
+      <td><span class="badge badge-${catL}">${esc(cat)}</span></td>
+      <td>${esc(r[8]||'')}</td>
+      <td id="rn-status-${i}"><span style="color:#aaa">⬜ 待更新</span></td>`;
+    tbody.appendChild(tr);
+    const chk = document.createElement('input');
+    chk.type='checkbox'; chk.className='fp-chk rn-chk'; chk.dataset.i=i;
+    chk.addEventListener('change',updateFpCount);
+    document.getElementById('rn-chk-td-'+i).appendChild(chk);
+  });
+}
+function toggleRnAll(cb){ document.querySelectorAll('.rn-chk').forEach(c=>c.checked=cb.checked); }
+function onRnChange(i,v){
+  newIds[i]=v.trim();
+  const inp=document.getElementById('rnid-'+i);
+  inp.className='new-id-input '+(newIds[i]!==(submissions[i][0]||'')?'modified':'');
+  document.getElementById('rn-row-'+i).classList.toggle('changed',newIds[i]!==(submissions[i][0]||''));
+}
+function autoRenumber(){
+  if(!submissions.length) return;
+  if(!confirm('依「類別→投稿時間」重新編號，確定繼續？')) return;
+  const groups={};
+  submissions.forEach((r,i)=>{ const c=(r[2]||'X').replace('類','').trim(); if(!groups[c])groups[c]=[]; groups[c].push({i,r}); });
+  Object.keys(groups).sort().forEach(cat=>{
+    groups[cat].sort((a,b)=>new Date(a.r[1]||0)-new Date(b.r[1]||0));
+    groups[cat].forEach((item,seq)=>{ newIds[item.i]=cat+'-'+String(seq+1).padStart(2,'0'); });
+  });
+  renderRenumberTable();
+  showInfo(`✅ 已重新編號 ${submissions.length} 筆，請確認後按「全部更新」`,'success');
+}
+function openRenumberPreview(){
+  const allIds=getAllNewIds();
+  const dups=findDups(allIds);
+  const changed=submissions.map((r,i)=>({i,oldId:r[0]||'',newId:allIds[i],r})).filter(x=>x.newId!==x.oldId);
+  if(!changed.length){ showInfo('沒有任何編號被修改','warning'); return; }
+  document.getElementById('rnModalTitle').textContent = `📋 送出前確認：共 ${changed.length} 筆變更`;
+  const tbody=document.getElementById('rnPreviewBody');
+  tbody.innerHTML='';
+  const hasDup=changed.some(x=>dups.has(x.newId));
+  changed.forEach((x,seq)=>{
+    const isDup=dups.has(x.newId);
+    const tr=document.createElement('tr');
+    if(isDup) tr.style.background='#fff3e0';
+    tr.innerHTML=`<td style="padding:0.4rem 0.6rem">${seq+1}</td>
+      <td style="padding:0.4rem 0.6rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.r[3]||'')}</td>
+      <td style="padding:0.4rem 0.6rem;color:#999;font-size:0.8rem">${esc(x.oldId)}</td>
+      <td style="padding:0.4rem 0.6rem;font-weight:700;color:${isDup?'var(--warning)':'var(--success)'}">${esc(x.newId)}${isDup?'<span class="dup-tag">⚠️</span>':''}</td>`;
+    tbody.appendChild(tr);
+  });
+  const warn=document.getElementById('rnDupWarn');
+  const btn=document.getElementById('rnConfirmBtn');
+  if(hasDup){ warn.textContent='⚠️ 發現重複編號，請返回修改後再送出'; warn.classList.add('show'); btn.disabled=true; }
+  else{ warn.classList.remove('show'); btn.disabled=false; }
+  document.getElementById('rnModal').classList.add('show');
+}
+async function doUpdate(){
+  closeModal('rnModal');
+  const allIds=getAllNewIds();
+  const updateList=submissions.map((r,i)=>({i,rowIndex:i+2,oldId:r[0]||'',newId:allIds[i],data:{category:r[2]||'',paperTitle:r[3]||'',keywords:r[4]||'',authors:r[5]||'',absMotivation:r[15]||'',absMethod:r[16]||'',absResult:r[17]||'',absConclusion:r[18]||'',wordCount:r[19]||'',status:r[21]||'待審查'}})).filter(x=>x.newId!==x.oldId);
+  await runProgress(updateList, async (item) => {
+    const body=new URLSearchParams();
+    body.append('action','renumberSubmission'); body.append('rowIndex',item.rowIndex);
+    body.append('oldId',item.oldId); body.append('newId',item.newId);
+    body.append('data',JSON.stringify(item.data)); body.append('keepOld','false');
+    const resp=await fetch(getUrl(),{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    const json=await resp.json();
+    if(json.result!=='success') throw new Error(json.message);
+    submissions[item.i][0]=item.newId;
+    if(json.newPdfUrl) submissions[item.i][20]=json.newPdfUrl;
+    document.getElementById('rn-status-'+item.i).innerHTML='<span style="color:var(--success)">✅ 完成</span>';
+  }, item => `更新：${item.newId}`, () => { newIds={}; renderRenumberTable(); renderOverview(); });
+}
+
+// ===== FINAL PDF =====
+function renderFpTable(){
+  const tbody=document.getElementById('fpBody');
+  tbody.innerHTML='';
+  document.getElementById('fpTotal').textContent=submissions.length;
+  submissions.forEach((r,i)=>{
+    const cat=(r[2]||'').replace('類','').trim().toLowerCase();
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="text-align:center" id="fp-chk-td-${i}"></td>
+      <td><strong>${esc(r[0]||'')}</strong></td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r[3]||'')}</td>
+      <td><span class="badge badge-${cat}">${esc(r[2]||'')}</span></td>
+      <td>${esc(r[8]||'')}</td>
+      <td id="fp-status-${i}"><span style="color:#aaa">⬜ 待產生</span></td>`;
+    tbody.appendChild(tr);
+    const chk=document.createElement('input');
+    chk.type='checkbox'; chk.className='fp-chk'; chk.dataset.i=i;
+    chk.addEventListener('change',updateFpCount);
+    document.getElementById('fp-chk-td-'+i).appendChild(chk);
+  });
+  updateFpCount();
+}
+function updateFpCount(){ document.getElementById('fpSelected').textContent=document.querySelectorAll('.fp-chk:checked').length; }
+async function doGenerateFinalPdf(){
+  const range=document.querySelector('input[name="fpRange"]:checked').value;
+  const targets=range==='all'?submissions.map((_,i)=>i):Array.from(document.querySelectorAll('.fp-chk:checked')).map(c=>parseInt(c.dataset.i));
+  if(!targets.length){ showInfo('請先勾選要產生的筆數','warning'); return; }
+  if(!confirm(`確定為 ${targets.length} 筆產生正式收錄 PDF？`)) return;
+  await runProgress(targets, async (i) => {
+    const r=submissions[i];
+    const body=new URLSearchParams();
+    body.append('action','generateFinalPdf'); body.append('rowIndex',i+2); body.append('submissionId',r[0]||'');
+    body.append('data',JSON.stringify({category:r[2]||'',paperTitle:r[3]||'',keywords:r[4]||'',authors:r[5]||'',memberNames:r[6]||'',contactName:r[8]||'',contactEmail:r[9]||'',contactPhone:r[10]||'',contactUnit:r[11]||'',contactDept:r[12]||'',contactTitle:r[13]||'',profession:r[14]||'',absMotivation:r[15]||'',absMethod:r[16]||'',absResult:r[17]||'',absConclusion:r[18]||''}));
+    const resp=await fetch(getUrl(),{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    const json=await resp.json();
+    if(json.result!=='success') throw new Error(json.message);
+    document.getElementById('fp-status-'+i).innerHTML='<span style="color:var(--success)">✅ 已產生</span>';
+  }, i => `產生：${submissions[i][0]||''}`, ()=>{ showInfo('正式收錄 PDF 已存入 Drive「2026正式收錄PDF」資料夾','success'); });
+}
+
+// ===== STATS =====
+function renderStats(){
+  if(!submissions.length) return;
+  const cats={A:0,B:0,C:0}, prof={}, hosp={};
+  submissions.forEach(r=>{
+    const c=(r[2]||'').replace('類','').trim();
+    if(cats[c]!==undefined) cats[c]++;
+    if(r[14]) prof[r[14]]=(prof[r[14]]||0)+1;
+    const u=(r[11]||'').split(/[\n,，]/)[0].trim();
+    if(u) hosp[u]=(hosp[u]||0)+1;
+  });
+  if(catChartInst) catChartInst.destroy();
+  catChartInst=new Chart(document.getElementById('catChart'),{type:'doughnut',data:{labels:['A類','B類','C類'],datasets:[{data:[cats.A,cats.B,cats.C],backgroundColor:['#1565c0','#6a1b9a','#2e7d32'],borderWidth:2}]},options:{plugins:{legend:{position:'bottom'}},responsive:true,maintainAspectRatio:true}});
+  const sp=Object.entries(prof).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  if(profChartInst) profChartInst.destroy();
+  profChartInst=new Chart(document.getElementById('profChart'),{type:'bar',data:{labels:sp.map(p=>p[0]),datasets:[{label:'篇數',data:sp.map(p=>p[1]),backgroundColor:'#1565c0',borderRadius:4}]},options:{plugins:{legend:{display:false}},responsive:true,maintainAspectRatio:true,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+  hospData=Object.entries(hosp).sort((a,b)=>b[1]-a[1]);
+  renderHospTable(hospData);
+}
+function renderHospTable(data){
+  const tbody=document.getElementById('hospBody');
+  tbody.innerHTML='';
+  data.forEach(([u,cnt])=>{
+    const ids=submissions.filter(r=>(r[11]||'').startsWith(u)).map(r=>r[0]).join('、');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${esc(u)}</strong></td><td style="text-align:center;font-weight:700;color:var(--primary)">${cnt}</td><td style="font-size:0.78rem;color:#888">${esc(ids||'—')}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+function filterHosp(){ const q=document.getElementById('hospSearch').value.toLowerCase(); renderHospTable(q?hospData.filter(([u])=>u.toLowerCase().includes(q)):hospData); }
+
+// ===== HELPERS =====
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+async function runProgress(items, fn, labelFn, doneFn) {
+  const overlay=document.getElementById('progressOverlay');
+  const fill=document.getElementById('progressFill');
+  const pt=document.getElementById('progressText');
+  overlay.classList.add('show');
+  let done=0,err=0;
+  const total=items.length;
+  for(const item of items){
+    pt.textContent=`處理中 ${done+err+1} / ${total}：${labelFn(item)}`;
+    fill.style.width=((done+err)/total*100)+'%';
+    try{ await fn(item); done++; }
+    catch(e){ err++; }
+  }
+  fill.style.width='100%';
+  pt.textContent=`完成！成功 ${done} 筆${err?'，失敗 '+err+' 筆':''}`;
+  setTimeout(()=>{ overlay.classList.remove('show'); if(doneFn) doneFn(); if(err===0) showInfo(`🎉 ${done} 筆操作完成`,'success'); else showInfo(`⚠️ ${done} 筆成功，${err} 筆失敗`,'warning'); },1200);
+}
+
+function getUnitAbbr(u){ if(!u) return '未知'; const m={'亞東':'亞東','奇美':'奇美','台大':'台大','臺大':'台大','長庚':'長庚','馬偕':'馬偕','成大':'成大','高醫':'高醫','榮總':'榮總','北榮':'北榮','中榮':'中榮','高榮':'高榮','屏基':'屏基','彰基':'彰基','嘉基':'嘉基','慈濟':'慈濟','新光':'新光','國泰':'國泰','萬芳':'萬芳','輔大':'輔大','陽明':'陽明','北醫':'北醫'}; for(const k in m) if(u.indexOf(k)!==-1) return m[k]; const c=u.match(/[\u4e00-\u9fff]/g); return c?c.slice(0,2).join(''):u.substring(0,2); }
+</script>
+</body>
+</html>
