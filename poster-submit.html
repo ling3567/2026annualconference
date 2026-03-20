@@ -1755,8 +1755,16 @@ async function checkSubmissionAsync() {
     const params = '?action=checkSubmission'
       + '&title='      + encodeURIComponent(title)
       + '&memberName=' + encodeURIComponent(memberName);
-    const resp = await fetch(APPS_SCRIPT_URL + params);
-    const json = await resp.json();
+    // 使用 JSONP 避免 CORS 問題
+    const json = await new Promise((resolve, reject) => {
+      const cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+      const script = document.createElement('script');
+      const timeout = setTimeout(() => { delete window[cbName]; document.body.removeChild(script); reject(new Error('timeout')); }, 10000);
+      window[cbName] = (data) => { clearTimeout(timeout); delete window[cbName]; document.body.removeChild(script); resolve(data); };
+      script.onerror = () => { clearTimeout(timeout); delete window[cbName]; document.body.removeChild(script); reject(new Error('error')); };
+      script.src = APPS_SCRIPT_URL + params + '&callback=' + cbName;
+      document.body.appendChild(script);
+    });
     if (json.result !== 'success') throw new Error(json.message);
 
     // 重複投稿：同論文題目已有紀錄
