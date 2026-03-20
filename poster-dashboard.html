@@ -252,6 +252,22 @@ canvas{max-height:240px;}
 
       <!-- ===== PAGE: 會員繳費 ===== -->
       <div class="page" id="page-member">
+        <div class="card" style="margin-bottom:0.75rem">
+          <div class="card-body" style="padding:0.9rem 1.25rem">
+            <div style="font-size:0.85rem;font-weight:700;color:#333;margin-bottom:0.5rem">📋 備註欄常用語（點擊複製後貼入備註欄）</div>
+            <div style="display:flex;flex-direction:column;gap:0.4rem">
+              <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+                <span style="font-size:0.82rem;background:#f0f4f8;padding:0.3rem 0.75rem;border-radius:6px;flex:1;min-width:200px;color:#333">經查詢作者群會員資格，原填寫之會員資訊未符合本會會員資料；另確認作者群中「王小明」具本會會員資格，已協助調整會員資訊。</span>
+                <button class="btn btn-sm btn-primary" onclick="copyNote(this,'經查詢作者群會員資格，原填寫之會員資訊未符合本會會員資料；另確認作者群中「王小明」具本會會員資格，已協助調整會員資訊。')">複製</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+                <span style="font-size:0.82rem;background:#f0f4f8;padding:0.3rem 0.75rem;border-radius:6px;flex:1;min-width:200px;color:#333">經查詢作者群會員資格，目前未符合本會會員條件，故本次投稿將以「非會員」身分受理，仍可進行審查，惟不列入優秀海報論文獎評選。</span>
+                <button class="btn btn-sm btn-primary" onclick="copyNote(this,'經查詢作者群會員資格，目前未符合本會會員條件，故本次投稿將以「非會員」身分受理，仍可進行審查，惟不列入優秀海報論文獎評選。')">複製</button>
+              </div>
+            </div>
+            <div style="font-size:0.78rem;color:#888;margin-top:0.5rem">💡 複製後貼入下方表格的「備註」欄，發送確認信時在範本中加入 <code style="background:#fff3e0;padding:0.1rem 0.3rem;border-radius:3px;color:#e65100">{備註}</code> 變數即可帶入。</div>
+          </div>
+        </div>
         <div class="card">
           <div class="card-header">
             <h2 id="memberTitle">會員繳費狀態管理</h2>
@@ -335,9 +351,9 @@ canvas{max-height:240px;}
               <thead><tr>
                 <th>職類</th>
                 <th style="text-align:center">合計</th>
-                <th style="text-align:center;color:#1565c0">A類</th>
-                <th style="text-align:center;color:#6a1b9a">B類</th>
-                <th style="text-align:center;color:#2e7d32">C類</th>
+                <th style="text-align:center;background:#1565c0">A 類</th>
+                <th style="text-align:center;background:#6a1b9a">B 類</th>
+                <th style="text-align:center;background:#2e7d32">C 類</th>
               </tr></thead>
               <tbody id="profDetailBody"></tbody>
             </table>
@@ -977,9 +993,9 @@ function renderStats(){
     const tr=document.createElement('tr');
     tr.innerHTML=`<td><strong>${esc(p)}</strong></td>
       <td style="text-align:center;font-weight:700;color:var(--primary)">${v.total}</td>
-      <td style="text-align:center">${v.A||'-'}</td>
-      <td style="text-align:center">${v.B||'-'}</td>
-      <td style="text-align:center">${v.C||'-'}</td>`;
+      <td style="text-align:center;font-weight:600;color:#1565c0">${v.A||'-'}</td>
+      <td style="text-align:center;font-weight:600;color:#6a1b9a">${v.B||'-'}</td>
+      <td style="text-align:center;font-weight:600;color:#2e7d32">${v.C||'-'}</td>`;
     pdTbody.appendChild(tr);
   });
 
@@ -988,16 +1004,6 @@ function renderStats(){
 function renderHospTable(data){
   const tbody=document.getElementById('hospBody');
   tbody.innerHTML='';
-  // 同時更新機構下拉
-  const sel=document.getElementById('hospSelect');
-  const prev=sel.value;
-  sel.innerHTML='<option value="">— 請選擇機構 —</option>';
-  data.forEach(([u])=>{
-    const opt=document.createElement('option');
-    opt.value=u; opt.textContent=u;
-    sel.appendChild(opt);
-  });
-  if(prev) sel.value=prev;
   // 渲染表格
   data.forEach(([u,cnt])=>{
     const ids=submissions.filter(r=>(r[11]||'').startsWith(u)).map(r=>r[0]).join('、');
@@ -1083,6 +1089,15 @@ function renderCrossTable() {
 function filterHosp(){ const q=document.getElementById('hospSearch').value.toLowerCase(); renderHospTable(q?hospData.filter(([u])=>u.toLowerCase().includes(q)):hospData); }
 
 // ===== HELPERS =====
+function copyNote(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅ 已複製';
+    btn.style.background = 'var(--success)';
+    setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 2000);
+  });
+}
+
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 
 async function runProgress(items, fn, labelFn, doneFn) {
