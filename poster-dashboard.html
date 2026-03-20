@@ -833,7 +833,7 @@ function refreshMailPreview() {
     const html = tmplHtml
       .replace(/\{姓名\}/g, esc(r[8]||''))
       .replace(/\{題目\}/g, esc(r[3]||''))
-      .replace(/\{類別\}/g, esc(r[2]||''))
+      .replace(/\{類別\}/g, esc(getCatFullName(r[2]||'')))
       .replace(/<div[^>]*>\{備註\}<\/div>/g, noteHtml)
       .replace(/\{備註\}/g, noteHtml)
       .replace(/<br>\s*<br>/g, '<br>');
@@ -847,6 +847,16 @@ function refreshMailPreview() {
   });
 }
 
+function getCatFullName(cat) {
+  const c = (cat||'').replace('類','').trim();
+  const map = {
+    'A': 'A類 臨床技能教育、模擬教學與跨專業學習',
+    'B': 'B類 評量、信任決策與能力導向醫學教育',
+    'C': 'C類 人文素養、醫療韌性與專業認同'
+  };
+  return map[c] || cat;
+}
+
 function buildMail(r, tmplHtml, note) {
   const noteHtml = note
     ? `<div style="background:#fff3e0;border-left:4px solid #e65100;color:#bf360c;font-weight:bold;padding:8px 12px;margin:6px 0;border-radius:4px">${note.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`
@@ -854,7 +864,7 @@ function buildMail(r, tmplHtml, note) {
   return (tmplHtml || '')
     .replace(/\{姓名\}/g, (r[8]||'').replace(/&/g,'&amp;'))
     .replace(/\{題目\}/g, (r[3]||'').replace(/&/g,'&amp;'))
-    .replace(/\{類別\}/g, (r[2]||'').replace(/&/g,'&amp;'))
+    .replace(/\{類別\}/g, (getCatFullName(r[2]||'')).replace(/&/g,'&amp;'))
     .replace(/<div[^>]*>\{備註\}<\/div>/g, noteHtml)
     .replace(/\{備註\}/g, noteHtml);
 }
