@@ -736,18 +736,23 @@ function syncTemplate() {
 
 // 純文字範本轉為 HTML 載入編輯器
 function plainToEditorHtml(text) {
+  let diamondCount = 0;
   return text.split('\n').map(line => {
     if (line.trim() === '') return '<br>';
     const safe = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    // 預設樣式套用
     if (/^親愛的/.test(line))
-      return `<div style="color:#0d47a1;font-weight:bold">${safe}</div>`;
-    if (/^❖/.test(line))
-      return `<div style="color:#1565c0;font-weight:bold">${safe}</div>`;
+      return `<div>${safe}</div>`;
+    if (/^❖/.test(line)) {
+      diamondCount++;
+      if (diamondCount === 1)
+        return `<div style="color:#e65100;font-weight:bold">${safe}</div>`;
+      else
+        return `<div>${safe}</div>`;
+    }
     if (/^ - 論文題目/.test(line))
       return `<div style="color:#0d47a1;font-weight:bold;padding-left:8px">${safe}</div>`;
     if (/^ - 投稿類別/.test(line))
-      return `<div style="color:#1565c0;padding-left:8px">${safe}</div>`;
+      return `<div style="color:#0d47a1;font-weight:bold;padding-left:8px">${safe}</div>`;
     if (/^\{備註\}/.test(line.trim()))
       return `<div style="color:#e65100;font-weight:bold">${safe}</div>`;
     return `<div>${safe}</div>`;
