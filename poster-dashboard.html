@@ -257,12 +257,12 @@ canvas{max-height:240px;}
             <div style="font-size:0.85rem;font-weight:700;color:#333;margin-bottom:0.5rem">📋 備註欄常用語（點擊複製後貼入備註欄）</div>
             <div style="display:flex;flex-direction:column;gap:0.4rem">
               <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
-                <span style="font-size:0.82rem;background:#f0f4f8;padding:0.3rem 0.75rem;border-radius:6px;flex:1;min-width:200px;color:#333">經查詢作者群會員資格，原填寫之會員資訊未符合本會會員資料；另確認作者群中「王小明」具本會會員資格，已協助調整會員資訊。</span>
-                <button class="btn btn-sm btn-primary" onclick="copyNote(this,'經查詢作者群會員資格，原填寫之會員資訊未符合本會會員資料；另確認作者群中「王小明」具本會會員資格，已協助調整會員資訊。')">複製</button>
+                <span style="font-size:0.82rem;background:#f0f4f8;padding:0.3rem 0.75rem;border-radius:6px;flex:1;min-width:200px;color:#333">經查詢作者群資料，原填寫之會員資訊與本會會員資料未相符；另確認作者群中「王小明」具本會會員資格，已協助調整會員資訊。</span>
+                <button class="btn btn-sm btn-primary" onclick="copyNote(this,'經查詢作者群資料，原填寫之會員資訊與本會會員資料未相符；另確認作者群中「王小明」具本會會員資格，已協助調整會員資訊。')">複製</button>
               </div>
               <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
-                <span style="font-size:0.82rem;background:#f0f4f8;padding:0.3rem 0.75rem;border-radius:6px;flex:1;min-width:200px;color:#333">經查詢作者群會員資格，目前未符合本會會員條件，故本次投稿將以「非會員」身分受理，仍可進行審查，惟不列入優秀海報論文獎評選。</span>
-                <button class="btn btn-sm btn-primary" onclick="copyNote(this,'經查詢作者群會員資格，目前未符合本會會員條件，故本次投稿將以「非會員」身分受理，仍可進行審查，惟不列入優秀海報論文獎評選。')">複製</button>
+                <span style="font-size:0.82rem;background:#f0f4f8;padding:0.3rem 0.75rem;border-radius:6px;flex:1;min-width:200px;color:#333">經查詢作者群資料，目前未包含本會會員，故本次投稿將以「非會員」身分受理，仍可進行審查，惟不列入優秀海報論文獎評選。</span>
+                <button class="btn btn-sm btn-primary" onclick="copyNote(this,'經查詢作者群資料，目前未包含本會會員，故本次投稿將以「非會員」身分受理，仍可進行審查，惟不列入優秀海報論文獎評選。')">複製</button>
               </div>
             </div>
             <div style="font-size:0.78rem;color:#888;margin-top:0.5rem">💡 複製後貼入下方表格的「備註」欄，發送確認信時在範本中加入 <code style="background:#fff3e0;padding:0.1rem 0.3rem;border-radius:3px;color:#e65100">{備註}</code> 變數即可帶入。</div>
@@ -671,7 +671,7 @@ const MAIL_TEMPLATES = {
 我們已收到您的投稿資料，相關資訊如下：
  - 論文題目：{題目}
  - 投稿類別：{類別}
-
+{備註}
 ❖ 審查結果預計於2026年7月15日前以Email另行通知。
 ❖ 海報發表相關資訊將於錄取後提供。
 
@@ -683,14 +683,14 @@ const MAIL_TEMPLATES = {
 
 感謝您投稿「台灣醫事聯合臨床技能發展學會2026年會員大會暨學術研討會」海報論文。
 
-我們已收到您的投稿資料。經查詢作者群會員資格，目前未符合本會會員條件，故本次投稿將以「非會員」身分受理。
+我們已收到您的投稿資料。經查詢作者群資料，目前未包含本會會員，故本次投稿將以「非會員」身分受理。
 
 依本會規定，投稿仍可進行審查，並於審查通過後參展，惟不列入優秀海報論文獎評選。
 
 投稿相關資訊如下：
  - 論文題目：{題目}
  - 投稿類別：{類別}
-
+{備註}
 ❖ 審查結果預計於2026年7月15日前以Email另行通知。
 ❖ 海報發表相關資訊將於錄取後提供。
 
@@ -732,18 +732,22 @@ function refreshMailPreview() {
     const body = buildMail(r, tmpl, memberNotes[i]||'');
     const div = document.createElement('div');
     div.style.cssText = 'margin-bottom:1rem;border:1px solid #ddd;border-radius:8px;overflow:hidden';
+    const noteHint = memberNotes[i] ? `<div style="background:#fff8e1;padding:0.3rem 0.75rem;font-size:0.75rem;color:#e65100">📌 備註已帶入：${esc(memberNotes[i])}</div>` : '';
     div.innerHTML = `<div style="background:#e3f2fd;padding:0.45rem 0.75rem;font-size:0.78rem;color:var(--primary);font-weight:700">${esc(r[8]||'')} &lt;${esc(r[9]||'')}&gt;</div>
+      ${noteHint}
       <div style="background:#f9f9f9;padding:0.9rem 1rem;font-size:0.85rem;line-height:1.8;white-space:pre-wrap">${esc(body)}</div>`;
     list.appendChild(div);
   });
 }
 
 function buildMail(r, tmpl, note) {
+  const noteStr = note ? note : '';
   return (tmpl || MAIL_TEMPLATES.general)
     .replace(/\{姓名\}/g, r[8]||'')
     .replace(/\{題目\}/g, r[3]||'')
     .replace(/\{類別\}/g, r[2]||'')
-    .replace(/\{備註\}/g, note||'');
+    .replace(/\{備註\}/g, noteStr)
+    .replace(/\n\n\n/g, '\n\n'); // 避免備註空白時出現多餘空行
 }
 
 async function sendEmails() {
