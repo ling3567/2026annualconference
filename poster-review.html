@@ -82,14 +82,14 @@ h1,h2,h3,h4,h5,h6,
 ══════════════════════════════ */
 #loginScreen{
   min-height:100vh; display:flex; align-items:center; justify-content:center;
-  background:linear-gradient(150deg, var(--dark) 0%, #8592a2 50%, #8e9bae 100%);
+  background:linear-gradient(150deg, #1e2a34 0%, #2e3d4a 45%, #3e5060 100%);
   position:relative; overflow:hidden;
 }
 #loginScreen::before{
   content:''; position:absolute; inset:0;
   background:
-    radial-gradient(ellipse 65% 55% at 10% 80%, rgba(142,155,174,.35) 0%, transparent 60%),
-    radial-gradient(ellipse 45% 50% at 90% 15%, rgba(190,203,211,.2) 0%, transparent 55%);
+    radial-gradient(ellipse 65% 55% at 10% 80%, rgba(62,80,96,.5) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 50% at 90% 15%, rgba(90,112,130,.3) 0%, transparent 55%);
 }
 #loginScreen::after{
   content:''; position:absolute;
@@ -114,49 +114,49 @@ h1,h2,h3,h4,h5,h6,
   background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18);
   border-radius:20px; padding:.35rem 1rem;
   font-size:.82rem; letter-spacing:.06em;
-  color:rgba(255,255,255,.9); font-weight:500; margin-bottom:1rem;
+  color:#ffffff; font-weight:600; margin-bottom:1rem;
 }
 .login-brand h1{
   font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
-  font-size:1.65rem; font-weight:700; color:white;
+  font-size:1.7rem; font-weight:700; color:#ffffff;
   letter-spacing:.02em; margin-bottom:.3rem;
 }
-.login-brand p{ font-size:.85rem; color:rgba(255,255,255,.5); }
+.login-brand p{ font-size:.85rem; color:rgba(255,255,255,.8); }
 
 .deadline-banner{
   display:flex; align-items:center; gap:.6rem;
-  background:rgba(227,208,204,.3); border:1px solid rgba(200,176,168,.5);
+  background:rgba(232,213,208,.18); border:1px solid rgba(232,213,208,.45);
   border-radius:9px; padding:.75rem 1.1rem;
-  font-size:.95rem; color:#f0e0dc; font-weight:500;
+  font-size:.95rem; color:#ffd8d0; font-weight:600;
   max-width:380px; width:100%;
 }
 
 .login-card{
-  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.25);
   border-radius:16px; padding:2rem 2.25rem;
   width:400px; max-width:calc(100vw - 2rem);
   backdrop-filter:blur(20px);
 }
 .fl{
   display:block; font-size:.92rem; font-weight:600;
-  color:rgba(255,255,255,.92); margin-bottom:.45rem;
+  color:#ffffff; margin-bottom:.45rem;
 }
 .fi{
   width:100%; padding:.85rem 1.1rem;
-  background:rgba(255,255,255,.12); border:1.5px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.15); border:1.5px solid rgba(255,255,255,.55);
   border-radius:9px; font-size:1rem; font-family:inherit;
-  color:white; font-weight:500; margin-bottom:1.1rem; transition:all .2s;
+  color:#ffffff !important; font-weight:500; margin-bottom:1.1rem; transition:all .2s;
 }
-.fi::placeholder{ color:rgba(255,255,255,.45); }
-.fi:focus{ outline:none; border-color:var(--main-l); background:rgba(255,255,255,.16); }
+.fi::placeholder{ color:rgba(255,255,255,.65); }
+.fi:focus{ outline:none; border-color:rgba(255,255,255,.75); background:rgba(255,255,255,.24); }
 .btn-login{
   width:100%; padding:.88rem; font-size:1rem;
-  background:linear-gradient(135deg, var(--main), var(--dark));
-  border:1px solid rgba(255,255,255,.2); border-radius:9px;
-  color:white; font-family:inherit; font-weight:600;
+  background:linear-gradient(135deg, var(--dark-2), var(--dark));
+  border:1px solid rgba(255,255,255,.35); border-radius:9px;
+  color:#ffffff; font-family:inherit; font-weight:700;
   letter-spacing:.04em; cursor:pointer; transition:all .2s;
 }
-.btn-login:hover{ background:linear-gradient(135deg,var(--main),var(--dark)); transform:translateY(-1px); }
+.btn-login:hover{ background:linear-gradient(135deg,var(--main),var(--dark-2)); transform:translateY(-1px); }
 .login-err{
   margin-top:.7rem; padding:.6rem .9rem;
   background:rgba(139,58,58,.25); border:1px solid rgba(139,58,58,.4);
@@ -194,9 +194,9 @@ h1,h2,h3,h4,h5,h6,
 .tb-right{ display:flex; align-items:center; gap:.5rem; flex-shrink:0; }
 .deadline-chip{
   display:flex; align-items:center; gap:.4rem;
-  background:rgba(227,208,204,.2); border:1px solid rgba(200,176,168,.35);
+  background:rgba(232,213,208,.18); border:1px solid rgba(232,213,208,.4);
   border-radius:6px; padding:.28rem .75rem;
-  font-size:.75rem; color:#f0ddd8; white-space:nowrap;
+  font-size:.75rem; color:#ffe0d8; white-space:nowrap;
 }
 .rv-chip{
   display:flex; align-items:center; gap:.35rem;
@@ -216,7 +216,7 @@ h1,h2,h3,h4,h5,h6,
    THREE-COLUMN LAYOUT
 ══════════════════════════════ */
 .app-body{
-  display:grid; grid-template-columns:240px 1fr 370px;
+  display:grid; grid-template-columns:200px 1fr 380px;
   flex:1; overflow:hidden;
 }
 
@@ -227,7 +227,7 @@ h1,h2,h3,h4,h5,h6,
 }
 .col-list-head{
   padding:.9rem 1rem; border-bottom:1px solid var(--border2);
-  background:var(--bg2);
+  background:var(--bg);
 }
 
 .prog-row{ display:flex; justify-content:space-between; align-items:center;
@@ -245,6 +245,7 @@ h1,h2,h3,h4,h5,h6,
 .pi{
   padding:.65rem .75rem; border-radius:9px; cursor:pointer;
   margin-bottom:.25rem; border:1.5px solid transparent; transition:all .15s;
+  min-height:0;
 }
 .pi:hover{ background:var(--bg2); }
 .pi.active{ background:var(--bg2); border-color:var(--main-l); }
@@ -262,8 +263,8 @@ h1,h2,h3,h4,h5,h6,
 .pi.rejected .pi-num{ background:var(--red); }
 .pi-cat{ font-size:.72rem; color:var(--muted); }
 .pi-ttl{
-  font-size:.88rem; font-weight:500; color:var(--ink); line-height:1.45;
-  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  font-size:.82rem; font-weight:500; color:var(--ink); line-height:1.45;
+  white-space:normal; overflow:visible; word-break:break-all;
 }
 .pi-status{ display:flex; align-items:center; gap:.3rem; margin-top:.28rem; }
 .pi-dot{ width:5px; height:5px; border-radius:50%; }
@@ -289,7 +290,7 @@ h1,h2,h3,h4,h5,h6,
 }
 .p-info-head{
   padding:.95rem 1.2rem; border-bottom:1px solid var(--border2);
-  background:linear-gradient(135deg, var(--dark), var(--main));
+  background:linear-gradient(135deg, var(--dark), var(--dark-2));
 }
 .p-tags{ display:flex; flex-wrap:wrap; gap:.35rem; margin-bottom:.5rem; }
 .tag{
@@ -306,7 +307,7 @@ h1,h2,h3,h4,h5,h6,
 .p-info-body{ padding:1rem 1.2rem; }
 .abs-sec{ margin-bottom:.9rem; }
 .abs-lbl{
-  font-size:.78rem; font-weight:700; letter-spacing:.1em; color:var(--main);
+  font-size:.78rem; font-weight:700; letter-spacing:.1em; color:var(--dark-2);
   text-transform:uppercase; display:flex; align-items:center; gap:.45rem; margin-bottom:.38rem;
 }
 .abs-lbl::after{ content:''; flex:1; height:1px; background:var(--border2); }
@@ -336,14 +337,27 @@ h1,h2,h3,h4,h5,h6,
   display:flex; flex-direction:column; overflow:hidden;
 }
 .col-score-head{
-  padding:.8rem 1.1rem; background:var(--main);
+  padding:.7rem 1rem; background:var(--dark-2);
   display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+  gap:.5rem;
 }
 .col-score-head h3{
-  font-size:.9rem; font-weight:700; color:white;
+  font-size:.88rem; font-weight:700; color:white;
   font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
 }
-.col-score-head-note{ font-size:.7rem; color:rgba(255,255,255,.45); }
+.col-score-head-note{ font-size:.7rem; color:rgba(255,255,255,.5); }
+/* 即時總分徽章 */
+.score-head-total{
+  display:flex; align-items:baseline; gap:.25rem;
+  background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25);
+  border-radius:20px; padding:.2rem .75rem; margin-left:auto;
+}
+.score-head-total .num{
+  font-size:1.1rem; font-weight:700; color:#fff; line-height:1;
+}
+.score-head-total .denom{
+  font-size:.7rem; color:rgba(255,255,255,.55);
+}
 .score-scroll{ flex:1; overflow-y:auto; padding:.9rem 1rem; }
 
 /* Done banner */
@@ -360,8 +374,8 @@ h1,h2,h3,h4,h5,h6,
   border-radius:9px; padding:.8rem; margin-bottom:.9rem;
 }
 .cat-adjust-block label{
-  display:block; font-size:.82rem; font-weight:600;
-  color:var(--ink); margin-bottom:.4rem;
+  display:block; font-size:.82rem; font-weight:700;
+  color:var(--slate); margin-bottom:.4rem;
 }
 .cat-adjust-sel{
   width:100%; padding:.5rem .7rem; border:1.5px solid var(--warm-d);
@@ -390,7 +404,7 @@ h1,h2,h3,h4,h5,h6,
   width:60px; padding:.48rem .5rem; text-align:center;
   border:1.5px solid var(--border); border-radius:7px;
   font-size:1rem; font-weight:700; font-family:inherit; color:var(--main);
-  background:var(--bg2); transition:all .2s;
+  background:var(--main-bg); transition:all .2s;
 }
 .score-input:focus{ outline:none; border-color:var(--main-l); background:white; }
 .score-input:disabled{ opacity:.5; cursor:not-allowed; }
@@ -414,13 +428,13 @@ h1,h2,h3,h4,h5,h6,
 /* Total */
 .total-bar{
   display:flex; align-items:center; justify-content:space-between;
-  background:linear-gradient(135deg, var(--dark), var(--main));
-  border-radius:9px; padding:.8rem 1.1rem; margin-bottom:.9rem;
+  background:linear-gradient(135deg, var(--dark), var(--dark-2));
+  border-radius:9px; padding:.7rem 1rem; margin-bottom:.9rem;
 }
-.total-lbl{ font-size:.8rem; color:rgba(255,255,255,.6); }
-.total-num{ font-size:1.7rem; font-weight:700; color:white; line-height:1; }
-.total-num small{ font-size:.72rem; color:rgba(255,255,255,.4); font-weight:400; }
-.bonus-note{ font-size:.7rem; color:rgba(255,255,255,.45); margin-top:.15rem; }
+.total-lbl{ font-size:.78rem; color:rgba(255,255,255,.7); font-weight:600; }
+.total-num{ font-size:1.8rem; font-weight:700; color:white; line-height:1; }
+.total-num small{ font-size:.72rem; color:rgba(255,255,255,.5); font-weight:400; }
+.bonus-note{ font-size:.68rem; color:rgba(255,255,255,.5); margin-top:.12rem; }
 
 /* Comment */
 .cmt-wrap{ margin-bottom:.9rem; }
@@ -599,7 +613,7 @@ h1,h2,h3,h4,h5,h6,
    RESPONSIVE
 ══════════════════════════════ */
 @media(max-width:1280px) and (min-width:761px){
-  .app-body{ grid-template-columns:220px 1fr 340px; }
+  .app-body{ grid-template-columns:200px 1fr 360px; }
 }
 @media(max-width:1020px) and (min-width:761px){
   .app-body{ grid-template-columns:1fr 320px; }
@@ -644,6 +658,11 @@ h1,h2,h3,h4,h5,h6,
   <div class="lg-deco lg-deco-2"></div>
   <div class="login-wrap">
     <div class="login-brand">
+      <img src="2026annualconference/images/TSMCSD-logo.png"
+           alt="TSMCSD Logo"
+           style="height:72px; width:auto; margin-bottom:1rem;
+                  filter:brightness(0) invert(1);
+                  drop-shadow(0 2px 8px rgba(0,0,0,.3));">
       <div class="eyebrow">⚕ TSMCSD 2026 年會暨學術研討會</div>
       <h1>競賽活動評審系統</h1>
       <p>僅供受邀評審委員使用・請勿轉發登入資訊</p>
@@ -711,6 +730,10 @@ h1,h2,h3,h4,h5,h6,
       <div class="col-score-head">
         <h3 id="scoreHeadTitle">評分表</h3>
         <span class="col-score-head-note" id="scoreHeadNote">請先選擇論文</span>
+        <div class="score-head-total" id="scoreHeadTotal" style="display:none">
+          <span class="num" id="scoreHeadNum">0</span>
+          <span class="denom" id="scoreHeadDenom">/ 100</span>
+        </div>
       </div>
       <div class="score-scroll" id="scoreArea">
         <p style="color:var(--muted);font-size:.88rem;text-align:center;padding:2rem 0">
@@ -835,6 +858,9 @@ function switchType(t){
   el('colContent').innerHTML=`<div class="content-empty"><div class="icon">${t==='osce'?'🎬':'📄'}</div><h3>請從左側選擇${t==='osce'?'教案':'論文'}</h3></div>`;
   el('scoreArea').innerHTML=`<p style="color:var(--muted);font-size:.88rem;text-align:center;padding:2rem 0">請先選擇${t==='osce'?'教案':'論文'}</p>`;
   el('scoreActions').style.display='none';
+  el('scoreHeadTitle').textContent='評分表';
+  el('scoreHeadNote').textContent='請先選擇論文';
+  const ht=el('scoreHeadTotal'); if(ht) ht.style.display='none';
   renderList();
 }
 
@@ -994,6 +1020,9 @@ function updatePosterTotal(){
   POSTER_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e) t+=parseInt(e.value)||0; });
   const tEl=el('posterTotal');
   if(tEl) tEl.innerHTML=`${t}<small> / ${POSTER_MAX}</small>`;
+  // 頭部即時總分
+  const hNum=el('scoreHeadNum'); const hDen=el('scoreHeadDenom'); const hTot=el('scoreHeadTotal');
+  if(hNum){ hNum.textContent=t; hDen.textContent='/ '+POSTER_MAX; hTot.style.display='flex'; }
 }
 
 // ── OSCE ──
@@ -1133,6 +1162,9 @@ function updateOsceTotal(){
   const bonus=bonusEl?parseInt(bonusEl.value)||0:0;
   const tEl=el('osceTotal');
   if(tEl) tEl.innerHTML=`${base+bonus}<small> / ${OSCE_BASE_MAX}${bonus>0?'+'+bonus:''}</small>`;
+  // 頭部即時總分
+  const hNum=el('scoreHeadNum'); const hDen=el('scoreHeadDenom'); const hTot=el('scoreHeadTotal');
+  if(hNum){ hNum.textContent=base+bonus; hDen.textContent='/ '+OSCE_BASE_MAX+(bonus>0?'+':'')+' 分'; hTot.style.display='flex'; }
 }
 
 // ── 未填樣式 ──
