@@ -127,19 +127,15 @@ h1,h2,h3,h4,h5,h6,
 
 /* LOGO + 機構名同一行 */
 .login-logo-row{
-  display:flex; align-items:center; gap:.9rem;
-  justify-content:center; margin-bottom:1.1rem;
-  background:rgba(20,30,40,.35);
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:14px;
-  padding:.7rem 1.5rem;
-  backdrop-filter:blur(8px);
+  display:flex; align-items:center; gap:1rem;
+  justify-content:center; margin-bottom:1.25rem;
+  /* 無底板：直接在深色背景上呈現 */
 }
 .login-org-name{
-  font-size:.92rem; font-weight:600;
-  color:#ffffff; letter-spacing:.02em;
+  font-size:.95rem; font-weight:600;
+  color:rgba(255,255,255,.95); letter-spacing:.02em;
   white-space:nowrap;
-  text-shadow:0 1px 3px rgba(0,0,0,.4);
+  text-shadow:0 1px 4px rgba(0,0,0,.5);
 }
 .deadline-banner{
   display:flex; align-items:center; gap:.6rem;
@@ -454,12 +450,13 @@ h1,h2,h3,h4,h5,h6,
 .total-bar{
   display:flex; align-items:center; justify-content:space-between;
   background:linear-gradient(135deg, #3a4550, #546070);
-  border-radius:9px; padding:.7rem 1rem; margin-bottom:.9rem;
+  border-radius:9px; padding:.8rem 1.1rem; margin-bottom:.9rem;
+  box-shadow:0 2px 8px rgba(58,69,80,.2);
 }
-.total-lbl{ font-size:.78rem; color:rgba(255,255,255,.7); font-weight:600; }
-.total-num{ font-size:1.8rem; font-weight:700; color:white; line-height:1; }
-.total-num small{ font-size:.72rem; color:rgba(255,255,255,.5); font-weight:400; }
-.bonus-note{ font-size:.68rem; color:rgba(255,255,255,.5); margin-top:.12rem; }
+.total-lbl{ font-size:.8rem; color:rgba(255,255,255,.75); font-weight:600; letter-spacing:.03em; }
+.total-num{ font-size:1.9rem; font-weight:700; color:white; line-height:1; }
+.total-num small{ font-size:.74rem; color:rgba(255,255,255,.55); font-weight:400; }
+.bonus-note{ font-size:.7rem; color:rgba(255,255,255,.5); margin-top:.12rem; }
 
 /* Comment */
 .cmt-wrap{ margin-bottom:.9rem; }
@@ -724,9 +721,12 @@ h1,h2,h3,h4,h5,h6,
       <div class="login-logo-row">
         <img src="images/TSMCSD-logo.png"
              alt="TSMCSD Logo"
-             style="height:52px; width:auto;
+             style="height:56px; width:56px;
+                    object-fit:contain;
                     border-radius:50%;
-                    box-shadow:0 2px 8px rgba(0,0,0,.35);">
+                    background:#ffffff;
+                    padding:3px;
+                    box-shadow:0 2px 12px rgba(0,0,0,.4), 0 0 0 2px rgba(255,255,255,.2);">
         <span class="login-org-name">TSMCSD 2026 年會暨學術研討會</span>
       </div>
       <h1>競賽活動評審系統</h1>
@@ -1267,19 +1267,56 @@ function toggleReject(){
   const chk=el('rejChk'); if(!chk) return;
   const wrap=el('rejReasonWrap'); if(!wrap) return;
   wrap.classList.toggle('show', chk.checked);
-  // 勾選退稿時：清空所有評分欄位
+
+  const allCriteria=[...POSTER_CRITERIA, ...OSCE_ALL_CRITERIA];
+  const bonusEl=el('sc_'+OSCE_BONUS.id);
+
   if(chk.checked){
-    const allCriteria=[...POSTER_CRITERIA, ...OSCE_ALL_CRITERIA];
+    // 勾選退稿：清空 + 鎖定所有評分欄位
     allCriteria.forEach(c=>{
       const e=el('sc_'+c.id);
-      if(e && !e.disabled && !e.readOnly){ e.value=''; e.classList.remove('over','empty'); }
+      if(e && !e.readOnly){
+        e.value='';
+        e.classList.remove('over','empty');
+        e.disabled=true;
+        e.style.opacity='.4';
+        e.style.cursor='not-allowed';
+        e.style.background='#ede8e4';
+      }
     });
-    const bonusEl=el('sc_'+OSCE_BONUS.id);
-    if(bonusEl && !bonusEl.disabled && !bonusEl.readOnly){ bonusEl.value=''; }
+    if(bonusEl && !bonusEl.readOnly){
+      bonusEl.value=''; bonusEl.disabled=true;
+      bonusEl.style.opacity='.4'; bonusEl.style.cursor='not-allowed';
+    }
+    // 鎖定推薦勾選
+    const recChk=el('recChk');
+    if(recChk){ recChk.disabled=true; recChk.checked=false; }
+    // 鎖定類別調整
+    const catSel=el('catAdjSel');
+    if(catSel){ catSel.disabled=true; catSel.style.opacity='.4'; }
     // 更新總分顯示
-    const pt=el('posterTotal'); if(pt) pt.innerHTML='—';
-    const ot=el('osceTotal');   if(ot) ot.innerHTML='—';
-    const hn=el('scoreHeadNum'); if(hn) hn.textContent='—';
+    const pt=el('posterTotal'); if(pt) pt.innerHTML='<small style="color:rgba(255,255,255,.6)">已標記退稿</small>';
+    const ot=el('osceTotal');   if(ot) ot.innerHTML='<small style="color:rgba(255,255,255,.6)">已標記退稿</small>';
+    const ht=el('scoreHeadTotal'); if(ht) ht.style.display='none';
+  } else {
+    // 取消退稿：解鎖所有評分欄位
+    allCriteria.forEach(c=>{
+      const e=el('sc_'+c.id);
+      if(e && !e.readOnly){
+        e.disabled=false;
+        e.style.opacity=''; e.style.cursor=''; e.style.background='';
+      }
+    });
+    if(bonusEl && !bonusEl.readOnly){
+      bonusEl.disabled=false;
+      bonusEl.style.opacity=''; bonusEl.style.cursor='';
+    }
+    // 解鎖推薦與類別
+    const recChk=el('recChk'); if(recChk) recChk.disabled=false;
+    const catSel=el('catAdjSel'); if(catSel){ catSel.disabled=false; catSel.style.opacity=''; }
+    // 重置總分
+    if(curType==='poster') updatePosterTotal();
+    else updateOsceTotal();
   }
 }
 
