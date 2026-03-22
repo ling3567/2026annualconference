@@ -3,406 +3,1246 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>論文評分系統｜TSMCSD 2026</title>
+<title>論文評審系統｜TSMCSD 2026</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;1,400&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@400;500;600&display=swap');
 
 :root {
-  --ink:#1c1c2e;--ink2:#2d2d4a;--slate:#4a5568;--muted:#718096;
-  --border:#e2e8f0;--border2:#edf2f7;--bg:#f7f6f3;--white:#fff;
-  --blue:#1e4d8c;--blue-light:#dbeafe;--blue-dim:#e8f0fb;
-  --gold:#9a6f0a;--gold-bg:#fdf6e3;
-  --green:#1e6b45;--green-bg:#f0faf5;
-  --red:#b91c1c;--red-bg:#fff1f1;
-  --sh:0 1px 3px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.04);
-  --r:12px;
+  /* 藍色主色系 */
+  --blue-900: #0a2342;
+  --blue-800: #0f3460;
+  --blue-700: #1a4f8a;
+  --blue-600: #1e6bb5;
+  --blue-500: #2980d4;
+  --blue-400: #4d9de8;
+  --blue-200: #bfdbf7;
+  --blue-100: #dbeafe;
+  --blue-50:  #eff6ff;
+  /* 中性色 */
+  --ink:    #0f172a;
+  --slate:  #334155;
+  --muted:  #64748b;
+  --border: #cbd5e1;
+  --border2:#e2e8f0;
+  --bg:     #f0f4f8;
+  --white:  #ffffff;
+  /* 語意色 */
+  --green:  #15803d;
+  --green-bg:#dcfce7;
+  --red:    #dc2626;
+  --red-bg: #fee2e2;
+  --amber:  #b45309;
+  --amber-bg:#fef3c7;
+  --orange: #c2410c;
+  /* 陰影 */
+  --sh-sm: 0 1px 2px rgba(0,0,0,.05);
+  --sh:    0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.05);
+  --sh-md: 0 4px 16px rgba(0,0,0,.1);
+  --r: 10px;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;}
 
-/* LOGIN */
-#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--ink);position:relative;overflow:hidden;}
-#loginScreen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 20% 80%,rgba(30,77,140,.35) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 20%,rgba(154,111,10,.18) 0%,transparent 60%);}
-.login-wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:2rem;animation:fadeUp .5s ease;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.login-head{text-align:center;color:white;}
-.login-head .conf{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.5rem;}
-.login-head h1{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:500;color:white;}
-.login-head p{font-size:.8rem;color:rgba(255,255,255,.35);margin-top:.3rem;}
-.login-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:2rem;width:360px;max-width:calc(100vw - 2rem);backdrop-filter:blur(12px);}
-.f-label{display:block;font-size:.72rem;font-weight:500;letter-spacing:.08em;color:rgba(255,255,255,.45);text-transform:uppercase;margin-bottom:.4rem;}
-.f-input{width:100%;padding:.7rem 1rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;font-size:.9rem;font-family:inherit;color:white;transition:all .2s;margin-bottom:1rem;}
-.f-input::placeholder{color:rgba(255,255,255,.22);}
-.f-input:focus{outline:none;border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.1);}
-.btn-login{width:100%;padding:.75rem;background:linear-gradient(135deg,#1e4d8c,#163870);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:white;font-size:.9rem;font-family:inherit;font-weight:500;letter-spacing:.05em;cursor:pointer;transition:opacity .2s,transform .15s;}
-.btn-login:hover{opacity:.85;transform:translateY(-1px);}
-.login-err{margin-top:.75rem;padding:.6rem .9rem;background:rgba(185,28,28,.25);border:1px solid rgba(185,28,28,.4);border-radius:8px;font-size:.82rem;color:#fca5a5;display:none;}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif; background:var(--bg); color:var(--ink); font-size:16px; line-height:1.7; font-weight:400; }
 
-/* APP */
-#app{display:none;}
-#app.show{display:block;}
+/* ── 分層字重 ── */
+/* 標題類：Bold */
+h1,h2,h3,h4,h5,h6,
+.p-title, .tb-logo, .login-brand h1,
+.col-score-head h3, .crit-group-title,
+.prog-lbl, .pi-num, .total-lbl,
+.sec-head h3, .modal-head h3 { font-weight:700; }
+/* 標籤、按鈕、重點：Medium */
+.tag, .btn, .btn-login, .btn-submit, .btn-draft,
+.tab, .tb-tab, .fl, .abs-lbl,
+.reject-zone-head label, .recommend-zone-head label,
+.deadline-banner, .deadline-chip,
+.crit-name { font-weight:500; }
+/* 一般內文：Regular */
+.abs-txt, .crit-meta, .recommend-note,
+.pi-ttl, .pi-st-txt, .pi-cat,
+.score-max, .col-score-head-note { font-weight:400; }
 
-/* Header */
-.app-header{position:sticky;top:0;z-index:200;height:56px;background:var(--ink);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;box-shadow:0 2px 12px rgba(0,0,0,.25);}
-.hd-left{display:flex;align-items:center;gap:.75rem;}
-.hd-logo{font-family:'Playfair Display',serif;font-size:.95rem;color:white;}
-.hd-sep{width:1px;height:20px;background:rgba(255,255,255,.15);}
-.hd-sub{font-size:.75rem;color:rgba(255,255,255,.4);}
-.hd-right{display:flex;align-items:center;gap:.75rem;}
-.rv-chip{display:flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:.3rem .8rem;font-size:.78rem;color:rgba(255,255,255,.8);}
-.btn-out{background:none;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:.3rem .7rem;font-size:.75rem;color:rgba(255,255,255,.5);cursor:pointer;transition:all .2s;font-family:inherit;}
-.btn-out:hover{border-color:rgba(255,255,255,.5);color:white;}
+/* ══════════════════════════════
+   LOGIN
+══════════════════════════════ */
+#loginScreen{
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(160deg, var(--blue-900) 0%, var(--blue-800) 45%, var(--blue-700) 100%);
+  position:relative; overflow:hidden;
+}
+#loginScreen::before{
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 85%, rgba(41,128,212,.3) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 85% 15%, rgba(30,107,181,.25) 0%, transparent 50%);
+}
+/* 幾何裝飾線 */
+#loginScreen::after{
+  content:''; position:absolute;
+  width:500px; height:500px; border-radius:50%;
+  border:1px solid rgba(255,255,255,.06);
+  top:-150px; right:-100px;
+}
+.lg-deco{
+  position:absolute; border-radius:50%;
+  border:1px solid rgba(255,255,255,.05);
+}
+.lg-deco-1{ width:300px; height:300px; bottom:-80px; left:-60px; }
+.lg-deco-2{ width:200px; height:200px; bottom:60px; left:20px; }
 
-/* Layout */
-.app-layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 56px);}
+.login-wrap{
+  position:relative; z-index:1;
+  display:flex; flex-direction:column; align-items:center; gap:1.75rem;
+  animation:fadeUp .5s ease;
+}
+@keyframes fadeUp{ from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
-/* Sidebar */
-.sidebar{background:var(--white);border-right:1px solid var(--border);position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;display:flex;flex-direction:column;}
-.sb-top{padding:1.1rem 1rem;border-bottom:1px solid var(--border2);}
-.prog-row{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--muted);margin-bottom:.45rem;}
-.prog-label{font-weight:500;color:var(--slate);}
-.prog-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),#3b82f6);border-radius:3px;transition:width .4s ease;}
-.sb-title{padding:.7rem 1rem .3rem;font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
-.paper-list{flex:1;padding:0 .5rem .5rem;}
-.pi{padding:.6rem .7rem;border-radius:9px;cursor:pointer;margin-bottom:.2rem;border:1.5px solid transparent;transition:all .15s;}
-.pi:hover{background:var(--bg);}
-.pi.active{background:var(--blue-dim);border-color:rgba(30,77,140,.2);}
-.pi.done{opacity:.6;}
-.pi-num{font-size:.65rem;font-weight:700;letter-spacing:.06em;color:var(--blue);margin-bottom:.12rem;}
-.pi.done .pi-num{color:var(--green);}
-.pi-ttl{font-size:.8rem;color:var(--ink);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.pi-st{display:flex;align-items:center;gap:.3rem;margin-top:.28rem;}
-.pi-dot{width:5px;height:5px;border-radius:50%;}
-.pi-dot.p{background:#ecc94b;}.pi-dot.d{background:#48bb78;}
-.pi-st span{font-size:.65rem;color:var(--muted);}
+.login-brand{ text-align:center; color:white; }
+.login-brand .eyebrow{
+  display:inline-flex; align-items:center; gap:.5rem;
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15);
+  border-radius:20px; padding:.32rem .9rem;
+  font-size:.78rem; letter-spacing:.08em; text-transform:uppercase;
+  color:rgba(255,255,255,.85); font-weight:500; margin-bottom:1rem;
+}
+.login-brand h1{
+  font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif; font-size:1.6rem;
+  font-weight:700; color:white; letter-spacing:.02em; margin-bottom:.3rem;
+}
+.login-brand p{ font-size:.8rem; color:rgba(255,255,255,.45); }
 
-/* Main */
-.main{padding:1.75rem 2rem;max-width:760px;}
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;color:var(--muted);text-align:center;gap:.75rem;}
-.empty .icon{font-size:2.5rem;opacity:.35;}
-.empty h3{font-size:1rem;color:var(--slate);}
-.empty p{font-size:.85rem;}
+/* 截止日警示 */
+.deadline-banner{
+  display:flex; align-items:center; gap:.6rem;
+  background:rgba(255,193,7,.18); border:1px solid rgba(255,193,7,.45);
+  border-radius:9px; padding:.75rem 1.1rem;
+  font-size:.92rem; color:#fef08a; font-weight:500;
+}
 
-/* Paper card */
-.p-card{background:var(--white);border:1px solid var(--border2);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:1.25rem;}
-.p-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border2);}
-.p-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.45rem;}
-.tag{padding:.17rem .6rem;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.04em;}
-.tg-no{background:var(--ink);color:white;}
-.tg-cat{background:var(--blue-light);color:var(--blue);}
-.tg-wc{background:var(--border2);color:var(--slate);}
-.p-title{font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:500;color:var(--ink);line-height:1.65;}
-.p-body{padding:1.2rem 1.4rem;}
-.abs-sec{margin-bottom:.95rem;}
-.abs-lbl{font-size:.65rem;font-weight:700;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;display:flex;align-items:center;gap:.5rem;margin-bottom:.38rem;}
-.abs-lbl::after{content:'';flex:1;height:1px;background:var(--border2);}
-.abs-txt{font-size:.85rem;line-height:1.85;color:var(--slate);}
+.login-card{
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);
+  border-radius:16px; padding:2rem; width:380px; max-width:calc(100vw - 2rem);
+  backdrop-filter:blur(16px);
+}
+.fl{ display:block; font-size:.82rem; font-weight:600; letter-spacing:.06em;
+  color:rgba(255,255,255,.9); margin-bottom:.4rem; }
+.fi{
+  width:100%; padding:.8rem 1.1rem;
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.25);
+  border-radius:9px; font-size:1rem; font-family:inherit;
+  color:white; font-weight:500; margin-bottom:1rem; transition:all .2s;
+}
+.fi::placeholder{ color:rgba(255,255,255,.55); }
+.fi:focus{ outline:none; border-color:var(--blue-400); background:rgba(255,255,255,.13); }
+.btn-login{
+  width:100%; padding:.85rem; font-size:1rem;
+  background:linear-gradient(135deg, var(--blue-600), var(--blue-800));
+  border:1px solid rgba(255,255,255,.18); border-radius:9px;
+  color:white; font-size:.9rem; font-family:inherit; font-weight:500;
+  letter-spacing:.06em; cursor:pointer; transition:all .2s;
+}
+.btn-login:hover{ background:linear-gradient(135deg, var(--blue-500), var(--blue-700)); transform:translateY(-1px); }
+.login-err{ margin-top:.65rem; padding:.55rem .9rem; background:rgba(220,38,38,.2);
+  border:1px solid rgba(220,38,38,.35); border-radius:7px; font-size:.8rem;
+  color:#fca5a5; display:none; }
 
-/* Score card */
-.sc-card{background:var(--white);border:1px solid var(--border2);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;}
-.sc-head{padding:.9rem 1.4rem;background:linear-gradient(135deg,var(--ink),var(--ink2));display:flex;align-items:center;justify-content:space-between;}
-.sc-head h3{font-family:'Noto Serif TC',serif;font-size:.95rem;font-weight:500;color:white;}
-.sc-head-note{font-size:.7rem;color:rgba(255,255,255,.4);}
-.sc-body{padding:1.25rem 1.4rem;}
+/* ══════════════════════════════
+   APP SHELL
+══════════════════════════════ */
+#app{ display:none; height:100vh; flex-direction:column; }
+#app.show{ display:flex; }
 
-/* Criterion */
-.crit{padding:.95rem 0;border-bottom:1px solid var(--border2);}
-.crit:last-of-type{border-bottom:none;}
-.crit-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.6rem;}
-.crit-name{font-size:.88rem;font-weight:500;color:var(--ink);}
-.crit-wt{font-size:.7rem;color:var(--muted);margin-top:.1rem;}
-.crit-val{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--blue);line-height:1;white-space:nowrap;text-align:right;min-width:52px;}
-.crit-val small{font-family:'Noto Sans TC',sans-serif;font-size:.68rem;color:var(--muted);}
-.slider-row{display:flex;align-items:center;gap:.55rem;}
-.sl-edge{font-size:.68rem;color:var(--muted);min-width:18px;text-align:center;}
-input[type=range]{flex:1;-webkit-appearance:none;height:5px;border-radius:3px;background:var(--border);cursor:pointer;outline:none;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--blue);box-shadow:0 2px 6px rgba(30,77,140,.3);cursor:pointer;transition:transform .15s;}
-input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
-input[type=range]:disabled{opacity:.4;cursor:not-allowed;}
+/* Top bar */
+.topbar{
+  height:52px; background:var(--blue-900); border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 1.25rem; flex-shrink:0; z-index:100;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+.tb-left{ display:flex; align-items:center; gap:.75rem; }
+.tb-logo{ font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif; font-size:.95rem; font-weight:700; color:white; letter-spacing:.03em; }
+.tb-sep{ width:1px; height:18px; background:rgba(255,255,255,.15); }
+.tb-type-tabs{ display:flex; gap:.25rem; }
+.tb-tab{
+  padding:.3rem .85rem; border-radius:6px; font-size:.78rem; font-weight:500;
+  cursor:pointer; transition:all .18s; border:1px solid transparent;
+  color:rgba(255,255,255,.5);
+}
+.tb-tab:hover{ color:rgba(255,255,255,.8); }
+.tb-tab.active{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.2); color:white; }
+.tb-right{ display:flex; align-items:center; gap:.6rem; }
 
-/* Total */
-.total-strip{display:flex;align-items:center;justify-content:space-between;background:var(--gold-bg);border:1px solid rgba(154,111,10,.2);border-radius:10px;padding:.9rem 1.1rem;margin:1.25rem 0;}
-.t-left .t-lbl{font-size:.8rem;font-weight:600;color:var(--gold);letter-spacing:.04em;}
-.t-left .t-note{font-size:.7rem;color:var(--muted);margin-top:.1rem;}
-.t-num{font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);}
-.t-num small{font-family:'Noto Sans TC',sans-serif;font-size:.72rem;color:var(--muted);}
-.rec-chip{padding:.25rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.04em;}
-.rec-chip.yes{background:#d1fae5;color:var(--green);}
-.rec-chip.no{background:var(--border2);color:var(--muted);}
+/* 截止日徽章 */
+.deadline-chip{
+  display:flex; align-items:center; gap:.4rem;
+  background:rgba(245,158,11,.15); border:1px solid rgba(245,158,11,.3);
+  border-radius:6px; padding:.28rem .7rem;
+  font-size:.7rem; color:#fcd34d; letter-spacing:.02em;
+}
+.rv-chip{
+  display:flex; align-items:center; gap:.35rem;
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15);
+  border-radius:20px; padding:.28rem .75rem;
+  font-size:.75rem; color:rgba(255,255,255,.8);
+}
+.btn-out{
+  background:none; border:1px solid rgba(255,255,255,.2);
+  border-radius:6px; padding:.28rem .65rem;
+  font-size:.72rem; color:rgba(255,255,255,.45); cursor:pointer;
+  transition:all .2s; font-family:inherit;
+}
+.btn-out:hover{ border-color:rgba(255,255,255,.5); color:white; }
 
-/* Comment */
-.cmt-wrap{margin-top:.5rem;}
-.cmt-wrap label{display:block;font-size:.75rem;font-weight:500;color:var(--slate);margin-bottom:.38rem;letter-spacing:.04em;}
-.cmt-wrap textarea{width:100%;padding:.7rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-size:.85rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);resize:vertical;min-height:72px;background:var(--bg);transition:border-color .2s;}
-.cmt-wrap textarea:focus{outline:none;border-color:var(--blue);background:white;}
+/* ══════════════════════════════
+   THREE-COLUMN LAYOUT
+══════════════════════════════ */
+.app-body{
+  display:grid; grid-template-columns:230px 1fr 360px;
+  flex:1; overflow:hidden;
+}
+
+/* ── COL 1: Paper list ── */
+.col-list{
+  background:var(--white); border-right:1px solid var(--border2);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.col-list-head{
+  padding:.85rem 1rem; border-bottom:1px solid var(--border2);
+  background:var(--blue-50);
+}
+.prog-row{ display:flex; justify-content:space-between; align-items:center;
+  font-size:.72rem; margin-bottom:.4rem; }
+.prog-lbl{ font-weight:600; color:var(--blue-800); }
+.prog-val{ color:var(--muted); }
+.prog-track{ height:4px; background:var(--border2); border-radius:2px; overflow:hidden; }
+.prog-fill{ height:100%; background:linear-gradient(90deg, var(--blue-600), var(--blue-400)); border-radius:2px; transition:width .4s ease; }
+
+.list-scroll{ flex:1; overflow-y:auto; padding:.4rem .5rem; }
+.pi{
+  padding:.6rem .7rem; border-radius:8px; cursor:pointer;
+  margin-bottom:.2rem; border:1.5px solid transparent; transition:all .15s;
+  position:relative;
+}
+.pi:hover{ background:var(--bg); }
+.pi.active{ background:var(--blue-50); border-color:var(--blue-200); }
+.pi.done{ opacity:.65; }
+.pi.rejected{ opacity:.6; }
+.pi-row1{ display:flex; align-items:center; gap:.4rem; margin-bottom:.15rem; }
+.pi-num{ font-size:.72rem; font-weight:700; letter-spacing:.05em;
+  background:var(--blue-800); color:white; padding:.1rem .45rem; border-radius:4px; }
+.pi.done .pi-num{ background:var(--green); }
+.pi.rejected .pi-num{ background:var(--red); }
+.pi-cat{ font-size:.72rem; color:var(--muted); }
+.pi-ttl{ font-size:.9rem; font-weight:500; color:var(--ink); line-height:1.4;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.pi-status{ display:flex; align-items:center; gap:.3rem; margin-top:.25rem; }
+.pi-dot{ width:5px; height:5px; border-radius:50%; }
+.pi-dot.p{ background:#f59e0b; }
+.pi-dot.d{ background:#22c55e; }
+.pi-dot.r{ background:var(--red); }
+.pi-st-txt{ font-size:.75rem; color:var(--muted); }
+
+/* ── COL 2: Paper content ── */
+.col-content{
+  overflow-y:auto; background:var(--bg); padding:1.25rem 1.5rem;
+}
+.content-empty{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  height:100%; color:var(--muted); text-align:center; gap:.75rem;
+}
+.content-empty .icon{ font-size:2.5rem; opacity:.3; }
+.content-empty h3{ font-size:.95rem; color:var(--slate); }
+
+/* Paper info card */
+.p-info-card{
+  background:white; border:1px solid var(--border2); border-radius:var(--r);
+  box-shadow:var(--sh-sm); overflow:hidden; margin-bottom:1rem;
+}
+.p-info-head{
+  padding:.9rem 1.1rem; border-bottom:1px solid var(--border2);
+  background:linear-gradient(135deg, var(--blue-900), var(--blue-800));
+}
+.p-tags{ display:flex; flex-wrap:wrap; gap:.35rem; margin-bottom:.5rem; }
+.tag{ padding:.2rem .6rem; border-radius:4px; font-size:.73rem; font-weight:700; letter-spacing:.04em; display:inline-block; }
+.tg-no  { background:rgba(255,255,255,.15); color:white; }
+.tg-cat { background:rgba(255,255,255,.1); color:rgba(255,255,255,.85); border:1px solid rgba(255,255,255,.2); }
+.tg-wc  { background:rgba(255,255,255,.08); color:rgba(255,255,255,.55); }
+.p-title{ font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif; font-size:1.1rem; font-weight:700; color:white; line-height:1.6; }
+
+/* 類別調整列 */
+.cat-adjust-row{
+  padding:.6rem 1.1rem; background:var(--amber-bg);
+  border-bottom:1px solid #fde68a;
+  display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;
+}
+.cat-adjust-lbl{ font-size:.72rem; font-weight:600; color:var(--amber); white-space:nowrap; }
+.cat-adjust-sel{
+  padding:.3rem .6rem; border:1.5px solid #f59e0b; border-radius:6px;
+  background:white; color:var(--ink); font-size:.78rem; font-family:inherit; cursor:pointer;
+}
+.cat-adjust-sel:focus{ outline:none; }
+.cat-adjust-note{ font-size:.7rem; color:var(--amber); }
+
+.p-info-body{ padding:1rem 1.1rem; }
+.abs-sec{ margin-bottom:.85rem; }
+.abs-lbl{
+  font-size:.78rem; font-weight:700; letter-spacing:.12em; color:var(--blue-700);
+  text-transform:uppercase; display:flex; align-items:center; gap:.45rem; margin-bottom:.35rem;
+}
+.abs-lbl::after{ content:''; flex:1; height:1px; background:var(--border2); }
+.abs-txt{ font-size:.95rem; line-height:1.85; color:var(--slate); }
+
+/* OSCE cloud link */
+.cloud-link-box{
+  display:flex; align-items:center; gap:.75rem;
+  background:var(--blue-50); border:1px solid var(--blue-200);
+  border-radius:9px; padding:.75rem 1rem; margin-bottom:.85rem;
+}
+.cloud-link-box .icon{ font-size:1.3rem; }
+.cloud-link-box .info{ flex:1; }
+.cloud-link-box .info p{ font-size:.72rem; color:var(--muted); margin-top:.1rem; }
+.btn-cloud{
+  padding:.4rem .85rem; background:var(--blue-700); color:white;
+  border:none; border-radius:7px; font-size:.78rem; font-family:inherit;
+  font-weight:500; cursor:pointer; transition:opacity .2s; white-space:nowrap;
+  text-decoration:none; display:inline-block;
+}
+.btn-cloud:hover{ opacity:.85; }
+
+/* ── COL 3: Score form ── */
+.col-score{
+  background:white; border-left:1px solid var(--border2);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.col-score-head{
+  padding:.75rem 1rem; background:var(--blue-800);
+  display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+}
+.col-score-head h3{ font-size:.9rem; font-weight:700; color:white; font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif; }
+.col-score-head-note{ font-size:.68rem; color:rgba(255,255,255,.45); }
+.score-scroll{ flex:1; overflow-y:auto; padding:.85rem 1rem; }
 
 /* Done banner */
-.done-banner{display:flex;align-items:center;gap:.6rem;background:var(--green-bg);border:1px solid #a7f3d0;border-radius:9px;padding:.7rem 1rem;font-size:.85rem;color:var(--green);margin-bottom:1.25rem;}
+.done-banner{
+  display:flex; align-items:center; gap:.5rem;
+  background:var(--green-bg); border:1px solid #bbf7d0;
+  border-radius:8px; padding:.6rem .85rem;
+  font-size:.8rem; color:var(--green); margin-bottom:1rem;
+}
 
-/* Submit */
-.sub-row{display:flex;gap:.75rem;align-items:center;margin-top:1.25rem;}
-.btn-draft{padding:.75rem 1rem;background:white;border:1.5px solid var(--border);border-radius:9px;font-size:.85rem;font-family:inherit;color:var(--slate);cursor:pointer;transition:all .2s;white-space:nowrap;}
-.btn-draft:hover{border-color:var(--blue);color:var(--blue);}
-.btn-sub{flex:1;padding:.8rem;background:linear-gradient(135deg,var(--green),#155d38);color:white;border:none;border-radius:9px;font-size:.9rem;font-family:inherit;font-weight:500;letter-spacing:.04em;cursor:pointer;transition:opacity .2s,transform .15s;}
-.btn-sub:hover{opacity:.9;transform:translateY(-1px);}
-.btn-sub:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+/* Reject zone */
+.reject-zone{
+  background:var(--red-bg); border:1.5px solid #fca5a5;
+  border-radius:9px; padding:.85rem; margin-bottom:1rem;
+}
+.reject-zone-head{
+  display:flex; align-items:center; gap:.5rem; margin-bottom:.6rem;
+  cursor:pointer; user-select:none;
+}
+.reject-zone-head label{ font-size:.92rem; font-weight:600; color:var(--red); cursor:pointer; }
+.reject-checkbox{ width:16px; height:16px; accent-color:var(--red); cursor:pointer; }
+.reject-reason-wrap{ display:none; }
+.reject-reason-wrap.show{ display:block; }
+.reject-reason-wrap label{ display:block; font-size:.7rem; color:var(--red); margin-bottom:.3rem; font-weight:500; }
+.reject-reason-wrap textarea{
+  width:100%; padding:.55rem .75rem; border:1.5px solid #fca5a5;
+  border-radius:7px; font-size:.82rem; font-family:inherit;
+  color:var(--ink); resize:vertical; min-height:64px; background:white;
+  transition:border-color .2s;
+}
+.reject-reason-wrap textarea:focus{ outline:none; border-color:var(--red); }
 
-/* Toast */
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.72rem 1.1rem;border-radius:10px;font-size:.88rem;color:white;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:9999;animation:toastIn .3s ease;max-width:320px;}
-.toast.ok{background:var(--green);}.toast.err{background:var(--red);}
-@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* Criteria */
+.crit-group{ margin-bottom:.85rem; }
+.crit-group-title{
+  font-size:.77rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--blue-700); padding:.3rem .6rem; background:var(--blue-50);
+  border-radius:5px; margin-bottom:.5rem;
+}
+.crit-item{
+  display:flex; align-items:center; gap:.6rem;
+  padding:.5rem .1rem; border-bottom:1px solid var(--border2);
+}
+.crit-item:last-child{ border-bottom:none; }
+.crit-info{ flex:1; min-width:0; }
+.crit-name{ font-size:.9rem; color:var(--ink); line-height:1.4; }
+.crit-meta{ font-size:.76rem; color:var(--muted); margin-top:.1rem; }
+.score-input-wrap{ display:flex; align-items:center; gap:.3rem; flex-shrink:0; }
+.score-input{
+  width:58px; padding:.45rem .5rem; text-align:center;
+  border:1.5px solid var(--border); border-radius:7px;
+  font-size:1rem; font-weight:600; font-family:inherit; color:var(--blue-800);
+  background:var(--blue-50); transition:border-color .2s, background .2s;
+}
+.score-input:focus{ outline:none; border-color:var(--blue-600); background:white; }
+.score-input:disabled{ opacity:.5; cursor:not-allowed; }
+.score-max{ font-size:.78rem; color:var(--muted); white-space:nowrap; }
+/* 超出滿分時紅底 */
+.score-input.over{ border-color:var(--red); background:var(--red-bg); color:var(--red); }
 
-/* Loader */
-.ldr{position:fixed;inset:0;background:rgba(255,255,255,.8);display:none;align-items:center;justify-content:center;z-index:9998;}
-.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .65s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* Recommend */
+.recommend-zone{
+  background:var(--blue-50); border:1.5px solid var(--blue-200);
+  border-radius:9px; padding:.75rem; margin-bottom:.85rem;
+}
+.recommend-zone-head{
+  display:flex; align-items:center; gap:.5rem;
+  cursor:pointer; user-select:none;
+}
+.recommend-zone-head label{ font-size:.92rem; font-weight:600; color:var(--blue-800); cursor:pointer; }
+.recommend-checkbox{ width:16px; height:16px; accent-color:var(--blue-700); cursor:pointer; }
+.recommend-note{ font-size:.8rem; color:var(--muted); margin-top:.35rem; line-height:1.5; }
 
-@media(max-width:720px){
-  .app-layout{grid-template-columns:1fr;}
-  .sidebar{position:static;height:auto;max-height:200px;overflow-y:auto;border-right:none;border-bottom:1px solid var(--border);}
-  .main{padding:1rem;}
-  .app-header{padding:0 1rem;}
-  .hd-sep,.hd-sub{display:none;}
+/* Total */
+.total-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(135deg, var(--blue-900), var(--blue-800));
+  border-radius:9px; padding:.75rem 1rem; margin-bottom:.85rem;
+}
+.total-lbl{ font-size:.75rem; color:rgba(255,255,255,.6); }
+.total-num{ font-family:'Noto Serif TC',serif; font-size:1.6rem; color:white; line-height:1; }
+.total-num small{ font-size:.7rem; color:rgba(255,255,255,.4); font-family:'Noto Sans TC',sans-serif; }
+.bonus-note{ font-size:.68rem; color:rgba(255,255,255,.45); margin-top:.15rem; }
+
+/* Comment */
+.cmt-wrap{ margin-bottom:.85rem; }
+.cmt-wrap label{ display:block; font-size:.72rem; font-weight:500; color:var(--slate);
+  margin-bottom:.3rem; letter-spacing:.04em; }
+.cmt-wrap textarea{
+  width:100%; padding:.6rem .8rem; border:1.5px solid var(--border);
+  border-radius:8px; font-size:.82rem; font-family:inherit;
+  color:var(--ink); resize:vertical; min-height:64px;
+  background:var(--bg); transition:border-color .2s;
+}
+.cmt-wrap textarea:focus{ outline:none; border-color:var(--blue-600); background:white; }
+
+/* Submit buttons */
+.score-actions{ display:flex; gap:.5rem; padding:.85rem 1rem; border-top:1px solid var(--border2); flex-shrink:0; }
+.btn-draft{
+  padding:.65rem .75rem; background:white; border:1.5px solid var(--border);
+  border-radius:8px; font-size:.78rem; font-family:inherit; color:var(--muted);
+  cursor:pointer; transition:all .2s; white-space:nowrap;
+}
+.btn-draft:hover{ border-color:var(--blue-500); color:var(--blue-700); }
+.btn-submit{
+  flex:1; padding:.68rem; background:linear-gradient(135deg, var(--green), #166534);
+  color:white; border:none; border-radius:8px; font-size:.82rem;
+  font-family:inherit; font-weight:500; letter-spacing:.04em;
+  cursor:pointer; transition:all .2s;
+}
+.btn-submit:hover{ opacity:.9; transform:translateY(-1px); }
+.btn-submit:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
+
+/* ══════════════════════════════
+   OVERVIEW MODAL (總覽確認)
+══════════════════════════════ */
+.modal-bg{
+  position:fixed; inset:0; background:rgba(10,35,66,.6);
+  display:none; align-items:center; justify-content:center;
+  z-index:500; padding:1rem; backdrop-filter:blur(4px);
+}
+.modal-bg.show{ display:flex; }
+.modal{
+  background:white; border-radius:14px;
+  width:780px; max-width:100%; max-height:90vh;
+  box-shadow:0 24px 64px rgba(0,0,0,.25);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.modal-head{
+  padding:1rem 1.25rem; background:var(--blue-900);
+  display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+}
+.modal-head h3{ font-family:'Noto Serif TC',serif; font-size:1rem; color:white; font-weight:500; }
+.modal-close{ background:none; border:none; font-size:1.1rem; color:rgba(255,255,255,.5); cursor:pointer; }
+.modal-close:hover{ color:white; }
+.modal-body{ flex:1; overflow-y:auto; padding:1.25rem; }
+.modal-foot{
+  padding:.9rem 1.25rem; border-top:1px solid var(--border2);
+  display:flex; gap:.6rem; justify-content:flex-end; flex-shrink:0;
+  background:var(--bg);
+}
+
+/* Overview table */
+.ov-table{ width:100%; border-collapse:collapse; font-size:.8rem; }
+.ov-table th{
+  padding:.6rem .75rem; background:var(--blue-50); font-size:.75rem;
+  font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--blue-700); text-align:left; border-bottom:2px solid var(--blue-200);
+  white-space:nowrap;
+}
+.ov-table td{
+  padding:.65rem .75rem; border-bottom:1px solid var(--border2);
+  vertical-align:middle; font-size:.88rem;
+}
+.ov-table tr:hover td{ background:var(--blue-50); }
+.ov-table tr.rejected-row td{ background:var(--red-bg); }
+.ov-no-data{ text-align:center; padding:2rem; color:var(--muted); font-size:.85rem; }
+
+/* Buttons */
+.btn{ padding:.55rem 1rem; border-radius:8px; font-size:.82rem; font-weight:500;
+  cursor:pointer; transition:all .18s; border:none; font-family:inherit; }
+.btn-primary{ background:var(--blue-700); color:white; }
+.btn-primary:hover{ background:var(--blue-600); }
+.btn-secondary{ background:white; border:1.5px solid var(--border); color:var(--slate); }
+.btn-secondary:hover{ border-color:var(--blue-500); color:var(--blue-700); }
+.btn-success-lg{
+  padding:.65rem 1.5rem; background:linear-gradient(135deg, var(--green), #166534);
+  color:white; border:none; border-radius:9px; font-size:.9rem;
+  font-family:inherit; font-weight:500; cursor:pointer; transition:all .2s;
+}
+.btn-success-lg:hover{ opacity:.9; }
+
+/* Overview score summary */
+.ov-score{ font-weight:700; color:var(--blue-800); }
+.ov-rec{ padding:.12rem .5rem; border-radius:4px; font-size:.65rem; font-weight:700; }
+.ov-rec.yes{ background:var(--green-bg); color:var(--green); }
+.ov-rec.no{ background:var(--border2); color:var(--muted); }
+.ov-rec.rej{ background:var(--red-bg); color:var(--red); }
+.ov-pending{ color:var(--muted); font-size:.75rem; }
+
+/* ══════════════════════════════
+   LOADER / TOAST
+══════════════════════════════ */
+.ldr{ position:fixed; inset:0; background:rgba(255,255,255,.8); display:none;
+  align-items:center; justify-content:center; z-index:9998; }
+.spinner{ width:34px; height:34px; border:3px solid var(--border);
+  border-top-color:var(--blue-600); border-radius:50%; animation:spin .65s linear infinite; }
+@keyframes spin{ to{ transform:rotate(360deg) } }
+.toast{ position:fixed; bottom:1.5rem; right:1.5rem; padding:.7rem 1.1rem;
+  border-radius:9px; font-size:.85rem; color:white;
+  box-shadow:0 8px 24px rgba(0,0,0,.15); z-index:9999;
+  animation:tIn .3s ease; max-width:320px; }
+.toast.ok{ background:var(--green); }
+.toast.err{ background:var(--red); }
+.toast.warn{ background:var(--amber); }
+@keyframes tIn{ from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ══════════════════════════════
+   MOBILE (single column)
+══════════════════════════════ */
+/* ── Tablet: 2欄 (list hidden, content+score) ── */
+@media(max-width:1200px) and (min-width:761px){
+  .app-body{ grid-template-columns:200px 1fr 320px; }
+}
+@media(max-width:1000px) and (min-width:761px){
+  .app-body{ grid-template-columns:1fr 300px; }
+  .col-list{ display:none; }
+  /* 以下拉選單替代 sidebar */
+}
+/* ── Mobile: 單欄 ── */
+@media(max-width:760px){
+  .app-body{ grid-template-columns:1fr; grid-template-rows:auto 1fr auto; }
+  .col-list{ max-height:160px; border-right:none; border-bottom:1px solid var(--border2); }
+  .list-scroll{ display:flex; gap:.35rem; overflow-x:auto; overflow-y:hidden; padding:.4rem .5rem; }
+  .pi{ min-width:160px; margin-bottom:0; flex-shrink:0; }
+  .col-content{ padding:.85rem; }
+  .col-score{ border-left:none; border-top:1px solid var(--border2); max-height:55vh; overflow-y:auto; }
+  .topbar{ padding:0 .85rem; flex-wrap:wrap; height:auto; padding:.5rem .85rem; gap:.4rem; }
+  .tb-left{ flex-wrap:wrap; }
+  .tb-logo{ font-size:.82rem; }
+  .deadline-chip{ display:none; }
+  .tb-sep{ display:none; }
+  .tb-right{ gap:.4rem; }
+  .btn-out{ font-size:.7rem; padding:.25rem .5rem; }
+  .rv-chip{ font-size:.72rem; padding:.25rem .6rem; }
+  .login-card{ padding:1.5rem; }
+}
+/* ── Small mobile ── */
+@media(max-width:400px){
+  body{ font-size:15px; }
+  .app-body{ grid-template-rows:140px 1fr auto; }
+  .col-list{ max-height:140px; }
 }
 </style>
 </head>
 <body>
 
+<!-- ══ LOGIN ══ -->
 <div id="loginScreen">
+  <div class="lg-deco lg-deco-1"></div>
+  <div class="lg-deco lg-deco-2"></div>
   <div class="login-wrap">
-    <div class="login-head">
-      <div class="conf">TSMCSD 2026 年會暨學術研討會</div>
+    <div class="login-brand">
+      <div class="eyebrow">⚕ TSMCSD 2026 年會暨學術研討會</div>
       <h1>論文評審系統</h1>
-      <p>僅供受邀評審委員使用</p>
+      <p>僅供受邀評審委員使用・請勿轉發登入資訊</p>
+    </div>
+    <div class="deadline-banner">
+      ⏰ 請於 <strong>115年7月3日（五）</strong> 前完成所有評分並送出
     </div>
     <div class="login-card">
-      <label class="f-label">委員帳號</label>
-      <input class="f-input" id="lgUser" type="text" placeholder="請輸入帳號" autocomplete="username">
-      <label class="f-label">密碼</label>
-      <input class="f-input" id="lgPass" type="password" placeholder="請輸入密碼" autocomplete="current-password"
+      <label class="fl">委員帳號</label>
+      <input class="fi" id="lgUser" type="text" placeholder="請輸入帳號" autocomplete="username">
+      <label class="fl">密碼</label>
+      <input class="fi" id="lgPass" type="password" placeholder="請輸入密碼"
              onkeydown="if(event.key==='Enter')doLogin()">
-      <button class="btn-login" onclick="doLogin()">登入</button>
+      <button class="btn-login" onclick="doLogin()">登入評審系統</button>
       <div class="login-err" id="lgErr"></div>
     </div>
   </div>
 </div>
 
+<!-- ══ APP ══ -->
 <div id="app">
-  <header class="app-header">
-    <div class="hd-left">
-      <span class="hd-logo">TSMCSD 2026</span>
-      <div class="hd-sep"></div>
-      <span class="hd-sub">論文評審系統</span>
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="tb-left">
+      <span class="tb-logo">TSMCSD 2026 論文評審</span>
+      <div class="tb-sep"></div>
+      <div class="tb-type-tabs">
+        <div class="tb-tab active" id="tabPoster" onclick="switchType('poster')">📋 海報論文</div>
+        <div class="tb-tab" id="tabOsce" onclick="switchType('osce')">🎬 OSCE 教案</div>
+      </div>
     </div>
-    <div class="hd-right">
+    <div class="tb-right">
+      <div class="deadline-chip">⏰ 截止 115.7.3（五）</div>
       <div class="rv-chip">👤 <span id="rvName"></span></div>
+      <button class="btn-out" onclick="showOverview()">📊 總覽確認</button>
       <button class="btn-out" onclick="doLogout()">登出</button>
     </div>
-  </header>
+  </div>
 
-  <div class="app-layout">
-    <aside class="sidebar">
-      <div class="sb-top">
+  <!-- Three-column body -->
+  <div class="app-body">
+    <!-- COL 1: List -->
+    <div class="col-list">
+      <div class="col-list-head">
         <div class="prog-row">
-          <span class="prog-label">評審進度</span>
-          <span id="progTxt">0 / 0</span>
+          <span class="prog-lbl" id="progLbl">評審進度</span>
+          <span class="prog-val" id="progTxt">0 / 0</span>
         </div>
         <div class="prog-track">
           <div class="prog-fill" id="progFill" style="width:0%"></div>
         </div>
       </div>
-      <div class="sb-title">指派論文</div>
-      <div class="paper-list" id="paperList"></div>
-    </aside>
+      <div class="list-scroll" id="paperList"></div>
+    </div>
 
-    <main class="main" id="mainArea">
-      <div class="empty">
-        <div class="icon">📋</div>
+    <!-- COL 2: Content -->
+    <div class="col-content" id="colContent">
+      <div class="content-empty">
+        <div class="icon">📄</div>
         <h3>請從左側選擇論文</h3>
-        <p>點選待評論文後開始評分</p>
+        <p style="font-size:.8rem">點選論文後，摘要與評分表單將顯示於此</p>
       </div>
-    </main>
+    </div>
+
+    <!-- COL 3: Score -->
+    <div class="col-score">
+      <div class="col-score-head">
+        <h3 id="scoreHeadTitle">評分表</h3>
+        <span class="col-score-head-note" id="scoreHeadNote">請先選擇論文</span>
+      </div>
+      <div class="score-scroll" id="scoreArea">
+        <p style="color:var(--muted);font-size:.82rem;text-align:center;padding:2rem 0">
+          請從左側選擇論文後開始評分
+        </p>
+      </div>
+      <div class="score-actions" id="scoreActions" style="display:none">
+        <button class="btn-draft" onclick="saveDraft()">暫存</button>
+        <button class="btn-submit" id="btnSubmit" onclick="submitScore()">✅ 提交評分</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OVERVIEW MODAL ══ -->
+<div class="modal-bg" id="overviewModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>📊 所有論文評分總覽</h3>
+      <button class="modal-close" onclick="closeOverview()">✕</button>
+    </div>
+    <div class="modal-body" id="overviewBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeOverview()">關閉</button>
+    </div>
   </div>
 </div>
 
 <div class="ldr" id="ldr"><div class="spinner"></div></div>
 
 <script>
+// ══ 設定 ══
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2njUGr6eORWe6V5iMITA_dbpuOzhOebyxDW43P8RySVezxUevEOvQZGUV0tl_Mhm9/exec';
 
-const CRITERIA = [
-  { id:'c1', label:'主題創新性',           weight:'20%', max:20 },
-  { id:'c2', label:'研究設計合理性',       weight:'15%', max:15 },
-  { id:'c3', label:'文字表達流暢性',       weight:'15%', max:15 },
-  { id:'c4', label:'內容結構的完整性',     weight:'25%', max:25 },
-  { id:'c5', label:'結果與討論的正確性',   weight:'15%', max:15 },
-  { id:'c6', label:'學術貢獻',             weight:'10%', max:10 }
+// 類別全名對照
+const CAT_NAMES = {
+  'A': 'A — Clinical Skills Education, Simulation & Interprofessional Learning',
+  'B': 'B — Assessment, Entrustment & Competency-Based Medical Education',
+  'C': 'C — Humanism, Wellbeing & Professional Identity'
+};
+const CAT_SHORT = {
+  'A': 'A 臨床技能教育',
+  'B': 'B 評量與能力導向',
+  'C': 'C 人文素養'
+};
+
+// ══ 海報論文評分向度 ══
+const POSTER_CRITERIA = [
+  { id:'p1', label:'主題創新性',           weight:'20%', max:20 },
+  { id:'p2', label:'研究設計合理性',       weight:'15%', max:15 },
+  { id:'p3', label:'文字表達流暢性',       weight:'15%', max:15 },
+  { id:'p4', label:'內容結構的完整性',     weight:'25%', max:25 },
+  { id:'p5', label:'結果與討論的正確性',   weight:'15%', max:15 },
+  { id:'p6', label:'學術貢獻',             weight:'10%', max:10 }
 ];
-const THRESHOLD = 80;
-const MAX_TOTAL = CRITERIA.reduce((s,c)=>s+c.max,0);
+const POSTER_MAX = POSTER_CRITERIA.reduce((s,c)=>s+c.max,0); // 100
 
-let reviewer=null, papers=[], submitted={}, drafts={}, curIdx=null;
+// ══ OSCE 教案評分向度 ══
+const OSCE_CRITERIA_GROUPS = [
+  {
+    group:'情境設置',
+    items:[
+      { id:'o1', label:'情境設置（包含示範、配置器材、技能操作題包含器材並與現場一致）', max:10 }
+    ]
+  },
+  {
+    group:'教案指引（30%）',
+    items:[
+      { id:'o2', label:'教學/考官指引（說明學習目標、教學/考官分說明清楚滿足考生語意清楚）', max:10 },
+      { id:'o3', label:'考生指引/SP指引（足以輔助考生執行任務）',                              max:10 },
+      { id:'o4', label:'SP腳本/助教指引（能引導考生達到特定症狀等）',                          max:10 }
+    ]
+  },
+  {
+    group:'教案設計（20%）',
+    items:[
+      { id:'o5', label:'評分項目與教案目標相關（評分尺標與教案目標相對應）', max:10 },
+      { id:'o6', label:'評分尺標與給分定義明確（評分項次尺標與給分定義明確）', max:10 }
+    ]
+  },
+  {
+    group:'教案目標明確一致（10%）',
+    items:[
+      { id:'o7', label:'教案內容（教案/考官、考生、SP教之教案內容及教材結構之完整性，指引目標一致）', max:10 }
+    ]
+  },
+  {
+    group:'影片呈現（30%）',
+    items:[
+      { id:'o8', label:'影片畫面品質優良',           max:10 },
+      { id:'o9', label:'影片聲音清晰，且有字幕',     max:10 },
+      { id:'o10',label:'剪輯得宜，有助於教案呈現',  max:10 }
+    ]
+  }
+];
+const OSCE_ALL_CRITERIA = OSCE_CRITERIA_GROUPS.flatMap(g=>g.items);
+const OSCE_BASE_MAX = OSCE_ALL_CRITERIA.reduce((s,c)=>s+c.max,0); // 100
+const OSCE_BONUS = { id:'o_bonus', label:'優良加分（特殊優良表現，請說明）', max:10 };
 
-async function doLogin() {
-  const u=document.getElementById('lgUser').value.trim();
-  const p=document.getElementById('lgPass').value.trim();
-  const eEl=document.getElementById('lgErr');
-  eEl.style.display='none';
+// ══ State ══
+let reviewer=null, papers={poster:[],osce:[]};
+let submitted={}, drafts={}, curType='poster', curIdx=null;
+
+// ══ Login ══
+async function doLogin(){
+  const u=el('lgUser').value.trim(), p=el('lgPass').value.trim();
+  const eEl=el('lgErr'); eEl.style.display='none';
   if(!u||!p) return;
   setLdr(true);
-  try {
+  try{
     const r=await api({action:'reviewerLogin',username:u,password:p});
     if(r.success){
-      reviewer=r.reviewer; papers=r.papers||[]; submitted=r.submitted||{};
-      document.getElementById('rvName').textContent=reviewer.name;
-      document.getElementById('loginScreen').style.display='none';
-      document.getElementById('app').classList.add('show');
-      renderSB();
+      reviewer=r.reviewer;
+      papers.poster=r.papers||[];
+      papers.osce=r.oscePapers||[];
+      submitted=r.submitted||{};
+      el('rvName').textContent=reviewer.name;
+      el('loginScreen').style.display='none';
+      el('app').classList.add('show');
+      renderList();
     } else {
       eEl.textContent='⚠ '+(r.message||'帳號或密碼錯誤');
       eEl.style.display='block';
     }
-  } catch { eEl.textContent='⚠ 連線失敗，請稍後再試'; eEl.style.display='block'; }
+  } catch{ eEl.textContent='⚠ 連線失敗，請稍後再試'; eEl.style.display='block'; }
   setLdr(false);
 }
 function doLogout(){ if(!confirm('確定登出？')) return; location.reload(); }
 
-function renderSB(){
-  const done=papers.filter(p=>submitted[p.id]).length;
-  const tot=papers.length;
-  document.getElementById('progTxt').textContent=done+' / '+tot;
-  document.getElementById('progFill').style.width=tot?(done/tot*100)+'%':'0%';
-  document.getElementById('paperList').innerHTML=papers.map((p,i)=>{
-    const d=!!submitted[p.id];
-    return `<div class="pi ${d?'done':''} ${curIdx===i?'active':''}" onclick="sel(${i})">
-      <div class="pi-num">${p.paperNo}</div>
-      <div class="pi-ttl">${esc(p.title)}</div>
-      <div class="pi-st"><div class="pi-dot ${d?'d':'p'}"></div><span>${d?'已完成':'待評審'}</span></div>
-    </div>`;
-  }).join('');
+// ══ Type switch ══
+function switchType(t){
+  curType=t; curIdx=null;
+  el('tabPoster').classList.toggle('active',t==='poster');
+  el('tabOsce').classList.toggle('active',t==='osce');
+  el('colContent').innerHTML=`<div class="content-empty"><div class="icon">${t==='osce'?'🎬':'📄'}</div><h3>請從左側選擇${t==='osce'?'教案':'論文'}</h3></div>`;
+  el('scoreArea').innerHTML=`<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:2rem 0">請先選擇${t==='osce'?'教案':'論文'}</p>`;
+  el('scoreActions').style.display='none';
+  renderList();
 }
 
-function sel(i){ curIdx=i; renderSB(); renderMain(); }
+// ══ Sidebar ══
+function renderList(){
+  const list=papers[curType]||[];
+  const done=list.filter(p=>submitted[p.id]).length;
+  el('progTxt').textContent=done+' / '+list.length;
+  el('progFill').style.width=list.length?(done/list.length*100)+'%':'0%';
+  el('progLbl').textContent=curType==='osce'?'OSCE 進度':'海報評審進度';
 
-function renderMain(){
-  const p=papers[curIdx]; if(!p) return;
+  el('paperList').innerHTML=list.map((p,i)=>{
+    const d=!!submitted[p.id];
+    const rej=drafts[p.id]?.rejected;
+    const statusClass=rej?'rejected':d?'done':'';
+    const dotClass=rej?'r':d?'d':'p';
+    const statusTxt=rej?'退稿':d?'已完成':'待評審';
+    const numLabel=curType==='osce'?p.caseNo:p.paperNo;
+    return `<div class="pi ${statusClass} ${curIdx===i?'active':''}" onclick="selectPaper(${i})">
+      <div class="pi-row1">
+        <span class="pi-num">${esc(numLabel||'—')}</span>
+        <span class="pi-cat">${curType==='osce'?'OSCE':(p.category||'')}</span>
+      </div>
+      <div class="pi-ttl">${esc(p.title)}</div>
+      <div class="pi-status">
+        <div class="pi-dot ${dotClass}"></div>
+        <span class="pi-st-txt">${statusTxt}</span>
+      </div>
+    </div>`;
+  }).join('') || '<p style="color:var(--muted);font-size:.78rem;text-align:center;padding:1.5rem .5rem">暫無指派項目</p>';
+}
+
+// ══ Select paper ══
+function selectPaper(i){
+  curIdx=i; renderList();
+  if(curType==='poster') renderPosterContent(i);
+  else renderOsceContent(i);
+}
+
+// ══ POSTER content & score ══
+function renderPosterContent(i){
+  const p=papers.poster[i]; if(!p) return;
   const isDone=!!submitted[p.id];
   const draft=drafts[p.id]||{};
-  document.getElementById('mainArea').innerHTML=`
-    <div class="p-card">
-      <div class="p-head">
+  const catFull=CAT_NAMES[p.category]||p.category||'—';
+  const catShort=CAT_SHORT[p.category]||p.category||'—';
+
+  // Content col
+  el('colContent').innerHTML=`
+    <div class="p-info-card">
+      <div class="p-info-head">
         <div class="p-tags">
-          <span class="tag tg-no">${p.paperNo}</span>
-          <span class="tag tg-cat">${esc(p.category||'')}</span>
+          <span class="tag tg-no">${esc(p.paperNo||'—')}</span>
+          <span class="tag tg-cat">${esc(catShort)}</span>
           ${p.wordCount?`<span class="tag tg-wc">摘要 ${p.wordCount} 字</span>`:''}
         </div>
         <div class="p-title">${esc(p.title)}</div>
       </div>
-      <div class="p-body">
+      <div class="cat-adjust-row">
+        <span class="cat-adjust-lbl">✏️ 建議調整類別：</span>
+        <select class="cat-adjust-sel" id="catAdjSel" ${isDone?'disabled':''}>
+          <option value="">（維持原類別）</option>
+          <option value="A" ${draft.catAdjust==='A'?'selected':''}>A — 臨床技能教育、模擬教學與跨專業學習</option>
+          <option value="B" ${draft.catAdjust==='B'?'selected':''}>B — 評量、信任決策與能力導向醫學教育</option>
+          <option value="C" ${draft.catAdjust==='C'?'selected':''}>C — 人文素養、醫療韌性與專業認同</option>
+        </select>
+        <span class="cat-adjust-note">若認為類別應調整，請選擇建議類別</span>
+      </div>
+      <div class="p-info-body">
         ${absBlk('研究動機',p.absMotivation)}
         ${absBlk('研究方法',p.absMethod)}
         ${absBlk('研究結果',p.absResult)}
         ${absBlk('結論',p.absConclusion)}
       </div>
-    </div>
-    <div class="sc-card">
-      <div class="sc-head">
-        <h3>📝 評分表</h3>
-        <span class="sc-head-note">滿分 ${MAX_TOTAL} 分・推薦門檻 ${THRESHOLD} 分</span>
-      </div>
-      <div class="sc-body">
-        ${isDone?'<div class="done-banner">✅ 此論文已完成評分，如需修改請聯絡管理員</div>':''}
-        ${CRITERIA.map(c=>critBlk(c,draft[c.id],isDone)).join('')}
-        <div class="cmt-wrap" style="padding-top:.5rem">
-          <label>評語（選填）</label>
-          <textarea id="cmtA" placeholder="可填寫對本篇論文的建議或意見…"
-            ${isDone?'readonly':''}>${esc(draft.comment||'')}</textarea>
-        </div>
-        <div class="total-strip">
-          <div class="t-left">
-            <div class="t-lbl">合計總分</div>
-            <div class="t-note">滿分 ${MAX_TOTAL} 分</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:.75rem">
-            <div class="t-num" id="tNum">—<small> / ${MAX_TOTAL}</small></div>
-            <div class="rec-chip" id="recChip"></div>
-          </div>
-        </div>
-        ${!isDone?`<div class="sub-row">
-          <button class="btn-draft" onclick="saveDraft()">暫存草稿</button>
-          <button class="btn-sub" onclick="submitScore('${p.id}')">✅ 確認提交評分</button>
-        </div>`:''}
-      </div>
     </div>`;
-  updTotal();
+
+  // Score col
+  el('scoreHeadTitle').textContent='海報論文評分';
+  el('scoreHeadNote').textContent=`滿分 ${POSTER_MAX} 分`;
+  el('scoreArea').innerHTML=renderPosterScoreForm(p, draft, isDone);
+  el('scoreActions').style.display=isDone?'none':'flex';
+  if(isDone){
+    el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">✅ 已完成評分，如需修改請聯絡管理員</div>');
+  }
+  updatePosterTotal();
 }
 
+function renderPosterScoreForm(p, draft, isDone){
+  const dis=isDone?'disabled':'';
+  let html='';
+
+  // 退稿區
+  const isRej=!!(draft.rejected);
+  html+=`<div class="reject-zone">
+    <div class="reject-zone-head" onclick="toggleReject()">
+      <input type="checkbox" class="reject-checkbox" id="rejChk" ${isRej?'checked':''} ${dis} onchange="toggleReject()">
+      <label for="rejChk">⚠️ 此論文不符合投稿範疇（退稿）</label>
+    </div>
+    <div class="reject-reason-wrap ${isRej?'show':''}" id="rejReasonWrap">
+      <label>退稿原因（必填）</label>
+      <textarea id="rejReason" placeholder="請說明退稿原因…" ${dis}>${esc(draft.rejectReason||'')}</textarea>
+    </div>
+  </div>`;
+
+  // 評分向度
+  html+=`<div class="crit-group"><div class="crit-group-title">各項評分（滿分 ${POSTER_MAX} 分）</div>`;
+  POSTER_CRITERIA.forEach(c=>{
+    const v=draft[c.id]!==undefined?draft[c.id]:'';
+    html+=`<div class="crit-item">
+      <div class="crit-info">
+        <div class="crit-name">${c.label}</div>
+        <div class="crit-meta">佔比 ${c.weight}・滿分 ${c.max} 分</div>
+      </div>
+      <div class="score-input-wrap">
+        <input type="number" class="score-input" id="sc_${c.id}"
+          min="0" max="${c.max}" value="${v}" placeholder="0"
+          ${dis} oninput="validateScore(this,${c.max}); updatePosterTotal()">
+        <span class="score-max">/ ${c.max}</span>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  // 推薦
+  const isRec=!!(draft.recommend);
+  html+=`<div class="recommend-zone">
+    <div class="recommend-zone-head">
+      <input type="checkbox" class="recommend-checkbox" id="recChk" ${isRec?'checked':''} ${dis}>
+      <label for="recChk">⭐ 推薦此論文進行「實體壁報」展示</label>
+    </div>
+    <div class="recommend-note">勾選代表建議此篇論文值得於研討會中進行實體壁報展示</div>
+  </div>`;
+
+  // 總分
+  html+=`<div class="total-bar">
+    <div><div class="total-lbl">合計總分</div></div>
+    <div style="text-align:right">
+      <div class="total-num" id="posterTotal">—<small> / ${POSTER_MAX}</small></div>
+    </div>
+  </div>`;
+
+  // 評語
+  html+=`<div class="cmt-wrap">
+    <label>評語（選填）</label>
+    <textarea id="cmtArea" placeholder="可填寫對本篇論文的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea>
+  </div>`;
+
+  return html;
+}
+
+function updatePosterTotal(){
+  let t=0;
+  POSTER_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e) t+=parseInt(e.value)||0; });
+  const tEl=el('posterTotal');
+  if(tEl) tEl.innerHTML=`${t}<small> / ${POSTER_MAX}</small>`;
+}
+
+function toggleReject(){
+  const chk=el('rejChk'); if(!chk) return;
+  const wrap=el('rejReasonWrap'); if(!wrap) return;
+  wrap.classList.toggle('show', chk.checked);
+}
+
+// ══ OSCE content & score ══
+function renderOsceContent(i){
+  const p=papers.osce[i]; if(!p) return;
+  const isDone=!!submitted[p.id];
+  const draft=drafts[p.id]||{};
+
+  // Content col
+  el('colContent').innerHTML=`
+    <div class="p-info-card">
+      <div class="p-info-head">
+        <div class="p-tags">
+          <span class="tag tg-no">${esc(p.caseNo||'—')}</span>
+          ${p.unit?`<span class="tag tg-cat">${esc(p.unit)}</span>`:''}
+          ${p.target?`<span class="tag tg-wc">對象：${esc(p.target)}</span>`:''}
+        </div>
+        <div class="p-title">${esc(p.title)}</div>
+      </div>
+      <div class="p-info-body">
+        ${p.driveUrl?`<div class="cloud-link-box">
+          <span class="icon">☁️</span>
+          <div class="info">
+            <strong style="font-size:.82rem">Google 雲端教案資料</strong>
+            <p>影片、教案 PDF 等評審資料</p>
+          </div>
+          <a class="btn-cloud" href="${esc(p.driveUrl)}" target="_blank">開啟資料 ↗</a>
+        </div>`:''}
+        ${p.summary?absBlk('教案摘要',p.summary):''}
+        ${p.absMotivation?absBlk('設計動機',p.absMotivation):''}
+        ${p.method?absBlk('教學方法',p.method):''}
+      </div>
+    </div>`;
+
+  // Score col
+  el('scoreHeadTitle').textContent='OSCE 教案評分';
+  el('scoreHeadNote').textContent=`基本滿分 ${OSCE_BASE_MAX} 分 + 加分最多 ${OSCE_BONUS.max} 分`;
+  el('scoreArea').innerHTML=renderOsceScoreForm(p, draft, isDone);
+  el('scoreActions').style.display=isDone?'none':'flex';
+  if(isDone){
+    el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">✅ 已完成評分，如需修改請聯絡管理員</div>');
+  }
+  updateOsceTotal();
+}
+
+function renderOsceScoreForm(p, draft, isDone){
+  const dis=isDone?'disabled':'';
+  let html='';
+
+  // 退稿
+  const isRej=!!(draft.rejected);
+  html+=`<div class="reject-zone">
+    <div class="reject-zone-head" onclick="toggleReject()">
+      <input type="checkbox" class="reject-checkbox" id="rejChk" ${isRej?'checked':''} ${dis} onchange="toggleReject()">
+      <label for="rejChk">⚠️ 此教案不符合投稿範疇（退稿）</label>
+    </div>
+    <div class="reject-reason-wrap ${isRej?'show':''}" id="rejReasonWrap">
+      <label>退稿原因（必填）</label>
+      <textarea id="rejReason" placeholder="請說明退稿原因…" ${dis}>${esc(draft.rejectReason||'')}</textarea>
+    </div>
+  </div>`;
+
+  // 評分向度（分組）
+  OSCE_CRITERIA_GROUPS.forEach(g=>{
+    html+=`<div class="crit-group"><div class="crit-group-title">${g.group}</div>`;
+    g.items.forEach(c=>{
+      const v=draft[c.id]!==undefined?draft[c.id]:'';
+      html+=`<div class="crit-item">
+        <div class="crit-info">
+          <div class="crit-name">${c.label}</div>
+          <div class="crit-meta">滿分 ${c.max} 分</div>
+        </div>
+        <div class="score-input-wrap">
+          <input type="number" class="score-input" id="sc_${c.id}"
+            min="0" max="${c.max}" value="${v}" placeholder="0"
+            ${dis} oninput="validateScore(this,${c.max}); updateOsceTotal()">
+          <span class="score-max">/ ${c.max}</span>
+        </div>
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+
+  // 優良加分
+  const bv=draft[OSCE_BONUS.id]!==undefined?draft[OSCE_BONUS.id]:'';
+  html+=`<div class="crit-group">
+    <div class="crit-group-title" style="background:#fef3c7;color:var(--amber)">優良加分（額外）</div>
+    <div class="crit-item">
+      <div class="crit-info">
+        <div class="crit-name">${OSCE_BONUS.label}</div>
+        <div class="crit-meta">額外加分，最多 ${OSCE_BONUS.max} 分（總分可超過100）</div>
+      </div>
+      <div class="score-input-wrap">
+        <input type="number" class="score-input" id="sc_${OSCE_BONUS.id}"
+          min="0" max="${OSCE_BONUS.max}" value="${bv}" placeholder="0"
+          ${dis} oninput="validateScore(this,${OSCE_BONUS.max}); updateOsceTotal()">
+        <span class="score-max">/ ${OSCE_BONUS.max}</span>
+      </div>
+    </div>
+  </div>`;
+
+  // 優良加分說明
+  const bonusNote=draft.bonusNote||'';
+  html+=`<div class="cmt-wrap">
+    <label>優良加分說明（有填加分時請說明）</label>
+    <textarea id="bonusNote" placeholder="請說明優良表現原因…" ${dis}>${esc(bonusNote)}</textarea>
+  </div>`;
+
+  // 推薦
+  const isRec=!!(draft.recommend);
+  html+=`<div class="recommend-zone">
+    <div class="recommend-zone-head">
+      <input type="checkbox" class="recommend-checkbox" id="recChk" ${isRec?'checked':''} ${dis}>
+      <label for="recChk">⭐ 推薦此教案</label>
+    </div>
+    <div class="recommend-note">勾選代表建議此教案值得於研討會中展示</div>
+  </div>`;
+
+  // 總分
+  html+=`<div class="total-bar">
+    <div>
+      <div class="total-lbl">合計總分</div>
+      <div class="bonus-note">（基本100分 + 優良加分）</div>
+    </div>
+    <div class="total-num" id="osceTotal">—<small> / 100+</small></div>
+  </div>`;
+
+  // 評語
+  html+=`<div class="cmt-wrap">
+    <label>評語（選填）</label>
+    <textarea id="cmtArea" placeholder="可填寫對本篇教案的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea>
+  </div>`;
+
+  return html;
+}
+
+function updateOsceTotal(){
+  let base=0;
+  OSCE_ALL_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e) base+=parseInt(e.value)||0; });
+  const bonusEl=el('sc_'+OSCE_BONUS.id);
+  const bonus=bonusEl?parseInt(bonusEl.value)||0:0;
+  const tEl=el('osceTotal');
+  if(tEl) tEl.innerHTML=`${base+bonus}<small> / ${OSCE_BASE_MAX}${bonus>0?'+'+bonus:''}</small>`;
+}
+
+// ══ Validate score input ══
+function validateScore(input, max){
+  let v=parseInt(input.value);
+  if(isNaN(v)||v<0){ input.value='0'; v=0; }
+  if(v>max){ input.classList.add('over'); } else { input.classList.remove('over'); }
+}
+
+// ══ Save draft ══
+function saveDraft(){
+  if(curIdx===null) return;
+  const list=papers[curType]; const p=list[curIdx]; if(!p) return;
+  const d={};
+  if(curType==='poster'){
+    POSTER_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e) d[c.id]=parseInt(e.value)||0; });
+    const catSel=el('catAdjSel'); d.catAdjust=catSel?catSel.value:'';
+  } else {
+    OSCE_ALL_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e) d[c.id]=parseInt(e.value)||0; });
+    const bEl=el('sc_'+OSCE_BONUS.id); d[OSCE_BONUS.id]=bEl?parseInt(bEl.value)||0:0;
+    const bnEl=el('bonusNote'); d.bonusNote=bnEl?bnEl.value:'';
+  }
+  const rejChk=el('rejChk'); d.rejected=rejChk?rejChk.checked:false;
+  const rejR=el('rejReason'); d.rejectReason=rejR?rejR.value:'';
+  const recChk=el('recChk'); d.recommend=recChk?recChk.checked:false;
+  const cmt=el('cmtArea'); d.comment=cmt?cmt.value:'';
+  drafts[p.id]=d;
+  showToast('草稿已暫存','ok');
+}
+
+// ══ Submit score ══
+async function submitScore(){
+  if(curIdx===null) return;
+  const list=papers[curType]; const p=list[curIdx]; if(!p) return;
+
+  // 先暫存
+  saveDraft();
+  const d=drafts[p.id]||{};
+
+  // 驗證
+  if(d.rejected){
+    if(!d.rejectReason||!d.rejectReason.trim()){
+      showToast('請填寫退稿原因','err'); return;
+    }
+  } else {
+    // 檢查所有分數是否填寫
+    const criteria=curType==='poster'?POSTER_CRITERIA:OSCE_ALL_CRITERIA;
+    const hasOver=criteria.some(c=>{ const e=el('sc_'+c.id); return e&&e.classList.contains('over'); });
+    if(hasOver){ showToast('有分數超過滿分，請修正後再提交','err'); return; }
+  }
+
+  // 計算總分
+  let total=0;
+  if(curType==='poster'){
+    POSTER_CRITERIA.forEach(c=>{ total+=d[c.id]||0; });
+  } else {
+    OSCE_ALL_CRITERIA.forEach(c=>{ total+=d[c.id]||0; });
+    total+=d[OSCE_BONUS.id]||0;
+  }
+
+  const label=curType==='osce'?'教案':'論文';
+  const confirmMsg=d.rejected
+    ? `確認提交「退稿」？\n\n${label}：${p.title}\n退稿原因：${d.rejectReason}\n\n提交後無法修改。`
+    : `確認提交評分？\n\n${label}：${p.title}\n合計：${total} 分${d.recommend?'\n⭐ 已勾選推薦':''}\n\n提交後無法修改。`;
+
+  if(!confirm(confirmMsg)) return;
+
+  setLdr(true);
+  try{
+    const payload={
+      action:'submitScore',
+      reviewerUsername: reviewer.username,
+      paperId: p.id,
+      paperNo: curType==='poster'?p.paperNo:p.caseNo,
+      paperType: curType,
+      scoresJson: JSON.stringify(d),
+      total,
+      rejected: d.rejected?'true':'false',
+      rejectReason: d.rejectReason||'',
+      recommend: d.recommend?'true':'false',
+      catAdjust: d.catAdjust||'',
+      comment: d.comment||''
+    };
+    const r=await api(payload);
+    if(r.success){
+      submitted[p.id]=true;
+      renderList();
+      selectPaper(curIdx);
+      showToast('評分已成功提交！','ok');
+    } else showToast('提交失敗：'+(r.message||'請稍後再試'),'err');
+  } catch{ showToast('網路錯誤，請稍後再試','err'); }
+  setLdr(false);
+}
+
+// ══ Overview ══
+function showOverview(){
+  const allPapers=[
+    ...papers.poster.map(p=>({...p,type:'poster'})),
+    ...papers.osce.map(p=>({...p,type:'osce'}))
+  ];
+  if(!allPapers.length){ showToast('尚無指派項目','warn'); return; }
+
+  let html='';
+  ['poster','osce'].forEach(t=>{
+    const list=papers[t]; if(!list.length) return;
+    const label=t==='poster'?'📋 海報論文':'🎬 OSCE 教案';
+    html+=`<h4 style="font-size:.82rem;font-weight:700;color:var(--blue-800);margin:0 0 .65rem;padding-bottom:.4rem;border-bottom:2px solid var(--blue-200)">${label}</h4>`;
+    html+=`<table class="ov-table" style="margin-bottom:1.5rem"><thead><tr>
+      <th>編號</th><th>題目</th><th>總分</th><th>推薦</th><th>狀態</th>
+    </tr></thead><tbody>`;
+    list.forEach(p=>{
+      const d=drafts[p.id]||{};
+      const isSub=!!submitted[p.id];
+      const isRej=d.rejected;
+      const num=t==='poster'?p.paperNo:p.caseNo;
+
+      let total='—';
+      if(isSub||Object.keys(d).length>0){
+        let t2=0;
+        const criteria=t==='poster'?POSTER_CRITERIA:OSCE_ALL_CRITERIA;
+        criteria.forEach(c=>{ t2+=d[c.id]||0; });
+        if(t==='osce') t2+=d[OSCE_BONUS.id]||0;
+        if(t2>0) total=t2;
+      }
+
+      const recTxt=isRej?'<span class="ov-rec rej">退稿</span>'
+        :(d.recommend?'<span class="ov-rec yes">推薦</span>':'<span class="ov-rec no">未推薦</span>');
+      const statusTxt=isSub?'<span style="color:var(--green);font-weight:600">✅ 已提交</span>'
+        :'<span class="ov-pending">草稿/未提交</span>';
+
+      html+=`<tr class="${isRej?'rejected-row':''}">
+        <td><strong>${esc(num||'—')}</strong></td>
+        <td style="max-width:220px;line-height:1.5">${esc(p.title)}</td>
+        <td class="ov-score">${total}</td>
+        <td>${recTxt}</td>
+        <td>${statusTxt}</td>
+      </tr>`;
+    });
+    html+=`</tbody></table>`;
+  });
+
+  const pendingCount=allPapers.filter(p=>!submitted[p.id]).length;
+  if(pendingCount>0){
+    html=`<div style="background:var(--amber-bg);border:1px solid #fde68a;border-radius:8px;padding:.65rem 1rem;font-size:.8rem;color:var(--amber);margin-bottom:1rem">
+      ⚠ 尚有 ${pendingCount} 篇未提交。請完成所有評分後再送出。截止日：<strong>115年7月3日（五）</strong>
+    </div>`+html;
+  }
+
+  el('overviewBody').innerHTML=html;
+  el('overviewModal').classList.add('show');
+}
+function closeOverview(){ el('overviewModal').classList.remove('show'); }
+
+// ══ Helpers ══
 function absBlk(lbl,txt){
   if(!txt) return '';
   return `<div class="abs-sec"><div class="abs-lbl">${lbl}</div><div class="abs-txt">${esc(String(txt))}</div></div>`;
-}
-function critBlk(c,val,disabled){
-  const v=val!==undefined?val:Math.ceil(c.max/2);
-  return `<div class="crit">
-    <div class="crit-top">
-      <div><div class="crit-name">${c.label}</div><div class="crit-wt">佔比 ${c.weight}・滿分 ${c.max} 分</div></div>
-      <div class="crit-val" id="dv_${c.id}">${v}<small>/${c.max}</small></div>
-    </div>
-    <div class="slider-row">
-      <span class="sl-edge">0</span>
-      <input type="range" id="sl_${c.id}" min="0" max="${c.max}" step="1" value="${v}"
-        ${disabled?'disabled':''} oninput="onSl('${c.id}',this.value)">
-      <span class="sl-edge">${c.max}</span>
-    </div>
-  </div>`;
-}
-function onSl(id,v){
-  const c=CRITERIA.find(x=>x.id===id);
-  document.getElementById('dv_'+id).innerHTML=`${v}<small>/${c.max}</small>`;
-  updTotal();
-}
-function updTotal(){
-  let t=0;
-  CRITERIA.forEach(c=>{ const el=document.getElementById('sl_'+c.id); if(el) t+=parseInt(el.value); });
-  const tEl=document.getElementById('tNum'); const rEl=document.getElementById('recChip');
-  if(!tEl) return;
-  tEl.innerHTML=`${t}<small> / ${MAX_TOTAL}</small>`;
-  if(rEl){ if(t>=THRESHOLD){ rEl.textContent='推薦壁報展示';rEl.className='rec-chip yes'; }
-  else{ rEl.textContent='未達推薦門檻';rEl.className='rec-chip no'; } }
-}
-function saveDraft(){
-  const p=papers[curIdx]; if(!p) return;
-  const d={};
-  CRITERIA.forEach(c=>{ const el=document.getElementById('sl_'+c.id); if(el) d[c.id]=parseInt(el.value); });
-  const ca=document.getElementById('cmtA'); d.comment=ca?ca.value:'';
-  drafts[p.id]=d; showToast('草稿已暫存','ok');
-}
-async function submitScore(pid){
-  const p=papers[curIdx]; if(!p||p.id!==pid) return;
-  const sc={}; let total=0;
-  CRITERIA.forEach(c=>{ const el=document.getElementById('sl_'+c.id); sc[c.id]=el?parseInt(el.value):0; total+=sc[c.id]; });
-  const ca=document.getElementById('cmtA'); sc.comment=ca?ca.value:'';
-  if(!confirm(`確認提交評分？\n\n論文：${p.title}\n合計：${total} 分\n\n提交後無法修改。`)) return;
-  setLdr(true);
-  try{
-    const r=await api({action:'submitScore',reviewerUsername:reviewer.username,paperId:p.id,paperNo:p.paperNo,scoresJson:JSON.stringify(sc),total,comment:sc.comment});
-    if(r.success){ submitted[p.id]=true; drafts[p.id]=sc; renderSB(); renderMain(); showToast('評分提交成功！','ok'); }
-    else showToast('提交失敗：'+(r.message||'請稍後再試'),'err');
-  } catch{ showToast('網路錯誤，請稍後再試','err'); }
-  setLdr(false);
 }
 async function api(params){
   const fd=new FormData();
   Object.entries(params).forEach(([k,v])=>fd.append(k,v));
   return (await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd})).json();
 }
-function setLdr(v){ document.getElementById('ldr').style.display=v?'flex':'none'; }
+function el(id){ return document.getElementById(id); }
+function setLdr(v){ el('ldr').style.display=v?'flex':'none'; }
 function showToast(msg,type){
   const t=document.createElement('div'); t.className='toast '+type; t.textContent=msg;
-  document.body.appendChild(t); setTimeout(()=>t.remove(),3000);
+  document.body.appendChild(t); setTimeout(()=>t.remove(),3200);
 }
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
 </body>
 </html>
