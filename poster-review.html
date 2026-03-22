@@ -3,148 +3,161 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>論文評審系統｜TSMCSD 2026</title>
+<title>競賽活動評審系統｜TSMCSD 2026</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@400;500;600&display=swap');
 
 :root {
-  /* 藍色主色系 */
-  --blue-900: #0a2342;
-  --blue-800: #0f3460;
-  --blue-700: #1a4f8a;
-  --blue-600: #1e6bb5;
-  --blue-500: #2980d4;
-  --blue-400: #4d9de8;
-  --blue-200: #bfdbf7;
-  --blue-100: #dbeafe;
-  --blue-50:  #eff6ff;
-  /* 中性色 */
-  --ink:    #0f172a;
-  --slate:  #334155;
-  --muted:  #64748b;
-  --border: #cbd5e1;
-  --border2:#e2e8f0;
-  --bg:     #f0f4f8;
-  --white:  #ffffff;
-  /* 語意色 */
-  --green:  #15803d;
-  --green-bg:#dcfce7;
-  --red:    #dc2626;
-  --red-bg: #fee2e2;
-  --amber:  #b45309;
-  --amber-bg:#fef3c7;
-  --orange: #c2410c;
+  /* ══ 莫蘭迪色系（依截圖色票）══ */
+  /* 主藍灰系列 */
+  --m-900: #4a5560;   /* 深藍灰：頂欄、Modal頭、深色背景 */
+  --m-800: #8592a2;   /* #77 中藍灰：按鈕、評分欄頭 */
+  --m-700: #8e9bae;   /* #71 藍灰：主要互動色 */
+  --m-600: #becbd3;   /* #74 淺藍灰：邊框、輔助背景 */
+  --m-400: #bfc2cb;   /* #72 淺灰藍：次要邊框 */
+  --m-200: #dcdddf;   /* #75 極淺灰藍：輕邊框 */
+  --m-100: #dcddd5;   /* #78 米灰：內容區背景 */
+  --m-50:  #f0efec;   /* 更淺米灰：卡片背景 */
+  /* 暖調輔助（藕粉） */
+  --warm:     #e3d0cc; /* #73 藕粉淺：暖色背景 */
+  --warm-deep:#dfbfb2; /* #76 藕粉深：強調暖色 */
+  --warm-dark:#cfc3bc; /* #80 淺棕灰：次要 */
+  --warm-br:  #c8b0aa; /* 藕粉邊框 */
+  /* 深棕：文字/強調 */
+  --brown:    #7d6252; /* #79 */
+  --brown-lt: #a08070;
+  /* 中性 */
+  --ink:   #3d3530;   /* 深棕灰內文 */
+  --slate: #5c5048;
+  --muted: #8e8680;
+  --border:#cfc3bc;   /* #80 */
+  --border2:#dcdddf;  /* #75 */
+  --bg:    #dcddd5;   /* #78 米灰大背景 */
+  --white: #ffffff;
+  /* 語意色（莫蘭迪柔化） */
+  --green:    #4a7060;
+  --green-bg: #deeae4;
+  --green-br: #9abfb0;
+  --red:      #8b4a4a;
+  --red-bg:   #f0e4e4;
+  --red-br:   #c8a0a0;
+  --amber:    #7a6040;
+  --amber-bg: #ede4d4;
+  --amber-br: #c0a070;
   /* 陰影 */
-  --sh-sm: 0 1px 2px rgba(0,0,0,.05);
-  --sh:    0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.05);
-  --sh-md: 0 4px 16px rgba(0,0,0,.1);
+  --sh-sm: 0 1px 3px rgba(61,53,48,.06);
+  --sh:    0 2px 8px rgba(61,53,48,.08), 0 1px 3px rgba(61,53,48,.05);
+  --sh-md: 0 4px 16px rgba(61,53,48,.1);
   --r: 10px;
 }
 
 *{ box-sizing:border-box; margin:0; padding:0; }
-body{ font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif; background:var(--bg); color:var(--ink); font-size:16px; line-height:1.7; font-weight:400; }
+body{
+  font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
+  background:var(--bg); color:var(--ink);
+  font-size:16px; line-height:1.7; font-weight:400;
+}
 
 /* ── 分層字重 ── */
-/* 標題類：Bold */
 h1,h2,h3,h4,h5,h6,
-.p-title, .tb-logo, .login-brand h1,
-.col-score-head h3, .crit-group-title,
-.prog-lbl, .pi-num, .total-lbl,
-.sec-head h3, .modal-head h3 { font-weight:700; }
-/* 標籤、按鈕、重點：Medium */
-.tag, .btn, .btn-login, .btn-submit, .btn-draft,
-.tab, .tb-tab, .fl, .abs-lbl,
-.reject-zone-head label, .recommend-zone-head label,
-.deadline-banner, .deadline-chip,
+.p-title,.tb-logo,.login-brand h1,
+.col-score-head h3,.crit-group-title,
+.prog-lbl,.pi-num,.total-lbl,
+.sec-head h3,.modal-head h3 { font-weight:700; }
+.tag,.btn,.btn-login,.btn-submit,.btn-draft,
+.tb-tab,.fl,.abs-lbl,
+.reject-zone-head label,.recommend-zone-head label,
+.deadline-banner,.deadline-chip,
 .crit-name { font-weight:500; }
-/* 一般內文：Regular */
-.abs-txt, .crit-meta, .recommend-note,
-.pi-ttl, .pi-st-txt, .pi-cat,
-.score-max, .col-score-head-note { font-weight:400; }
+.abs-txt,.crit-meta,.recommend-note,
+.pi-ttl,.pi-st-txt,.pi-cat,
+.score-max,.col-score-head-note { font-weight:400; }
 
 /* ══════════════════════════════
    LOGIN
 ══════════════════════════════ */
 #loginScreen{
   min-height:100vh; display:flex; align-items:center; justify-content:center;
-  background: linear-gradient(160deg, var(--blue-900) 0%, var(--blue-800) 45%, var(--blue-700) 100%);
+  background:linear-gradient(150deg, #3d4550 0%, #8592a2 50%, #8e9bae 100%);
   position:relative; overflow:hidden;
 }
 #loginScreen::before{
   content:''; position:absolute; inset:0;
   background:
-    radial-gradient(ellipse 70% 60% at 15% 85%, rgba(41,128,212,.3) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 85% 15%, rgba(30,107,181,.25) 0%, transparent 50%);
+    radial-gradient(ellipse 65% 55% at 10% 80%, rgba(142,155,174,.35) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 50% at 90% 15%, rgba(190,203,211,.2) 0%, transparent 55%);
 }
-/* 幾何裝飾線 */
 #loginScreen::after{
   content:''; position:absolute;
-  width:500px; height:500px; border-radius:50%;
+  width:480px; height:480px; border-radius:50%;
   border:1px solid rgba(255,255,255,.06);
-  top:-150px; right:-100px;
+  top:-140px; right:-90px;
 }
-.lg-deco{
-  position:absolute; border-radius:50%;
-  border:1px solid rgba(255,255,255,.05);
-}
-.lg-deco-1{ width:300px; height:300px; bottom:-80px; left:-60px; }
-.lg-deco-2{ width:200px; height:200px; bottom:60px; left:20px; }
+.lg-deco{ position:absolute; border-radius:50%; border:1px solid rgba(255,255,255,.05); }
+.lg-deco-1{ width:280px; height:280px; bottom:-70px; left:-50px; }
+.lg-deco-2{ width:180px; height:180px; bottom:70px; left:30px; }
 
 .login-wrap{
   position:relative; z-index:1;
-  display:flex; flex-direction:column; align-items:center; gap:1.75rem;
-  animation:fadeUp .5s ease;
+  display:flex; flex-direction:column; align-items:center; gap:1.5rem;
+  animation:fadeUp .5s ease; padding:1rem;
 }
 @keyframes fadeUp{ from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
 .login-brand{ text-align:center; color:white; }
 .login-brand .eyebrow{
   display:inline-flex; align-items:center; gap:.5rem;
-  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15);
-  border-radius:20px; padding:.32rem .9rem;
-  font-size:.78rem; letter-spacing:.08em; text-transform:uppercase;
-  color:rgba(255,255,255,.85); font-weight:500; margin-bottom:1rem;
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18);
+  border-radius:20px; padding:.35rem 1rem;
+  font-size:.82rem; letter-spacing:.06em;
+  color:rgba(255,255,255,.9); font-weight:500; margin-bottom:1rem;
 }
 .login-brand h1{
-  font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif; font-size:1.6rem;
-  font-weight:700; color:white; letter-spacing:.02em; margin-bottom:.3rem;
+  font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
+  font-size:1.65rem; font-weight:700; color:white;
+  letter-spacing:.02em; margin-bottom:.3rem;
 }
-.login-brand p{ font-size:.8rem; color:rgba(255,255,255,.45); }
+.login-brand p{ font-size:.85rem; color:rgba(255,255,255,.5); }
 
-/* 截止日警示 */
 .deadline-banner{
   display:flex; align-items:center; gap:.6rem;
-  background:rgba(255,193,7,.18); border:1px solid rgba(255,193,7,.45);
+  background:rgba(223,191,178,.25); border:1px solid rgba(223,191,178,.5);
   border-radius:9px; padding:.75rem 1.1rem;
-  font-size:.92rem; color:#fef08a; font-weight:500;
+  font-size:.95rem; color:#f5e8e2; font-weight:500;
+  max-width:380px; width:100%;
 }
 
 .login-card{
-  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);
-  border-radius:16px; padding:2rem; width:380px; max-width:calc(100vw - 2rem);
-  backdrop-filter:blur(16px);
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+  border-radius:16px; padding:2rem 2.25rem;
+  width:400px; max-width:calc(100vw - 2rem);
+  backdrop-filter:blur(20px);
 }
-.fl{ display:block; font-size:.82rem; font-weight:600; letter-spacing:.06em;
-  color:rgba(255,255,255,.9); margin-bottom:.4rem; }
+.fl{
+  display:block; font-size:.92rem; font-weight:600;
+  color:rgba(255,255,255,.92); margin-bottom:.45rem;
+}
 .fi{
-  width:100%; padding:.8rem 1.1rem;
-  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.25);
+  width:100%; padding:.85rem 1.1rem;
+  background:rgba(255,255,255,.12); border:1.5px solid rgba(255,255,255,.28);
   border-radius:9px; font-size:1rem; font-family:inherit;
-  color:white; font-weight:500; margin-bottom:1rem; transition:all .2s;
+  color:white; font-weight:500; margin-bottom:1.1rem; transition:all .2s;
 }
-.fi::placeholder{ color:rgba(255,255,255,.55); }
-.fi:focus{ outline:none; border-color:var(--blue-400); background:rgba(255,255,255,.13); }
+.fi::placeholder{ color:rgba(255,255,255,.45); }
+.fi:focus{ outline:none; border-color:var(--m-300); background:rgba(255,255,255,.16); }
 .btn-login{
-  width:100%; padding:.85rem; font-size:1rem;
-  background:linear-gradient(135deg, var(--blue-600), var(--blue-800));
-  border:1px solid rgba(255,255,255,.18); border-radius:9px;
-  color:white; font-size:.9rem; font-family:inherit; font-weight:500;
-  letter-spacing:.06em; cursor:pointer; transition:all .2s;
+  width:100%; padding:.88rem; font-size:1rem;
+  background:linear-gradient(135deg, var(--m-700), #3d4550);
+  border:1px solid rgba(255,255,255,.2); border-radius:9px;
+  color:white; font-family:inherit; font-weight:600;
+  letter-spacing:.04em; cursor:pointer; transition:all .2s;
 }
-.btn-login:hover{ background:linear-gradient(135deg, var(--blue-500), var(--blue-700)); transform:translateY(-1px); }
-.login-err{ margin-top:.65rem; padding:.55rem .9rem; background:rgba(220,38,38,.2);
-  border:1px solid rgba(220,38,38,.35); border-radius:7px; font-size:.8rem;
-  color:#fca5a5; display:none; }
+.btn-login:hover{ background:linear-gradient(135deg,var(--m-700),#4a5560); transform:translateY(-1px); }
+.login-err{
+  margin-top:.7rem; padding:.6rem .9rem;
+  background:rgba(139,58,58,.25); border:1px solid rgba(139,58,58,.4);
+  border-radius:7px; font-size:.88rem; color:#f5b8b8; display:none;
+}
 
 /* ══════════════════════════════
    APP SHELL
@@ -154,50 +167,52 @@ h1,h2,h3,h4,h5,h6,
 
 /* Top bar */
 .topbar{
-  height:52px; background:var(--blue-900); border-bottom:1px solid rgba(255,255,255,.08);
+  height:54px; background:#3d4550;
+  border-bottom:1px solid rgba(255,255,255,.07);
   display:flex; align-items:center; justify-content:space-between;
   padding:0 1.25rem; flex-shrink:0; z-index:100;
-  box-shadow:0 2px 8px rgba(0,0,0,.25);
+  box-shadow:0 2px 10px rgba(0,0,0,.2);
 }
-.tb-left{ display:flex; align-items:center; gap:.75rem; }
-.tb-logo{ font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif; font-size:.95rem; font-weight:700; color:white; letter-spacing:.03em; }
-.tb-sep{ width:1px; height:18px; background:rgba(255,255,255,.15); }
-.tb-type-tabs{ display:flex; gap:.25rem; }
+.tb-left{ display:flex; align-items:center; gap:.75rem; min-width:0; }
+.tb-logo{
+  font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
+  font-size:.95rem; font-weight:700; color:white; white-space:nowrap;
+}
+.tb-sep{ width:1px; height:18px; background:rgba(255,255,255,.15); flex-shrink:0; }
+.tb-type-tabs{ display:flex; gap:.2rem; }
 .tb-tab{
-  padding:.3rem .85rem; border-radius:6px; font-size:.78rem; font-weight:500;
+  padding:.32rem .9rem; border-radius:6px; font-size:.82rem; font-weight:500;
   cursor:pointer; transition:all .18s; border:1px solid transparent;
-  color:rgba(255,255,255,.5);
+  color:rgba(255,255,255,.5); white-space:nowrap;
 }
 .tb-tab:hover{ color:rgba(255,255,255,.8); }
-.tb-tab.active{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.2); color:white; }
-.tb-right{ display:flex; align-items:center; gap:.6rem; }
-
-/* 截止日徽章 */
+.tb-tab.active{ background:rgba(255,255,255,.13); border-color:rgba(255,255,255,.2); color:white; }
+.tb-right{ display:flex; align-items:center; gap:.5rem; flex-shrink:0; }
 .deadline-chip{
   display:flex; align-items:center; gap:.4rem;
-  background:rgba(245,158,11,.15); border:1px solid rgba(245,158,11,.3);
-  border-radius:6px; padding:.28rem .7rem;
-  font-size:.7rem; color:#fcd34d; letter-spacing:.02em;
+  background:rgba(223,191,178,.2); border:1px solid rgba(223,191,178,.4);
+  border-radius:6px; padding:.28rem .75rem;
+  font-size:.75rem; color:#f5e0d8; white-space:nowrap;
 }
 .rv-chip{
   display:flex; align-items:center; gap:.35rem;
   background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15);
-  border-radius:20px; padding:.28rem .75rem;
-  font-size:.75rem; color:rgba(255,255,255,.8);
+  border-radius:20px; padding:.28rem .8rem;
+  font-size:.78rem; color:rgba(255,255,255,.85);
 }
 .btn-out{
   background:none; border:1px solid rgba(255,255,255,.2);
-  border-radius:6px; padding:.28rem .65rem;
-  font-size:.72rem; color:rgba(255,255,255,.45); cursor:pointer;
-  transition:all .2s; font-family:inherit;
+  border-radius:6px; padding:.3rem .7rem;
+  font-size:.76rem; color:rgba(255,255,255,.5); cursor:pointer;
+  transition:all .2s; font-family:inherit; white-space:nowrap;
 }
-.btn-out:hover{ border-color:rgba(255,255,255,.5); color:white; }
+.btn-out:hover{ border-color:rgba(255,255,255,.55); color:white; }
 
 /* ══════════════════════════════
    THREE-COLUMN LAYOUT
 ══════════════════════════════ */
 .app-body{
-  display:grid; grid-template-columns:230px 1fr 360px;
+  display:grid; grid-template-columns:240px 1fr 370px;
   flex:1; overflow:hidden;
 }
 
@@ -207,51 +222,61 @@ h1,h2,h3,h4,h5,h6,
   display:flex; flex-direction:column; overflow:hidden;
 }
 .col-list-head{
-  padding:.85rem 1rem; border-bottom:1px solid var(--border2);
-  background:var(--blue-50);
+  padding:.9rem 1rem; border-bottom:1px solid var(--border2);
+  background:#ebe9e5;
 }
+
 .prog-row{ display:flex; justify-content:space-between; align-items:center;
-  font-size:.72rem; margin-bottom:.4rem; }
-.prog-lbl{ font-weight:600; color:var(--blue-800); }
-.prog-val{ color:var(--muted); }
-.prog-track{ height:4px; background:var(--border2); border-radius:2px; overflow:hidden; }
-.prog-fill{ height:100%; background:linear-gradient(90deg, var(--blue-600), var(--blue-400)); border-radius:2px; transition:width .4s ease; }
+  font-size:.78rem; margin-bottom:.45rem; }
+.prog-lbl{ font-weight:700; color:var(--m-800); font-size:.82rem; }
+.prog-val{ color:var(--muted); font-size:.78rem; }
+.prog-track{ height:5px; background:var(--border2); border-radius:3px; overflow:hidden; }
+.prog-fill{
+  height:100%;
+  background:linear-gradient(90deg, var(--m-800), var(--m-700));
+  border-radius:3px; transition:width .4s ease;
+}
 
 .list-scroll{ flex:1; overflow-y:auto; padding:.4rem .5rem; }
 .pi{
-  padding:.6rem .7rem; border-radius:8px; cursor:pointer;
-  margin-bottom:.2rem; border:1.5px solid transparent; transition:all .15s;
-  position:relative;
+  padding:.65rem .75rem; border-radius:9px; cursor:pointer;
+  margin-bottom:.25rem; border:1.5px solid transparent; transition:all .15s;
 }
-.pi:hover{ background:var(--bg); }
-.pi.active{ background:var(--blue-50); border-color:var(--blue-200); }
-.pi.done{ opacity:.65; }
-.pi.rejected{ opacity:.6; }
+.pi:hover{ background:var(--m-50); }
+.pi.active{ background:var(--m-100); border-color:var(--m-300); }
+.pi.done{ opacity:.7; }
+.pi.drafted{ background:#f0f6ef; border-color:#b4c6b4; } /* 已暫存 */
+.pi.rejected{ opacity:.65; }
 .pi-row1{ display:flex; align-items:center; gap:.4rem; margin-bottom:.15rem; }
-.pi-num{ font-size:.72rem; font-weight:700; letter-spacing:.05em;
-  background:var(--blue-800); color:white; padding:.1rem .45rem; border-radius:4px; }
+.pi-num{
+  font-size:.72rem; font-weight:700; letter-spacing:.04em;
+  background:var(--m-800); color:white; padding:.12rem .5rem; border-radius:4px;
+  white-space:nowrap;
+}
 .pi.done .pi-num{ background:var(--green); }
+.pi.drafted .pi-num{ background:var(--m-600); }
 .pi.rejected .pi-num{ background:var(--red); }
 .pi-cat{ font-size:.72rem; color:var(--muted); }
-.pi-ttl{ font-size:.9rem; font-weight:500; color:var(--ink); line-height:1.4;
-  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.pi-status{ display:flex; align-items:center; gap:.3rem; margin-top:.25rem; }
+.pi-ttl{
+  font-size:.88rem; font-weight:500; color:var(--ink); line-height:1.45;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.pi-status{ display:flex; align-items:center; gap:.3rem; margin-top:.28rem; }
 .pi-dot{ width:5px; height:5px; border-radius:50%; }
-.pi-dot.p{ background:#f59e0b; }
-.pi-dot.d{ background:#22c55e; }
+.pi-dot.p{ background:#c9a86a; }
+.pi-dot.sv{ background:var(--m-500); } /* 暫存 */
+.pi-dot.d{ background:var(--green); }
 .pi-dot.r{ background:var(--red); }
-.pi-st-txt{ font-size:.75rem; color:var(--muted); }
+.pi-st-txt{ font-size:.72rem; color:var(--muted); }
 
 /* ── COL 2: Paper content ── */
-.col-content{
-  overflow-y:auto; background:var(--bg); padding:1.25rem 1.5rem;
-}
+.col-content{ overflow-y:auto; background:var(--bg); padding:1.25rem 1.5rem; }
 .content-empty{
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   height:100%; color:var(--muted); text-align:center; gap:.75rem;
 }
-.content-empty .icon{ font-size:2.5rem; opacity:.3; }
-.content-empty h3{ font-size:.95rem; color:var(--slate); }
+.content-empty .icon{ font-size:2.5rem; opacity:.25; }
+.content-empty h3{ font-size:1rem; color:var(--slate); }
 
 /* Paper info card */
 .p-info-card{
@@ -259,35 +284,26 @@ h1,h2,h3,h4,h5,h6,
   box-shadow:var(--sh-sm); overflow:hidden; margin-bottom:1rem;
 }
 .p-info-head{
-  padding:.9rem 1.1rem; border-bottom:1px solid var(--border2);
-  background:linear-gradient(135deg, var(--blue-900), var(--blue-800));
+  padding:.95rem 1.2rem; border-bottom:1px solid var(--border2);
+  background:linear-gradient(135deg, #3d4550, var(--m-800));
 }
 .p-tags{ display:flex; flex-wrap:wrap; gap:.35rem; margin-bottom:.5rem; }
-.tag{ padding:.2rem .6rem; border-radius:4px; font-size:.73rem; font-weight:700; letter-spacing:.04em; display:inline-block; }
-.tg-no  { background:rgba(255,255,255,.15); color:white; }
-.tg-cat { background:rgba(255,255,255,.1); color:rgba(255,255,255,.85); border:1px solid rgba(255,255,255,.2); }
-.tg-wc  { background:rgba(255,255,255,.08); color:rgba(255,255,255,.55); }
-.p-title{ font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif; font-size:1.1rem; font-weight:700; color:white; line-height:1.6; }
-
-/* 類別調整列 */
-.cat-adjust-row{
-  padding:.6rem 1.1rem; background:var(--amber-bg);
-  border-bottom:1px solid #fde68a;
-  display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;
+.tag{
+  padding:.2rem .65rem; border-radius:4px; font-size:.75rem;
+  font-weight:700; letter-spacing:.03em; display:inline-block;
 }
-.cat-adjust-lbl{ font-size:.72rem; font-weight:600; color:var(--amber); white-space:nowrap; }
-.cat-adjust-sel{
-  padding:.3rem .6rem; border:1.5px solid #f59e0b; border-radius:6px;
-  background:white; color:var(--ink); font-size:.78rem; font-family:inherit; cursor:pointer;
+.tg-no { background:rgba(255,255,255,.18); color:white; }
+.tg-cat{ background:rgba(255,255,255,.1); color:rgba(255,255,255,.88); border:1px solid rgba(255,255,255,.2); }
+.tg-wc { background:rgba(255,255,255,.07); color:rgba(255,255,255,.55); }
+.p-title{
+  font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
+  font-size:1.1rem; font-weight:700; color:white; line-height:1.6;
 }
-.cat-adjust-sel:focus{ outline:none; }
-.cat-adjust-note{ font-size:.7rem; color:var(--amber); }
-
-.p-info-body{ padding:1rem 1.1rem; }
-.abs-sec{ margin-bottom:.85rem; }
+.p-info-body{ padding:1rem 1.2rem; }
+.abs-sec{ margin-bottom:.9rem; }
 .abs-lbl{
-  font-size:.78rem; font-weight:700; letter-spacing:.12em; color:var(--blue-700);
-  text-transform:uppercase; display:flex; align-items:center; gap:.45rem; margin-bottom:.35rem;
+  font-size:.78rem; font-weight:700; letter-spacing:.1em; color:var(--m-800);
+  text-transform:uppercase; display:flex; align-items:center; gap:.45rem; margin-bottom:.38rem;
 }
 .abs-lbl::after{ content:''; flex:1; height:1px; background:var(--border2); }
 .abs-txt{ font-size:.95rem; line-height:1.85; color:var(--slate); }
@@ -295,15 +311,16 @@ h1,h2,h3,h4,h5,h6,
 /* OSCE cloud link */
 .cloud-link-box{
   display:flex; align-items:center; gap:.75rem;
-  background:var(--blue-50); border:1px solid var(--blue-200);
-  border-radius:9px; padding:.75rem 1rem; margin-bottom:.85rem;
+  background:var(--m-50); border:1px solid var(--m-200);
+  border-radius:9px; padding:.8rem 1rem; margin-bottom:.9rem;
 }
 .cloud-link-box .icon{ font-size:1.3rem; }
 .cloud-link-box .info{ flex:1; }
-.cloud-link-box .info p{ font-size:.72rem; color:var(--muted); margin-top:.1rem; }
+.cloud-link-box .info strong{ font-size:.88rem; color:var(--m-800); }
+.cloud-link-box .info p{ font-size:.75rem; color:var(--muted); margin-top:.1rem; }
 .btn-cloud{
-  padding:.4rem .85rem; background:var(--blue-700); color:white;
-  border:none; border-radius:7px; font-size:.78rem; font-family:inherit;
+  padding:.42rem .9rem; background:var(--m-700); color:white;
+  border:none; border-radius:7px; font-size:.82rem; font-family:inherit;
   font-weight:500; cursor:pointer; transition:opacity .2s; white-space:nowrap;
   text-decoration:none; display:inline-block;
 }
@@ -315,243 +332,303 @@ h1,h2,h3,h4,h5,h6,
   display:flex; flex-direction:column; overflow:hidden;
 }
 .col-score-head{
-  padding:.75rem 1rem; background:var(--blue-800);
+  padding:.8rem 1.1rem; background:var(--m-700);
   display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
 }
-.col-score-head h3{ font-size:.9rem; font-weight:700; color:white; font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif; }
-.col-score-head-note{ font-size:.68rem; color:rgba(255,255,255,.45); }
-.score-scroll{ flex:1; overflow-y:auto; padding:.85rem 1rem; }
+.col-score-head h3{
+  font-size:.9rem; font-weight:700; color:white;
+  font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
+}
+.col-score-head-note{ font-size:.7rem; color:rgba(255,255,255,.45); }
+.score-scroll{ flex:1; overflow-y:auto; padding:.9rem 1rem; }
 
 /* Done banner */
 .done-banner{
   display:flex; align-items:center; gap:.5rem;
-  background:var(--green-bg); border:1px solid #bbf7d0;
-  border-radius:8px; padding:.6rem .85rem;
-  font-size:.8rem; color:var(--green); margin-bottom:1rem;
+  background:var(--green-bg); border:1px solid var(--green-br);
+  border-radius:8px; padding:.65rem .9rem;
+  font-size:.88rem; color:var(--green); margin-bottom:1rem;
 }
 
-/* Reject zone */
-.reject-zone{
-  background:var(--red-bg); border:1.5px solid #fca5a5;
-  border-radius:9px; padding:.85rem; margin-bottom:1rem;
+/* 類別調整（在評分欄） */
+.cat-adjust-block{
+  background:var(--warm); border:1.5px solid var(--warm-br);
+  border-radius:9px; padding:.8rem; margin-bottom:.9rem;
 }
-.reject-zone-head{
-  display:flex; align-items:center; gap:.5rem; margin-bottom:.6rem;
-  cursor:pointer; user-select:none;
+.cat-adjust-block label{
+  display:block; font-size:.82rem; font-weight:600;
+  color:var(--brown); margin-bottom:.4rem;
 }
-.reject-zone-head label{ font-size:.92rem; font-weight:600; color:var(--red); cursor:pointer; }
-.reject-checkbox{ width:16px; height:16px; accent-color:var(--red); cursor:pointer; }
-.reject-reason-wrap{ display:none; }
-.reject-reason-wrap.show{ display:block; }
-.reject-reason-wrap label{ display:block; font-size:.7rem; color:var(--red); margin-bottom:.3rem; font-weight:500; }
-.reject-reason-wrap textarea{
-  width:100%; padding:.55rem .75rem; border:1.5px solid #fca5a5;
-  border-radius:7px; font-size:.82rem; font-family:inherit;
-  color:var(--ink); resize:vertical; min-height:64px; background:white;
-  transition:border-color .2s;
+.cat-adjust-sel{
+  width:100%; padding:.5rem .7rem; border:1.5px solid var(--warm-br);
+  border-radius:7px; background:white; color:var(--ink);
+  font-size:.88rem; font-family:inherit; cursor:pointer;
 }
-.reject-reason-wrap textarea:focus{ outline:none; border-color:var(--red); }
+.cat-adjust-sel:focus{ outline:none; border-color:var(--m-600); }
 
-/* Criteria */
-.crit-group{ margin-bottom:.85rem; }
+/* Criteria group */
+.crit-group{ margin-bottom:.9rem; }
 .crit-group-title{
-  font-size:.77rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
-  color:var(--blue-700); padding:.3rem .6rem; background:var(--blue-50);
-  border-radius:5px; margin-bottom:.5rem;
+  font-size:.78rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--m-800); padding:.32rem .65rem; background:var(--m-100);
+  border-radius:5px; margin-bottom:.5rem; border-left:3px solid var(--m-700);
 }
 .crit-item{
-  display:flex; align-items:center; gap:.6rem;
-  padding:.5rem .1rem; border-bottom:1px solid var(--border2);
+  display:flex; align-items:flex-start; gap:.65rem;
+  padding:.55rem .05rem; border-bottom:1px solid var(--border2);
 }
 .crit-item:last-child{ border-bottom:none; }
-.crit-info{ flex:1; min-width:0; }
-.crit-name{ font-size:.9rem; color:var(--ink); line-height:1.4; }
-.crit-meta{ font-size:.76rem; color:var(--muted); margin-top:.1rem; }
-.score-input-wrap{ display:flex; align-items:center; gap:.3rem; flex-shrink:0; }
+.crit-info{ flex:1; min-width:0; padding-top:.1rem; }
+.crit-name{ font-size:.88rem; font-weight:500; color:var(--ink); line-height:1.45; }
+.crit-meta{ font-size:.75rem; color:var(--muted); margin-top:.12rem; }
+.score-input-wrap{ display:flex; align-items:center; gap:.35rem; flex-shrink:0; }
 .score-input{
-  width:58px; padding:.45rem .5rem; text-align:center;
+  width:60px; padding:.48rem .5rem; text-align:center;
   border:1.5px solid var(--border); border-radius:7px;
-  font-size:1rem; font-weight:600; font-family:inherit; color:var(--blue-800);
-  background:var(--blue-50); transition:border-color .2s, background .2s;
+  font-size:1rem; font-weight:700; font-family:inherit; color:var(--m-800);
+  background:#ebe9e5; transition:all .2s;
 }
-.score-input:focus{ outline:none; border-color:var(--blue-600); background:white; }
+.score-input:focus{ outline:none; border-color:var(--m-600); background:white; }
 .score-input:disabled{ opacity:.5; cursor:not-allowed; }
-.score-max{ font-size:.78rem; color:var(--muted); white-space:nowrap; }
-/* 超出滿分時紅底 */
 .score-input.over{ border-color:var(--red); background:var(--red-bg); color:var(--red); }
+/* 未填（空白）時邊框提示 */
+.score-input.empty{ border-color:var(--amber-br); background:var(--amber-bg); }
+.score-max{ font-size:.78rem; color:var(--muted); white-space:nowrap; }
 
 /* Recommend */
 .recommend-zone{
-  background:var(--blue-50); border:1.5px solid var(--blue-200);
-  border-radius:9px; padding:.75rem; margin-bottom:.85rem;
+  background:var(--m-50); border:1.5px solid var(--m-200);
+  border-radius:9px; padding:.8rem; margin-bottom:.9rem;
 }
 .recommend-zone-head{
-  display:flex; align-items:center; gap:.5rem;
-  cursor:pointer; user-select:none;
+  display:flex; align-items:center; gap:.5rem; cursor:pointer; user-select:none;
 }
-.recommend-zone-head label{ font-size:.92rem; font-weight:600; color:var(--blue-800); cursor:pointer; }
-.recommend-checkbox{ width:16px; height:16px; accent-color:var(--blue-700); cursor:pointer; }
+.recommend-zone-head label{ font-size:.92rem; font-weight:600; color:#3d4550; cursor:pointer; }
+.recommend-checkbox{ width:17px; height:17px; accent-color:var(--m-700); cursor:pointer; flex-shrink:0; }
 .recommend-note{ font-size:.8rem; color:var(--muted); margin-top:.35rem; line-height:1.5; }
 
 /* Total */
 .total-bar{
   display:flex; align-items:center; justify-content:space-between;
-  background:linear-gradient(135deg, var(--blue-900), var(--blue-800));
-  border-radius:9px; padding:.75rem 1rem; margin-bottom:.85rem;
+  background:linear-gradient(135deg, #3d4550, var(--m-800));
+  border-radius:9px; padding:.8rem 1.1rem; margin-bottom:.9rem;
 }
-.total-lbl{ font-size:.75rem; color:rgba(255,255,255,.6); }
-.total-num{ font-family:'Noto Serif TC',serif; font-size:1.6rem; color:white; line-height:1; }
-.total-num small{ font-size:.7rem; color:rgba(255,255,255,.4); font-family:'Noto Sans TC',sans-serif; }
-.bonus-note{ font-size:.68rem; color:rgba(255,255,255,.45); margin-top:.15rem; }
+.total-lbl{ font-size:.8rem; color:rgba(255,255,255,.6); }
+.total-num{ font-size:1.7rem; font-weight:700; color:white; line-height:1; }
+.total-num small{ font-size:.72rem; color:rgba(255,255,255,.4); font-weight:400; }
+.bonus-note{ font-size:.7rem; color:rgba(255,255,255,.45); margin-top:.15rem; }
 
 /* Comment */
-.cmt-wrap{ margin-bottom:.85rem; }
-.cmt-wrap label{ display:block; font-size:.72rem; font-weight:500; color:var(--slate);
-  margin-bottom:.3rem; letter-spacing:.04em; }
-.cmt-wrap textarea{
-  width:100%; padding:.6rem .8rem; border:1.5px solid var(--border);
-  border-radius:8px; font-size:.82rem; font-family:inherit;
-  color:var(--ink); resize:vertical; min-height:64px;
-  background:var(--bg); transition:border-color .2s;
+.cmt-wrap{ margin-bottom:.9rem; }
+.cmt-wrap label{
+  display:block; font-size:.82rem; font-weight:600; color:var(--slate);
+  margin-bottom:.35rem;
 }
-.cmt-wrap textarea:focus{ outline:none; border-color:var(--blue-600); background:white; }
+.cmt-wrap textarea{
+  width:100%; padding:.65rem .85rem; border:1.5px solid var(--border);
+  border-radius:8px; font-size:.88rem; font-family:inherit;
+  color:var(--ink); resize:vertical; min-height:68px;
+  background:var(--m-50); transition:border-color .2s;
+}
+.cmt-wrap textarea:focus{ outline:none; border-color:var(--m-600); background:white; }
+
+/* Reject zone（最下方） */
+.reject-zone{
+  background:var(--red-bg); border:1.5px solid var(--red-br);
+  border-radius:9px; padding:.85rem; margin-bottom:.9rem;
+  margin-top:.5rem;
+}
+.reject-zone-head{
+  display:flex; align-items:center; gap:.5rem;
+  cursor:pointer; user-select:none;
+}
+.reject-zone-head label{
+  font-size:.92rem; font-weight:600; color:var(--red); cursor:pointer;
+}
+.reject-checkbox{ width:17px; height:17px; accent-color:var(--red); cursor:pointer; flex-shrink:0; }
+.reject-reason-wrap{ display:none; margin-top:.6rem; }
+.reject-reason-wrap.show{ display:block; }
+.reject-reason-wrap label{
+  display:block; font-size:.8rem; color:var(--red);
+  margin-bottom:.3rem; font-weight:600;
+}
+.reject-reason-wrap textarea{
+  width:100%; padding:.6rem .8rem; border:1.5px solid var(--red-br);
+  border-radius:7px; font-size:.88rem; font-family:inherit;
+  color:var(--ink); resize:vertical; min-height:68px; background:white;
+}
+.reject-reason-wrap textarea:focus{ outline:none; border-color:var(--red); }
 
 /* Submit buttons */
-.score-actions{ display:flex; gap:.5rem; padding:.85rem 1rem; border-top:1px solid var(--border2); flex-shrink:0; }
+.score-actions{
+  display:flex; gap:.5rem; padding:.9rem 1rem;
+  border-top:1px solid var(--border2); flex-shrink:0;
+}
 .btn-draft{
-  padding:.65rem .75rem; background:white; border:1.5px solid var(--border);
-  border-radius:8px; font-size:.78rem; font-family:inherit; color:var(--muted);
+  padding:.68rem .9rem; background:white; border:1.5px solid var(--border);
+  border-radius:8px; font-size:.85rem; font-family:inherit; color:var(--muted);
   cursor:pointer; transition:all .2s; white-space:nowrap;
 }
-.btn-draft:hover{ border-color:var(--blue-500); color:var(--blue-700); }
+.btn-draft:hover{ border-color:var(--m-500); color:var(--m-700); }
 .btn-submit{
-  flex:1; padding:.68rem; background:linear-gradient(135deg, var(--green), #166534);
-  color:white; border:none; border-radius:8px; font-size:.82rem;
-  font-family:inherit; font-weight:500; letter-spacing:.04em;
+  flex:1; padding:.7rem;
+  background:linear-gradient(135deg, #4a7060, #385548);
+  color:white; border:none; border-radius:8px; font-size:.88rem;
+  font-family:inherit; font-weight:600; letter-spacing:.04em;
   cursor:pointer; transition:all .2s;
 }
 .btn-submit:hover{ opacity:.9; transform:translateY(-1px); }
 .btn-submit:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
 
 /* ══════════════════════════════
-   OVERVIEW MODAL (總覽確認)
+   OVERVIEW MODAL
 ══════════════════════════════ */
 .modal-bg{
-  position:fixed; inset:0; background:rgba(10,35,66,.6);
+  position:fixed; inset:0; background:rgba(43,58,74,.65);
   display:none; align-items:center; justify-content:center;
   z-index:500; padding:1rem; backdrop-filter:blur(4px);
 }
 .modal-bg.show{ display:flex; }
 .modal{
   background:white; border-radius:14px;
-  width:780px; max-width:100%; max-height:90vh;
-  box-shadow:0 24px 64px rgba(0,0,0,.25);
+  width:820px; max-width:100%; max-height:90vh;
+  box-shadow:0 24px 64px rgba(0,0,0,.2);
   display:flex; flex-direction:column; overflow:hidden;
 }
 .modal-head{
-  padding:1rem 1.25rem; background:var(--blue-900);
+  padding:1rem 1.25rem; background:#3d4550;
   display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
 }
-.modal-head h3{ font-family:'Noto Serif TC',serif; font-size:1rem; color:white; font-weight:500; }
-.modal-close{ background:none; border:none; font-size:1.1rem; color:rgba(255,255,255,.5); cursor:pointer; }
+.modal-head h3{
+  font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
+  font-size:1rem; color:white; font-weight:700;
+}
+.modal-close{
+  background:none; border:none; font-size:1.1rem;
+  color:rgba(255,255,255,.5); cursor:pointer;
+}
 .modal-close:hover{ color:white; }
 .modal-body{ flex:1; overflow-y:auto; padding:1.25rem; }
 .modal-foot{
   padding:.9rem 1.25rem; border-top:1px solid var(--border2);
-  display:flex; gap:.6rem; justify-content:flex-end; flex-shrink:0;
-  background:var(--bg);
+  display:flex; gap:.6rem; justify-content:space-between; align-items:center;
+  flex-shrink:0; background:var(--m-50);
 }
+.modal-foot-left{ font-size:.82rem; color:var(--muted); }
+.modal-foot-right{ display:flex; gap:.6rem; }
 
 /* Overview table */
-.ov-table{ width:100%; border-collapse:collapse; font-size:.8rem; }
+.ov-table{ width:100%; border-collapse:collapse; }
 .ov-table th{
-  padding:.6rem .75rem; background:var(--blue-50); font-size:.75rem;
-  font-weight:700; letter-spacing:.06em; text-transform:uppercase;
-  color:var(--blue-700); text-align:left; border-bottom:2px solid var(--blue-200);
+  padding:.6rem .75rem; background:var(--m-50); font-size:.78rem;
+  font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--m-700); text-align:left; border-bottom:2px solid var(--m-200);
   white-space:nowrap;
 }
 .ov-table td{
   padding:.65rem .75rem; border-bottom:1px solid var(--border2);
-  vertical-align:middle; font-size:.88rem;
+  vertical-align:middle; font-size:.9rem;
 }
-.ov-table tr:hover td{ background:var(--blue-50); }
+.ov-table tr:hover td{ background:var(--m-50); }
 .ov-table tr.rejected-row td{ background:var(--red-bg); }
-.ov-no-data{ text-align:center; padding:2rem; color:var(--muted); font-size:.85rem; }
-
-/* Buttons */
-.btn{ padding:.55rem 1rem; border-radius:8px; font-size:.82rem; font-weight:500;
-  cursor:pointer; transition:all .18s; border:none; font-family:inherit; }
-.btn-primary{ background:var(--blue-700); color:white; }
-.btn-primary:hover{ background:var(--blue-600); }
-.btn-secondary{ background:white; border:1.5px solid var(--border); color:var(--slate); }
-.btn-secondary:hover{ border-color:var(--blue-500); color:var(--blue-700); }
-.btn-success-lg{
-  padding:.65rem 1.5rem; background:linear-gradient(135deg, var(--green), #166534);
-  color:white; border:none; border-radius:9px; font-size:.9rem;
-  font-family:inherit; font-weight:500; cursor:pointer; transition:all .2s;
+.ov-score{ font-weight:700; color:var(--m-800); }
+.ov-rec{
+  padding:.15rem .55rem; border-radius:4px;
+  font-size:.72rem; font-weight:700; white-space:nowrap;
 }
-.btn-success-lg:hover{ opacity:.9; }
-
-/* Overview score summary */
-.ov-score{ font-weight:700; color:var(--blue-800); }
-.ov-rec{ padding:.12rem .5rem; border-radius:4px; font-size:.65rem; font-weight:700; }
 .ov-rec.yes{ background:var(--green-bg); color:var(--green); }
 .ov-rec.no{ background:var(--border2); color:var(--muted); }
 .ov-rec.rej{ background:var(--red-bg); color:var(--red); }
-.ov-pending{ color:var(--muted); font-size:.75rem; }
+.ov-pending{ color:var(--muted); font-size:.8rem; }
+
+/* 總覽勾選送出 */
+.ov-check{ width:18px; height:18px; accent-color:var(--m-700); cursor:pointer; }
+.ov-table tr.rejected-row .ov-check{ accent-color:var(--red); }
+.btn-bulk-submit{
+  padding:.65rem 1.4rem;
+  background:linear-gradient(135deg, #4a7060, #385548);
+  color:white; border:none; border-radius:9px; font-size:.92rem;
+  font-family:inherit; font-weight:600; cursor:pointer; transition:all .2s;
+}
+.btn-bulk-submit:hover{ opacity:.9; }
+.btn-bulk-submit:disabled{ opacity:.45; cursor:not-allowed; }
+
+/* Buttons */
+.btn{
+  padding:.55rem 1rem; border-radius:8px; font-size:.85rem; font-weight:500;
+  cursor:pointer; transition:all .18s; border:none; font-family:inherit;
+}
+.btn-secondary{ background:white; border:1.5px solid var(--border); color:var(--slate); }
+.btn-secondary:hover{ border-color:var(--m-500); color:var(--m-700); }
+.btn-select-all{
+  padding:.38rem .8rem; background:#e8e5e0; border:1px solid var(--m-600);
+  border-radius:7px; font-size:.8rem; color:var(--m-700); font-family:inherit;
+  cursor:pointer; transition:all .2s; font-weight:500;
+}
+.btn-select-all:hover{ background:var(--m-600); color:white; }
 
 /* ══════════════════════════════
    LOADER / TOAST
 ══════════════════════════════ */
-.ldr{ position:fixed; inset:0; background:rgba(255,255,255,.8); display:none;
-  align-items:center; justify-content:center; z-index:9998; }
-.spinner{ width:34px; height:34px; border:3px solid var(--border);
-  border-top-color:var(--blue-600); border-radius:50%; animation:spin .65s linear infinite; }
+.ldr{
+  position:fixed; inset:0; background:rgba(255,255,255,.82);
+  display:none; align-items:center; justify-content:center; z-index:9998;
+}
+.spinner{
+  width:36px; height:36px; border:3px solid var(--border);
+  border-top-color:var(--m-700); border-radius:50%;
+  animation:spin .65s linear infinite;
+}
 @keyframes spin{ to{ transform:rotate(360deg) } }
-.toast{ position:fixed; bottom:1.5rem; right:1.5rem; padding:.7rem 1.1rem;
-  border-radius:9px; font-size:.85rem; color:white;
+.toast{
+  position:fixed; bottom:1.5rem; right:1.5rem; padding:.75rem 1.1rem;
+  border-radius:9px; font-size:.9rem; color:white;
   box-shadow:0 8px 24px rgba(0,0,0,.15); z-index:9999;
-  animation:tIn .3s ease; max-width:320px; }
+  animation:tIn .3s ease; max-width:340px;
+}
 .toast.ok{ background:var(--green); }
 .toast.err{ background:var(--red); }
 .toast.warn{ background:var(--amber); }
 @keyframes tIn{ from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
 /* ══════════════════════════════
-   MOBILE (single column)
+   RESPONSIVE
 ══════════════════════════════ */
-/* ── Tablet: 2欄 (list hidden, content+score) ── */
-@media(max-width:1200px) and (min-width:761px){
-  .app-body{ grid-template-columns:200px 1fr 320px; }
+@media(max-width:1280px) and (min-width:761px){
+  .app-body{ grid-template-columns:220px 1fr 340px; }
 }
-@media(max-width:1000px) and (min-width:761px){
-  .app-body{ grid-template-columns:1fr 300px; }
+@media(max-width:1020px) and (min-width:761px){
+  .app-body{ grid-template-columns:1fr 320px; }
   .col-list{ display:none; }
-  /* 以下拉選單替代 sidebar */
 }
-/* ── Mobile: 單欄 ── */
 @media(max-width:760px){
-  .app-body{ grid-template-columns:1fr; grid-template-rows:auto 1fr auto; }
-  .col-list{ max-height:160px; border-right:none; border-bottom:1px solid var(--border2); }
+  .app-body{ display:flex; flex-direction:column; overflow:visible; height:auto; }
+  #app{ height:auto; min-height:100vh; }
+  .col-list{ max-height:170px; border-right:none; border-bottom:1px solid var(--border2); }
   .list-scroll{ display:flex; gap:.35rem; overflow-x:auto; overflow-y:hidden; padding:.4rem .5rem; }
-  .pi{ min-width:160px; margin-bottom:0; flex-shrink:0; }
-  .col-content{ padding:.85rem; }
-  .col-score{ border-left:none; border-top:1px solid var(--border2); max-height:55vh; overflow-y:auto; }
-  .topbar{ padding:0 .85rem; flex-wrap:wrap; height:auto; padding:.5rem .85rem; gap:.4rem; }
+  .pi{ min-width:155px; margin-bottom:0; flex-shrink:0; }
+  .col-content{ padding:.9rem; overflow-y:visible; }
+  .col-score{
+    border-left:none; border-top:1px solid var(--border2);
+    max-height:none; overflow-y:visible;
+  }
+  .score-scroll{ overflow-y:visible; max-height:none; }
+  .topbar{ height:auto; padding:.6rem .9rem; flex-wrap:wrap; gap:.4rem; }
   .tb-left{ flex-wrap:wrap; }
-  .tb-logo{ font-size:.82rem; }
-  .deadline-chip{ display:none; }
+  .tb-logo{ font-size:.88rem; }
   .tb-sep{ display:none; }
-  .tb-right{ gap:.4rem; }
-  .btn-out{ font-size:.7rem; padding:.25rem .5rem; }
-  .rv-chip{ font-size:.72rem; padding:.25rem .6rem; }
+  .deadline-chip{ display:none; }
+  .tb-right{ gap:.35rem; flex-wrap:wrap; }
+  .btn-out{ font-size:.72rem; padding:.28rem .55rem; }
+  .rv-chip{ font-size:.75rem; }
   .login-card{ padding:1.5rem; }
+  .modal{ border-radius:10px; }
+  .modal-body{ padding:1rem; }
+  .ov-table th,.ov-table td{ padding:.5rem .55rem; font-size:.82rem; }
 }
-/* ── Small mobile ── */
-@media(max-width:400px){
+@media(max-width:420px){
   body{ font-size:15px; }
-  .app-body{ grid-template-rows:140px 1fr auto; }
-  .col-list{ max-height:140px; }
+  .tb-type-tabs .tb-tab{ font-size:.75rem; padding:.28rem .65rem; }
 }
 </style>
 </head>
@@ -564,7 +641,7 @@ h1,h2,h3,h4,h5,h6,
   <div class="login-wrap">
     <div class="login-brand">
       <div class="eyebrow">⚕ TSMCSD 2026 年會暨學術研討會</div>
-      <h1>論文評審系統</h1>
+      <h1>競賽活動評審系統</h1>
       <p>僅供受邀評審委員使用・請勿轉發登入資訊</p>
     </div>
     <div class="deadline-banner">
@@ -572,7 +649,7 @@ h1,h2,h3,h4,h5,h6,
     </div>
     <div class="login-card">
       <label class="fl">委員帳號</label>
-      <input class="fi" id="lgUser" type="text" placeholder="請輸入帳號" autocomplete="username">
+      <input class="fi" id="lgUser" type="text" placeholder="請輸入您的帳號" autocomplete="username">
       <label class="fl">密碼</label>
       <input class="fi" id="lgPass" type="password" placeholder="請輸入密碼"
              onkeydown="if(event.key==='Enter')doLogin()">
@@ -584,10 +661,9 @@ h1,h2,h3,h4,h5,h6,
 
 <!-- ══ APP ══ -->
 <div id="app">
-  <!-- Top bar -->
   <div class="topbar">
     <div class="tb-left">
-      <span class="tb-logo">TSMCSD 2026 論文評審</span>
+      <span class="tb-logo">TSMCSD 2026 競賽活動評審</span>
       <div class="tb-sep"></div>
       <div class="tb-type-tabs">
         <div class="tb-tab active" id="tabPoster" onclick="switchType('poster')">📋 海報論文</div>
@@ -597,12 +673,11 @@ h1,h2,h3,h4,h5,h6,
     <div class="tb-right">
       <div class="deadline-chip">⏰ 截止 115.7.3（五）</div>
       <div class="rv-chip">👤 <span id="rvName"></span></div>
-      <button class="btn-out" onclick="showOverview()">📊 總覽確認</button>
+      <button class="btn-out" onclick="showOverview()">📊 總覽送出</button>
       <button class="btn-out" onclick="doLogout()">登出</button>
     </div>
   </div>
 
-  <!-- Three-column body -->
   <div class="app-body">
     <!-- COL 1: List -->
     <div class="col-list">
@@ -623,7 +698,7 @@ h1,h2,h3,h4,h5,h6,
       <div class="content-empty">
         <div class="icon">📄</div>
         <h3>請從左側選擇論文</h3>
-        <p style="font-size:.8rem">點選論文後，摘要與評分表單將顯示於此</p>
+        <p style="font-size:.85rem">點選論文後，摘要與評分表單將顯示於此</p>
       </div>
     </div>
 
@@ -634,12 +709,12 @@ h1,h2,h3,h4,h5,h6,
         <span class="col-score-head-note" id="scoreHeadNote">請先選擇論文</span>
       </div>
       <div class="score-scroll" id="scoreArea">
-        <p style="color:var(--muted);font-size:.82rem;text-align:center;padding:2rem 0">
+        <p style="color:var(--muted);font-size:.88rem;text-align:center;padding:2rem 0">
           請從左側選擇論文後開始評分
         </p>
       </div>
       <div class="score-actions" id="scoreActions" style="display:none">
-        <button class="btn-draft" onclick="saveDraft()">暫存</button>
+        <button class="btn-draft" onclick="saveDraft()">💾 暫存</button>
         <button class="btn-submit" id="btnSubmit" onclick="submitScore()">✅ 提交評分</button>
       </div>
     </div>
@@ -650,12 +725,18 @@ h1,h2,h3,h4,h5,h6,
 <div class="modal-bg" id="overviewModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>📊 所有論文評分總覽</h3>
+      <h3>📊 評分總覽・勾選送出</h3>
       <button class="modal-close" onclick="closeOverview()">✕</button>
     </div>
     <div class="modal-body" id="overviewBody"></div>
     <div class="modal-foot">
-      <button class="btn btn-secondary" onclick="closeOverview()">關閉</button>
+      <div class="modal-foot-left" id="ovSelectedCount">請勾選要送出的項目</div>
+      <div class="modal-foot-right">
+        <button class="btn btn-secondary" onclick="closeOverview()">關閉</button>
+        <button class="btn-bulk-submit" id="btnBulkSubmit" onclick="bulkSubmit()" disabled>
+          ✅ 送出勾選項目
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -663,22 +744,19 @@ h1,h2,h3,h4,h5,h6,
 <div class="ldr" id="ldr"><div class="spinner"></div></div>
 
 <script>
-// ══ 設定 ══
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2njUGr6eORWe6V5iMITA_dbpuOzhOebyxDW43P8RySVezxUevEOvQZGUV0tl_Mhm9/exec';
 
-// 類別全名對照
 const CAT_NAMES = {
-  'A': 'A — Clinical Skills Education, Simulation & Interprofessional Learning',
-  'B': 'B — Assessment, Entrustment & Competency-Based Medical Education',
-  'C': 'C — Humanism, Wellbeing & Professional Identity'
+  'A':'A — Clinical Skills Education, Simulation & Interprofessional Learning',
+  'B':'B — Assessment, Entrustment & Competency-Based Medical Education',
+  'C':'C — Humanism, Wellbeing & Professional Identity'
 };
 const CAT_SHORT = {
-  'A': 'A 臨床技能教育',
-  'B': 'B 評量與能力導向',
-  'C': 'C 人文素養'
+  'A':'A 臨床技能教育',
+  'B':'B 評量與能力導向',
+  'C':'C 人文素養'
 };
 
-// ══ 海報論文評分向度 ══
 const POSTER_CRITERIA = [
   { id:'p1', label:'主題創新性',           weight:'20%', max:20 },
   { id:'p2', label:'研究設計合理性',       weight:'15%', max:15 },
@@ -687,55 +765,39 @@ const POSTER_CRITERIA = [
   { id:'p5', label:'結果與討論的正確性',   weight:'15%', max:15 },
   { id:'p6', label:'學術貢獻',             weight:'10%', max:10 }
 ];
-const POSTER_MAX = POSTER_CRITERIA.reduce((s,c)=>s+c.max,0); // 100
+const POSTER_MAX = POSTER_CRITERIA.reduce((s,c)=>s+c.max,0);
 
-// ══ OSCE 教案評分向度 ══
 const OSCE_CRITERIA_GROUPS = [
-  {
-    group:'情境設置',
-    items:[
-      { id:'o1', label:'情境設置（包含示範、配置器材、技能操作題包含器材並與現場一致）', max:10 }
-    ]
-  },
-  {
-    group:'教案指引（30%）',
-    items:[
-      { id:'o2', label:'教學/考官指引（說明學習目標、教學/考官分說明清楚滿足考生語意清楚）', max:10 },
-      { id:'o3', label:'考生指引/SP指引（足以輔助考生執行任務）',                              max:10 },
-      { id:'o4', label:'SP腳本/助教指引（能引導考生達到特定症狀等）',                          max:10 }
-    ]
-  },
-  {
-    group:'教案設計（20%）',
-    items:[
-      { id:'o5', label:'評分項目與教案目標相關（評分尺標與教案目標相對應）', max:10 },
-      { id:'o6', label:'評分尺標與給分定義明確（評分項次尺標與給分定義明確）', max:10 }
-    ]
-  },
-  {
-    group:'教案目標明確一致（10%）',
-    items:[
-      { id:'o7', label:'教案內容（教案/考官、考生、SP教之教案內容及教材結構之完整性，指引目標一致）', max:10 }
-    ]
-  },
-  {
-    group:'影片呈現（30%）',
-    items:[
-      { id:'o8', label:'影片畫面品質優良',           max:10 },
-      { id:'o9', label:'影片聲音清晰，且有字幕',     max:10 },
-      { id:'o10',label:'剪輯得宜，有助於教案呈現',  max:10 }
-    ]
-  }
+  { group:'情境設置（10%）', items:[
+    { id:'o1', label:'情境設置（包含示範、配置器材；技能操作題包含器材並與現場一致）', max:10 }
+  ]},
+  { group:'教案指引（30%）', items:[
+    { id:'o2', label:'教學/考官指引（說明學習目標清楚，語意清晰）', max:10 },
+    { id:'o3', label:'考生指引/SP指引（足以輔助考生執行任務）', max:10 },
+    { id:'o4', label:'SP腳本/助教指引（能引導考生達到特定症狀）', max:10 }
+  ]},
+  { group:'教案設計（20%）', items:[
+    { id:'o5', label:'評分項目與教案目標相關（評分尺標與教案目標相對應）', max:10 },
+    { id:'o6', label:'評分尺標與給分定義明確', max:10 }
+  ]},
+  { group:'教案目標明確一致（10%）', items:[
+    { id:'o7', label:'教案內容完整、結構一致，指引目標一致', max:10 }
+  ]},
+  { group:'影片呈現（30%）', items:[
+    { id:'o8', label:'影片畫面品質優良', max:10 },
+    { id:'o9', label:'影片聲音清晰，且有字幕', max:10 },
+    { id:'o10',label:'剪輯得宜，有助於教案呈現', max:10 }
+  ]}
 ];
 const OSCE_ALL_CRITERIA = OSCE_CRITERIA_GROUPS.flatMap(g=>g.items);
-const OSCE_BASE_MAX = OSCE_ALL_CRITERIA.reduce((s,c)=>s+c.max,0); // 100
+const OSCE_BASE_MAX = OSCE_ALL_CRITERIA.reduce((s,c)=>s+c.max,0);
 const OSCE_BONUS = { id:'o_bonus', label:'優良加分（特殊優良表現，請說明）', max:10 };
 
-// ══ State ══
+// ── State ──
 let reviewer=null, papers={poster:[],osce:[]};
 let submitted={}, drafts={}, curType='poster', curIdx=null;
 
-// ══ Login ══
+// ── Login ──
 async function doLogin(){
   const u=el('lgUser').value.trim(), p=el('lgPass').value.trim();
   const eEl=el('lgErr'); eEl.style.display='none';
@@ -761,18 +823,18 @@ async function doLogin(){
 }
 function doLogout(){ if(!confirm('確定登出？')) return; location.reload(); }
 
-// ══ Type switch ══
+// ── Type switch ──
 function switchType(t){
   curType=t; curIdx=null;
   el('tabPoster').classList.toggle('active',t==='poster');
   el('tabOsce').classList.toggle('active',t==='osce');
   el('colContent').innerHTML=`<div class="content-empty"><div class="icon">${t==='osce'?'🎬':'📄'}</div><h3>請從左側選擇${t==='osce'?'教案':'論文'}</h3></div>`;
-  el('scoreArea').innerHTML=`<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:2rem 0">請先選擇${t==='osce'?'教案':'論文'}</p>`;
+  el('scoreArea').innerHTML=`<p style="color:var(--muted);font-size:.88rem;text-align:center;padding:2rem 0">請先選擇${t==='osce'?'教案':'論文'}</p>`;
   el('scoreActions').style.display='none';
   renderList();
 }
 
-// ══ Sidebar ══
+// ── Sidebar ──
 function renderList(){
   const list=papers[curType]||[];
   const done=list.filter(p=>submitted[p.id]).length;
@@ -781,11 +843,20 @@ function renderList(){
   el('progLbl').textContent=curType==='osce'?'OSCE 進度':'海報評審進度';
 
   el('paperList').innerHTML=list.map((p,i)=>{
-    const d=!!submitted[p.id];
-    const rej=drafts[p.id]?.rejected;
-    const statusClass=rej?'rejected':d?'done':'';
-    const dotClass=rej?'r':d?'d':'p';
-    const statusTxt=rej?'退稿':d?'已完成':'待評審';
+    const isDone=!!submitted[p.id];
+    const d=drafts[p.id];
+    const isRej=d?.rejected;
+    const hasDraft=d&&Object.keys(d).length>0&&!isDone;
+
+    let statusClass='', dotClass='p', statusTxt='待評審';
+    if(isDone){
+      statusClass='done'; dotClass='d'; statusTxt='已提交';
+    } else if(isRej){
+      statusClass='rejected'; dotClass='r'; statusTxt='標記退稿';
+    } else if(hasDraft){
+      statusClass='drafted'; dotClass='sv'; statusTxt='已暫存';
+    }
+
     const numLabel=curType==='osce'?p.caseNo:p.paperNo;
     return `<div class="pi ${statusClass} ${curIdx===i?'active':''}" onclick="selectPaper(${i})">
       <div class="pi-row1">
@@ -798,25 +869,23 @@ function renderList(){
         <span class="pi-st-txt">${statusTxt}</span>
       </div>
     </div>`;
-  }).join('') || '<p style="color:var(--muted);font-size:.78rem;text-align:center;padding:1.5rem .5rem">暫無指派項目</p>';
+  }).join('') || '<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:1.5rem .5rem">暫無指派項目</p>';
 }
 
-// ══ Select paper ══
+// ── Select paper ──
 function selectPaper(i){
   curIdx=i; renderList();
   if(curType==='poster') renderPosterContent(i);
   else renderOsceContent(i);
 }
 
-// ══ POSTER content & score ══
+// ── POSTER ──
 function renderPosterContent(i){
   const p=papers.poster[i]; if(!p) return;
   const isDone=!!submitted[p.id];
   const draft=drafts[p.id]||{};
-  const catFull=CAT_NAMES[p.category]||p.category||'—';
   const catShort=CAT_SHORT[p.category]||p.category||'—';
 
-  // Content col
   el('colContent').innerHTML=`
     <div class="p-info-card">
       <div class="p-info-head">
@@ -827,16 +896,6 @@ function renderPosterContent(i){
         </div>
         <div class="p-title">${esc(p.title)}</div>
       </div>
-      <div class="cat-adjust-row">
-        <span class="cat-adjust-lbl">✏️ 建議調整類別：</span>
-        <select class="cat-adjust-sel" id="catAdjSel" ${isDone?'disabled':''}>
-          <option value="">（維持原類別）</option>
-          <option value="A" ${draft.catAdjust==='A'?'selected':''}>A — 臨床技能教育、模擬教學與跨專業學習</option>
-          <option value="B" ${draft.catAdjust==='B'?'selected':''}>B — 評量、信任決策與能力導向醫學教育</option>
-          <option value="C" ${draft.catAdjust==='C'?'selected':''}>C — 人文素養、醫療韌性與專業認同</option>
-        </select>
-        <span class="cat-adjust-note">若認為類別應調整，請選擇建議類別</span>
-      </div>
       <div class="p-info-body">
         ${absBlk('研究動機',p.absMotivation)}
         ${absBlk('研究方法',p.absMethod)}
@@ -845,14 +904,12 @@ function renderPosterContent(i){
       </div>
     </div>`;
 
-  // Score col
   el('scoreHeadTitle').textContent='海報論文評分';
   el('scoreHeadNote').textContent=`滿分 ${POSTER_MAX} 分`;
   el('scoreArea').innerHTML=renderPosterScoreForm(p, draft, isDone);
   el('scoreActions').style.display=isDone?'none':'flex';
-  if(isDone){
-    el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">✅ 已完成評分，如需修改請聯絡管理員</div>');
-  }
+  if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">✅ 已完成評分，如需修改請聯絡管理員</div>');
+  markEmptyInputs();
   updatePosterTotal();
 }
 
@@ -860,7 +917,59 @@ function renderPosterScoreForm(p, draft, isDone){
   const dis=isDone?'disabled':'';
   let html='';
 
-  // 退稿區
+  // 評分向度（必填）
+  html+=`<div class="crit-group"><div class="crit-group-title">各項評分（滿分 ${POSTER_MAX} 分・全部必填）</div>`;
+  POSTER_CRITERIA.forEach(c=>{
+    const v=draft[c.id]!==undefined?draft[c.id]:'';
+    html+=`<div class="crit-item">
+      <div class="crit-info">
+        <div class="crit-name">${c.label}</div>
+        <div class="crit-meta">佔比 ${c.weight}・滿分 ${c.max} 分</div>
+      </div>
+      <div class="score-input-wrap">
+        <input type="number" class="score-input" id="sc_${c.id}"
+          min="0" max="${c.max}" value="${v}" placeholder="—"
+          ${dis} oninput="validateScore(this,${c.max}); updatePosterTotal(); markEmptyInputs()">
+        <span class="score-max">/ ${c.max}</span>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  // 建議調整類別
+  html+=`<div class="cat-adjust-block">
+    <label>✏️ 建議調整類別（選填）</label>
+    <select class="cat-adjust-sel" id="catAdjSel" ${dis}>
+      <option value="">（維持原類別）</option>
+      <option value="A" ${draft.catAdjust==='A'?'selected':''}>A — 臨床技能教育、模擬教學與跨專業學習</option>
+      <option value="B" ${draft.catAdjust==='B'?'selected':''}>B — 評量、信任決策與能力導向醫學教育</option>
+      <option value="C" ${draft.catAdjust==='C'?'selected':''}>C — 人文素養、醫療韌性與專業認同</option>
+    </select>
+  </div>`;
+
+  // 推薦
+  const isRec=!!(draft.recommend);
+  html+=`<div class="recommend-zone">
+    <div class="recommend-zone-head">
+      <input type="checkbox" class="recommend-checkbox" id="recChk" ${isRec?'checked':''} ${dis}>
+      <label for="recChk">⭐ 推薦此論文進行「實體壁報」展示</label>
+    </div>
+    <div class="recommend-note">勾選代表建議此篇論文值得於研討會中進行實體壁報展示</div>
+  </div>`;
+
+  // 合計
+  html+=`<div class="total-bar">
+    <div><div class="total-lbl">合計總分</div></div>
+    <div class="total-num" id="posterTotal">—<small> / ${POSTER_MAX}</small></div>
+  </div>`;
+
+  // 評語
+  html+=`<div class="cmt-wrap">
+    <label>評語（選填）</label>
+    <textarea id="cmtArea" placeholder="可填寫對本篇論文的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea>
+  </div>`;
+
+  // 退稿（最下方）
   const isRej=!!(draft.rejected);
   html+=`<div class="reject-zone">
     <div class="reject-zone-head" onclick="toggleReject()">
@@ -873,49 +982,6 @@ function renderPosterScoreForm(p, draft, isDone){
     </div>
   </div>`;
 
-  // 評分向度
-  html+=`<div class="crit-group"><div class="crit-group-title">各項評分（滿分 ${POSTER_MAX} 分）</div>`;
-  POSTER_CRITERIA.forEach(c=>{
-    const v=draft[c.id]!==undefined?draft[c.id]:'';
-    html+=`<div class="crit-item">
-      <div class="crit-info">
-        <div class="crit-name">${c.label}</div>
-        <div class="crit-meta">佔比 ${c.weight}・滿分 ${c.max} 分</div>
-      </div>
-      <div class="score-input-wrap">
-        <input type="number" class="score-input" id="sc_${c.id}"
-          min="0" max="${c.max}" value="${v}" placeholder="0"
-          ${dis} oninput="validateScore(this,${c.max}); updatePosterTotal()">
-        <span class="score-max">/ ${c.max}</span>
-      </div>
-    </div>`;
-  });
-  html+=`</div>`;
-
-  // 推薦
-  const isRec=!!(draft.recommend);
-  html+=`<div class="recommend-zone">
-    <div class="recommend-zone-head">
-      <input type="checkbox" class="recommend-checkbox" id="recChk" ${isRec?'checked':''} ${dis}>
-      <label for="recChk">⭐ 推薦此論文進行「實體壁報」展示</label>
-    </div>
-    <div class="recommend-note">勾選代表建議此篇論文值得於研討會中進行實體壁報展示</div>
-  </div>`;
-
-  // 總分
-  html+=`<div class="total-bar">
-    <div><div class="total-lbl">合計總分</div></div>
-    <div style="text-align:right">
-      <div class="total-num" id="posterTotal">—<small> / ${POSTER_MAX}</small></div>
-    </div>
-  </div>`;
-
-  // 評語
-  html+=`<div class="cmt-wrap">
-    <label>評語（選填）</label>
-    <textarea id="cmtArea" placeholder="可填寫對本篇論文的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea>
-  </div>`;
-
   return html;
 }
 
@@ -926,19 +992,12 @@ function updatePosterTotal(){
   if(tEl) tEl.innerHTML=`${t}<small> / ${POSTER_MAX}</small>`;
 }
 
-function toggleReject(){
-  const chk=el('rejChk'); if(!chk) return;
-  const wrap=el('rejReasonWrap'); if(!wrap) return;
-  wrap.classList.toggle('show', chk.checked);
-}
-
-// ══ OSCE content & score ══
+// ── OSCE ──
 function renderOsceContent(i){
   const p=papers.osce[i]; if(!p) return;
   const isDone=!!submitted[p.id];
   const draft=drafts[p.id]||{};
 
-  // Content col
   el('colContent').innerHTML=`
     <div class="p-info-card">
       <div class="p-info-head">
@@ -953,7 +1012,7 @@ function renderOsceContent(i){
         ${p.driveUrl?`<div class="cloud-link-box">
           <span class="icon">☁️</span>
           <div class="info">
-            <strong style="font-size:.82rem">Google 雲端教案資料</strong>
+            <strong>Google 雲端教案資料</strong>
             <p>影片、教案 PDF 等評審資料</p>
           </div>
           <a class="btn-cloud" href="${esc(p.driveUrl)}" target="_blank">開啟資料 ↗</a>
@@ -964,14 +1023,12 @@ function renderOsceContent(i){
       </div>
     </div>`;
 
-  // Score col
   el('scoreHeadTitle').textContent='OSCE 教案評分';
-  el('scoreHeadNote').textContent=`基本滿分 ${OSCE_BASE_MAX} 分 + 加分最多 ${OSCE_BONUS.max} 分`;
+  el('scoreHeadNote').textContent=`基本滿分 ${OSCE_BASE_MAX} + 優良加分 ${OSCE_BONUS.max}`;
   el('scoreArea').innerHTML=renderOsceScoreForm(p, draft, isDone);
   el('scoreActions').style.display=isDone?'none':'flex';
-  if(isDone){
-    el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">✅ 已完成評分，如需修改請聯絡管理員</div>');
-  }
+  if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">✅ 已完成評分，如需修改請聯絡管理員</div>');
+  markEmptyInputs();
   updateOsceTotal();
 }
 
@@ -979,20 +1036,7 @@ function renderOsceScoreForm(p, draft, isDone){
   const dis=isDone?'disabled':'';
   let html='';
 
-  // 退稿
-  const isRej=!!(draft.rejected);
-  html+=`<div class="reject-zone">
-    <div class="reject-zone-head" onclick="toggleReject()">
-      <input type="checkbox" class="reject-checkbox" id="rejChk" ${isRej?'checked':''} ${dis} onchange="toggleReject()">
-      <label for="rejChk">⚠️ 此教案不符合投稿範疇（退稿）</label>
-    </div>
-    <div class="reject-reason-wrap ${isRej?'show':''}" id="rejReasonWrap">
-      <label>退稿原因（必填）</label>
-      <textarea id="rejReason" placeholder="請說明退稿原因…" ${dis}>${esc(draft.rejectReason||'')}</textarea>
-    </div>
-  </div>`;
-
-  // 評分向度（分組）
+  // 分組評分向度
   OSCE_CRITERIA_GROUPS.forEach(g=>{
     html+=`<div class="crit-group"><div class="crit-group-title">${g.group}</div>`;
     g.items.forEach(c=>{
@@ -1004,8 +1048,8 @@ function renderOsceScoreForm(p, draft, isDone){
         </div>
         <div class="score-input-wrap">
           <input type="number" class="score-input" id="sc_${c.id}"
-            min="0" max="${c.max}" value="${v}" placeholder="0"
-            ${dis} oninput="validateScore(this,${c.max}); updateOsceTotal()">
+            min="0" max="${c.max}" value="${v}" placeholder="—"
+            ${dis} oninput="validateScore(this,${c.max}); updateOsceTotal(); markEmptyInputs()">
           <span class="score-max">/ ${c.max}</span>
         </div>
       </div>`;
@@ -1016,7 +1060,7 @@ function renderOsceScoreForm(p, draft, isDone){
   // 優良加分
   const bv=draft[OSCE_BONUS.id]!==undefined?draft[OSCE_BONUS.id]:'';
   html+=`<div class="crit-group">
-    <div class="crit-group-title" style="background:#fef3c7;color:var(--amber)">優良加分（額外）</div>
+    <div class="crit-group-title" style="background:var(--amber-bg);color:var(--amber);border-left-color:var(--amber-br)">優良加分（額外・非必填）</div>
     <div class="crit-item">
       <div class="crit-info">
         <div class="crit-name">${OSCE_BONUS.label}</div>
@@ -1032,10 +1076,9 @@ function renderOsceScoreForm(p, draft, isDone){
   </div>`;
 
   // 優良加分說明
-  const bonusNote=draft.bonusNote||'';
   html+=`<div class="cmt-wrap">
     <label>優良加分說明（有填加分時請說明）</label>
-    <textarea id="bonusNote" placeholder="請說明優良表現原因…" ${dis}>${esc(bonusNote)}</textarea>
+    <textarea id="bonusNote" placeholder="請說明優良表現原因…" ${dis}>${esc(draft.bonusNote||'')}</textarea>
   </div>`;
 
   // 推薦
@@ -1048,11 +1091,11 @@ function renderOsceScoreForm(p, draft, isDone){
     <div class="recommend-note">勾選代表建議此教案值得於研討會中展示</div>
   </div>`;
 
-  // 總分
+  // 合計
   html+=`<div class="total-bar">
     <div>
       <div class="total-lbl">合計總分</div>
-      <div class="bonus-note">（基本100分 + 優良加分）</div>
+      <div class="bonus-note">（基本100分＋優良加分）</div>
     </div>
     <div class="total-num" id="osceTotal">—<small> / 100+</small></div>
   </div>`;
@@ -1061,6 +1104,19 @@ function renderOsceScoreForm(p, draft, isDone){
   html+=`<div class="cmt-wrap">
     <label>評語（選填）</label>
     <textarea id="cmtArea" placeholder="可填寫對本篇教案的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea>
+  </div>`;
+
+  // 退稿（最下方）
+  const isRej=!!(draft.rejected);
+  html+=`<div class="reject-zone">
+    <div class="reject-zone-head" onclick="toggleReject()">
+      <input type="checkbox" class="reject-checkbox" id="rejChk" ${isRej?'checked':''} ${dis} onchange="toggleReject()">
+      <label for="rejChk">⚠️ 此教案不符合投稿範疇（退稿）</label>
+    </div>
+    <div class="reject-reason-wrap ${isRej?'show':''}" id="rejReasonWrap">
+      <label>退稿原因（必填）</label>
+      <textarea id="rejReason" placeholder="請說明退稿原因…" ${dis}>${esc(draft.rejectReason||'')}</textarea>
+    </div>
   </div>`;
 
   return html;
@@ -1075,24 +1131,41 @@ function updateOsceTotal(){
   if(tEl) tEl.innerHTML=`${base+bonus}<small> / ${OSCE_BASE_MAX}${bonus>0?'+'+bonus:''}</small>`;
 }
 
-// ══ Validate score input ══
+// ── 未填樣式 ──
+function markEmptyInputs(){
+  document.querySelectorAll('.score-input').forEach(input=>{
+    if(input.disabled) return;
+    const isEmpty=input.value===''||input.value===null;
+    input.classList.toggle('empty', isEmpty && !input.classList.contains('over'));
+  });
+}
+
+// ── validate ──
 function validateScore(input, max){
   let v=parseInt(input.value);
   if(isNaN(v)||v<0){ input.value='0'; v=0; }
-  if(v>max){ input.classList.add('over'); } else { input.classList.remove('over'); }
+  input.classList.toggle('over', v>max);
+  input.classList.remove('empty');
 }
 
-// ══ Save draft ══
+// ── Toggle reject ──
+function toggleReject(){
+  const chk=el('rejChk'); if(!chk) return;
+  const wrap=el('rejReasonWrap'); if(!wrap) return;
+  wrap.classList.toggle('show', chk.checked);
+}
+
+// ── Save draft ──
 function saveDraft(){
   if(curIdx===null) return;
   const list=papers[curType]; const p=list[curIdx]; if(!p) return;
   const d={};
   if(curType==='poster'){
-    POSTER_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e) d[c.id]=parseInt(e.value)||0; });
+    POSTER_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e&&e.value!=='') d[c.id]=parseInt(e.value); });
     const catSel=el('catAdjSel'); d.catAdjust=catSel?catSel.value:'';
   } else {
-    OSCE_ALL_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e) d[c.id]=parseInt(e.value)||0; });
-    const bEl=el('sc_'+OSCE_BONUS.id); d[OSCE_BONUS.id]=bEl?parseInt(bEl.value)||0:0;
+    OSCE_ALL_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e&&e.value!=='') d[c.id]=parseInt(e.value); });
+    const bEl=el('sc_'+OSCE_BONUS.id); if(bEl&&bEl.value!=='') d[OSCE_BONUS.id]=parseInt(bEl.value);
     const bnEl=el('bonusNote'); d.bonusNote=bnEl?bnEl.value:'';
   }
   const rejChk=el('rejChk'); d.rejected=rejChk?rejChk.checked:false;
@@ -1100,54 +1173,99 @@ function saveDraft(){
   const recChk=el('recChk'); d.recommend=recChk?recChk.checked:false;
   const cmt=el('cmtArea'); d.comment=cmt?cmt.value:'';
   drafts[p.id]=d;
-  showToast('草稿已暫存','ok');
+  renderList(); // 更新左側狀態
+  showToast('💾 草稿已暫存，左側狀態已更新','ok');
 }
 
-// ══ Submit score ══
+// ── 驗證是否所有必填已填 ──
+function validateAllFilled(type){
+  const criteria=type==='poster'?POSTER_CRITERIA:OSCE_ALL_CRITERIA;
+  const missing=criteria.filter(c=>{ const e=el('sc_'+c.id); return !e||e.value===''||e.value===null; });
+  return missing;
+}
+
+// ── Submit single ──
 async function submitScore(){
   if(curIdx===null) return;
   const list=papers[curType]; const p=list[curIdx]; if(!p) return;
-
-  // 先暫存
   saveDraft();
   const d=drafts[p.id]||{};
-
-  // 驗證
-  if(d.rejected){
-    if(!d.rejectReason||!d.rejectReason.trim()){
-      showToast('請填寫退稿原因','err'); return;
+  if(!d.rejected){
+    const missing=validateAllFilled(curType);
+    if(missing.length>0){
+      showToast(`請填寫所有評分項目（尚有 ${missing.length} 項未填）`,'err');
+      markEmptyInputs();
+      return;
     }
+    const hasOver=document.querySelectorAll('.score-input.over').length>0;
+    if(hasOver){ showToast('有分數超過滿分，請修正','err'); return; }
   } else {
-    // 檢查所有分數是否填寫
-    const criteria=curType==='poster'?POSTER_CRITERIA:OSCE_ALL_CRITERIA;
-    const hasOver=criteria.some(c=>{ const e=el('sc_'+c.id); return e&&e.classList.contains('over'); });
-    if(hasOver){ showToast('有分數超過滿分，請修正後再提交','err'); return; }
+    if(!d.rejectReason||!d.rejectReason.trim()){ showToast('請填寫退稿原因','err'); return; }
   }
-
-  // 計算總分
-  let total=0;
-  if(curType==='poster'){
-    POSTER_CRITERIA.forEach(c=>{ total+=d[c.id]||0; });
-  } else {
-    OSCE_ALL_CRITERIA.forEach(c=>{ total+=d[c.id]||0; });
-    total+=d[OSCE_BONUS.id]||0;
-  }
-
+  let total=calcTotal(p.id, curType);
   const label=curType==='osce'?'教案':'論文';
-  const confirmMsg=d.rejected
-    ? `確認提交「退稿」？\n\n${label}：${p.title}\n退稿原因：${d.rejectReason}\n\n提交後無法修改。`
-    : `確認提交評分？\n\n${label}：${p.title}\n合計：${total} 分${d.recommend?'\n⭐ 已勾選推薦':''}\n\n提交後無法修改。`;
+  if(!confirm(`確認提交評分？\n\n${label}：${p.title}\n合計：${total} 分${d.recommend?'\n⭐ 已勾選推薦':''}${d.rejected?'\n⚠️ 標記退稿':''}\n\n提交後無法修改。`)) return;
+  await doSubmit(p, curType, d, total);
+}
 
-  if(!confirm(confirmMsg)) return;
+// ── Bulk submit from overview ──
+async function bulkSubmit(){
+  const checks=document.querySelectorAll('.ov-check:checked');
+  if(!checks.length){ showToast('請勾選要送出的項目','warn'); return; }
+
+  const items=[];
+  checks.forEach(chk=>{
+    const pid=chk.dataset.pid, ptype=chk.dataset.ptype;
+    const list=papers[ptype]||[];
+    const p=list.find(x=>x.id===pid);
+    if(p&&!submitted[pid]) items.push({p, ptype});
+  });
+
+  if(!items.length){ showToast('勾選項目已全部提交過','warn'); return; }
+
+  // 驗證所有勾選項
+  const errors=[];
+  items.forEach(({p,ptype})=>{
+    const d=drafts[p.id]||{};
+    if(!d.rejected){
+      const criteria=ptype==='poster'?POSTER_CRITERIA:OSCE_ALL_CRITERIA;
+      const missing=criteria.filter(c=>d[c.id]===undefined||d[c.id]==='');
+      if(missing.length>0) errors.push(`「${p.paperNo||p.caseNo}」尚有 ${missing.length} 項未填`);
+    } else {
+      if(!d.rejectReason||!d.rejectReason.trim()) errors.push(`「${p.paperNo||p.caseNo}」退稿原因未填`);
+    }
+  });
+
+  if(errors.length>0){
+    alert('以下項目無法送出，請先補齊資料：\n\n'+errors.join('\n'));
+    return;
+  }
+
+  if(!confirm(`確認送出 ${items.length} 筆評分？\n\n送出後無法修改。`)) return;
 
   setLdr(true);
+  closeOverview();
+  let success=0, fail=0;
+  for(const {p, ptype} of items){
+    const d=drafts[p.id]||{};
+    const total=calcTotal(p.id, ptype);
+    const ok=await doSubmit(p, ptype, d, total, true);
+    if(ok) success++; else fail++;
+  }
+  setLdr(false);
+  renderList();
+  if(fail===0) showToast(`✅ ${success} 筆評分已成功送出！`,'ok');
+  else showToast(`${success} 筆成功，${fail} 筆失敗，請稍後再試`,'warn');
+}
+
+async function doSubmit(p, ptype, d, total, silent=false){
   try{
-    const payload={
+    const r=await api({
       action:'submitScore',
       reviewerUsername: reviewer.username,
       paperId: p.id,
-      paperNo: curType==='poster'?p.paperNo:p.caseNo,
-      paperType: curType,
+      paperNo: ptype==='poster'?p.paperNo:p.caseNo,
+      paperType: ptype,
       scoresJson: JSON.stringify(d),
       total,
       rejected: d.rejected?'true':'false',
@@ -1155,19 +1273,34 @@ async function submitScore(){
       recommend: d.recommend?'true':'false',
       catAdjust: d.catAdjust||'',
       comment: d.comment||''
-    };
-    const r=await api(payload);
+    });
     if(r.success){
       submitted[p.id]=true;
-      renderList();
-      selectPaper(curIdx);
-      showToast('評分已成功提交！','ok');
-    } else showToast('提交失敗：'+(r.message||'請稍後再試'),'err');
-  } catch{ showToast('網路錯誤，請稍後再試','err'); }
-  setLdr(false);
+      if(!silent){ renderList(); selectPaper(curIdx); showToast('評分已成功提交！','ok'); }
+      return true;
+    } else {
+      if(!silent) showToast('提交失敗：'+(r.message||'請稍後再試'),'err');
+      return false;
+    }
+  } catch{
+    if(!silent) showToast('網路錯誤，請稍後再試','err');
+    return false;
+  }
 }
 
-// ══ Overview ══
+function calcTotal(pid, ptype){
+  const d=drafts[pid]||{};
+  let t=0;
+  if(ptype==='poster'){
+    POSTER_CRITERIA.forEach(c=>{ t+=d[c.id]||0; });
+  } else {
+    OSCE_ALL_CRITERIA.forEach(c=>{ t+=d[c.id]||0; });
+    t+=d[OSCE_BONUS.id]||0;
+  }
+  return t;
+}
+
+// ── Overview ──
 function showOverview(){
   const allPapers=[
     ...papers.poster.map(p=>({...p,type:'poster'})),
@@ -1179,34 +1312,38 @@ function showOverview(){
   ['poster','osce'].forEach(t=>{
     const list=papers[t]; if(!list.length) return;
     const label=t==='poster'?'📋 海報論文':'🎬 OSCE 教案';
-    html+=`<h4 style="font-size:.82rem;font-weight:700;color:var(--blue-800);margin:0 0 .65rem;padding-bottom:.4rem;border-bottom:2px solid var(--blue-200)">${label}</h4>`;
+    html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 .6rem">
+      <h4 style="font-size:.9rem;font-weight:700;color:var(--m-800)">${label}</h4>
+      <button class="btn-select-all" onclick="toggleSelectAll('${t}')">全選／取消</button>
+    </div>`;
     html+=`<table class="ov-table" style="margin-bottom:1.5rem"><thead><tr>
+      <th style="width:36px">送出</th>
       <th>編號</th><th>題目</th><th>總分</th><th>推薦</th><th>狀態</th>
     </tr></thead><tbody>`;
+
     list.forEach(p=>{
       const d=drafts[p.id]||{};
       const isSub=!!submitted[p.id];
       const isRej=d.rejected;
       const num=t==='poster'?p.paperNo:p.caseNo;
-
-      let total='—';
-      if(isSub||Object.keys(d).length>0){
-        let t2=0;
-        const criteria=t==='poster'?POSTER_CRITERIA:OSCE_ALL_CRITERIA;
-        criteria.forEach(c=>{ t2+=d[c.id]||0; });
-        if(t==='osce') t2+=d[OSCE_BONUS.id]||0;
-        if(t2>0) total=t2;
-      }
-
+      const total=calcTotal(p.id,t);
+      const totalTxt=total>0?total:'—';
       const recTxt=isRej?'<span class="ov-rec rej">退稿</span>'
-        :(d.recommend?'<span class="ov-rec yes">推薦</span>':'<span class="ov-rec no">未推薦</span>');
-      const statusTxt=isSub?'<span style="color:var(--green);font-weight:600">✅ 已提交</span>'
-        :'<span class="ov-pending">草稿/未提交</span>';
+        :(d.recommend?'<span class="ov-rec yes">推薦</span>':'<span class="ov-rec no">—</span>');
+      const statusTxt=isSub
+        ?'<span style="color:var(--green);font-weight:700">✅ 已提交</span>'
+        :(Object.keys(d).length?'<span style="color:var(--m-600)">已暫存</span>':'<span class="ov-pending">未填寫</span>');
+      const canCheck=!isSub;
 
       html+=`<tr class="${isRej?'rejected-row':''}">
+        <td style="text-align:center">
+          ${canCheck
+            ?`<input type="checkbox" class="ov-check" data-pid="${p.id}" data-ptype="${t}" onchange="updateBulkBtn()">`
+            :'<span style="color:var(--green);font-size:.85rem">✓</span>'}
+        </td>
         <td><strong>${esc(num||'—')}</strong></td>
-        <td style="max-width:220px;line-height:1.5">${esc(p.title)}</td>
-        <td class="ov-score">${total}</td>
+        <td style="max-width:200px;line-height:1.5;font-size:.88rem">${esc(p.title)}</td>
+        <td class="ov-score">${totalTxt}</td>
         <td>${recTxt}</td>
         <td>${statusTxt}</td>
       </tr>`;
@@ -1216,17 +1353,33 @@ function showOverview(){
 
   const pendingCount=allPapers.filter(p=>!submitted[p.id]).length;
   if(pendingCount>0){
-    html=`<div style="background:var(--amber-bg);border:1px solid #fde68a;border-radius:8px;padding:.65rem 1rem;font-size:.8rem;color:var(--amber);margin-bottom:1rem">
-      ⚠ 尚有 ${pendingCount} 篇未提交。請完成所有評分後再送出。截止日：<strong>115年7月3日（五）</strong>
+    html=`<div style="background:var(--amber-bg);border:1px solid var(--amber-br);border-radius:8px;padding:.65rem 1rem;font-size:.85rem;color:var(--amber);margin-bottom:1rem">
+      ⚠ 尚有 ${pendingCount} 筆未提交，截止日：<strong>115年7月3日（五）</strong>
     </div>`+html;
   }
 
   el('overviewBody').innerHTML=html;
+  el('btnBulkSubmit').disabled=true;
+  el('ovSelectedCount').textContent='請勾選要送出的項目';
   el('overviewModal').classList.add('show');
 }
+
+function toggleSelectAll(ptype){
+  const checks=document.querySelectorAll(`.ov-check[data-ptype="${ptype}"]`);
+  const allChecked=[...checks].every(c=>c.checked);
+  checks.forEach(c=>{ c.checked=!allChecked; });
+  updateBulkBtn();
+}
+
+function updateBulkBtn(){
+  const checked=document.querySelectorAll('.ov-check:checked').length;
+  el('btnBulkSubmit').disabled=checked===0;
+  el('ovSelectedCount').textContent=checked>0?`已勾選 ${checked} 筆`:'請勾選要送出的項目';
+}
+
 function closeOverview(){ el('overviewModal').classList.remove('show'); }
 
-// ══ Helpers ══
+// ── Helpers ──
 function absBlk(lbl,txt){
   if(!txt) return '';
   return `<div class="abs-sec"><div class="abs-lbl">${lbl}</div><div class="abs-txt">${esc(String(txt))}</div></div>`;
