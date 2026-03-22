@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>論文評分系統｜TSMCSD 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;1,400&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+:root {
+  --ink:#1c1c2e;--ink2:#2d2d4a;--slate:#4a5568;--muted:#718096;
+  --border:#e2e8f0;--border2:#edf2f7;--bg:#f7f6f3;--white:#fff;
+  --blue:#1e4d8c;--blue-light:#dbeafe;--blue-dim:#e8f0fb;
+  --gold:#9a6f0a;--gold-bg:#fdf6e3;
+  --green:#1e6b45;--green-bg:#f0faf5;
+  --red:#b91c1c;--red-bg:#fff1f1;
+  --sh:0 1px 3px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.04);
+  --r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;}
+
+/* LOGIN */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--ink);position:relative;overflow:hidden;}
+#loginScreen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 20% 80%,rgba(30,77,140,.35) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 20%,rgba(154,111,10,.18) 0%,transparent 60%);}
+.login-wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:2rem;animation:fadeUp .5s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.login-head{text-align:center;color:white;}
+.login-head .conf{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.5rem;}
+.login-head h1{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:500;color:white;}
+.login-head p{font-size:.8rem;color:rgba(255,255,255,.35);margin-top:.3rem;}
+.login-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:2rem;width:360px;max-width:calc(100vw - 2rem);backdrop-filter:blur(12px);}
+.f-label{display:block;font-size:.72rem;font-weight:500;letter-spacing:.08em;color:rgba(255,255,255,.45);text-transform:uppercase;margin-bottom:.4rem;}
+.f-input{width:100%;padding:.7rem 1rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;font-size:.9rem;font-family:inherit;color:white;transition:all .2s;margin-bottom:1rem;}
+.f-input::placeholder{color:rgba(255,255,255,.22);}
+.f-input:focus{outline:none;border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.1);}
+.btn-login{width:100%;padding:.75rem;background:linear-gradient(135deg,#1e4d8c,#163870);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:white;font-size:.9rem;font-family:inherit;font-weight:500;letter-spacing:.05em;cursor:pointer;transition:opacity .2s,transform .15s;}
+.btn-login:hover{opacity:.85;transform:translateY(-1px);}
+.login-err{margin-top:.75rem;padding:.6rem .9rem;background:rgba(185,28,28,.25);border:1px solid rgba(185,28,28,.4);border-radius:8px;font-size:.82rem;color:#fca5a5;display:none;}
+
+/* APP */
+#app{display:none;}
+#app.show{display:block;}
+
+/* Header */
+.app-header{position:sticky;top:0;z-index:200;height:56px;background:var(--ink);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;box-shadow:0 2px 12px rgba(0,0,0,.25);}
+.hd-left{display:flex;align-items:center;gap:.75rem;}
+.hd-logo{font-family:'Playfair Display',serif;font-size:.95rem;color:white;}
+.hd-sep{width:1px;height:20px;background:rgba(255,255,255,.15);}
+.hd-sub{font-size:.75rem;color:rgba(255,255,255,.4);}
+.hd-right{display:flex;align-items:center;gap:.75rem;}
+.rv-chip{display:flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:.3rem .8rem;font-size:.78rem;color:rgba(255,255,255,.8);}
+.btn-out{background:none;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:.3rem .7rem;font-size:.75rem;color:rgba(255,255,255,.5);cursor:pointer;transition:all .2s;font-family:inherit;}
+.btn-out:hover{border-color:rgba(255,255,255,.5);color:white;}
+
+/* Layout */
+.app-layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 56px);}
+
+/* Sidebar */
+.sidebar{background:var(--white);border-right:1px solid var(--border);position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;display:flex;flex-direction:column;}
+.sb-top{padding:1.1rem 1rem;border-bottom:1px solid var(--border2);}
+.prog-row{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--muted);margin-bottom:.45rem;}
+.prog-label{font-weight:500;color:var(--slate);}
+.prog-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),#3b82f6);border-radius:3px;transition:width .4s ease;}
+.sb-title{padding:.7rem 1rem .3rem;font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.paper-list{flex:1;padding:0 .5rem .5rem;}
+.pi{padding:.6rem .7rem;border-radius:9px;cursor:pointer;margin-bottom:.2rem;border:1.5px solid transparent;transition:all .15s;}
+.pi:hover{background:var(--bg);}
+.pi.active{background:var(--blue-dim);border-color:rgba(30,77,140,.2);}
+.pi.done{opacity:.6;}
+.pi-num{font-size:.65rem;font-weight:700;letter-spacing:.06em;color:var(--blue);margin-bottom:.12rem;}
+.pi.done .pi-num{color:var(--green);}
+.pi-ttl{font-size:.8rem;color:var(--ink);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.pi-st{display:flex;align-items:center;gap:.3rem;margin-top:.28rem;}
+.pi-dot{width:5px;height:5px;border-radius:50%;}
+.pi-dot.p{background:#ecc94b;}.pi-dot.d{background:#48bb78;}
+.pi-st span{font-size:.65rem;color:var(--muted);}
+
+/* Main */
+.main{padding:1.75rem 2rem;max-width:760px;}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;color:var(--muted);text-align:center;gap:.75rem;}
+.empty .icon{font-size:2.5rem;opacity:.35;}
+.empty h3{font-size:1rem;color:var(--slate);}
+.empty p{font-size:.85rem;}
+
+/* Paper card */
+.p-card{background:var(--white);border:1px solid var(--border2);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:1.25rem;}
+.p-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border2);}
+.p-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.45rem;}
+.tag{padding:.17rem .6rem;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.04em;}
+.tg-no{background:var(--ink);color:white;}
+.tg-cat{background:var(--blue-light);color:var(--blue);}
+.tg-wc{background:var(--border2);color:var(--slate);}
+.p-title{font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:500;color:var(--ink);line-height:1.65;}
+.p-body{padding:1.2rem 1.4rem;}
+.abs-sec{margin-bottom:.95rem;}
+.abs-lbl{font-size:.65rem;font-weight:700;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;display:flex;align-items:center;gap:.5rem;margin-bottom:.38rem;}
+.abs-lbl::after{content:'';flex:1;height:1px;background:var(--border2);}
+.abs-txt{font-size:.85rem;line-height:1.85;color:var(--slate);}
+
+/* Score card */
+.sc-card{background:var(--white);border:1px solid var(--border2);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;}
+.sc-head{padding:.9rem 1.4rem;background:linear-gradient(135deg,var(--ink),var(--ink2));display:flex;align-items:center;justify-content:space-between;}
+.sc-head h3{font-family:'Noto Serif TC',serif;font-size:.95rem;font-weight:500;color:white;}
+.sc-head-note{font-size:.7rem;color:rgba(255,255,255,.4);}
+.sc-body{padding:1.25rem 1.4rem;}
+
+/* Criterion */
+.crit{padding:.95rem 0;border-bottom:1px solid var(--border2);}
+.crit:last-of-type{border-bottom:none;}
+.crit-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.6rem;}
+.crit-name{font-size:.88rem;font-weight:500;color:var(--ink);}
+.crit-wt{font-size:.7rem;color:var(--muted);margin-top:.1rem;}
+.crit-val{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--blue);line-height:1;white-space:nowrap;text-align:right;min-width:52px;}
+.crit-val small{font-family:'Noto Sans TC',sans-serif;font-size:.68rem;color:var(--muted);}
+.slider-row{display:flex;align-items:center;gap:.55rem;}
+.sl-edge{font-size:.68rem;color:var(--muted);min-width:18px;text-align:center;}
+input[type=range]{flex:1;-webkit-appearance:none;height:5px;border-radius:3px;background:var(--border);cursor:pointer;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--blue);box-shadow:0 2px 6px rgba(30,77,140,.3);cursor:pointer;transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+input[type=range]:disabled{opacity:.4;cursor:not-allowed;}
+
+/* Total */
+.total-strip{display:flex;align-items:center;justify-content:space-between;background:var(--gold-bg);border:1px solid rgba(154,111,10,.2);border-radius:10px;padding:.9rem 1.1rem;margin:1.25rem 0;}
+.t-left .t-lbl{font-size:.8rem;font-weight:600;color:var(--gold);letter-spacing:.04em;}
+.t-left .t-note{font-size:.7rem;color:var(--muted);margin-top:.1rem;}
+.t-num{font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);}
+.t-num small{font-family:'Noto Sans TC',sans-serif;font-size:.72rem;color:var(--muted);}
+.rec-chip{padding:.25rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.04em;}
+.rec-chip.yes{background:#d1fae5;color:var(--green);}
+.rec-chip.no{background:var(--border2);color:var(--muted);}
+
+/* Comment */
+.cmt-wrap{margin-top:.5rem;}
+.cmt-wrap label{display:block;font-size:.75rem;font-weight:500;color:var(--slate);margin-bottom:.38rem;letter-spacing:.04em;}
+.cmt-wrap textarea{width:100%;padding:.7rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-size:.85rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);resize:vertical;min-height:72px;background:var(--bg);transition:border-color .2s;}
+.cmt-wrap textarea:focus{outline:none;border-color:var(--blue);background:white;}
+
+/* Done banner */
+.done-banner{display:flex;align-items:center;gap:.6rem;background:var(--green-bg);border:1px solid #a7f3d0;border-radius:9px;padding:.7rem 1rem;font-size:.85rem;color:var(--green);margin-bottom:1.25rem;}
+
+/* Submit */
+.sub-row{display:flex;gap:.75rem;align-items:center;margin-top:1.25rem;}
+.btn-draft{padding:.75rem 1rem;background:white;border:1.5px solid var(--border);border-radius:9px;font-size:.85rem;font-family:inherit;color:var(--slate);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-draft:hover{border-color:var(--blue);color:var(--blue);}
+.btn-sub{flex:1;padding:.8rem;background:linear-gradient(135deg,var(--green),#155d38);color:white;border:none;border-radius:9px;font-size:.9rem;font-family:inherit;font-weight:500;letter-spacing:.04em;cursor:pointer;transition:opacity .2s,transform .15s;}
+.btn-sub:hover{opacity:.9;transform:translateY(-1px);}
+.btn-sub:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+
+/* Toast */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.72rem 1.1rem;border-radius:10px;font-size:.88rem;color:white;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:9999;animation:toastIn .3s ease;max-width:320px;}
+.toast.ok{background:var(--green);}.toast.err{background:var(--red);}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Loader */
+.ldr{position:fixed;inset:0;background:rgba(255,255,255,.8);display:none;align-items:center;justify-content:center;z-index:9998;}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .65s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:720px){
+  .app-layout{grid-template-columns:1fr;}
+  .sidebar{position:static;height:auto;max-height:200px;overflow-y:auto;border-right:none;border-bottom:1px solid var(--border);}
+  .main{padding:1rem;}
+  .app-header{padding:0 1rem;}
+  .hd-sep,.hd-sub{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-wrap">
+    <div class="login-head">
+      <div class="conf">TSMCSD 2026 年會暨學術研討會</div>
+      <h1>論文評審系統</h1>
+      <p>僅供受邀評審委員使用</p>
+    </div>
+    <div class="login-card">
+      <label class="f-label">委員帳號</label>
+      <input class="f-input" id="lgUser" type="text" placeholder="請輸入帳號" autocomplete="username">
+      <label class="f-label">密碼</label>
+      <input class="f-input" id="lgPass" type="password" placeholder="請輸入密碼" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn-login" onclick="doLogin()">登入</button>
+      <div class="login-err" id="lgErr"></div>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="app-header">
+    <div class="hd-left">
+      <span class="hd-logo">TSMCSD 2026</span>
+      <div class="hd-sep"></div>
+      <span class="hd-sub">論文評審系統</span>
+    </div>
+    <div class="hd-right">
+      <div class="rv-chip">👤 <span id="rvName"></span></div>
+      <button class="btn-out" onclick="doLogout()">登出</button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sb-top">
+        <div class="prog-row">
+          <span class="prog-label">評審進度</span>
+          <span id="progTxt">0 / 0</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-fill" id="progFill" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="sb-title">指派論文</div>
+      <div class="paper-list" id="paperList"></div>
+    </aside>
+
+    <main class="main" id="mainArea">
+      <div class="empty">
+        <div class="icon">📋</div>
+        <h3>請從左側選擇論文</h3>
+        <p>點選待評論文後開始評分</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="ldr" id="ldr"><div class="spinner"></div></div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2njUGr6eORWe6V5iMITA_dbpuOzhOebyxDW43P8RySVezxUevEOvQZGUV0tl_Mhm9/exec';
+
+const CRITERIA = [
+  { id:'c1', label:'主題創新性',           weight:'20%', max:20 },
+  { id:'c2', label:'研究設計合理性',       weight:'15%', max:15 },
+  { id:'c3', label:'文字表達流暢性',       weight:'15%', max:15 },
+  { id:'c4', label:'內容結構的完整性',     weight:'25%', max:25 },
+  { id:'c5', label:'結果與討論的正確性',   weight:'15%', max:15 },
+  { id:'c6', label:'學術貢獻',             weight:'10%', max:10 }
+];
+const THRESHOLD = 80;
+const MAX_TOTAL = CRITERIA.reduce((s,c)=>s+c.max,0);
+
+let reviewer=null, papers=[], submitted={}, drafts={}, curIdx=null;
+
+async function doLogin() {
+  const u=document.getElementById('lgUser').value.trim();
+  const p=document.getElementById('lgPass').value.trim();
+  const eEl=document.getElementById('lgErr');
+  eEl.style.display='none';
+  if(!u||!p) return;
+  setLdr(true);
+  try {
+    const r=await api({action:'reviewerLogin',username:u,password:p});
+    if(r.success){
+      reviewer=r.reviewer; papers=r.papers||[]; submitted=r.submitted||{};
+      document.getElementById('rvName').textContent=reviewer.name;
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('app').classList.add('show');
+      renderSB();
+    } else {
+      eEl.textContent='⚠ '+(r.message||'帳號或密碼錯誤');
+      eEl.style.display='block';
+    }
+  } catch { eEl.textContent='⚠ 連線失敗，請稍後再試'; eEl.style.display='block'; }
+  setLdr(false);
+}
+function doLogout(){ if(!confirm('確定登出？')) return; location.reload(); }
+
+function renderSB(){
+  const done=papers.filter(p=>submitted[p.id]).length;
+  const tot=papers.length;
+  document.getElementById('progTxt').textContent=done+' / '+tot;
+  document.getElementById('progFill').style.width=tot?(done/tot*100)+'%':'0%';
+  document.getElementById('paperList').innerHTML=papers.map((p,i)=>{
+    const d=!!submitted[p.id];
+    return `<div class="pi ${d?'done':''} ${curIdx===i?'active':''}" onclick="sel(${i})">
+      <div class="pi-num">${p.paperNo}</div>
+      <div class="pi-ttl">${esc(p.title)}</div>
+      <div class="pi-st"><div class="pi-dot ${d?'d':'p'}"></div><span>${d?'已完成':'待評審'}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function sel(i){ curIdx=i; renderSB(); renderMain(); }
+
+function renderMain(){
+  const p=papers[curIdx]; if(!p) return;
+  const isDone=!!submitted[p.id];
+  const draft=drafts[p.id]||{};
+  document.getElementById('mainArea').innerHTML=`
+    <div class="p-card">
+      <div class="p-head">
+        <div class="p-tags">
+          <span class="tag tg-no">${p.paperNo}</span>
+          <span class="tag tg-cat">${esc(p.category||'')}</span>
+          ${p.wordCount?`<span class="tag tg-wc">摘要 ${p.wordCount} 字</span>`:''}
+        </div>
+        <div class="p-title">${esc(p.title)}</div>
+      </div>
+      <div class="p-body">
+        ${absBlk('研究動機',p.absMotivation)}
+        ${absBlk('研究方法',p.absMethod)}
+        ${absBlk('研究結果',p.absResult)}
+        ${absBlk('結論',p.absConclusion)}
+      </div>
+    </div>
+    <div class="sc-card">
+      <div class="sc-head">
+        <h3>📝 評分表</h3>
+        <span class="sc-head-note">滿分 ${MAX_TOTAL} 分・推薦門檻 ${THRESHOLD} 分</span>
+      </div>
+      <div class="sc-body">
+        ${isDone?'<div class="done-banner">✅ 此論文已完成評分，如需修改請聯絡管理員</div>':''}
+        ${CRITERIA.map(c=>critBlk(c,draft[c.id],isDone)).join('')}
+        <div class="cmt-wrap" style="padding-top:.5rem">
+          <label>評語（選填）</label>
+          <textarea id="cmtA" placeholder="可填寫對本篇論文的建議或意見…"
+            ${isDone?'readonly':''}>${esc(draft.comment||'')}</textarea>
+        </div>
+        <div class="total-strip">
+          <div class="t-left">
+            <div class="t-lbl">合計總分</div>
+            <div class="t-note">滿分 ${MAX_TOTAL} 分</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.75rem">
+            <div class="t-num" id="tNum">—<small> / ${MAX_TOTAL}</small></div>
+            <div class="rec-chip" id="recChip"></div>
+          </div>
+        </div>
+        ${!isDone?`<div class="sub-row">
+          <button class="btn-draft" onclick="saveDraft()">暫存草稿</button>
+          <button class="btn-sub" onclick="submitScore('${p.id}')">✅ 確認提交評分</button>
+        </div>`:''}
+      </div>
+    </div>`;
+  updTotal();
+}
+
+function absBlk(lbl,txt){
+  if(!txt) return '';
+  return `<div class="abs-sec"><div class="abs-lbl">${lbl}</div><div class="abs-txt">${esc(String(txt))}</div></div>`;
+}
+function critBlk(c,val,disabled){
+  const v=val!==undefined?val:Math.ceil(c.max/2);
+  return `<div class="crit">
+    <div class="crit-top">
+      <div><div class="crit-name">${c.label}</div><div class="crit-wt">佔比 ${c.weight}・滿分 ${c.max} 分</div></div>
+      <div class="crit-val" id="dv_${c.id}">${v}<small>/${c.max}</small></div>
+    </div>
+    <div class="slider-row">
+      <span class="sl-edge">0</span>
+      <input type="range" id="sl_${c.id}" min="0" max="${c.max}" step="1" value="${v}"
+        ${disabled?'disabled':''} oninput="onSl('${c.id}',this.value)">
+      <span class="sl-edge">${c.max}</span>
+    </div>
+  </div>`;
+}
+function onSl(id,v){
+  const c=CRITERIA.find(x=>x.id===id);
+  document.getElementById('dv_'+id).innerHTML=`${v}<small>/${c.max}</small>`;
+  updTotal();
+}
+function updTotal(){
+  let t=0;
+  CRITERIA.forEach(c=>{ const el=document.getElementById('sl_'+c.id); if(el) t+=parseInt(el.value); });
+  const tEl=document.getElementById('tNum'); const rEl=document.getElementById('recChip');
+  if(!tEl) return;
+  tEl.innerHTML=`${t}<small> / ${MAX_TOTAL}</small>`;
+  if(rEl){ if(t>=THRESHOLD){ rEl.textContent='推薦壁報展示';rEl.className='rec-chip yes'; }
+  else{ rEl.textContent='未達推薦門檻';rEl.className='rec-chip no'; } }
+}
+function saveDraft(){
+  const p=papers[curIdx]; if(!p) return;
+  const d={};
+  CRITERIA.forEach(c=>{ const el=document.getElementById('sl_'+c.id); if(el) d[c.id]=parseInt(el.value); });
+  const ca=document.getElementById('cmtA'); d.comment=ca?ca.value:'';
+  drafts[p.id]=d; showToast('草稿已暫存','ok');
+}
+async function submitScore(pid){
+  const p=papers[curIdx]; if(!p||p.id!==pid) return;
+  const sc={}; let total=0;
+  CRITERIA.forEach(c=>{ const el=document.getElementById('sl_'+c.id); sc[c.id]=el?parseInt(el.value):0; total+=sc[c.id]; });
+  const ca=document.getElementById('cmtA'); sc.comment=ca?ca.value:'';
+  if(!confirm(`確認提交評分？\n\n論文：${p.title}\n合計：${total} 分\n\n提交後無法修改。`)) return;
+  setLdr(true);
+  try{
+    const r=await api({action:'submitScore',reviewerUsername:reviewer.username,paperId:p.id,paperNo:p.paperNo,scoresJson:JSON.stringify(sc),total,comment:sc.comment});
+    if(r.success){ submitted[p.id]=true; drafts[p.id]=sc; renderSB(); renderMain(); showToast('評分提交成功！','ok'); }
+    else showToast('提交失敗：'+(r.message||'請稍後再試'),'err');
+  } catch{ showToast('網路錯誤，請稍後再試','err'); }
+  setLdr(false);
+}
+async function api(params){
+  const fd=new FormData();
+  Object.entries(params).forEach(([k,v])=>fd.append(k,v));
+  return (await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd})).json();
+}
+function setLdr(v){ document.getElementById('ldr').style.display=v?'flex':'none'; }
+function showToast(msg,type){
+  const t=document.createElement('div'); t.className='toast '+type; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),3000);
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
