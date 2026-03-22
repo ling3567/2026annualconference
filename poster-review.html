@@ -8,50 +8,51 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@400;500;600&display=swap');
 
 :root {
-  /* ══ 簡化莫蘭迪色系 ══
-     只用：深藍灰 / 中藍灰 / 米灰 / 白 / 藕粉（點綴）/ 深棕（文字）
-  ═══════════════════════════════ */
+  /* ══════════════════════════════
+     莫蘭迪色系 - 完整定義版
+     所有變數都使用直接色碼，無循環引用
+  ══════════════════════════════ */
 
-  /* ① 深藍灰 — 頂欄、深色背景 */
-  --dark:  var(--dark);
+  /* 深色區 */
+  --dark:    #3a4550;
+  --dark-2:  #546070;
 
-  /* ② 中藍灰 — 主要互動色、按鈕、評分欄頭 */
-  --main:  #8e9bae;   /* #71 + #77 混用，統一為此色 */
-  --main-d:#7a8898;   /* 深一階，hover用 */
-  --main-l:#becbd3;   /* #74，淺版：邊框、分隔 */
+  /* 主藍灰 */
+  --main:    #7a90a4;
+  --main-d:  #5e7080;
+  --main-l:  #a8bfcc;
+  --main-bg: #dce6ec;
 
-  /* ③ 米灰 — 大背景、側邊欄 */
-  --bg:    #e0dfd8;   /* #78 微調，更柔和 */
-  --bg2:   var(--bg2);   /* 卡片/輸入框底色 */
+  /* 背景 */
+  --bg:      #e4e2dc;
+  --bg2:     #f0eeea;
+  --white:   #ffffff;
 
-  /* ④ 白 — 主要卡片 */
-  --white: #ffffff;
+  /* 暖色點綴 */
+  --warm:    #e8d5d0;
+  --warm-d:  #c0a098;
 
-  /* ⑤ 藕粉 — 唯一暖色點綴（截止日、建議類別） */
-  --warm:  #e3d0cc;   /* #73 */
-  --warm-d:#c8b0a8;   /* 邊框 */
+  /* 文字 */
+  --ink:     #2a2420;
+  --slate:   #4a3e38;
+  --muted:   #7a6e68;
 
-  /* ⑥ 深棕 — 內文主色 */
-  --ink:   #4a3e36;   /* #79 偏深，易讀 */
-  --slate: #6b5c52;
-  --muted: #9a8e88;
+  /* 邊框 */
+  --border:  #b8c8d4;
+  --border2: #ccd8e0;
 
-  /* 邊框 — 統一用 main-l */
-  --border: #becbd3;
-  --border2:#d4dde4;
-
-  /* 語意色（莫蘭迪柔化版）*/
-  --green:    var(--green);
-  --green-bg: #daeae3;
-  --green-br: #96bfb0;
-  --red:      #8b4a4a;
-  --red-bg:   #eedede;
-  --red-br:   #c8a0a0;
+  /* 語意色 */
+  --green:    #3d6b54;
+  --green-bg: #d4e8de;
+  --green-br: #88b8a0;
+  --red:      #7a3838;
+  --red-bg:   #f0dada;
+  --red-br:   #c09090;
 
   /* 陰影 */
-  --sh-sm: 0 1px 3px rgba(74,62,54,.07);
-  --sh:    0 2px 8px rgba(74,62,54,.08);
-  --sh-md: 0 4px 16px rgba(74,62,54,.1);
+  --sh-sm: 0 1px 4px rgba(42,36,32,.08);
+  --sh:    0 2px 10px rgba(42,36,32,.09);
+  --sh-md: 0 6px 20px rgba(42,36,32,.12);
   --r: 10px;
 }
 
@@ -151,12 +152,12 @@ h1,h2,h3,h4,h5,h6,
 .fi:focus{ outline:none; border-color:rgba(255,255,255,.75); background:rgba(255,255,255,.24); }
 .btn-login{
   width:100%; padding:.88rem; font-size:1rem;
-  background:linear-gradient(135deg, var(--dark-2), var(--dark));
+  background:linear-gradient(135deg, #546070, #3a4550);
   border:1px solid rgba(255,255,255,.35); border-radius:9px;
   color:#ffffff; font-family:inherit; font-weight:700;
   letter-spacing:.04em; cursor:pointer; transition:all .2s;
 }
-.btn-login:hover{ background:linear-gradient(135deg,var(--main),var(--dark-2)); transform:translateY(-1px); }
+.btn-login:hover{ background:linear-gradient(135deg,#7a90a4,#3a4550); transform:translateY(-1px); }
 .login-err{
   margin-top:.7rem; padding:.6rem .9rem;
   background:rgba(139,58,58,.25); border:1px solid rgba(139,58,58,.4);
@@ -171,7 +172,7 @@ h1,h2,h3,h4,h5,h6,
 
 /* Top bar */
 .topbar{
-  height:54px; background:var(--dark);
+  height:54px; background:#3a4550;
   border-bottom:1px solid rgba(255,255,255,.07);
   display:flex; align-items:center; justify-content:space-between;
   padding:0 1.25rem; flex-shrink:0; z-index:100;
@@ -227,7 +228,7 @@ h1,h2,h3,h4,h5,h6,
 }
 .col-list-head{
   padding:.9rem 1rem; border-bottom:1px solid var(--border2);
-  background:var(--bg);
+  background:#e4e2dc;
 }
 
 .prog-row{ display:flex; justify-content:space-between; align-items:center;
@@ -237,7 +238,7 @@ h1,h2,h3,h4,h5,h6,
 .prog-track{ height:5px; background:var(--border2); border-radius:3px; overflow:hidden; }
 .prog-fill{
   height:100%;
-  background:linear-gradient(90deg, var(--main), var(--main-l));
+  background:linear-gradient(90deg, var(--main), #a8bfcc);
   border-radius:3px; transition:width .4s ease;
 }
 
@@ -248,7 +249,7 @@ h1,h2,h3,h4,h5,h6,
   min-height:0;
 }
 .pi:hover{ background:var(--bg2); }
-.pi.active{ background:var(--bg2); border-color:var(--main-l); }
+.pi.active{ background:var(--bg2); border-color:#a8bfcc; }
 .pi.done{ opacity:.7; }
 .pi.drafted{ background:#f0f6ef; border-color:#b4c6b4; } /* 已暫存 */
 .pi.rejected{ opacity:.65; }
@@ -259,7 +260,7 @@ h1,h2,h3,h4,h5,h6,
   white-space:nowrap;
 }
 .pi.done .pi-num{ background:var(--green); }
-.pi.drafted .pi-num{ background:var(--main-l); }
+.pi.drafted .pi-num{ background:#a8bfcc; }
 .pi.rejected .pi-num{ background:var(--red); }
 .pi-cat{ font-size:.72rem; color:var(--muted); }
 .pi-ttl{
@@ -290,7 +291,7 @@ h1,h2,h3,h4,h5,h6,
 }
 .p-info-head{
   padding:.95rem 1.2rem; border-bottom:1px solid var(--border2);
-  background:linear-gradient(135deg, var(--dark), var(--dark-2));
+  background:linear-gradient(135deg, #3a4550, #546070);
 }
 .p-tags{ display:flex; flex-wrap:wrap; gap:.35rem; margin-bottom:.5rem; }
 .tag{
@@ -307,7 +308,7 @@ h1,h2,h3,h4,h5,h6,
 .p-info-body{ padding:1rem 1.2rem; }
 .abs-sec{ margin-bottom:.9rem; }
 .abs-lbl{
-  font-size:.78rem; font-weight:700; letter-spacing:.1em; color:var(--dark-2);
+  font-size:.78rem; font-weight:700; letter-spacing:.1em; color:#546070;
   text-transform:uppercase; display:flex; align-items:center; gap:.45rem; margin-bottom:.38rem;
 }
 .abs-lbl::after{ content:''; flex:1; height:1px; background:var(--border2); }
@@ -337,7 +338,7 @@ h1,h2,h3,h4,h5,h6,
   display:flex; flex-direction:column; overflow:hidden;
 }
 .col-score-head{
-  padding:.7rem 1rem; background:var(--dark-2);
+  padding:.7rem 1rem; background:#546070;
   display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
   gap:.5rem;
 }
@@ -382,7 +383,7 @@ h1,h2,h3,h4,h5,h6,
   border-radius:7px; background:white; color:var(--ink);
   font-size:.88rem; font-family:inherit; cursor:pointer;
 }
-.cat-adjust-sel:focus{ outline:none; border-color:var(--main-l); }
+.cat-adjust-sel:focus{ outline:none; border-color:#a8bfcc; }
 
 /* Criteria group */
 .crit-group{ margin-bottom:.9rem; }
@@ -404,9 +405,9 @@ h1,h2,h3,h4,h5,h6,
   width:60px; padding:.48rem .5rem; text-align:center;
   border:1.5px solid var(--border); border-radius:7px;
   font-size:1rem; font-weight:700; font-family:inherit; color:var(--main);
-  background:var(--main-bg); transition:all .2s;
+  background:#dce6ec; transition:all .2s;
 }
-.score-input:focus{ outline:none; border-color:var(--main-l); background:white; }
+.score-input:focus{ outline:none; border-color:#a8bfcc; background:white; }
 .score-input:disabled{ opacity:.5; cursor:not-allowed; }
 .score-input.over{ border-color:var(--red); background:var(--red-bg); color:var(--red); }
 /* 未填（空白）時邊框提示 */
@@ -421,14 +422,14 @@ h1,h2,h3,h4,h5,h6,
 .recommend-zone-head{
   display:flex; align-items:center; gap:.5rem; cursor:pointer; user-select:none;
 }
-.recommend-zone-head label{ font-size:.92rem; font-weight:600; color:var(--dark); cursor:pointer; }
+.recommend-zone-head label{ font-size:.92rem; font-weight:600; color:#3a4550; cursor:pointer; }
 .recommend-checkbox{ width:17px; height:17px; accent-color:var(--main); cursor:pointer; flex-shrink:0; }
 .recommend-note{ font-size:.8rem; color:var(--muted); margin-top:.35rem; line-height:1.5; }
 
 /* Total */
 .total-bar{
   display:flex; align-items:center; justify-content:space-between;
-  background:linear-gradient(135deg, var(--dark), var(--dark-2));
+  background:linear-gradient(135deg, #3a4550, #546070);
   border-radius:9px; padding:.7rem 1rem; margin-bottom:.9rem;
 }
 .total-lbl{ font-size:.78rem; color:rgba(255,255,255,.7); font-weight:600; }
@@ -448,7 +449,7 @@ h1,h2,h3,h4,h5,h6,
   color:var(--ink); resize:vertical; min-height:68px;
   background:var(--bg2); transition:border-color .2s;
 }
-.cmt-wrap textarea:focus{ outline:none; border-color:var(--main-l); background:white; }
+.cmt-wrap textarea:focus{ outline:none; border-color:#a8bfcc; background:white; }
 
 /* Reject zone（最下方） */
 .reject-zone{
@@ -514,7 +515,7 @@ h1,h2,h3,h4,h5,h6,
   display:flex; flex-direction:column; overflow:hidden;
 }
 .modal-head{
-  padding:1rem 1.25rem; background:var(--dark);
+  padding:1rem 1.25rem; background:#3a4550;
   display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
 }
 .modal-head h3{
@@ -530,7 +531,7 @@ h1,h2,h3,h4,h5,h6,
 .modal-foot{
   padding:.9rem 1.25rem; border-top:1px solid var(--border2);
   display:flex; gap:.6rem; justify-content:space-between; align-items:center;
-  flex-shrink:0; background:var(--bg2);
+  flex-shrink:0; background:#e4e2dc;
 }
 .modal-foot-left{ font-size:.82rem; color:var(--muted); }
 .modal-foot-right{ display:flex; gap:.6rem; }
@@ -579,11 +580,11 @@ h1,h2,h3,h4,h5,h6,
 .btn-secondary{ background:white; border:1.5px solid var(--border); color:var(--slate); }
 .btn-secondary:hover{ border-color:var(--main); color:var(--main); }
 .btn-select-all{
-  padding:.38rem .8rem; background:var(--bg2); border:1px solid var(--main-l);
+  padding:.38rem .8rem; background:var(--bg2); border:1px solid #a8bfcc;
   border-radius:7px; font-size:.8rem; color:var(--main); font-family:inherit;
   cursor:pointer; transition:all .2s; font-weight:500;
 }
-.btn-select-all:hover{ background:var(--main-l); color:white; }
+.btn-select-all:hover{ background:#a8bfcc; color:white; }
 
 /* ══════════════════════════════
    LOADER / TOAST
@@ -658,7 +659,7 @@ h1,h2,h3,h4,h5,h6,
   <div class="lg-deco lg-deco-2"></div>
   <div class="login-wrap">
     <div class="login-brand">
-      <img src="2026annualconference/images/TSMCSD-logo.png"
+      <img src="images/TSMCSD-logo.png"
            alt="TSMCSD Logo"
            style="height:72px; width:auto; margin-bottom:1rem;
                   filter:brightness(0) invert(1);
@@ -1368,7 +1369,7 @@ function showOverview(){
         :(d.recommend?'<span class="ov-rec yes">推薦</span>':'<span class="ov-rec no">—</span>');
       const statusTxt=isSub
         ?'<span style="color:var(--green);font-weight:700">✅ 已提交</span>'
-        :(Object.keys(d).length?'<span style="color:var(--main-l)">已暫存</span>':'<span class="ov-pending">未填寫</span>');
+        :(Object.keys(d).length?'<span style="color:#a8bfcc">已暫存</span>':'<span class="ov-pending">未填寫</span>');
       const canCheck=!isSub;
 
       html+=`<tr class="${isRej?'rejected-row':''}">
