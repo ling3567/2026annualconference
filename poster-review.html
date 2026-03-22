@@ -124,6 +124,17 @@ h1,h2,h3,h4,h5,h6,
 }
 .login-brand p{ font-size:.85rem; color:rgba(255,255,255,.8); }
 
+
+/* LOGO + 機構名同一行 */
+.login-logo-row{
+  display:flex; align-items:center; gap:.75rem;
+  justify-content:center; margin-bottom:1rem;
+}
+.login-org-name{
+  font-size:.88rem; font-weight:600;
+  color:rgba(255,255,255,.9); letter-spacing:.03em;
+  white-space:nowrap;
+}
 .deadline-banner{
   display:flex; align-items:center; gap:.6rem;
   background:rgba(232,213,208,.18); border:1px solid rgba(232,213,208,.45);
@@ -659,17 +670,15 @@ h1,h2,h3,h4,h5,h6,
   <div class="lg-deco lg-deco-2"></div>
   <div class="login-wrap">
     <div class="login-brand">
-      <img src="images/TSMCSD-logo.png"
-           alt="TSMCSD Logo"
-           style="height:72px; width:auto; margin-bottom:1rem;
-                  filter:brightness(0) invert(1);
-                  drop-shadow(0 2px 8px rgba(0,0,0,.3));">
-      <div class="eyebrow">⚕ TSMCSD 2026 年會暨學術研討會</div>
+      <div class="login-logo-row">
+        <img src="images/TSMCSD-logo.png"
+             alt="TSMCSD Logo"
+             style="height:48px; width:auto;
+                    filter:brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,.4));">
+        <span class="login-org-name">TSMCSD 2026 年會暨學術研討會</span>
+      </div>
       <h1>競賽活動評審系統</h1>
       <p>僅供受邀評審委員使用・請勿轉發登入資訊</p>
-    </div>
-    <div class="deadline-banner">
-      ⏰ 請於 <strong>115年7月3日（五）</strong> 前完成所有評分並送出
     </div>
     <div class="login-card">
       <label class="fl">委員帳號</label>
@@ -838,6 +847,9 @@ async function doLogin(){
       papers.poster=r.papers||[];
       papers.osce=r.oscePapers||[];
       submitted=r.submitted||{};
+      // 已提交的分數回填到 drafts，讓委員可以查看送出的分數
+      const ss=r.submittedScores||{};
+      Object.entries(ss).forEach(([pid,sc])=>{ drafts[pid]=sc; });
       el('rvName').textContent=reviewer.name;
       el('loginScreen').style.display='none';
       el('app').classList.add('show');
@@ -951,7 +963,7 @@ function renderPosterScoreForm(p, draft, isDone){
   // 評分向度（必填）
   html+=`<div class="crit-group"><div class="crit-group-title">各項評分（滿分 ${POSTER_MAX} 分・全部必填）</div>`;
   POSTER_CRITERIA.forEach(c=>{
-    const v=draft[c.id]!==undefined?draft[c.id]:'';
+    const v=draft[c.id]!==undefined?draft[c.id]:(isDone?'—':'');
     html+=`<div class="crit-item">
       <div class="crit-info">
         <div class="crit-name">${c.label}</div>
@@ -960,7 +972,7 @@ function renderPosterScoreForm(p, draft, isDone){
       <div class="score-input-wrap">
         <input type="number" class="score-input" id="sc_${c.id}"
           min="0" max="${c.max}" value="${v}" placeholder="—"
-          ${dis} oninput="validateScore(this,${c.max}); updatePosterTotal(); markEmptyInputs()">
+          ${isDone?'readonly':''}  oninput="validateScore(this,${c.max}); updatePosterTotal(); markEmptyInputs()">
         <span class="score-max">/ ${c.max}</span>
       </div>
     </div>`;
@@ -1074,7 +1086,7 @@ function renderOsceScoreForm(p, draft, isDone){
   OSCE_CRITERIA_GROUPS.forEach(g=>{
     html+=`<div class="crit-group"><div class="crit-group-title">${g.group}</div>`;
     g.items.forEach(c=>{
-      const v=draft[c.id]!==undefined?draft[c.id]:'';
+      const v=draft[c.id]!==undefined?draft[c.id]:(isDone?'—':'');
       html+=`<div class="crit-item">
         <div class="crit-info">
           <div class="crit-name">${c.label}</div>
@@ -1083,7 +1095,7 @@ function renderOsceScoreForm(p, draft, isDone){
         <div class="score-input-wrap">
           <input type="number" class="score-input" id="sc_${c.id}"
             min="0" max="${c.max}" value="${v}" placeholder="—"
-            ${dis} oninput="validateScore(this,${c.max}); updateOsceTotal(); markEmptyInputs()">
+            ${isDone?'readonly':''}  oninput="validateScore(this,${c.max}); updateOsceTotal(); markEmptyInputs()">
           <span class="score-max">/ ${c.max}</span>
         </div>
       </div>`;
