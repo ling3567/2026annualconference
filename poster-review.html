@@ -127,12 +127,16 @@ h1,h2,h3,h4,h5,h6,
 
 /* LOGO + 機構名同一行 */
 .login-logo-row{
-  display:flex; align-items:center; gap:.75rem;
-  justify-content:center; margin-bottom:1rem;
+  display:flex; align-items:center; gap:.85rem;
+  justify-content:center; margin-bottom:1.1rem;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:12px;
+  padding:.6rem 1.2rem;
 }
 .login-org-name{
-  font-size:.88rem; font-weight:600;
-  color:rgba(255,255,255,.9); letter-spacing:.03em;
+  font-size:.9rem; font-weight:600;
+  color:#ffffff; letter-spacing:.02em;
   white-space:nowrap;
 }
 .deadline-banner{
@@ -197,12 +201,18 @@ h1,h2,h3,h4,h5,h6,
 .tb-sep{ width:1px; height:18px; background:rgba(255,255,255,.15); flex-shrink:0; }
 .tb-type-tabs{ display:flex; gap:.2rem; }
 .tb-tab{
-  padding:.32rem .9rem; border-radius:6px; font-size:.82rem; font-weight:500;
-  cursor:pointer; transition:all .18s; border:1px solid transparent;
-  color:rgba(255,255,255,.5); white-space:nowrap;
+  display:flex; align-items:center; gap:.45rem;
+  padding:.38rem 1rem; border-radius:7px; font-size:.85rem; font-weight:500;
+  cursor:pointer; transition:all .18s; border:1.5px solid transparent;
+  color:rgba(255,255,255,.55); white-space:nowrap; letter-spacing:.02em;
 }
-.tb-tab:hover{ color:rgba(255,255,255,.8); }
-.tb-tab.active{ background:rgba(255,255,255,.13); border-color:rgba(255,255,255,.2); color:white; }
+.tb-tab:hover{ color:rgba(255,255,255,.88); background:rgba(255,255,255,.08); }
+.tb-tab.active{
+  background:rgba(255,255,255,.18);
+  border-color:rgba(255,255,255,.3);
+  color:white;
+  box-shadow:0 1px 4px rgba(0,0,0,.15);
+}
 .tb-right{ display:flex; align-items:center; gap:.5rem; flex-shrink:0; }
 .deadline-chip{
   display:flex; align-items:center; gap:.4rem;
@@ -212,17 +222,18 @@ h1,h2,h3,h4,h5,h6,
 }
 .rv-chip{
   display:flex; align-items:center; gap:.35rem;
-  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15);
-  border-radius:20px; padding:.28rem .8rem;
-  font-size:.78rem; color:rgba(255,255,255,.85);
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22);
+  border-radius:20px; padding:.32rem .9rem;
+  font-size:.8rem; color:rgba(255,255,255,.9); font-weight:500;
 }
 .btn-out{
-  background:none; border:1px solid rgba(255,255,255,.2);
-  border-radius:6px; padding:.3rem .7rem;
-  font-size:.76rem; color:rgba(255,255,255,.5); cursor:pointer;
-  transition:all .2s; font-family:inherit; white-space:nowrap;
+  display:inline-flex; align-items:center; gap:.38rem;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.22);
+  border-radius:6px; padding:.32rem .8rem;
+  font-size:.78rem; color:rgba(255,255,255,.7); cursor:pointer;
+  transition:all .2s; font-family:inherit; white-space:nowrap; font-weight:500;
 }
-.btn-out:hover{ border-color:rgba(255,255,255,.55); color:white; }
+.btn-out:hover{ background:rgba(255,255,255,.16); border-color:rgba(255,255,255,.5); color:white; }
 
 /* ══════════════════════════════
    THREE-COLUMN LAYOUT
@@ -600,6 +611,44 @@ h1,h2,h3,h4,h5,h6,
 /* ══════════════════════════════
    LOADER / TOAST
 ══════════════════════════════ */
+
+/* ══ 自訂確認 Modal ══ */
+.confirm-modal{ width:480px; }
+.confirm-head{ background:#3a4550; }
+.confirm-body{ padding:1.5rem 1.5rem 1rem; }
+.confirm-info-block{
+  background:#f0eeea; border:1px solid #ccd8e0;
+  border-radius:9px; padding:1rem 1.1rem; margin-bottom:1rem;
+}
+.confirm-info-row{
+  display:flex; align-items:baseline; gap:.5rem;
+  padding:.3rem 0; font-size:.9rem; color:#2a2420;
+  border-bottom:1px solid #e0dcd8;
+}
+.confirm-info-row:last-child{ border-bottom:none; }
+.confirm-info-label{
+  font-size:.75rem; font-weight:700; color:#546070;
+  min-width:52px; white-space:nowrap;
+}
+.confirm-score-big{
+  font-size:1.6rem; font-weight:700; color:#3a4550; line-height:1;
+}
+.confirm-score-big span{ font-size:.8rem; color:#7a6e68; font-weight:400; }
+.confirm-warn-box{
+  display:flex; align-items:center; gap:.6rem;
+  background:#f5e8e8; border:1px solid #c09090;
+  border-radius:8px; padding:.65rem .9rem;
+  font-size:.85rem; color:#7a3838; font-weight:600;
+}
+.confirm-ok-btn{
+  padding:.65rem 1.5rem;
+  background:linear-gradient(135deg, #3d6b54, #2d5042);
+  color:white; border:none; border-radius:9px;
+  font-size:.9rem; font-family:inherit; font-weight:600;
+  cursor:pointer; transition:all .2s;
+}
+.confirm-ok-btn:hover{ opacity:.9; transform:translateY(-1px); }
+.confirm-foot{ justify-content:space-between; background:#f0eeea; }
 .ldr{
   position:fixed; inset:0; background:rgba(255,255,255,.82);
   display:none; align-items:center; justify-content:center; z-index:9998;
@@ -699,15 +748,15 @@ h1,h2,h3,h4,h5,h6,
       <span class="tb-logo">TSMCSD 2026 競賽活動評審</span>
       <div class="tb-sep"></div>
       <div class="tb-type-tabs">
-        <div class="tb-tab active" id="tabPoster" onclick="switchType('poster')">📋 海報論文</div>
-        <div class="tb-tab" id="tabOsce" onclick="switchType('osce')">🎬 OSCE 教案</div>
+        <div class="tb-tab active" id="tabPoster" onclick="switchType('poster')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg> 海報論文</div>
+        <div class="tb-tab" id="tabOsce" onclick="switchType('osce')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> OSCE 教案</div>
       </div>
     </div>
     <div class="tb-right">
-      <div class="deadline-chip">⏰ 截止 115.7.3（五）</div>
-      <div class="rv-chip">👤 <span id="rvName"></span></div>
-      <button class="btn-out" onclick="showOverview()">📊 總覽送出</button>
-      <button class="btn-out" onclick="doLogout()">登出</button>
+      <div class="deadline-chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 截止 115.7.3（五）</div>
+      <div class="rv-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <span id="rvName"></span></div>
+      <button class="btn-out" onclick="showOverview()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 總覽送出</button>
+      <button class="btn-out" onclick="doLogout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> 登出</button>
     </div>
   </div>
 
@@ -751,8 +800,8 @@ h1,h2,h3,h4,h5,h6,
         </p>
       </div>
       <div class="score-actions" id="scoreActions" style="display:none">
-        <button class="btn-draft" onclick="saveDraft()">💾 暫存</button>
-        <button class="btn-submit" id="btnSubmit" onclick="submitScore()">✅ 提交評分</button>
+        <button class="btn-draft" onclick="saveDraft()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> 暫存</button>
+        <button class="btn-submit" id="btnSubmit" onclick="submitScore()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 提交評分</button>
       </div>
     </div>
   </div>
@@ -762,7 +811,7 @@ h1,h2,h3,h4,h5,h6,
 <div class="modal-bg" id="overviewModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>📊 評分總覽・勾選送出</h3>
+      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 評分總覽・勾選送出</h3>
       <button class="modal-close" onclick="closeOverview()">✕</button>
     </div>
     <div class="modal-body" id="overviewBody"></div>
@@ -771,13 +820,26 @@ h1,h2,h3,h4,h5,h6,
       <div class="modal-foot-right">
         <button class="btn btn-secondary" onclick="closeOverview()">關閉</button>
         <button class="btn-bulk-submit" id="btnBulkSubmit" onclick="bulkSubmit()" disabled>
-          ✅ 送出勾選項目
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 送出勾選項目
         </button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- ══ 自訂確認對話框 ══ -->
+<div class="modal-bg" id="confirmModal">
+  <div class="modal confirm-modal">
+    <div class="modal-head confirm-head">
+      <h3 id="confirmTitle">確認提交評分</h3>
+    </div>
+    <div class="modal-body confirm-body" id="confirmBody"></div>
+    <div class="modal-foot confirm-foot">
+      <button class="btn btn-secondary" onclick="confirmCancel()">取消</button>
+      <button class="confirm-ok-btn" id="confirmOkBtn" onclick="confirmOk()">確認送出</button>
+    </div>
+  </div>
+</div>
 <div class="ldr" id="ldr"><div class="spinner"></div></div>
 
 <script>
@@ -789,9 +851,9 @@ const CAT_NAMES = {
   'C':'C — Humanism, Wellbeing & Professional Identity'
 };
 const CAT_SHORT = {
-  'A':'A 臨床技能教育',
-  'B':'B 評量與能力導向',
-  'C':'C 人文素養'
+  'A':'A｜臨床技能教育、模擬教學與跨專業學習',
+  'B':'B｜評量、信任決策與能力導向醫學教育',
+  'C':'C｜人文素養、醫療韌性與專業認同'
 };
 
 const POSTER_CRITERIA = [
@@ -1061,7 +1123,7 @@ function renderOsceContent(i){
             <strong>Google 雲端教案資料</strong>
             <p>影片、教案 PDF 等評審資料</p>
           </div>
-          <a class="btn-cloud" href="${esc(p.driveUrl)}" target="_blank">開啟資料 ↗</a>
+          <a class="btn-cloud" href="${esc(p.driveUrl)}" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 13 12 8 7 13"/><line x1="12" y1="8" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg> 開啟資料</a>
         </div>`:''}
         ${p.summary?absBlk('教案摘要',p.summary):''}
         ${p.absMotivation?absBlk('設計動機',p.absMotivation):''}
@@ -1253,7 +1315,33 @@ async function submitScore(){
   }
   let total=calcTotal(p.id, curType);
   const label=curType==='osce'?'教案':'論文';
-  if(!confirm(`確認提交評分？\n\n${label}：${p.title}\n合計：${total} 分${d.recommend?'\n⭐ 已勾選推薦':''}${d.rejected?'\n⚠️ 標記退稿':''}\n\n提交後無法修改。`)) return;
+  const numLabel=curType==='poster'?p.paperNo:p.caseNo;
+
+  const confirmHtml=`
+    <div class="confirm-info-block">
+      <div class="confirm-info-row">
+        <span class="confirm-info-label">編號</span>
+        <strong>${numLabel||'—'}</strong>
+      </div>
+      <div class="confirm-info-row">
+        <span class="confirm-info-label">${label}題目</span>
+        <span style="line-height:1.5">${esc(p.title)}</span>
+      </div>
+      <div class="confirm-info-row">
+        <span class="confirm-info-label">合計總分</span>
+        <span class="confirm-score-big">${total}<span> / ${curType==='poster'?POSTER_MAX:OSCE_BASE_MAX}${curType==='osce'&&(d[OSCE_BONUS.id]||0)>0?' + '+(d[OSCE_BONUS.id]||0)+'（加分）':''}</span></span>
+      </div>
+      ${d.recommend?`<div class="confirm-info-row"><span class="confirm-info-label">推薦</span><span style="color:#3d6b54;font-weight:600">✓ 已勾選推薦</span></div>`:''}
+      ${d.catAdjust?`<div class="confirm-info-row"><span class="confirm-info-label">類別調整</span><span>建議改為 ${d.catAdjust}</span></div>`:''}
+      ${d.rejected?`<div class="confirm-info-row"><span class="confirm-info-label">退稿</span><span style="color:#7a3838;font-weight:600">⚠ 標記退稿</span></div>`:''}
+    </div>
+    <div class="confirm-warn-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      提交後無法自行修改，如需修改請聯絡依玲 06-2812811-57426
+    </div>`;
+
+  const ok = await showConfirm('確認提交評分', confirmHtml);
+  if(!ok) return;
   await doSubmit(p, curType, d, total);
 }
 
@@ -1290,7 +1378,27 @@ async function bulkSubmit(){
     return;
   }
 
-  if(!confirm(`確認送出 ${items.length} 筆評分？\n\n送出後無法修改。`)) return;
+  const bulkHtml = `
+    <div class="confirm-info-block">
+      ${items.map(({p,ptype})=>{
+        const num=ptype==='poster'?p.paperNo:p.caseNo;
+        const d2=drafts[p.id]||{};
+        const t2=calcTotal(p.id,ptype);
+        return `<div class="confirm-info-row">
+          <span class="confirm-info-label">${num||'—'}</span>
+          <span style="flex:1;line-height:1.45;font-size:.88rem">${esc(p.title)}</span>
+          <strong style="color:#3a4550;margin-left:.5rem">${t2}分</strong>
+          ${d2.rejected?'<span style="color:#7a3838;font-size:.75rem;margin-left:.3rem">退稿</span>':''}
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="confirm-warn-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      送出後無法自行修改，如需修改請聯絡依玲 06-2812811-57426
+    </div>`;
+
+  const bulkOk = await showConfirm(`確認送出 ${items.length} 筆評分`, bulkHtml);
+  if(!bulkOk) return;
 
   setLdr(true);
   closeOverview();
