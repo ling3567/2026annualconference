@@ -436,6 +436,22 @@ tr:hover td{ background:#fafafa; }
 .btn-select-all{ padding:.38rem .8rem; background:var(--bg2); border:1px solid var(--border); border-radius:7px; font-size:.8rem; color:#546070; font-family:inherit; cursor:pointer; transition:all .2s; font-weight:500; }
 .btn-select-all:hover{ background:var(--main); color:white; }
 
+
+/* OSCE 後台專用 */
+.type-switcher{
+  display:flex; gap:.5rem; margin-bottom:1.25rem;
+  background:white; padding:.5rem;
+  border:1px solid #e2e8f0; border-radius:9px; width:fit-content;
+}
+.type-btn{
+  padding:.45rem 1.1rem; border-radius:7px; font-size:.85rem; font-weight:500;
+  cursor:pointer; border:none; font-family:inherit; transition:all .18s;
+  color:#718096; background:transparent;
+}
+.type-btn.active{ background:var(--adm-blue); color:white; }
+.type-btn:hover:not(.active){ background:#f7f6f3; color:#1c1c2e; }
+.osce-tag{ padding:.15rem .55rem; border-radius:4px; font-size:.7rem; font-weight:700; background:#fef3c7; color:#92400e; }
+.poster-tag{ padding:.15rem .55rem; border-radius:4px; font-size:.7rem; font-weight:700; background:#dbeafe; color:#1e4d8c; }
 /* ══ Toast / Loader ══ */
 .toast{ position:fixed; bottom:1.5rem; right:1.5rem; padding:.75rem 1.1rem; border-radius:9px; font-size:.9rem; color:white; box-shadow:0 8px 24px rgba(0,0,0,.15); z-index:9999; animation:tIn .3s ease; max-width:340px; }
 .toast.ok{ background:#3d6b54; }
@@ -606,34 +622,98 @@ tr:hover td{ background:#fafafa; }
     </div>
   </div>
   <div class="adm-content" id="adm-tab-dashboard">
+    <!-- 統計卡 -->
     <div class="stats-row" id="statsRow"></div>
-    <div class="sec">
-      <div class="sec-head"><h3>各論文評審進度</h3><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">重新整理</button></div>
-      <div class="sec-body"><div class="tbl-wrap"><table><thead><tr><th>編號</th><th>論文題目</th><th>類別</th><th>指派委員</th><th>已評/應評</th><th>平均分</th><th>推薦</th></tr></thead><tbody id="dashBody"></tbody></table></div></div>
+    <!-- 類型切換 -->
+    <div class="type-switcher">
+      <button class="type-btn active" id="dashTypePoster" onclick="dashSwitchType('poster')">📋 海報論文</button>
+      <button class="type-btn" id="dashTypeOsce" onclick="dashSwitchType('osce')">🎬 OSCE 教案</button>
+    </div>
+    <!-- 海報論文進度 -->
+    <div id="dashPosterSection">
+      <div class="sec">
+        <div class="sec-head"><h3>海報論文評審進度</h3><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">重新整理</button></div>
+        <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
+          <th>編號</th><th>論文題目</th><th>類別</th><th>指派委員</th><th>已評/應評</th><th>平均分</th><th>推薦</th>
+        </tr></thead><tbody id="dashBody"></tbody></table></div></div>
+      </div>
+    </div>
+    <!-- OSCE 進度 -->
+    <div id="dashOsceSection" style="display:none">
+      <div class="sec">
+        <div class="sec-head"><h3>OSCE 教案評審進度</h3><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadOsceDashboard()">重新整理</button></div>
+        <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
+          <th>編號</th><th>教案主題</th><th>單位</th><th>指派委員</th><th>已評/應評</th><th>平均分</th><th>推薦</th>
+        </tr></thead><tbody id="osceDashBody"></tbody></table></div></div>
+      </div>
     </div>
   </div>
   <div class="adm-content" id="adm-tab-assign" style="display:none">
-    <div class="sec">
-      <div class="sec-head"><h3>指派評審委員</h3>
-        <div style="display:flex;gap:.5rem">
-          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="autoAssign()">自動平均指派</button>
-          <button class="adm-btn adm-btn-success adm-btn-sm" onclick="saveAssignments()">儲存指派</button>
+    <div class="type-switcher">
+      <button class="type-btn active" id="assignTypePoster" onclick="assignSwitchType('poster')">📋 海報論文</button>
+      <button class="type-btn" id="assignTypeOsce" onclick="assignSwitchType('osce')">🎬 OSCE 教案</button>
+    </div>
+    <!-- 海報指派 -->
+    <div id="assignPosterSection">
+      <div class="sec">
+        <div class="sec-head"><h3>海報論文 — 指派評審委員</h3>
+          <div style="display:flex;gap:.5rem">
+            <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="autoAssign('poster')">自動平均指派</button>
+            <button class="adm-btn adm-btn-success adm-btn-sm" onclick="saveAssignments('poster')">儲存指派</button>
+          </div>
+        </div>
+        <div class="sec-body"><p style="font-size:.78rem;color:#718096;margin-bottom:1rem">點選「＋委員」新增評審委員，完成後按「儲存指派」。</p>
+          <div class="tbl-wrap"><table><thead><tr><th>編號</th><th>論文題目</th><th>類別</th><th>指派委員（可多位）</th></tr></thead><tbody id="assignBody"></tbody></table></div>
         </div>
       </div>
-      <div class="sec-body"><p style="font-size:.78rem;color:#718096;margin-bottom:1rem">點選「＋委員」為每篇論文新增評審委員，完成後按「儲存指派」。</p>
-        <div class="tbl-wrap"><table><thead><tr><th>編號</th><th>論文題目</th><th>類別</th><th>指派委員（可多位）</th></tr></thead><tbody id="assignBody"></tbody></table></div>
+    </div>
+    <!-- OSCE 指派 -->
+    <div id="assignOsceSection" style="display:none">
+      <div class="sec">
+        <div class="sec-head"><h3>OSCE 教案 — 指派評審委員</h3>
+          <div style="display:flex;gap:.5rem">
+            <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="autoAssign('osce')">自動平均指派</button>
+            <button class="adm-btn adm-btn-success adm-btn-sm" onclick="saveAssignments('osce')">儲存指派</button>
+          </div>
+        </div>
+        <div class="sec-body"><p style="font-size:.78rem;color:#718096;margin-bottom:1rem">點選「＋委員」新增評審委員，完成後按「儲存指派」。</p>
+          <div class="tbl-wrap"><table><thead><tr><th>編號</th><th>教案主題</th><th>單位</th><th>指派委員（可多位）</th></tr></thead><tbody id="osceAssignBody"></tbody></table></div>
+        </div>
       </div>
     </div>
   </div>
   <div class="adm-content" id="adm-tab-results" style="display:none">
-    <div class="sec">
-      <div class="sec-head"><h3>評分詳細結果</h3>
-        <div style="display:flex;align-items:center;gap:.5rem">
-          <input type="text" id="resultSearch" placeholder="搜尋題目…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:180px;font-family:inherit" oninput="filterResults()">
-          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">重新整理</button>
+    <div class="type-switcher">
+      <button class="type-btn active" id="resultsTypePoster" onclick="resultsSwitchType('poster')">📋 海報論文</button>
+      <button class="type-btn" id="resultsTypeOsce" onclick="resultsSwitchType('osce')">🎬 OSCE 教案</button>
+    </div>
+    <!-- 海報評分結果 -->
+    <div id="resultsPosterSection">
+      <div class="sec">
+        <div class="sec-head"><h3>海報論文 — 評分結果</h3>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <input type="text" id="resultSearch" placeholder="搜尋題目…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:180px;font-family:inherit" oninput="filterResults()">
+            <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">重新整理</button>
+          </div>
         </div>
+        <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
+          <th>編號</th><th>論文題目</th><th>類別</th><th>平均總分</th><th>推薦</th><th>退稿</th><th>評審數</th><th>詳細</th>
+        </tr></thead><tbody id="resultsBody"></tbody></table></div></div>
       </div>
-      <div class="sec-body"><div class="tbl-wrap"><table><thead><tr><th>編號</th><th>論文題目</th><th>類別</th><th>平均總分</th><th>推薦</th><th>退稿</th><th>評審數</th><th>詳細</th></tr></thead><tbody id="resultsBody"></tbody></table></div></div>
+    </div>
+    <!-- OSCE 評分結果 -->
+    <div id="resultsOsceSection" style="display:none">
+      <div class="sec">
+        <div class="sec-head"><h3>OSCE 教案 — 評分結果</h3>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <input type="text" id="osceResultSearch" placeholder="搜尋教案…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:180px;font-family:inherit" oninput="filterOsceResults()">
+            <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadOsceDashboard()">重新整理</button>
+          </div>
+        </div>
+        <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
+          <th>編號</th><th>教案主題</th><th>單位</th><th>平均總分</th><th>推薦</th><th>退稿</th><th>評審數</th><th>詳細</th>
+        </tr></thead><tbody id="osceResultsBody"></tbody></table></div></div>
+      </div>
     </div>
   </div>
   <div class="adm-content" id="adm-tab-reviewers" style="display:none">
@@ -1177,6 +1257,8 @@ async function loadDashboard(){
     renderDashTable(r.papers);
     renderAssignTable(r.papers, r.reviewers);
     renderResultsTable(r.papers);
+    // 同步載入 OSCE 資料（背景）
+    loadOsceDashboard();
   } catch(e){ showToast('連線失敗','err'); console.error(e); }
   setLdr(false);
 }
@@ -1184,11 +1266,15 @@ async function loadDashboard(){
 function renderStats(s){
   if(!s) return;
   const pct=s.totalPapers?Math.round(s.reviewedPapers/s.totalPapers*100):0;
+  const osceS = osceData ? osceData.stats : null;
   el('statsRow').innerHTML=`
-    <div class="stat-card blue"><div class="stat-num">${s.totalPapers}</div><div class="stat-lbl">總投稿篇數</div></div>
-    <div class="stat-card"><div class="stat-num">${s.reviewedPapers}<span style="font-size:.9rem;color:#718096"> (${pct}%)</span></div><div class="stat-lbl">已有評分</div></div>
-    <div class="stat-card green"><div class="stat-num">${s.fullyReviewed}</div><div class="stat-lbl">已完全評審</div></div>
-    <div class="stat-card gold"><div class="stat-num">${s.recommended}</div><div class="stat-lbl">推薦 ≥${ADM_THRESHOLD}分</div></div>
+    <div class="stat-card blue"><div class="stat-num">${s.totalPapers}</div><div class="stat-lbl"><span class="poster-tag">海報</span> 投稿篇數</div></div>
+    <div class="stat-card"><div class="stat-num">${s.reviewedPapers}<span style="font-size:.9rem;color:#718096"> (${pct}%)</span></div><div class="stat-lbl"><span class="poster-tag">海報</span> 已有評分</div></div>
+    <div class="stat-card green"><div class="stat-num">${s.recommended}</div><div class="stat-lbl"><span class="poster-tag">海報</span> 推薦篇數</div></div>
+    ${osceS?`
+    <div class="stat-card blue"><div class="stat-num">${osceS.total||0}</div><div class="stat-lbl"><span class="osce-tag">OSCE</span> 教案總數</div></div>
+    <div class="stat-card"><div class="stat-num">${osceS.reviewed||0}</div><div class="stat-lbl"><span class="osce-tag">OSCE</span> 已有評分</div></div>
+    <div class="stat-card green"><div class="stat-num">${osceS.recommended||0}</div><div class="stat-lbl"><span class="osce-tag">OSCE</span> 推薦教案</div></div>`:''}
     <div class="stat-card orange"><div class="stat-num">${s.activeReviewers}</div><div class="stat-lbl">啟用委員數</div></div>`;
 }
 
@@ -1244,6 +1330,253 @@ function renderRvTable(reviewers){ el('rvBody').innerHTML=(reviewers||[]).map(r=
 async function addReviewer(){ const u=el('nwUser').value.trim(), pw=el('nwPw').value.trim(), n=el('nwName').value.trim(); if(!u||!pw||!n){ showToast('請填寫完整欄位','err'); return; } setLdr(true); try{ const r=await api({action:'adminAddReviewer',username:u,password:pw,name:n}); if(r.success){ showToast('委員已新增','ok'); el('nwUser').value=''; el('nwPw').value=''; el('nwName').value=''; loadReviewers(); } else showToast(r.message||'新增失敗','err'); } catch{ showToast('連線失敗','err'); } setLdr(false); }
 async function toggleReviewer(u,enabled){ setLdr(true); try{ const r=await api({action:'adminUpdateReviewer',username:u,enabled:String(enabled)}); if(r.success){ showToast(`帳號已${enabled?'啟用':'停用'}`,'ok'); loadReviewers(); } else showToast('操作失敗','err'); } catch{ showToast('連線失敗','err'); } setLdr(false); }
 async function deleteReviewer(u){ if(!confirm(`確定刪除委員「${u}」？`)) return; setLdr(true); try{ const r=await api({action:'adminDeleteReviewer',username:u}); if(r.success){ showToast('委員已刪除','ok'); loadReviewers(); } else showToast(r.message||'刪除失敗','err'); } catch{ showToast('連線失敗','err'); } setLdr(false); }
+
+
+// ══════════════════════════════
+// 後台：OSCE 相關 JS
+// ══════════════════════════════
+let osceData = null;           // { cases, reviewers, stats }
+let osceAssignments = {};      // { caseId: [username,...] }
+let dashType = 'poster';       // 總覽目前類型
+let assignType = 'poster';     // 指派目前類型
+let resultsType = 'poster';    // 結果目前類型
+
+// 切換總覽類型
+function dashSwitchType(t){
+  dashType = t;
+  el('dashTypePoster').classList.toggle('active', t==='poster');
+  el('dashTypeOsce').classList.toggle('active', t==='osce');
+  el('dashPosterSection').style.display = t==='poster' ? '' : 'none';
+  el('dashOsceSection').style.display   = t==='osce'   ? '' : 'none';
+  if(t==='osce' && !osceData) loadOsceDashboard();
+}
+
+// 切換指派類型
+function assignSwitchType(t){
+  assignType = t;
+  el('assignTypePoster').classList.toggle('active', t==='poster');
+  el('assignTypeOsce').classList.toggle('active', t==='osce');
+  el('assignPosterSection').style.display = t==='poster' ? '' : 'none';
+  el('assignOsceSection').style.display   = t==='osce'   ? '' : 'none';
+  if(t==='osce') {
+    if(!osceData) loadOsceDashboard();
+    else renderOsceAssignTable(osceData.cases, osceData.reviewers);
+  }
+}
+
+// 切換結果類型
+function resultsSwitchType(t){
+  resultsType = t;
+  el('resultsTypePoster').classList.toggle('active', t==='poster');
+  el('resultsTypeOsce').classList.toggle('active', t==='osce');
+  el('resultsPosterSection').style.display = t==='poster' ? '' : 'none';
+  el('resultsOsceSection').style.display   = t==='osce'   ? '' : 'none';
+  if(t==='osce') {
+    if(!osceData) loadOsceDashboard();
+    else renderOsceResultsTable(osceData.cases);
+  }
+}
+
+// 載入 OSCE 後台資料
+async function loadOsceDashboard(){
+  setLdr(true);
+  try{
+    const r = await api({action:'adminGetOsceDashboard'});
+    if(!r.success){ showToast('OSCE 資料載入失敗','err'); setLdr(false); return; }
+    osceData = r;
+    const ar = await api({action:'adminGetOsceAssignments'});
+    osceAssignments = ar.assignments || {};
+    renderOsceDashTable(r.cases);
+    renderOsceAssignTable(r.cases, r.reviewers);
+    renderOsceResultsTable(r.cases);
+    renderOsceStats(r.stats);
+  } catch(e){ showToast('連線失敗','err'); console.error(e); }
+  setLdr(false);
+}
+
+// OSCE 統計（更新總統計卡）
+function renderOsceStats(s){
+  if(!s || !dashData) return;
+  // 統計卡已由 renderStats 顯示海報，OSCE 另外在區塊內顯示
+}
+
+// OSCE 總覽表格
+function renderOsceDashTable(cases){
+  if(!cases) return;
+  el('osceDashBody').innerHTML = cases.map(c=>{
+    const assigned = osceAssignments[c.id] || [];
+    const done = c.reviews.length;
+    const total = assigned.length || 0;
+    const pct = total ? Math.round(done/total*100) : 0;
+    const fillClass = done===0?'none':done>=total?'done':'part';
+    return `<tr>
+      <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
+      <td style="max-width:260px;line-height:1.5">${esc(c.title)}</td>
+      <td style="font-size:.82rem">${esc(c.unit||'—')}</td>
+      <td style="font-size:.78rem;color:#718096">${assigned.join('、')||'—'}</td>
+      <td><div class="sc-prog"><span>${done}/${total}</span>
+        <div class="sc-bar"><div class="sc-fill ${fillClass}" style="width:${pct}%"></div></div>
+      </div></td>
+      <td style="font-weight:600">${c.avgTotal!==null?c.avgTotal:'—'}</td>
+      <td>${c.avgTotal!==null?(c.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:#718096;padding:2rem">尚無 OSCE 教案資料</td></tr>';
+}
+
+// OSCE 指派表格
+function renderOsceAssignTable(cases, reviewers){
+  if(!cases) return;
+  el('osceAssignBody').innerHTML = cases.map(c=>{
+    const assigned = osceAssignments[c.id] || [];
+    const options = (reviewers||[]).map(r=>`<option value="${r.username}">${r.name}(${r.username})</option>`).join('');
+    return `<tr>
+      <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
+      <td style="max-width:240px;line-height:1.5">${esc(c.title)}</td>
+      <td style="font-size:.82rem">${esc(c.unit||'—')}</td>
+      <td>
+        <div class="assign-wrap" id="oaw_${c.id}">
+          ${assigned.map(u=>`<span class="assign-chip">${u}<span class="rm" onclick="removeOsceAssign('${c.id}','${u}')">✕</span></span>`).join('')}
+          <select class="assign-sel" id="oasel_${c.id}" onchange="addOsceAssign('${c.id}')">
+            <option value="">＋ 委員</option>${options}
+          </select>
+        </div>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:#718096;padding:2rem">尚無 OSCE 教案資料</td></tr>';
+}
+
+function addOsceAssign(cid){
+  const sel = el('oasel_'+cid);
+  const u = sel.value; if(!u) return; sel.value='';
+  if(!osceAssignments[cid]) osceAssignments[cid]=[];
+  if(osceAssignments[cid].includes(u)){ showToast('此委員已在列表中','err'); return; }
+  osceAssignments[cid].push(u);
+  refreshOsceAssignRow(cid);
+}
+function removeOsceAssign(cid, u){
+  if(!osceAssignments[cid]) return;
+  osceAssignments[cid] = osceAssignments[cid].filter(x=>x!==u);
+  refreshOsceAssignRow(cid);
+}
+function refreshOsceAssignRow(cid){
+  const wrap = el('oaw_'+cid); if(!wrap) return;
+  const assigned = osceAssignments[cid] || [];
+  const sel = el('oasel_'+cid);
+  const selHTML = sel ? sel.outerHTML : '';
+  wrap.innerHTML = assigned.map(u=>`<span class="assign-chip">${u}<span class="rm" onclick="removeOsceAssign('${cid}','${u}')">✕</span></span>`).join('') + selHTML;
+}
+
+// OSCE 評分結果表格
+function renderOsceResultsTable(cases){
+  if(!cases) return;
+  const sorted = [...cases].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1));
+  el('osceResultsBody').innerHTML = sorted.map(c=>{
+    const rejCount = c.reviews.filter(r=>r.rejected).length;
+    return `<tr data-osce-title="${esc(c.title).toLowerCase()}">
+      <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
+      <td style="max-width:260px;line-height:1.5">${esc(c.title)}</td>
+      <td style="font-size:.82rem">${esc(c.unit||'—')}</td>
+      <td style="font-weight:600;font-size:1rem">${c.avgTotal!==null?c.avgTotal+'分':'—'}</td>
+      <td>${c.avgTotal!==null?(c.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td>
+      <td>${rejCount>0?`<span class="chip chip-red">${rejCount}位退稿</span>`:'—'}</td>
+      <td style="color:#718096">${c.reviews.length} 位</td>
+      <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showOsceDetail('${c.id}')">詳細</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';
+}
+
+function filterOsceResults(){
+  const q = el('osceResultSearch').value.toLowerCase();
+  document.querySelectorAll('#osceResultsBody tr').forEach(tr=>{
+    tr.style.display = !q || (tr.dataset.osceTitle||'').includes(q) ? '' : 'none';
+  });
+}
+
+// OSCE 評分詳細
+const OSCE_CRITERIA_LABELS = [
+  {label:'情境設置',max:10},{label:'教學/考官指引',max:10},{label:'考生指引/SP指引',max:10},
+  {label:'SP腳本/助教指引',max:10},{label:'評分項目與教案目標相關',max:10},
+  {label:'評分尺標與給分定義明確',max:10},{label:'教案目標明確一致',max:10},
+  {label:'影片畫面品質優良',max:10},{label:'影片聲音清晰且有字幕',max:10},
+  {label:'剪輯得宜有助於教案呈現',max:10}
+];
+function showOsceDetail(cid){
+  if(!osceData) return;
+  const c = osceData.cases.find(x=>x.id===cid); if(!c) return;
+  el('detailTitle').textContent = (c.caseNo||'') + ' OSCE 教案評分詳細';
+  let html = `<div style="margin-bottom:.75rem"><div style="font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#718096;margin-bottom:.25rem">教案主題</div>
+    <div style="font-size:.85rem;color:#1c1c2e;line-height:1.7;font-weight:500">${esc(c.title)}</div></div>
+    <div style="font-size:.82rem;color:#718096;margin-bottom:1rem">${esc(c.unit||'')} ${c.target?'・對象：'+esc(c.target):''}</div>`;
+  if(!c.reviews.length){
+    html += '<p style="color:#718096;font-size:.85rem">尚無評分記錄</p>';
+  } else {
+    c.reviews.forEach((r,i)=>{
+      html += `<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #edf2f7">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.6rem">
+          <span style="font-size:.78rem;font-weight:600;color:#4a5568">評審 ${i+1}：${r.reviewer}</span>
+          <span style="font-size:.78rem;color:#718096">${r.time}</span>
+        </div>`;
+      if(r.rejected){
+        html += `<div style="background:#fff1f1;border:1px solid #fee2e2;border-radius:8px;padding:.6rem .8rem;font-size:.85rem;color:#b91c1c">⚠ 退稿：${esc(r.rejectReason||'（未填原因）')}</div>`;
+      } else {
+        OSCE_CRITERIA_LABELS.forEach((c2,idx)=>{
+          const id = 'o'+(idx+1);
+          html += `<div class="crit-score-row"><span>${c2.label}</span><span style="font-weight:600;color:var(--adm-blue)">${r.scores&&r.scores[id]!==undefined?r.scores[id]:0} / ${c2.max}</span></div>`;
+        });
+        if(r.bonus) html += `<div class="crit-score-row"><span>優良加分</span><span style="font-weight:600;color:#92400e">${r.bonus} / 10</span></div>`;
+        html += `<div style="display:flex;justify-content:space-between;padding:.5rem 0;font-weight:600">
+          <span>總分</span>
+          <span style="color:${r.total>=80?'var(--adm-green)':'#1c1c2e'};font-size:1.05rem">${r.total} 分</span></div>`;
+      }
+      if(r.comment) html += `<div style="font-size:.8rem;color:#718096;background:#f7f6f3;padding:.5rem .7rem;border-radius:7px">💬 ${esc(r.comment)}</div>`;
+      html += '</div>';
+    });
+  }
+  el('detailBody').innerHTML = html;
+  el('detailModal').classList.add('show');
+}
+
+// ══ 覆寫 saveAssignments 支援 OSCE ══
+async function saveAssignments(type){
+  const t = type || assignType;
+  if(!confirm('確認儲存所有指派設定？')) return;
+  setLdr(true);
+  try{
+    let r;
+    if(t==='osce'){
+      r = await api({action:'adminSaveOsceAssignments', assignmentsJson:JSON.stringify(osceAssignments)});
+    } else {
+      r = await api({action:'adminSaveAssignments', assignmentsJson:JSON.stringify(assignments)});
+    }
+    if(r.success) showToast(`指派已儲存（${r.saved} 筆）`,'ok');
+    else showToast('儲存失敗','err');
+  } catch{ showToast('連線失敗','err'); }
+  setLdr(false);
+}
+
+// ══ 覆寫 autoAssign 支援 OSCE ══
+function autoAssign(type){
+  const t = type || assignType;
+  if(t==='osce'){
+    if(!osceData) return;
+    const {cases, reviewers} = osceData;
+    const active = (reviewers||[]).filter(r=>r.enabled);
+    if(!active.length){ showToast('沒有啟用中的委員','err'); return; }
+    if(!confirm(`將 ${cases.length} 個教案平均分配給 ${active.length} 位委員？`)) return;
+    cases.forEach((c,i)=>{ osceAssignments[c.id] = [active[i%active.length].username]; });
+    renderOsceAssignTable(cases, reviewers);
+    showToast('自動指派完成，請記得按「儲存指派」','ok');
+  } else {
+    if(!dashData) return;
+    const {papers, reviewers} = dashData;
+    const active = (reviewers||[]).filter(r=>r.enabled);
+    if(!active.length){ showToast('沒有啟用中的委員','err'); return; }
+    if(!confirm(`將 ${papers.length} 篇論文平均分配給 ${active.length} 位委員？`)) return;
+    papers.forEach((p,i)=>{ assignments[p.id]=[active[i%active.length].username]; });
+    renderAssignTable(papers, reviewers);
+    showToast('自動指派完成，請記得按「儲存指派」','ok');
+  }
+}
 
 // ══ 自訂確認對話框 ══
 function showConfirm(title, bodyHtml){
