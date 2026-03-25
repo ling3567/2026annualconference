@@ -248,7 +248,7 @@ h1,h2,h3,h4,h5,h6{ font-weight:700; }
 .abs-sec{ margin-bottom:.9rem; }
 .abs-lbl{ font-size:.78rem; font-weight:700; letter-spacing:.1em; color:#546070; text-transform:uppercase; display:flex; align-items:center; gap:.45rem; margin-bottom:.38rem; }
 .abs-lbl::after{ content:''; flex:1; height:1px; background:var(--border2); }
-.abs-txt{ font-size:.95rem; line-height:1.85; color:var(--slate); }
+.abs-txt{ font-size:.95rem; line-height:1.85; color:var(--slate); white-space:pre-wrap; word-break:break-word; }
 .cloud-link-box{ display:flex; align-items:center; gap:.75rem; background:var(--main-bg); border:1px solid var(--border); border-radius:9px; padding:.8rem 1rem; margin-bottom:.9rem; }
 .cloud-link-box .icon{ font-size:1.3rem; }
 .cloud-link-box .info{ flex:1; }
@@ -438,6 +438,21 @@ tr:hover td{ background:#fafafa; }
 
 
 
+
+/* 委員帳號子分頁 */
+.sub-tabbar{
+  display:flex; gap:0; margin-bottom:1.25rem;
+  border-bottom:2px solid #e2e8f0;
+}
+.sub-tab{
+  padding:.6rem 1.2rem; font-size:.88rem; font-weight:500;
+  color:#718096; cursor:pointer; border-bottom:2.5px solid transparent;
+  margin-bottom:-2px; transition:all .18s; white-space:nowrap;
+  display:flex; align-items:center; gap:.4rem;
+}
+.sub-tab.active{ color:var(--adm-blue); border-bottom-color:var(--adm-blue); font-weight:600; }
+.sub-tab:hover:not(.active){ color:#334155; }
+
 /* 展開式指派明細 */
 .assign-summary{
   display:inline-flex; align-items:center; gap:.4rem;
@@ -474,6 +489,35 @@ tr:hover td{ background:#fafafa; }
 .cat-o{ background:#fef3c7; color:#92400e; }
 .assign-paper-no{ font-family:monospace; font-size:.75rem; color:#334155; font-weight:600; }
 .assign-paper-title{ color:#64748b; line-height:1.4; }
+
+
+/* Google Drive 嵌入預覽 */
+.drive-preview-wrap{
+  background:white; border:1px solid var(--border2);
+  border-radius:var(--r); overflow:hidden;
+  margin-bottom:1rem; box-shadow:var(--sh-sm);
+}
+.drive-preview-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.6rem 1rem; background:var(--main-bg);
+  border-bottom:1px solid var(--border);
+}
+.drive-preview-head strong{ font-size:.85rem; color:#3a4550; }
+.drive-preview-btns{ display:flex; gap:.4rem; }
+.drive-toggle-btn{
+  padding:.28rem .7rem; border-radius:6px; font-size:.78rem;
+  cursor:pointer; font-family:inherit; font-weight:500; transition:all .18s;
+  background:white; border:1px solid var(--border); color:#546070;
+}
+.drive-toggle-btn:hover{ background:var(--main-bg); border-color:var(--main); }
+.drive-toggle-btn.active{ background:#546070; color:white; border-color:#546070; }
+.drive-iframe-wrap{
+  height:0; overflow:hidden; transition:height .3s ease;
+}
+.drive-iframe-wrap.open{ height:520px; }
+.drive-iframe-wrap iframe{
+  width:100%; height:100%; border:none; display:block;
+}
 
 /* OSCE 後台專用 */
 .type-switcher{
@@ -777,20 +821,54 @@ tr:hover td{ background:#fafafa; }
     </div>
   </div>
   <div class="adm-content" id="adm-tab-reviewers" style="display:none">
-    <div class="sec">
-      <div class="sec-head"><h3>新增委員帳號</h3></div>
-      <div class="sec-body">
-        <div class="form-row">
-          <div class="form-grp"><label>帳號</label><input id="nwUser" placeholder="reviewer01"></div>
-          <div class="form-grp"><label>密碼</label><input id="nwPw" type="text" placeholder="pass1234"></div>
-          <div class="form-grp"><label>姓名</label><input id="nwName" placeholder="王評審委員"></div>
-          <button class="adm-btn adm-btn-primary" onclick="addReviewer()" style="margin-bottom:0">＋ 新增</button>
-        </div>
+    <!-- 子分頁切換 -->
+    <div class="sub-tabbar">
+      <div class="sub-tab active" id="rvSubAccounts" onclick="rvSwitchSub('accounts')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        帳號管理
+      </div>
+      <div class="sub-tab" id="rvSubAssign" onclick="rvSwitchSub('assign')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+        指派明細
       </div>
     </div>
-    <div class="sec">
-      <div class="sec-head"><h3>委員帳號列表</h3><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadReviewers()">重新整理</button></div>
-      <div class="sec-body"><div class="tbl-wrap"><table><thead><tr><th>帳號</th><th>密碼</th><th>姓名</th><th>狀態</th><th style="text-align:center">海報指派</th><th style="text-align:center">OSCE指派</th><th>操作</th></tr></thead><tbody id="rvBody"></tbody></table></div></div>
+
+    <!-- 帳號管理 -->
+    <div id="rvPanelAccounts">
+      <div class="sec">
+        <div class="sec-head"><h3>新增委員帳號</h3></div>
+        <div class="sec-body">
+          <div class="form-row">
+            <div class="form-grp"><label>帳號</label><input id="nwUser" placeholder="reviewer01"></div>
+            <div class="form-grp"><label>密碼</label><input id="nwPw" type="text" placeholder="pass1234"></div>
+            <div class="form-grp"><label>姓名</label><input id="nwName" placeholder="王評審委員"></div>
+            <button class="adm-btn adm-btn-primary" onclick="addReviewer()" style="margin-bottom:0">＋ 新增</button>
+          </div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-head">
+          <h3>委員帳號列表</h3>
+          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadReviewers()">重新整理</button>
+        </div>
+        <div class="sec-body"><div class="tbl-wrap"><table>
+          <thead><tr><th>帳號</th><th>密碼</th><th>姓名</th><th>狀態</th><th>操作</th></tr></thead>
+          <tbody id="rvBody"></tbody>
+        </table></div></div>
+      </div>
+    </div>
+
+    <!-- 指派明細 -->
+    <div id="rvPanelAssign" style="display:none">
+      <div class="sec">
+        <div class="sec-head">
+          <h3>委員指派明細</h3>
+          <span style="font-size:.8rem;color:#718096">各委員的海報論文與 OSCE 教案指派狀況</span>
+        </div>
+        <div class="sec-body" id="rvAssignDetail">
+          <p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">載入中…</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1335,8 +1413,7 @@ function renderStats(s){
     <div class="stat-card green"><div class="stat-num">${s.recommended}</div><div class="stat-lbl"><span class="poster-tag">海報</span> 推薦篇數</div></div>
     ${osceS?`
     <div class="stat-card blue"><div class="stat-num">${osceS.total||0}</div><div class="stat-lbl"><span class="osce-tag">OSCE</span> 教案總數</div></div>
-    <div class="stat-card"><div class="stat-num">${osceS.reviewed||0}</div><div class="stat-lbl"><span class="osce-tag">OSCE</span> 已有評分</div></div>
-    <div class="stat-card green"><div class="stat-num">${osceS.recommended||0}</div><div class="stat-lbl"><span class="osce-tag">OSCE</span> 推薦教案</div></div>`:''}
+    <div class="stat-card"><div class="stat-num">${osceS.reviewed||0}</div><div class="stat-lbl"><span class="osce-tag">OSCE</span> 已有評分</div></div>`:''}
     <div class="stat-card orange"><div class="stat-num">${s.activeReviewers}</div><div class="stat-lbl">啟用委員數</div></div>`;
 }
 
@@ -1489,10 +1566,86 @@ async function loadReviewers(){
   } catch{ showToast('連線失敗','err'); }
   setLdr(false);
 }
+// ══ 子分頁切換 ══
+function rvSwitchSub(tab){
+  el('rvSubAccounts').classList.toggle('active', tab==='accounts');
+  el('rvSubAssign').classList.toggle('active', tab==='assign');
+  el('rvPanelAccounts').style.display = tab==='accounts' ? '' : 'none';
+  el('rvPanelAssign').style.display   = tab==='assign'   ? '' : 'none';
+  if(tab==='assign') renderRvAssignDetail();
+}
+
+function renderRvAssignDetail(){
+  const rvrs = (dashData && dashData.reviewers) || [];
+  if(!rvrs.length){ el('rvAssignDetail').innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">請先載入總覽統計資料</p>'; return; }
+
+  let html = '';
+  rvrs.forEach(r=>{
+    // 海報指派
+    const myPosters = dashData.papers
+      ? dashData.papers.filter(p=>(assignments[p.id]||[]).includes(r.username))
+      : [];
+    // OSCE 指派
+    const myCases = (osceData && osceData.cases)
+      ? osceData.cases.filter(c=>(osceAssignments[c.id]||[]).includes(r.username))
+      : [];
+
+    const posterCount = myPosters.length;
+    const osceCount   = myCases.length;
+
+    html += `<div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid #e2e8f0">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+        <span style="font-weight:700;font-size:.95rem;color:#1c1c2e">${r.name}</span>
+        <span style="font-family:monospace;font-size:.8rem;color:#718096">${r.username}</span>
+        <span class="chip ${r.enabled?'chip-green':'chip-gray'}" style="font-size:.72rem">${r.enabled?'啟用':'停用'}</span>
+        <span style="margin-left:auto;font-size:.8rem;color:#718096">
+          <span style="background:#dbeafe;color:#1e4d8c;padding:.1rem .5rem;border-radius:4px;font-weight:600;margin-right:.3rem">海報 ${posterCount} 篇</span>
+          <span style="background:#fef3c7;color:#92400e;padding:.1rem .5rem;border-radius:4px;font-weight:600">OSCE ${osceCount} 個</span>
+        </span>
+      </div>`;
+
+    if(posterCount > 0){
+      html += `<div style="margin-bottom:.6rem">
+        <div style="font-size:.75rem;font-weight:700;color:#1e4d8c;margin-bottom:.3rem;letter-spacing:.04em">📋 海報論文</div>
+        <div style="display:flex;flex-direction:column;gap:.2rem">`;
+      myPosters.forEach(p=>{
+        const catStyle={A:'background:#dbeafe;color:#1e4d8c',B:'background:#ede9fe;color:#5b21b6',C:'background:#dcfce7;color:#166534'};
+        html+=`<div style="display:flex;align-items:center;gap:.5rem;padding:.3rem .5rem;background:#f8fafc;border-radius:6px;font-size:.82rem">
+          <span style="${catStyle[p.category]||''};padding:.1rem .4rem;border-radius:4px;font-size:.7rem;font-weight:700;min-width:1.8rem;text-align:center">${p.category||'?'}</span>
+          <span style="font-weight:600;font-family:monospace;font-size:.75rem;color:#334155;min-width:50px">${esc(p.paperNo||'—')}</span>
+          <span style="color:#334155;line-height:1.4">${esc(p.title)}</span>
+          ${p.reviews&&p.reviews.some(rv=>rv.reviewer===r.username)?'<span style="margin-left:auto;color:#16a34a;font-size:.72rem;font-weight:600">✓ 已評</span>':'<span style="margin-left:auto;color:#d97706;font-size:.72rem">待評</span>'}
+        </div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    if(osceCount > 0){
+      html += `<div>
+        <div style="font-size:.75rem;font-weight:700;color:#92400e;margin-bottom:.3rem;letter-spacing:.04em">🎬 OSCE 教案</div>
+        <div style="display:flex;flex-direction:column;gap:.2rem">`;
+      myCases.forEach(c=>{
+        html+=`<div style="display:flex;align-items:center;gap:.5rem;padding:.3rem .5rem;background:#fffbeb;border-radius:6px;font-size:.82rem">
+          <span style="background:#fef3c7;color:#92400e;padding:.1rem .4rem;border-radius:4px;font-size:.7rem;font-weight:700">OSCE</span>
+          <span style="font-weight:600;font-family:monospace;font-size:.75rem;color:#92400e;min-width:50px">${esc(c.caseNo||'—')}</span>
+          <span style="color:#334155;line-height:1.4">${esc(c.title)}</span>
+          ${c.reviews&&c.reviews.some(rv=>rv.reviewer===r.username)?'<span style="margin-left:auto;color:#16a34a;font-size:.72rem;font-weight:600">✓ 已評</span>':'<span style="margin-left:auto;color:#d97706;font-size:.72rem">待評</span>'}
+        </div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    if(posterCount===0 && osceCount===0){
+      html += `<p style="color:#cbd5e0;font-size:.82rem;padding:.3rem 0">尚未指派任何項目</p>`;
+    }
+
+    html += `</div>`;
+  });
+
+  el('rvAssignDetail').innerHTML = html || '<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">尚無委員資料</p>';
+}
+
 function renderRvTable(reviewers){
-  // 計算各委員指派數（含 A/B/C 類別分類）
-  const posterDetail = {}; // { username: {A:n, B:n, C:n, total:n} }
-  const osceCnt = {};
 
   // 從 assignments 計算海報各類別
   if(dashData && dashData.papers){
@@ -1754,17 +1907,49 @@ function refreshOsceAssignRow(cid){
 // OSCE 評分結果表格
 function renderOsceResultsTable(cases){
   if(!cases) return;
-  const sorted = [...cases].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1));
+
+  // 總排名（不分類別）
+  const rankable = cases.filter(c=>c.avgTotal!==null);
+  const rankMap  = {};
+  let rank=1, prev=null;
+  rankable.sort((a,b)=>b.avgTotal-a.avgTotal).forEach((c,i)=>{
+    if(c.avgTotal!==prev){ rank=i+1; } rankMap[c.id]=rank; prev=c.avgTotal;
+  });
+
+  function osceBadge(rank){
+    if(rank===undefined) return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';
+    const medals={1:'🥇',2:'🥈',3:'🥉'};
+    const medal=medals[rank]||'';
+    const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';
+    const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';
+    const bdr=rank===1?'#fde68a':rank===2?'#cbd5e1':rank===3?'#fcd34d':'#e2e8f0';
+    return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};border:1px solid ${bdr};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700;white-space:nowrap">${medal}第${rank}名</span>`;
+  }
+
+  function osceGap(c){
+    const valid=c.reviews.filter(r=>!r.rejected);
+    if(valid.length>=2){
+      const sc=valid.map(r=>r.total).sort((a,b)=>a-b);
+      const gap=sc[sc.length-1]-sc[0];
+      return gap>10
+        ?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700;display:inline-flex;align-items:center;gap:.2rem">⚠ ${gap}分<span style="font-weight:400;font-size:.68rem">需第3位</span></span>`
+        :`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${gap}分</span>`;
+    }
+    if(valid.length===1) return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
+    return '—';
+  }
+
+  const sorted=[...cases].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1));
   el('osceResultsBody').innerHTML = sorted.map(c=>{
-    const rejCount = c.reviews.filter(r=>r.rejected).length;
+    const rejCount=c.reviews.filter(r=>r.rejected).length;
     return `<tr data-osce-title="${esc(c.title).toLowerCase()}">
+      <td style="text-align:center">${osceBadge(rankMap[c.id])}</td>
       <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
-      <td style="max-width:260px;line-height:1.5">${esc(c.title)}</td>
-      <td style="font-size:.82rem">${esc(c.unit||'—')}</td>
-      <td style="font-weight:600;font-size:1rem">${c.avgTotal!==null?c.avgTotal+'分':'—'}</td>
-      <td>${c.avgTotal!==null?(c.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td>
+      <td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(c.title)}</td>
+      <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
+      <td style="font-weight:700;font-size:1rem;color:#1c1c2e">${c.avgTotal!==null?c.avgTotal+'分':'—'}</td>
+      <td>${osceGap(c)}</td>
       <td>${rejCount>0?`<span class="chip chip-red">${rejCount}位退稿</span>`:'—'}</td>
-      <td style="color:#718096">${c.reviews.length} 位</td>
       <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showOsceDetail('${c.id}')">詳細</button></td>
     </tr>`;
   }).join('') || '<tr><td colspan="8" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';
@@ -1887,10 +2072,46 @@ function toggleAssignDetail(summaryId, detailId){
   detail.classList.toggle('show', !isOpen);
   summary.classList.toggle('expanded', !isOpen);
 }
+
+// Google Drive URL 轉換為可嵌入格式
+function getDriveEmbedUrl(url){
+  if(!url) return '';
+  // Google Drive 資料夾
+  const folderMatch = url.match(/drive\.google\.com\/drive\/folders\/([a-zA-Z0-9_-]+)/);
+  if(folderMatch) return `https://drive.google.com/embeddedfolderview?id=${folderMatch[1]}#list`;
+  // Google Drive 單一檔案
+  const fileMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(fileMatch) return `https://drive.google.com/file/d/${fileMatch[1]}/preview`;
+  // Google Docs/Sheets/Slides
+  const docsMatch = url.match(/docs\.google\.com\/(document|spreadsheets|presentation)\/d\/([a-zA-Z0-9_-]+)/);
+  if(docsMatch) return url.replace('/edit', '/preview').replace('/pub', '/preview');
+  // 其他：直接嵌入
+  return url;
+}
+
+// 切換 Drive 預覽
+function toggleDrivePreview(pid){
+  const wrap  = el('driveIframe_'+pid);
+  const btn   = el('previewToggle_'+pid);
+  if(!wrap) return;
+  const isOpen = wrap.classList.contains('open');
+  wrap.classList.toggle('open', !isOpen);
+  if(btn) btn.classList.toggle('active', !isOpen);
+}
 // 帳號轉姓名
 function rvName(username){ return reviewerNamesMap[username]||username; }
 
-function absBlk(lbl,txt){ if(!txt) return ''; return `<div class="abs-sec"><div class="abs-lbl">${lbl}</div><div class="abs-txt">${esc(String(txt))}</div></div>`; }
+function absBlk(lbl,txt){
+  if(!txt) return '';
+  // 格式化：數字條列自動換行（1. 2. 3. 或 1、2、3、）
+  let formatted = String(txt)
+    .replace(/\r\n/g,'\n')
+    .replace(/\r/g,'\n')
+    // 數字條列前加換行（若不在行首）
+    .replace(/([^\n])([0-9１２３４５６７８９]+[.．、。]\s)/g, '$1\n$2')
+    .trim();
+  return `<div class="abs-sec"><div class="abs-lbl">${lbl}</div><div class="abs-txt">${esc(formatted)}</div></div>`;
+}
 async function api(params){ const fd=new FormData(); Object.entries(params).forEach(([k,v])=>fd.append(k,v)); return (await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd})).json(); }
 function el(id){ return document.getElementById(id); }
 function setLdr(v){ el('ldr').style.display=v?'flex':'none'; }
