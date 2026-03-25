@@ -734,9 +734,31 @@ tr:hover td{ background:#fafafa; }
             <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">重新整理</button>
           </div>
         </div>
-        <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
-          <th>編號</th><th>論文題目</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
-        </tr></thead><tbody id="resultsBody"></tbody></table></div></div>
+        <div class="sec-body">
+          <p style="font-size:.82rem;color:#718096;margin-bottom:1.1rem">名次依平均總分計算・退稿論文不列入排名・同分同名次</p>
+
+          <!-- 分類排名 -->
+          <div style="margin-bottom:1.5rem">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem">
+              <span style="font-size:.88rem;font-weight:700;color:#1c1c2e">分類排名</span>
+              <span style="font-size:.75rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名</span>
+            </div>
+            <div class="tbl-wrap"><table><thead><tr>
+              <th style="width:90px">名次</th><th>編號</th><th>論文題目</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
+            </tr></thead><tbody id="resultsCatBody"></tbody></table></div>
+          </div>
+
+          <!-- 總排名 -->
+          <div>
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem">
+              <span style="font-size:.88rem;font-weight:700;color:#1c1c2e">總排名</span>
+              <span style="font-size:.75rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">所有論文不分類別</span>
+            </div>
+            <div class="tbl-wrap"><table><thead><tr>
+              <th style="width:72px">名次</th><th>編號</th><th>論文題目</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
+            </tr></thead><tbody id="resultsAllBody"></tbody></table></div>
+          </div>
+        </div>
       </div>
     </div>
     <!-- OSCE 評分結果 -->
@@ -1326,7 +1348,7 @@ function renderStats(s){
 function renderDashTable(papers){
   if(!papers) return;
   el('dashBody').innerHTML=papers.map(p=>{ const assigned=assignments[p.id]||[]; const done=p.reviews.length; const total=assigned.length||0; const pct=total?Math.round(done/total*100):0; const fillClass=done===0?'none':done>=total?'done':'part';
-    return `<tr><td><span class="chip chip-blue">${p.paperNo}</span></td><td style="max-width:280px;line-height:1.5">${esc(p.title)}</td><td>${p.category}</td><td style="font-size:.78rem;color:#718096">${assigned.join('、')||'—'}</td><td><div class="sc-prog"><span>${done}/${total}</span><div class="sc-bar"><div class="sc-fill ${fillClass}" style="width:${pct}%"></div></div></div></td><td class="avg-num" style="font-weight:600">${p.avgTotal!==null?p.avgTotal:'—'}</td><td>${p.avgTotal!==null?(p.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td></tr>`;
+    return `<tr><td><span class="chip chip-blue">${p.paperNo}</span></td><td style="max-width:280px;line-height:1.5">${esc(p.title)}</td><td>${p.category}</td><td style="font-size:.78rem;color:#718096">${assigned.map(u=>rvName(u)).join('、')||'—'}</td><td><div class="sc-prog"><span>${done}/${total}</span><div class="sc-bar"><div class="sc-fill ${fillClass}" style="width:${pct}%"></div></div></div></td><td class="avg-num" style="font-weight:600">${p.avgTotal!==null?p.avgTotal:'—'}</td><td>${p.avgTotal!==null?(p.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td></tr>`;
   }).join('');
 }
 
@@ -1345,37 +1367,98 @@ function autoAssign(){ if(!dashData) return; const {papers,reviewers}=dashData; 
 
 function renderResultsTable(papers){
   if(!papers) return;
-  const sorted=[...papers].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1));
-  el('resultsBody').innerHTML=sorted.map(p=>{
-    const rejCount=p.reviews.filter(r=>r.rejected).length;
-    const validReviews=p.reviews.filter(r=>!r.rejected);
 
-    // 計算分數差距
-    let gapHtml='—';
-    if(validReviews.length>=2){
-      const scores=validReviews.map(r=>r.total).sort((a,b)=>a-b);
-      const gap=scores[scores.length-1]-scores[0];
-      if(gap>10){
-        gapHtml=`<span style="display:inline-flex;align-items:center;gap:.3rem;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.2rem .65rem;border-radius:6px;font-size:.8rem;font-weight:700">
-          ⚠ ${gap}分 <span style="font-weight:400;font-size:.72rem">需第3位</span>
-        </span>`;
-      } else {
-        gapHtml=`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${gap}分</span>`;
-      }
-    } else if(validReviews.length===1){
-      gapHtml=`<span style="color:#718096;font-size:.78rem">僅1位</span>`;
+  const rankable = papers.filter(p=>p.avgTotal!==null);
+  const sorted   = [...papers].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1));
+
+  // ── 名次徽章 ──
+  function rankBadge(rank, showCat, cat){
+    if(rank===undefined) return '<span style="color:#cbd5e0;font-size:.8rem">未評分</span>';
+    const medals={1:'🥇',2:'🥈',3:'🥉'};
+    const medal=medals[rank]||'';
+    const catLabel=showCat?`<span style="font-size:.7rem;opacity:.7">${cat}</span> `:'';
+    const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';
+    const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';
+    const bdr=rank===1?'#fde68a':rank===2?'#cbd5e1':rank===3?'#fcd34d':'#e2e8f0';
+    return `<span style="display:inline-flex;align-items:center;gap:.25rem;background:${bg};color:${co};border:1px solid ${bdr};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700;white-space:nowrap">${medal}${catLabel}第${rank}名</span>`;
+  }
+
+  // ── 差距計算（共用）──
+  function gapHtml(p){
+    const valid=p.reviews.filter(r=>!r.rejected);
+    if(valid.length>=2){
+      const sc=valid.map(r=>r.total).sort((a,b)=>a-b);
+      const gap=sc[sc.length-1]-sc[0];
+      return gap>10
+        ?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700;display:inline-flex;align-items:center;gap:.2rem">⚠ ${gap}分<span style="font-weight:400;font-size:.68rem">需第3位</span></span>`
+        :`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${gap}分</span>`;
     }
+    if(valid.length===1) return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
+    return '—';
+  }
 
+  // ── 單列渲染 ──
+  function makeRow(p, rankBadgeHtml){
+    const rejCount=p.reviews.filter(r=>r.rejected).length;
     return `<tr data-title="${esc(p.title).toLowerCase()}">
+      <td style="text-align:center">${rankBadgeHtml}</td>
       <td><span class="chip chip-blue">${p.paperNo||'—'}</span></td>
-      <td style="max-width:260px;line-height:1.5">${esc(p.title)}</td>
-      <td>${p.category}</td>
-      <td class="avg-num" style="font-size:1rem">${p.avgTotal!==null?p.avgTotal+'分':'—'}</td>
-      <td>${gapHtml}</td>
+      <td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(p.title)}</td>
+      <td><span style="font-weight:600">${p.category||'—'}</span></td>
+      <td style="font-weight:700;font-size:1rem;color:#1c1c2e">${p.avgTotal!==null?p.avgTotal+'分':'—'}</td>
+      <td>${gapHtml(p)}</td>
       <td>${p.avgTotal!==null?(p.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td>
       <td>${rejCount>0?`<span class="chip chip-red">${rejCount}位退稿</span>`:'—'}</td>
       <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button></td>
     </tr>`;
+  }
+
+  // ══ 分類排名表格 ══
+  const catRankMap={};
+  ['A','B','C'].forEach(cat=>{
+    let rank=1, prev=null;
+    rankable.filter(p=>p.category===cat).sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i,arr)=>{
+      if(p.avgTotal!==prev){ rank=i+1; } catRankMap[p.id]=rank; prev=p.avgTotal;
+    });
+  });
+
+  // 分類排名：先按類別再按名次排序
+  const catSorted=[...sorted].sort((a,b)=>{
+    const catOrd={A:0,B:1,C:2};
+    const co=(catOrd[a.category]??9)-(catOrd[b.category]??9);
+    if(co!==0) return co;
+    return (catRankMap[a.id]??99)-(catRankMap[b.id]??99);
+  });
+
+  const catRows=catSorted.map(p=>{
+    const badge=p.avgTotal!==null?rankBadge(catRankMap[p.id],true,p.category):'<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';
+    return makeRow(p, badge);
+  }).join('');
+
+  // 類別分隔行
+  let catHtml='', lastCat='';
+  catRows.split('</tr>').filter(Boolean).forEach((row,i)=>{
+    const p=catSorted[i]; if(!p) return;
+    if(p.category!==lastCat){
+      const catNames={A:'A 類：臨床技能教育',B:'B 類：評量與能力導向',C:'C 類：人文素養'};
+      catHtml+=`<tr><td colspan="9" style="background:#f8fafc;font-size:.78rem;font-weight:700;color:#64748b;padding:.4rem .9rem;border-top:2px solid #e2e8f0">${catNames[p.category]||p.category}</td></tr>`;
+      lastCat=p.category;
+    }
+    catHtml+=row+'</tr>';
+  });
+  const catBody=el('resultsCatBody'); if(catBody) catBody.innerHTML=catHtml;
+
+  // ══ 總排名表格 ══
+  const allRankMap={};
+  let rank=1, prev=null;
+  rankable.sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i)=>{
+    if(p.avgTotal!==prev){ rank=i+1; } allRankMap[p.id]=rank; prev=p.avgTotal;
+  });
+
+  const allBody=el('resultsAllBody');
+  if(allBody) allBody.innerHTML=sorted.map(p=>{
+    const badge=p.avgTotal!==null?rankBadge(allRankMap[p.id],false,''):'<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';
+    return makeRow(p, badge);
   }).join('');
 }
 function filterResults(){ const q=el('resultSearch').value.toLowerCase(); document.querySelectorAll('#resultsBody tr').forEach(tr=>{ tr.style.display=!q||tr.dataset.title.includes(q)?'':'none'; }); }
@@ -1575,19 +1658,31 @@ function resultsSwitchType(t){
 
 // 載入 OSCE 後台資料
 async function loadOsceDashboard(){
-  setLdr(true);
+  // 不顯示全域 loading（避免干擾主畫面）
   try{
     const r = await api({action:'adminGetOsceDashboard'});
-    if(!r.success){ showToast('OSCE 資料載入失敗','err'); setLdr(false); return; }
-    osceData = r;
+    if(!r.success){
+      console.warn('OSCE 載入：', r.message);
+      // 不顯示錯誤 toast，OSCE 可能尚未設定
+      osceData = { cases:[], reviewers:[], stats:{total:0,reviewed:0,recommended:0,rejected:0} };
+    } else {
+      osceData = r;
+      // 同步更新 reviewerNamesMap
+      (r.reviewers||[]).forEach(rv=>{
+        if(rv.username && rv.name) reviewerNamesMap[rv.username]=rv.name;
+      });
+    }
     const ar = await api({action:'adminGetOsceAssignments'});
-    osceAssignments = ar.assignments || {};
-    renderOsceDashTable(r.cases);
-    renderOsceAssignTable(r.cases, r.reviewers);
-    renderOsceResultsTable(r.cases);
-    renderOsceStats(r.stats);
-  } catch(e){ showToast('連線失敗','err'); console.error(e); }
-  setLdr(false);
+    osceAssignments = (ar && ar.assignments) || {};
+    renderOsceDashTable(osceData.cases);
+    renderOsceAssignTable(osceData.cases, osceData.reviewers);
+    renderOsceResultsTable(osceData.cases);
+    // 更新統計卡（含 OSCE 數字）
+    if(dashData) renderStats(dashData.stats);
+  } catch(e){
+    console.error('OSCE 載入錯誤:', e);
+    osceData = { cases:[], reviewers:[], stats:{} };
+  }
 }
 
 // OSCE 統計（更新總統計卡）
@@ -1787,6 +1882,7 @@ function confirmOk(){ el('confirmModal').classList.remove('show'); if(_confirmRe
 function confirmCancel(){ el('confirmModal').classList.remove('show'); if(_confirmResolve){ _confirmResolve(false); _confirmResolve=null; } }
 
 // ══ Helpers ══
+
 
 // 展開/收合指派明細
 function toggleAssignDetail(summaryId, detailId){
