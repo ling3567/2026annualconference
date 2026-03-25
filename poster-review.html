@@ -1291,9 +1291,11 @@ async function loadDashboard(){
     const r=await api({action:'adminGetDashboard'});
     if(!r.success){ showToast('載入失敗','err'); setLdr(false); return; }
     dashData=r;
-    // 建立委員帳號→姓名對照
+    // 先建立委員姓名對照，再渲染（確保 rvName() 可用）
     if(r.reviewerNamesMap) Object.assign(reviewerNamesMap, r.reviewerNamesMap);
-    else (r.reviewers||[]).forEach(rv=>{ reviewerNamesMap[rv.username]=rv.name||rv.username; });
+    (r.reviewers||[]).forEach(rv=>{
+      if(rv.username && rv.name) reviewerNamesMap[rv.username]=rv.name;
+    });
     const ar=await api({action:'adminGetAssignments'});
     assignments=ar.assignments||{};
     renderStats(r.stats);
@@ -1331,7 +1333,7 @@ function renderDashTable(papers){
 function renderAssignTable(papers, reviewers){
   if(!papers) return;
   el('assignBody').innerHTML=papers.map(p=>{ const assigned=assignments[p.id]||[]; const options=(reviewers||[]).map(r=>`<option value="${r.username}">${r.name}(${r.username})</option>`).join('');
-    return `<tr><td><span class="chip chip-blue">${p.paperNo}</span></td><td style="max-width:260px;line-height:1.5">${esc(p.title)}</td><td>${p.category}</td><td><div class="assign-wrap" id="aw_${p.id}">${assigned.map(u=>`<span class="assign-chip">${u}<span class="rm" onclick="removeAssign('${p.id}','${u}')">✕</span></span>`).join('')}<select class="assign-sel" id="asel_${p.id}" onchange="addAssign('${p.id}')"><option value="">＋ 委員</option>${options}</select></div></td></tr>`;
+    return `<tr><td><span class="chip chip-blue">${p.paperNo}</span></td><td style="max-width:260px;line-height:1.5">${esc(p.title)}</td><td>${p.category}</td><td><div class="assign-wrap" id="aw_${p.id}">${assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeAssign('${p.id}','${u}')">✕</span></span>`).join('')}<select class="assign-sel" id="asel_${p.id}" onchange="addAssign('${p.id}')"><option value="">＋ 委員</option>${options}</select></div></td></tr>`;
   }).join('');
 }
 
