@@ -681,7 +681,7 @@ tr:hover td{ background:#fafafa; }
       <div class="sec">
         <div class="sec-head"><h3>OSCE 教案評審進度</h3><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadOsceDashboard()">重新整理</button></div>
         <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
-          <th>編號</th><th>教案主題</th><th>單位</th><th>指派委員</th><th>已評/應評</th><th>平均分</th><th>推薦</th>
+          <th>編號</th><th>教案主題</th><th>服務醫院</th><th>指派委員</th><th>已評/應評</th><th>平均分</th>
         </tr></thead><tbody id="osceDashBody"></tbody></table></div></div>
       </div>
     </div>
@@ -715,7 +715,7 @@ tr:hover td{ background:#fafafa; }
           </div>
         </div>
         <div class="sec-body"><p style="font-size:.78rem;color:#718096;margin-bottom:1rem">點選「＋委員」新增評審委員，完成後按「儲存指派」。</p>
-          <div class="tbl-wrap"><table><thead><tr><th>編號</th><th>教案主題</th><th>單位</th><th>指派委員（可多位）</th></tr></thead><tbody id="osceAssignBody"></tbody></table></div>
+          <div class="tbl-wrap"><table><thead><tr><th>編號</th><th>教案主題</th><th>服務醫院</th><th>指派委員（可多位）</th></tr></thead><tbody id="osceAssignBody"></tbody></table></div>
         </div>
       </div>
     </div>
@@ -771,7 +771,7 @@ tr:hover td{ background:#fafafa; }
           </div>
         </div>
         <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
-          <th>編號</th><th>教案主題</th><th>單位</th><th>平均總分</th><th>推薦</th><th>退稿</th><th>評審數</th><th>詳細</th>
+          <th>名次</th><th>編號</th><th>教案主題</th><th>服務醫院</th><th>平均總分</th><th>分數差距</th><th>退稿</th><th>詳細</th>
         </tr></thead><tbody id="osceResultsBody"></tbody></table></div></div>
       </div>
     </div>
@@ -1698,13 +1698,12 @@ function renderOsceDashTable(cases){
     return `<tr>
       <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
       <td style="max-width:260px;line-height:1.5">${esc(c.title)}</td>
-      <td style="font-size:.82rem">${esc(c.unit||'—')}</td>
+      <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
       <td style="font-size:.82rem;color:#334155">${assigned.map(u=>rvName(u)).join('、')||'—'}</td>
       <td><div class="sc-prog"><span>${done}/${total}</span>
         <div class="sc-bar"><div class="sc-fill ${fillClass}" style="width:${pct}%"></div></div>
       </div></td>
       <td style="font-weight:600">${c.avgTotal!==null?c.avgTotal:'—'}</td>
-      <td>${c.avgTotal!==null?(c.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td>
     </tr>`;
   }).join('') || '<tr><td colspan="7" style="text-align:center;color:#718096;padding:2rem">尚無 OSCE 教案資料</td></tr>';
 }
@@ -1718,7 +1717,7 @@ function renderOsceAssignTable(cases, reviewers){
     return `<tr>
       <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
       <td style="max-width:240px;line-height:1.5">${esc(c.title)}</td>
-      <td style="font-size:.82rem">${esc(c.unit||'—')}</td>
+      <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
       <td>
         <div class="assign-wrap" id="oaw_${c.id}">
           ${assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeOsceAssign('${c.id}','${u}')">✕</span></span>`).join('')}
