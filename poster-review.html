@@ -1110,11 +1110,6 @@ function renderOsceScoreForm(p, draft, isDone){
         ${isDone?'readonly':''}  oninput="validateScore(this,${OSCE_BONUS.max}); updateOsceTotal()"><span class="score-max">/ ${OSCE_BONUS.max}</span></div>
     </div></div>`;
   html+=`<div class="total-bar"><div><div class="total-lbl">合計總分</div><div class="bonus-note">（基本100分＋優良加分）</div></div><div class="total-num" id="osceTotal">—<small> / 100+</small></div></div>`;
-  const isRec=!!(draft.recommend);
-  html+=`<div class="recommend-zone"><div class="recommend-zone-head">
-    <input type="checkbox" class="recommend-checkbox" id="recChk" ${isRec?'checked':''} ${dis}>
-    <label for="recChk">⭐ 推薦此教案</label></div>
-    <div class="recommend-note">勾選代表建議此教案值得於研討會中展示</div></div>`;
   html+=`<div class="cmt-wrap"><label>評語（選填）</label><textarea id="cmtArea" placeholder="可填寫對本篇教案的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea></div>`;
   html+=`<div class="cmt-wrap"><label>優良加分說明（有填加分時請說明）</label><textarea id="bonusNote" placeholder="請說明優良表現原因…" ${dis}>${esc(draft.bonusNote||'')}</textarea></div>`;
   const isRej=!!(draft.rejected);
