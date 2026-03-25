@@ -730,7 +730,7 @@ tr:hover td{ background:#fafafa; }
     </div>
     <div class="sec">
       <div class="sec-head"><h3>委員帳號列表</h3><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadReviewers()">重新整理</button></div>
-      <div class="sec-body"><div class="tbl-wrap"><table><thead><tr><th>帳號</th><th>密碼</th><th>姓名</th><th>狀態</th><th>操作</th></tr></thead><tbody id="rvBody"></tbody></table></div></div>
+      <div class="sec-body"><div class="tbl-wrap"><table><thead><tr><th>帳號</th><th>密碼</th><th>姓名</th><th>狀態</th><th style="text-align:center">海報指派</th><th style="text-align:center">OSCE指派</th><th>操作</th></tr></thead><tbody id="rvBody"></tbody></table></div></div>
     </div>
   </div>
 </div>
@@ -832,6 +832,7 @@ let currentRole = null; // 'reviewer' | 'admin'
 let reviewer=null, papers={poster:[],osce:[]};
 let submitted={}, drafts={}, curType='poster', curIdx=null;
 let dashData=null, assignments={}, admCurTab='dashboard';
+let reviewerNamesMap={}; // username → name
 let _confirmResolve=null;
 
 // ══════════════════════════════
@@ -854,6 +855,7 @@ async function doLogin(){
       submitted=r.submitted||{};
       const ss=r.submittedScores||{};
       Object.entries(ss).forEach(([pid,sc])=>{ drafts[pid]=sc; });
+      reviewerNamesMap=r.reviewerNames||{};
       el('rvName').textContent=reviewer.name;
       el('loginScreen').style.display='none';
       el('reviewerApp').classList.add('show');
@@ -1242,7 +1244,7 @@ function admSwitchTab(t){
   admCurTab=t;
   document.querySelectorAll('.adm-tab').forEach(el=>el.classList.toggle('active',el.dataset.tab===t));
   ['dashboard','assign','results','reviewers'].forEach(id=>{ el('adm-tab-'+id).style.display=id===t?'block':'none'; });
-  if(t==='reviewers') loadReviewers();
+  if(t==='reviewers'){ loadReviewers(); }
 }
 
 async function loadDashboard(){
@@ -1251,6 +1253,8 @@ async function loadDashboard(){
     const r=await api({action:'adminGetDashboard'});
     if(!r.success){ showToast('載入失敗','err'); setLdr(false); return; }
     dashData=r;
+    // 建立委員帳號→姓名對照
+    (r.reviewers||[]).forEach(rv=>{ reviewerNamesMap[rv.username]=rv.name||rv.username; });
     const ar=await api({action:'adminGetAssignments'});
     assignments=ar.assignments||{};
     renderStats(r.stats);
@@ -1326,7 +1330,41 @@ function showDetail(pid){
 function closeModal(){ el('detailModal').classList.remove('show'); }
 
 async function loadReviewers(){ setLdr(true); try{ const r=await api({action:'adminGetReviewers'}); if(r.success) renderRvTable(r.reviewers); else showToast('載入失敗','err'); } catch{ showToast('連線失敗','err'); } setLdr(false); }
-function renderRvTable(reviewers){ el('rvBody').innerHTML=(reviewers||[]).map(r=>`<tr><td style="font-weight:500">${r.username}</td><td style="color:#718096;font-family:monospace">${r.password}</td><td>${r.name}</td><td><span class="chip ${r.enabled?'chip-green':'chip-gray'}">${r.enabled?'啟用':'停用'}</span></td><td><div style="display:flex;gap:.4rem"><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="toggleReviewer('${r.username}',${!r.enabled})">${r.enabled?'停用':'啟用'}</button><button class="adm-btn adm-btn-danger adm-btn-sm" onclick="deleteReviewer('${r.username}')">刪除</button></div></td></tr>`).join(''); }
+function renderRvTable(reviewers){
+  // 計算各委員指派數（從 assignments 和 osceAssignments）
+  const posterCnt = {}, osceCnt = {};
+  Object.values(assignments).forEach(users => {
+    (users||[]).forEach(u => { posterCnt[u] = (posterCnt[u]||0)+1; });
+  });
+  Object.values(osceAssignments).forEach(users => {
+    (users||[]).forEach(u => { osceCnt[u] = (osceCnt[u]||0)+1; });
+  });
+  // 若後台剛載入有 r.posterCount 則優先使用
+  el('rvBody').innerHTML=(reviewers||[]).map(r=>{
+    const pc = r.posterCount !== undefined ? r.posterCount : (posterCnt[r.username]||0);
+    const oc = r.osceCount   !== undefined ? r.osceCount   : (osceCnt[r.username]||0);
+    return `<tr>
+      <td style="font-weight:500;font-family:monospace;font-size:.85rem">${r.username}</td>
+      <td style="color:#718096;font-family:monospace;font-size:.85rem">${r.password}</td>
+      <td style="font-weight:500">${r.name}</td>
+      <td><span class="chip ${r.enabled?'chip-green':'chip-gray'}">${r.enabled?'啟用':'停用'}</span></td>
+      <td style="text-align:center">
+        ${pc>0
+          ? `<span style="display:inline-flex;align-items:center;gap:.3rem;background:#dbeafe;color:#1e4d8c;padding:.2rem .6rem;border-radius:6px;font-size:.8rem;font-weight:600">${pc} 篇</span>`
+          : `<span style="color:#cbd5e0;font-size:.82rem">—</span>`}
+      </td>
+      <td style="text-align:center">
+        ${oc>0
+          ? `<span style="display:inline-flex;align-items:center;gap:.3rem;background:#fef3c7;color:#92400e;padding:.2rem .6rem;border-radius:6px;font-size:.8rem;font-weight:600">${oc} 個</span>`
+          : `<span style="color:#cbd5e0;font-size:.82rem">—</span>`}
+      </td>
+      <td><div style="display:flex;gap:.4rem">
+        <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="toggleReviewer('${r.username}',${!r.enabled})">${r.enabled?'停用':'啟用'}</button>
+        <button class="adm-btn adm-btn-danger adm-btn-sm" onclick="deleteReviewer('${r.username}')">刪除</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
 async function addReviewer(){ const u=el('nwUser').value.trim(), pw=el('nwPw').value.trim(), n=el('nwName').value.trim(); if(!u||!pw||!n){ showToast('請填寫完整欄位','err'); return; } setLdr(true); try{ const r=await api({action:'adminAddReviewer',username:u,password:pw,name:n}); if(r.success){ showToast('委員已新增','ok'); el('nwUser').value=''; el('nwPw').value=''; el('nwName').value=''; loadReviewers(); } else showToast(r.message||'新增失敗','err'); } catch{ showToast('連線失敗','err'); } setLdr(false); }
 async function toggleReviewer(u,enabled){ setLdr(true); try{ const r=await api({action:'adminUpdateReviewer',username:u,enabled:String(enabled)}); if(r.success){ showToast(`帳號已${enabled?'啟用':'停用'}`,'ok'); loadReviewers(); } else showToast('操作失敗','err'); } catch{ showToast('連線失敗','err'); } setLdr(false); }
 async function deleteReviewer(u){ if(!confirm(`確定刪除委員「${u}」？`)) return; setLdr(true); try{ const r=await api({action:'adminDeleteReviewer',username:u}); if(r.success){ showToast('委員已刪除','ok'); loadReviewers(); } else showToast(r.message||'刪除失敗','err'); } catch{ showToast('連線失敗','err'); } setLdr(false); }
@@ -1413,7 +1451,7 @@ function renderOsceDashTable(cases){
       <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
       <td style="max-width:260px;line-height:1.5">${esc(c.title)}</td>
       <td style="font-size:.82rem">${esc(c.unit||'—')}</td>
-      <td style="font-size:.78rem;color:#718096">${assigned.join('、')||'—'}</td>
+      <td style="font-size:.82rem;color:#334155">${assigned.map(u=>rvName(u)).join('、')||'—'}</td>
       <td><div class="sc-prog"><span>${done}/${total}</span>
         <div class="sc-bar"><div class="sc-fill ${fillClass}" style="width:${pct}%"></div></div>
       </div></td>
@@ -1435,7 +1473,7 @@ function renderOsceAssignTable(cases, reviewers){
       <td style="font-size:.82rem">${esc(c.unit||'—')}</td>
       <td>
         <div class="assign-wrap" id="oaw_${c.id}">
-          ${assigned.map(u=>`<span class="assign-chip">${u}<span class="rm" onclick="removeOsceAssign('${c.id}','${u}')">✕</span></span>`).join('')}
+          ${assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeOsceAssign('${c.id}','${u}')">✕</span></span>`).join('')}
           <select class="assign-sel" id="oasel_${c.id}" onchange="addOsceAssign('${c.id}')">
             <option value="">＋ 委員</option>${options}
           </select>
@@ -1463,7 +1501,7 @@ function refreshOsceAssignRow(cid){
   const assigned = osceAssignments[cid] || [];
   const sel = el('oasel_'+cid);
   const selHTML = sel ? sel.outerHTML : '';
-  wrap.innerHTML = assigned.map(u=>`<span class="assign-chip">${u}<span class="rm" onclick="removeOsceAssign('${cid}','${u}')">✕</span></span>`).join('') + selHTML;
+  wrap.innerHTML = assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeOsceAssign('${cid}','${u}')">✕</span></span>`).join('') + selHTML;
 }
 
 // OSCE 評分結果表格
@@ -1513,7 +1551,7 @@ function showOsceDetail(cid){
     c.reviews.forEach((r,i)=>{
       html += `<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #edf2f7">
         <div style="display:flex;justify-content:space-between;margin-bottom:.6rem">
-          <span style="font-size:.78rem;font-weight:600;color:#4a5568">評審 ${i+1}：${r.reviewer}</span>
+          <span style="font-size:.78rem;font-weight:600;color:#4a5568">評審 ${i+1}：${rvName(r.reviewer)}</span>
           <span style="font-size:.78rem;color:#718096">${r.time}</span>
         </div>`;
       if(r.rejected){
@@ -1591,6 +1629,9 @@ function confirmOk(){ el('confirmModal').classList.remove('show'); if(_confirmRe
 function confirmCancel(){ el('confirmModal').classList.remove('show'); if(_confirmResolve){ _confirmResolve(false); _confirmResolve=null; } }
 
 // ══ Helpers ══
+// 帳號轉姓名
+function rvName(username){ return reviewerNamesMap[username]||username; }
+
 function absBlk(lbl,txt){ if(!txt) return ''; return `<div class="abs-sec"><div class="abs-lbl">${lbl}</div><div class="abs-txt">${esc(String(txt))}</div></div>`; }
 async function api(params){ const fd=new FormData(); Object.entries(params).forEach(([k,v])=>fd.append(k,v)); return (await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd})).json(); }
 function el(id){ return document.getElementById(id); }
