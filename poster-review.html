@@ -1019,7 +1019,9 @@ async function doLogin(){
   setLdr(true);
   try{
     // 先嘗試委員登入
+    console.log('嘗試委員登入:', u);
     const r=await api({action:'reviewerLogin', username:u, password:p});
+    console.log('委員登入回應:', JSON.stringify(r));
     if(r.success){
       // 委員登入成功
       currentRole='reviewer';
@@ -1037,7 +1039,9 @@ async function doLogin(){
       renderList();
     } else if(r.message==='NOT_REVIEWER'){
       // 不是委員，嘗試管理員登入
+      console.log('非委員帳號，嘗試管理員登入');
       const ra=await api({action:'adminLogin', username:u, password:p});
+      console.log('管理員登入回應:', JSON.stringify(ra));
       if(ra.success){
         currentRole='admin';
         el('adminName').textContent=ra.adminName||u;
@@ -1052,7 +1056,12 @@ async function doLogin(){
       eEl.textContent='⚠ '+(r.message||'帳號或密碼錯誤');
       eEl.style.display='block';
     }
-  } catch(e){ eEl.textContent='⚠ 連線失敗，請稍後再試'; eEl.style.display='block'; console.error(e); }
+  } catch(e){
+    const msg = e && e.message ? e.message : String(e);
+    eEl.textContent='⚠ 連線失敗：' + msg;
+    eEl.style.display='block';
+    console.error('doLogin error:', e);
+  }
   setLdr(false);
 }
 
@@ -1864,8 +1873,15 @@ async function deleteReviewer(u){
 // ══ Helpers ══
 async function api(params){
   const fd=new FormData();
-  Object.entries(params).forEach(([k,v])=>fd.append(k,v));
-  return (await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd})).json();
+  Object.entries(params).forEach(([k,v])=>fd.append(k,String(v??'')));
+  const resp = await fetch(APPS_SCRIPT_URL, {
+    method:'POST', body:fd,
+    redirect:'follow'
+  });
+  if(!resp.ok) throw new Error('HTTP '+resp.status+' '+resp.statusText);
+  const text = await resp.text();
+  try { return JSON.parse(text); }
+  catch(e){ throw new Error('回應非 JSON：'+text.substring(0,100)); }
 }
 function el(id){ return document.getElementById(id); }
 function setLdr(v){ el('ldr').style.display=v?'flex':'none'; }
@@ -1874,6 +1890,240 @@ function showToast(msg,type){
   document.body.appendChild(t); setTimeout(()=>t.remove(),3200);
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ══ State 變數（OSCE 後台）══
+let osceData = null;
+let osceAssignments = {};
+let dashType = 'poster';
+let assignType = 'poster';
+let resultsType = 'poster';
+
+// ══ 確認 Modal ══
+// _confirmResolve 已在前面宣告
+function showConfirm(title, bodyHtml){
+  return new Promise(resolve => {
+    _confirmResolve = resolve;
+    const cm = el('confirmModal'); if(!cm) { resolve(true); return; }
+    el('confirmTitle').textContent = title;
+    el('confirmBody').innerHTML = bodyHtml;
+    cm.classList.add('show');
+  });
+}
+function confirmOk(){ const cm=el('confirmModal'); if(cm) cm.classList.remove('show'); if(_confirmResolve){ _confirmResolve(true); _confirmResolve=null; } }
+function confirmCancel(){ const cm=el('confirmModal'); if(cm) cm.classList.remove('show'); if(_confirmResolve){ _confirmResolve(false); _confirmResolve=null; } }
+
+// ══ Drive 預覽 ══
+function getDriveEmbedUrl(url){
+  if(!url) return '';
+  const folderMatch = url.match(/drive\.google\.com\/drive\/folders\/([a-zA-Z0-9_-]+)/);
+  if(folderMatch) return 'https://drive.google.com/embeddedfolderview?id='+folderMatch[1]+'#list';
+  const fileMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(fileMatch) return 'https://drive.google.com/file/d/'+fileMatch[1]+'/preview';
+  return url;
+}
+function toggleDrivePreview(pid){
+  const wrap = el('di_'+pid) || el('driveIframe_'+pid);
+  const btn  = el('pt_'+pid) || el('previewToggle_'+pid);
+  if(!wrap) return;
+  const isOpen = wrap.classList.contains('open');
+  wrap.classList.toggle('open', !isOpen);
+  if(btn) btn.classList.toggle('active', !isOpen);
+}
+
+// ══ Draggable 分隔線 ══
+function initDraggable(){
+  ['divider1','divider2'].forEach(id=>{
+    const div = el(id); if(!div) return;
+    let startX, startPrev, startNext;
+    div.addEventListener('mousedown', e=>{
+      const prev = div.previousElementSibling;
+      const next = div.nextElementSibling;
+      if(!prev||!next) return;
+      startX = e.clientX;
+      startPrev = prev.offsetWidth;
+      startNext = next.offsetWidth;
+      div.classList.add('dragging');
+      document.body.style.cursor='col-resize';
+      document.body.style.userSelect='none';
+      function onMove(e2){
+        const dx = e2.clientX - startX;
+        const prevMin = parseInt(getComputedStyle(prev).minWidth)||100;
+        const nextMin = parseInt(getComputedStyle(next).minWidth)||100;
+        const newPrev = Math.max(prevMin, Math.min(startPrev+dx, startPrev+startNext-nextMin));
+        const newNext = startPrev+startNext-newPrev;
+        prev.style.width = newPrev+'px'; prev.style.flex = '0 0 '+newPrev+'px';
+        next.style.width = newNext+'px'; next.style.flex = '0 0 '+newNext+'px';
+      }
+      function onUp(){
+        div.classList.remove('dragging');
+        document.body.style.cursor=''; document.body.style.userSelect='';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      e.preventDefault();
+    });
+  });
+}
+
+// ══ 展開/收合 ══
+function toggleAssignDetail(summaryId, detailId){
+  const summary=el(summaryId), detail=el(detailId);
+  if(!summary||!detail) return;
+  const isOpen=detail.classList.contains('show');
+  detail.classList.toggle('show',!isOpen);
+  summary.classList.toggle('expanded',!isOpen);
+}
+
+// ══ 後台分頁切換 ══
+function dashSwitchType(t){
+  dashType=t;
+  el('dashTypePoster').classList.toggle('active',t==='poster');
+  el('dashTypeOsce').classList.toggle('active',t==='osce');
+  el('dashPosterSection').style.display=t==='poster'?'':'none';
+  el('dashOsceSection').style.display=t==='osce'?'':'none';
+  if(t==='osce'&&!osceData) loadOsceDashboard();
+}
+function assignSwitchType(t){
+  assignType=t;
+  el('assignTypePoster').classList.toggle('active',t==='poster');
+  el('assignTypeOsce').classList.toggle('active',t==='osce');
+  el('assignPosterSection').style.display=t==='poster'?'':'none';
+  el('assignOsceSection').style.display=t==='osce'?'':'none';
+  if(t==='osce'){ if(!osceData) loadOsceDashboard(); else renderOsceAssignTable(osceData.cases,osceData.reviewers); }
+}
+function resultsSwitchType(t){
+  resultsType=t;
+  el('resultsTypePoster').classList.toggle('active',t==='poster');
+  el('resultsTypeOsce').classList.toggle('active',t==='osce');
+  el('resultsPosterSection').style.display=t==='poster'?'':'none';
+  el('resultsOsceSection').style.display=t==='osce'?'':'none';
+  if(t==='osce'){ if(!osceData) loadOsceDashboard(); else renderOsceResultsTable(osceData.cases); }
+}
+function rvSwitchSub(tab){
+  el('rvSubAccounts').classList.toggle('active',tab==='accounts');
+  el('rvSubAssign').classList.toggle('active',tab==='assign');
+  el('rvPanelAccounts').style.display=tab==='accounts'?'':'none';
+  el('rvPanelAssign').style.display=tab==='assign'?'':'none';
+}
+
+// ══ OSCE 後台資料 ══
+async function loadOsceDashboard(){
+  try{
+    const r=await api({action:'adminGetOsceDashboard'});
+    if(!r.success){ osceData={cases:[],reviewers:[],stats:{}}; }
+    else{
+      osceData=r;
+      (r.reviewers||[]).forEach(rv=>{ if(rv.username&&rv.name) reviewerNamesMap[rv.username]=rv.name; });
+    }
+    const ar=await api({action:'adminGetOsceAssignments'});
+    osceAssignments=(ar&&ar.assignments)||{};
+    renderOsceDashTable(osceData.cases);
+    renderOsceAssignTable(osceData.cases,osceData.reviewers);
+    renderOsceResultsTable(osceData.cases);
+    if(dashData) renderStats(dashData.stats);
+  }catch(e){ console.error('OSCE 載入錯誤:',e); osceData={cases:[],reviewers:[],stats:{}}; }
+}
+
+function renderOsceDashTable(cases){
+  const body=el('osceDashBody'); if(!body) return;
+  if(!cases||!cases.length){ body.innerHTML='<tr><td colspan="6" style="text-align:center;color:#718096;padding:2rem">尚無 OSCE 教案資料</td></tr>'; return; }
+  body.innerHTML=cases.map(c=>{
+    const assigned=osceAssignments[c.id]||[];
+    const done=c.reviews.length, total=assigned.length||0;
+    const pct=total?Math.round(done/total*100):0;
+    const fillClass=done===0?'none':done>=total?'done':'part';
+    return `<tr>
+      <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
+      <td style="max-width:260px;line-height:1.5">${esc(c.title)}</td>
+      <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
+      <td style="font-size:.85rem;color:#334155">${assigned.map(u=>rvName(u)).join('、')||'—'}</td>
+      <td><div class="sc-prog"><span>${done}/${total}</span><div class="sc-bar"><div class="sc-fill ${fillClass}" style="width:${pct}%"></div></div></div></td>
+      <td style="font-weight:600">${c.avgTotal!==null?c.avgTotal:'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderOsceAssignTable(cases,reviewers){
+  const body=el('osceAssignBody'); if(!body) return;
+  if(!cases||!cases.length){ body.innerHTML='<tr><td colspan="4" style="text-align:center;color:#718096;padding:2rem">尚無教案資料</td></tr>'; return; }
+  body.innerHTML=cases.map(c=>{
+    const assigned=osceAssignments[c.id]||[];
+    const options=(reviewers||[]).map(r=>`<option value="${r.username}">${r.name}(${r.username})</option>`).join('');
+    return `<tr>
+      <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
+      <td style="max-width:240px;line-height:1.5">${esc(c.title)}</td>
+      <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
+      <td><div class="assign-wrap" id="oaw_${c.id}">
+        ${assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeOsceAssign('${c.id}','${u}')">✕</span></span>`).join('')}
+        <select class="assign-sel" id="oasel_${c.id}" onchange="addOsceAssign('${c.id}')"><option value="">＋ 委員</option>${options}</select>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function addOsceAssign(cid){ const sel=el('oasel_'+cid); const u=sel.value; if(!u) return; sel.value=''; if(!osceAssignments[cid]) osceAssignments[cid]=[]; if(osceAssignments[cid].includes(u)){showToast('此委員已在列表中','err');return;} osceAssignments[cid].push(u); refreshOsceAssignRow(cid); }
+function removeOsceAssign(cid,u){ if(!osceAssignments[cid]) return; osceAssignments[cid]=osceAssignments[cid].filter(x=>x!==u); refreshOsceAssignRow(cid); }
+function refreshOsceAssignRow(cid){ const wrap=el('oaw_'+cid); if(!wrap) return; const assigned=osceAssignments[cid]||[]; const sel=el('oasel_'+cid); const selHTML=sel?sel.outerHTML:''; wrap.innerHTML=assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeOsceAssign('${cid}','${u}')">✕</span></span>`).join('')+selHTML; }
+
+function renderOsceResultsTable(cases){
+  const body=el('osceResultsBody'); if(!body) return;
+  if(!cases||!cases.length){ body.innerHTML='<tr><td colspan="8" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>'; return; }
+  const rankable=cases.filter(c=>c.avgTotal!==null);
+  const rankMap={};
+  let rank=1,prev=null;
+  rankable.sort((a,b)=>b.avgTotal-a.avgTotal).forEach((c,i)=>{ if(c.avgTotal!==prev){rank=i+1;} rankMap[c.id]=rank; prev=c.avgTotal; });
+  function badge(rank){ if(rank===undefined) return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>'; const medals={1:'🥇',2:'🥈',3:'🥉'}; const medal=medals[rank]||''; const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc'; const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b'; const bdr=rank===1?'#fde68a':rank===2?'#cbd5e1':rank===3?'#fcd34d':'#e2e8f0'; return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};border:1px solid ${bdr};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700;white-space:nowrap">${medal}第${rank}名</span>`; }
+  function gapHtml(c){ const valid=c.reviews.filter(r=>!r.rejected); if(valid.length>=2){ const sc=valid.map(r=>r.total).sort((a,b)=>a-b); const gap=sc[sc.length-1]-sc[0]; return gap>10?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700;display:inline-flex;align-items:center;gap:.2rem">⚠ ${gap}分<span style="font-weight:400;font-size:.68rem">需第3位</span></span>`:`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${gap}分</span>`; } if(valid.length===1) return '<span style="color:#718096;font-size:.78rem">僅1位</span>'; return '—'; }
+  const sorted=[...cases].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1));
+  body.innerHTML=sorted.map(c=>{ const rejCount=c.reviews.filter(r=>r.rejected).length; return `<tr data-osce-title="${esc(c.title).toLowerCase()}">
+    <td style="text-align:center">${badge(rankMap[c.id])}</td>
+    <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
+    <td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(c.title)}</td>
+    <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
+    <td style="font-weight:700;font-size:1rem;color:#1c1c2e">${c.avgTotal!==null?c.avgTotal+'分':'—'}</td>
+    <td>${gapHtml(c)}</td>
+    <td>${rejCount>0?`<span class="chip chip-red">${rejCount}位退稿</span>`:'—'}</td>
+    <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showOsceDetail('${c.id}')">詳細</button></td>
+  </tr>`; }).join('');
+}
+function filterOsceResults(){ const q=el('osceResultSearch').value.toLowerCase(); document.querySelectorAll('#osceResultsBody tr').forEach(tr=>{ tr.style.display=!q||(tr.dataset.osceTitle||'').includes(q)?'':'none'; }); }
+
+async function saveAssignments(type){
+  const t=type||assignType;
+  if(!confirm('確認儲存所有指派設定？')) return;
+  setLdr(true);
+  try{
+    let r;
+    if(t==='osce') r=await api({action:'adminSaveOsceAssignments',assignmentsJson:JSON.stringify(osceAssignments)});
+    else r=await api({action:'adminSaveAssignments',assignmentsJson:JSON.stringify(assignments)});
+    if(r.success) showToast(`指派已儲存（${r.saved}筆）`,'ok');
+    else showToast('儲存失敗','err');
+  }catch{ showToast('連線失敗','err'); }
+  setLdr(false);
+}
+function autoAssign(type){
+  const t=type||assignType;
+  if(t==='osce'){
+    if(!osceData) return;
+    const {cases,reviewers}=osceData;
+    const active=(reviewers||[]).filter(r=>r.enabled);
+    if(!active.length){showToast('沒有啟用中的委員','err');return;}
+    if(!confirm(`將 ${cases.length} 個教案平均分配給 ${active.length} 位委員？`)) return;
+    cases.forEach((c,i)=>{osceAssignments[c.id]=[active[i%active.length].username];});
+    renderOsceAssignTable(cases,reviewers);
+    showToast('自動指派完成，請記得按「儲存指派」','ok');
+  } else {
+    if(!dashData) return;
+    const {papers,reviewers}=dashData;
+    const active=(reviewers||[]).filter(r=>r.enabled);
+    if(!active.length){showToast('沒有啟用中的委員','err');return;}
+    if(!confirm(`將 ${papers.length} 篇論文平均分配給 ${active.length} 位委員？`)) return;
+    papers.forEach((p,i)=>{assignments[p.id]=[active[i%active.length].username];});
+    renderAssignTable(papers,reviewers);
+    showToast('自動指派完成，請記得按「儲存指派」','ok');
+  }
+}
 </script>
 </body>
 </html>
