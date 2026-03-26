@@ -1797,3 +1797,83 @@ function showOsceDetail(cid){
   el('detailBody').innerHTML=html;
   el('detailModal').classList.add('show');
 }
+
+// 前端版智慧平均（取差距最小的2位）
+function calcFrontendSmartAvg(scores){
+  const s=scores.filter(v=>!isNaN(v)&&v!==null&&v!==undefined);
+  if(!s.length) return null;
+  if(s.length<=2) return Math.round(s.reduce((a,b)=>a+b,0)/s.length*10)/10;
+  const sorted=[...s].sort((a,b)=>a-b);
+  let minGap=Infinity, bestPair=[sorted[0],sorted[1]];
+  for(let i=0;i<sorted.length-1;i++){
+    const gap=sorted[i+1]-sorted[i];
+    if(gap<minGap){minGap=gap;bestPair=[sorted[i],sorted[i+1]];}
+  }
+  return Math.round((bestPair[0]+bestPair[1])/2*10)/10;
+}
+
+function closeModal(){ el('detailModal').classList.remove('show'); }
+
+// ── Reviewers ──
+async function loadReviewers(){
+  setLdr(true);
+  try{
+    const r=await api({action:'adminGetReviewers'});
+    if(r.success){
+      if(r.reviewerNamesMap) Object.assign(reviewerNamesMap, r.reviewerNamesMap);
+      else (r.reviewers||[]).forEach(rv=>{ reviewerNamesMap[rv.username]=rv.name||rv.username; });
+      renderRvTable(r.reviewers);
+    } else showToast('載入失敗','err');
+  } catch{ showToast('連線失敗','err'); }
+  setLdr(false);
+}
+
+async function addReviewer(){
+  const u=el('nwUser').value.trim(), pw=el('nwPw').value.trim(), n=el('nwName').value.trim();
+  if(!u||!pw||!n){ showToast('請填寫完整欄位','err'); return; }
+  setLdr(true);
+  try{
+    const r=await api({action:'adminAddReviewer',username:u,password:pw,name:n});
+    if(r.success){ showToast('委員已新增','ok'); el('nwUser').value=''; el('nwPw').value=''; el('nwName').value=''; loadReviewers(); }
+    else showToast(r.message||'新增失敗','err');
+  } catch{ showToast('連線失敗','err'); }
+  setLdr(false);
+}
+
+async function toggleReviewer(u,enabled){
+  setLdr(true);
+  try{
+    const r=await api({action:'adminUpdateReviewer',username:u,enabled:String(enabled)});
+    if(r.success){ showToast(`帳號已${enabled?'啟用':'停用'}`,'ok'); loadReviewers(); }
+    else showToast('操作失敗','err');
+  } catch{ showToast('連線失敗','err'); }
+  setLdr(false);
+}
+
+async function deleteReviewer(u){
+  if(!confirm(`確定刪除委員「${u}」？`)) return;
+  setLdr(true);
+  try{
+    const r=await api({action:'adminDeleteReviewer',username:u});
+    if(r.success){ showToast('委員已刪除','ok'); loadReviewers(); }
+    else showToast(r.message||'刪除失敗','err');
+  } catch{ showToast('連線失敗','err'); }
+  setLdr(false);
+}
+
+// ══ Helpers ══
+async function api(params){
+  const fd=new FormData();
+  Object.entries(params).forEach(([k,v])=>fd.append(k,v));
+  return (await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd})).json();
+}
+function el(id){ return document.getElementById(id); }
+function setLdr(v){ el('ldr').style.display=v?'flex':'none'; }
+function showToast(msg,type){
+  const t=document.createElement('div'); t.className='toast '+type; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),3200);
+}
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
