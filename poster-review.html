@@ -702,6 +702,10 @@ tr:hover td{ background:#fafafa; }
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       委員帳號
     </div>
+    <div class="adm-tab" data-tab="assignDetail" onclick="admSwitchTab('assignDetail')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      指派明細
+    </div>
   </div>
   <div class="adm-content" id="adm-tab-dashboard">
     <!-- 統計卡 -->
@@ -868,6 +872,19 @@ tr:hover td{ background:#fafafa; }
         <div class="sec-body" id="rvAssignDetail">
           <p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">載入中…</p>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 指派明細（獨立分頁）-->
+  <div class="adm-content" id="adm-tab-assignDetail" style="display:none">
+    <div class="sec">
+      <div class="sec-head">
+        <h3>委員指派明細</h3>
+        <span style="font-size:.8rem;color:#718096">各委員的海報論文與 OSCE 教案指派狀況・含已評/待評</span>
+      </div>
+      <div class="sec-body" id="rvAssignDetail2">
+        <p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">載入中…</p>
       </div>
     </div>
   </div>
@@ -1152,7 +1169,20 @@ function renderOsceContent(i){
         <div class="p-title">${esc(p.title)}</div>
       </div>
       <div class="p-info-body">
-        ${p.driveUrl?`<div class="cloud-link-box"><span class="icon">☁️</span><div class="info"><strong>Google 雲端教案資料</strong><p>影片、教案 PDF 等評審資料</p></div><a class="btn-cloud" href="${esc(p.driveUrl)}" target="_blank">開啟資料 ↗</a></div>`:''}
+        ${p.driveUrl?`<div class="drive-preview-wrap">
+          <div class="drive-preview-head">
+            <div><strong>Google 雲端教案資料</strong>
+              ${p.contactName?'<span style="font-size:.75rem;color:#7a6e68;margin-left:.5rem">聯絡人：'+esc(p.contactName)+'</span>':''}</div>
+            <div class="drive-preview-btns">
+              <button class="drive-toggle-btn active" id="pt_${p.id}" onclick="toggleDrivePreview('${p.id}')">在此預覽</button>
+              <a class="drive-toggle-btn" href="${p.driveUrl}" target="_blank">開新分頁</a>
+            </div>
+          </div>
+          <div class="drive-iframe-wrap open" id="di_${p.id}">
+            <iframe src="${getDriveEmbedUrl(p.driveUrl)}" allowfullscreen loading="lazy"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+          </div>
+        </div>`:''}
         ${p.summary?absBlk('教案摘要',p.summary):''}
         ${p.absMotivation?absBlk('設計動機',p.absMotivation):''}
         ${p.method?absBlk('教學方法',p.method):''}
@@ -1278,6 +1308,19 @@ async function submitScore(){
     const missing=validateAllFilled(curType);
     if(missing.length>0){ showToast(`請填寫所有評分項目（尚有 ${missing.length} 項未填）`,'err'); markEmptyInputs(); return; }
     if(document.querySelectorAll('.score-input.over').length>0){ showToast('有分數超過滿分，請修正','err'); return; }
+    // OSCE：有填優良加分時，說明欄必填
+    if(curType==='osce'){
+      const bonusVal = d[OSCE_BONUS.id];
+      if(bonusVal && Number(bonusVal)>0){
+        const bonusNote = el('bonusNote');
+        if(!bonusNote||!bonusNote.value.trim()){
+          showToast('已填寫優良加分，請說明優良表現原因','err');
+          bonusNote&&bonusNote.focus();
+          if(bonusNote) bonusNote.style.borderColor='var(--red)';
+          return;
+        }
+      }
+    }
   } else { if(!d.rejectReason||!d.rejectReason.trim()){ showToast('請填寫退稿原因','err'); return; } }
   let total=calcTotal(p.id, curType);
   const label=curType==='osce'?'教案':'論文';
