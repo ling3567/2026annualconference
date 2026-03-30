@@ -926,6 +926,7 @@ tr:hover td{ background:#fafafa; }
 <div class="ldr" id="ldr"><div class="spinner"></div></div>
 
 <script>
+
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2njUGr6eORWe6V5iMITA_dbpuOzhOebyxDW43P8RySVezxUevEOvQZGUV0tl_Mhm9/exec';
 
 // ══ 評分向度 ══
@@ -978,84 +979,71 @@ const ADM_CRITERIA = [
 const ADM_THRESHOLD = 80;
 
 // ══ State ══
-let currentRole = null; // 'reviewer' | 'admin'
-let reviewer=null, papers={poster:[],osce:[]};
-let submitted={}, drafts={}, curType='poster', curIdx=null;
-let dashData=null, assignments={}, admCurTab='dashboard';
-let reviewerNamesMap={}; // username → name
-let _confirmResolve=null;
+// ══ State ══
+let currentRole = null;
+let reviewer = null;
+let papers = { poster:[], osce:[] };
+let submitted = {};
+let drafts = {};
+let curType = 'poster';
+let curIdx = -1;
+let reviewerNamesMap = {};
+let dashData = null;
+let osceData = null;
+let assignments = {};
+let osceAssignments = {};
+let admCurTab = 'dashboard';
+let dashType = 'poster', assignType = 'poster', resultsType = 'poster';
+let _confirmResolve = null;
 
-// ══════════════════════════════
-// 共用登入
-// ══════════════════════════════
+// ══ 帳號轉姓名 ══
+function rvName(u){ return reviewerNamesMap[u]||u; }
+
+// ══ 登入 / 登出 ══
 async function doLogin(){
   const u=el('lgUser').value.trim(), p=el('lgPass').value.trim();
   const eEl=el('lgErr'); eEl.style.display='none';
   if(!u||!p) return;
   setLdr(true);
   try{
-    // 先嘗試委員登入
-    console.log('嘗試委員登入:', u);
     const r=await api({action:'reviewerLogin', username:u, password:p});
-    console.log('委員登入回應:', JSON.stringify(r));
     if(r.success){
-      // 委員登入成功
-      currentRole='reviewer';
-      reviewer=r.reviewer;
-      papers.poster=r.papers||[];
-      papers.osce=r.oscePapers||[];
+      currentRole='reviewer'; reviewer=r.reviewer;
+      papers.poster=r.papers||[]; papers.osce=r.oscePapers||[];
       submitted=r.submitted||{};
       const ss=r.submittedScores||{};
       Object.entries(ss).forEach(([pid,sc])=>{ drafts[pid]=sc; });
       reviewerNamesMap=r.reviewerNames||{};
       el('rvName').textContent=reviewer.name;
-      setTimeout(initDraggable, 100);
+      setTimeout(initDraggable,100);
       el('loginScreen').style.display='none';
       el('reviewerApp').classList.add('show');
       renderList();
     } else if(r.message==='NOT_REVIEWER'){
-      // 不是委員，嘗試管理員登入
-      console.log('非委員帳號，嘗試管理員登入');
       const ra=await api({action:'adminLogin', username:u, password:p});
-      console.log('管理員登入回應:', JSON.stringify(ra));
       if(ra.success){
         currentRole='admin';
         el('adminName').textContent=ra.adminName||u;
         el('loginScreen').style.display='none';
         el('adminApp').classList.add('show');
         loadDashboard();
-      } else {
-        eEl.textContent='⚠ '+(ra.message||'帳號或密碼錯誤');
-        eEl.style.display='block';
-      }
-    } else {
-      eEl.textContent='⚠ '+(r.message||'帳號或密碼錯誤');
-      eEl.style.display='block';
-    }
-  } catch(e){
-    const msg = e && e.message ? e.message : String(e);
-    eEl.textContent='⚠ 連線失敗：' + msg;
-    eEl.style.display='block';
-    console.error('doLogin error:', e);
-  }
+      } else { eEl.textContent='⚠ '+(ra.message||'帳號或密碼錯誤'); eEl.style.display='block'; }
+    } else { eEl.textContent='⚠ '+(r.message||'帳號或密碼錯誤'); eEl.style.display='block'; }
+  } catch(e){ const msg=e&&e.message?e.message:String(e); eEl.textContent='⚠ 連線失敗：'+msg; eEl.style.display='block'; console.error(e); }
   setLdr(false);
 }
-
 function doLogout(){ if(!confirm('確定登出？')) return; location.reload(); }
 
-// ══════════════════════════════
-// 委員評審 — 以下與原 review_v3 相同
-// ══════════════════════════════
+// ══ 委員評審 ══
 function switchType(t){
-  curType=t; curIdx=null;
+  curType=t; curIdx=-1;
   el('tabPoster').classList.toggle('active',t==='poster');
   el('tabOsce').classList.toggle('active',t==='osce');
-  el('colContent').innerHTML=`<div class="content-empty"><div class="icon">${t==='osce'?'🎬':'📄'}</div><h3>請從左側選擇${t==='osce'?'教案':'論文'}</h3></div>`;
-  el('scoreArea').innerHTML=`<p style="color:var(--muted);font-size:.88rem;text-align:center;padding:2rem 0">請先選擇${t==='osce'?'教案':'論文'}</p>`;
+  el('colContent').innerHTML='<div class="empty-hint"><div class="empty-icon">'+(t==='osce'?'🎬':'📋')+'</div><p>請從左側選擇'+(t==='osce'?'教案':'論文')+'</p></div>';
+  el('scoreHeadTitle').textContent=t==='osce'?'OSCE 教案評分':'海報論文評分';
+  el('scoreHeadNote').textContent=t==='osce'?`基本滿分 ${OSCE_BASE_MAX} + 優良加分 ${OSCE_BONUS.max}`:'';
+  el('scoreArea').innerHTML='<p style="color:var(--muted);text-align:center;padding:2rem;font-size:.85rem">請先選擇'+( t==='osce'?'教案':'論文')+'</p>';
   el('scoreActions').style.display='none';
-  el('scoreHeadTitle').textContent='評分表';
-  el('scoreHeadNote').textContent='請先選擇論文';
-  const ht=el('scoreHeadTotal'); if(ht) ht.style.display='none';
   renderList();
 }
 
@@ -1066,420 +1054,604 @@ function renderList(){
   el('progFill').style.width=list.length?(done/list.length*100)+'%':'0%';
   el('progLbl').textContent=curType==='osce'?'OSCE 進度':'海報評審進度';
   el('paperList').innerHTML=list.map((p,i)=>{
-    const isDone=!!submitted[p.id];
-    const d=drafts[p.id];
-    const isRej=d?.rejected;
-    const hasDraft=d&&Object.keys(d).length>0&&!isDone;
-    let statusClass='', dotClass='p', statusTxt='待評審';
-    if(isDone){ statusClass='done'; dotClass='d'; statusTxt='已提交'; }
-    else if(isRej){ statusClass='rejected'; dotClass='r'; statusTxt='標記退稿'; }
-    else if(hasDraft){ statusClass='drafted'; dotClass='sv'; statusTxt='已暫存'; }
+    const isDone=!!submitted[p.id], d=drafts[p.id], isRej=d?.rejected, hasDraft=d&&Object.keys(d).length>0&&!isDone;
+    let sc='', dotC='p', stTxt='待評審';
+    if(isDone){sc='done';dotC='d';stTxt='已提交';}
+    else if(isRej){sc='rejected';dotC='r';stTxt='標記退稿';}
+    else if(hasDraft){sc='drafted';dotC='sv';stTxt='已暫存';}
     const numLabel=curType==='osce'?p.caseNo:p.paperNo;
-    return `<div class="pi ${statusClass} ${curIdx===i?'active':''}" onclick="selectPaper(${i})">
+    return `<div class="pi ${sc} ${curIdx===i?'active':''}" onclick="selectPaper(${i})">
       <div class="pi-row1"><span class="pi-num">${esc(numLabel||'—')}</span><span class="pi-cat">${curType==='osce'?'OSCE':(p.category||'')}</span></div>
       <div class="pi-ttl">${esc(p.title)}</div>
-      <div class="pi-status"><div class="pi-dot ${dotClass}"></div><span class="pi-st-txt">${statusTxt}</span></div>
+      <div class="pi-status"><div class="pi-dot ${dotC}"></div><span class="pi-st-txt">${stTxt}</span></div>
     </div>`;
-  }).join('') || '<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:1.5rem .5rem">暫無指派項目</p>';
+  }).join('')||'<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:1.5rem .5rem">暫無指派項目</p>';
 }
 
-function selectPaper(i){ curIdx=i; renderList(); if(curType==='poster') renderPosterContent(i); else renderOsceContent(i); }
+function selectPaper(i){
+  curIdx=i; renderList();
+  if(curType==='poster') renderPosterContent(i);
+  else renderOsceContent(i);
+}
+
+function absBlk(lbl,txt){
+  if(!txt) return '';
+  const lines=String(txt).replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  const formatted=lines.join('\n').trim();
+  return '<div class="abs-sec"><div class="abs-lbl">'+lbl+'</div><div class="abs-txt">'+esc(formatted)+'</div></div>';
+}
 
 function renderPosterContent(i){
   const p=papers.poster[i]; if(!p) return;
-  const isDone=!!submitted[p.id];
-  const draft=drafts[p.id]||{};
-  const catShort=CAT_SHORT[p.category]||p.category||'—';
+  const isDone=!!submitted[p.id], draft=drafts[p.id]||{};
   el('colContent').innerHTML=`
     <div class="p-info-card">
       <div class="p-info-head">
         <div class="p-tags">
           <span class="tag tg-no">${esc(p.paperNo||'—')}</span>
-          <span class="tag tg-cat">${esc(catShort)}</span>
+          <span class="tag tg-cat">${p.category||''} | ${esc(p.catFull||'')}</span>
           ${p.wordCount?`<span class="tag tg-wc">摘要 ${p.wordCount} 字</span>`:''}
         </div>
         <div class="p-title">${esc(p.title)}</div>
       </div>
       <div class="p-info-body">
-        ${absBlk('研究動機',p.absMotivation)}${absBlk('研究方法',p.absMethod)}
-        ${absBlk('研究結果',p.absResult)}${absBlk('結論',p.absConclusion)}
+        ${p.absMotivation?absBlk('研究動機',p.absMotivation):''}
+        ${p.absMethod?absBlk('研究方法',p.absMethod):''}
+        ${p.absResult?absBlk('研究結果',p.absResult):''}
+        ${p.absConclusion?absBlk('結論',p.absConclusion):''}
       </div>
     </div>`;
   el('scoreHeadTitle').textContent='海報論文評分';
-  el('scoreHeadNote').textContent=`滿分 ${POSTER_MAX} 分`;
+  el('scoreHeadNote').textContent='滿分 100 分';
   el('scoreArea').innerHTML=renderPosterScoreForm(p, draft, isDone);
   el('scoreActions').style.display=isDone?'none':'flex';
   if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">✅ 已完成評分，如需修改請聯絡依玲 06-2812811-57426・tsmcsd2018@gmail.com</div>');
   markEmptyInputs(); updatePosterTotal();
 }
 
-function renderPosterScoreForm(p, draft, isDone){
+function renderOsceContent(i){
+  const p=papers.osce[i]; if(!p) return;
+  const isDone=!!submitted[p.id], draft=drafts[p.id]||{};
+  el('colContent').innerHTML=`
+    <div class="p-info-card">
+      <div class="p-info-head">
+        <div class="p-tags">
+          <span class="tag tg-no">${esc(p.caseNo||'—')}</span>
+          ${p.staffType?`<span class="tag tg-cat">${esc(p.staffType)}</span>`:''}
+          ${p.target?`<span class="tag tg-wc">對象：${esc(p.target)}</span>`:''}
+        </div>
+        <div class="p-title">${esc(p.title)}</div>
+      </div>
+      <div class="p-info-body">
+        ${p.summary?absBlk('教案摘要',p.summary):''}
+        ${p.driveUrl?`<div class="drive-preview-wrap">
+          <div class="drive-preview-head">
+            <div><strong>Google 雲端教案資料</strong>
+              ${p.contactName?'<span style="font-size:.75rem;color:#7a6e68;margin-left:.5rem">聯絡人：'+esc(p.contactName)+'</span>':''}</div>
+            <div class="drive-preview-btns">
+              <button class="drive-toggle-btn active" id="pt_${p.id}" onclick="toggleDrivePreview('${p.id}')">在此預覽</button>
+              <a class="drive-toggle-btn" href="${p.driveUrl}" target="_blank">開新分頁</a>
+            </div>
+          </div>
+          <div class="drive-iframe-wrap open" id="di_${p.id}">
+            <iframe src="${getDriveEmbedUrl(p.driveUrl)}" allowfullscreen loading="lazy"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+          </div>
+        </div>`:''}
+      </div>
+    </div>`;
+  el('scoreHeadTitle').textContent='OSCE 教案評分';
+  el('scoreHeadNote').textContent=`基本滿分 ${OSCE_BASE_MAX} + 優良加分 ${OSCE_BONUS.max}`;
+  el('scoreArea').innerHTML=renderOsceScoreForm(p, draft, isDone);
+  el('scoreActions').style.display=isDone?'none':'flex';
+  if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">✅ 已完成評分，如需修改請聯絡依玲 06-2812811-57426・tsmcsd2018@gmail.com</div>');
+  markEmptyInputs(); updateOsceTotal();
+}
+
+function getDriveEmbedUrl(url){
+  if(!url)return '';
+  const fm=url.match(/drive\.google\.com\/drive\/folders\/([a-zA-Z0-9_-]+)/);
+  if(fm)return 'https://drive.google.com/embeddedfolderview?id='+fm[1]+'#list';
+  const fm2=url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(fm2)return 'https://drive.google.com/file/d/'+fm2[1]+'/preview';
+  return url;
+}
+function toggleDrivePreview(pid){
+  const w=el('di_'+pid),b=el('pt_'+pid); if(!w)return;
+  const o=w.classList.contains('open');
+  w.classList.toggle('open',!o); if(b)b.classList.toggle('active',!o);
+}
+
+// ══ 評分表單（海報）══
+function renderPosterScoreForm(p,draft,isDone){
+  const dis=isDone?'disabled':'';
+  let html=`<div class="score-group-head">各項評分（滿分 100 分・全部必填）</div>`;
+  CRITERIA.forEach(c=>{
+    const v=draft[c.id]!==undefined?draft[c.id]:'';
+    html+=`<div class="score-item">
+      <div class="score-item-label"><strong>${c.label}</strong><span class="score-item-sub">佔比${Math.round(c.max)}%・滿分 ${c.max} 分</span></div>
+      <div class="score-input-wrap">
+        <input type="number" class="score-input" id="sc_${c.id}" min="0" max="${c.max}" value="${v}" placeholder="—" ${dis}
+          oninput="validateScore(this,${c.max});updatePosterTotal()">
+        <span class="score-max">/ ${c.max}</span>
+      </div>
+    </div>`;
+  });
+  const rejChecked=draft.rejected?'checked':'';
+  html+=`<div class="reject-zone ${isDone&&draft.rejected?'active':''}">
+    <div class="reject-head">
+      <input type="checkbox" class="reject-cb" id="rejChk" ${rejChecked} ${dis} onchange="toggleReject(this)">
+      <label for="rejChk">⚠ 建議退稿</label>
+    </div>
+    <div class="reject-body" id="rejBody" style="display:${draft.rejected?'block':'none'}">
+      <textarea id="rejReason" placeholder="請說明退稿原因..." ${dis}>${esc(draft.rejectReason||'')}</textarea>
+    </div>
+  </div>`;
+  html+=`<div class="recommend-zone">
+    <input type="checkbox" class="recommend-checkbox" id="recChk" ${draft.recommend?'checked':''} ${dis}>
+    <label for="recChk">⭐ 推薦此論文</label>
+    <div class="recommend-note">勾選代表建議此論文值得於研討會中展示</div>
+  </div>`;
+  html+=`<div class="cmt-wrap"><label>評語（選填）</label><textarea id="cmtArea" placeholder="可填寫對本篇論文的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea></div>`;
+  return html;
+}
+
+// ══ 評分表單（OSCE）══
+function renderOsceScoreForm(p,draft,isDone){
   const dis=isDone?'disabled':'';
   let html='';
-  html+=`<div class="crit-group"><div class="crit-group-title">各項評分（滿分 ${POSTER_MAX} 分・全部必填）</div>`;
-  POSTER_CRITERIA.forEach(c=>{
-    const v=draft[c.id]!==undefined?draft[c.id]:(isDone?'—':'');
-    html+=`<div class="crit-item"><div class="crit-info"><div class="crit-name">${c.label}</div><div class="crit-meta">佔比 ${c.weight}・滿分 ${c.max} 分</div></div>
+  const groups=[
+    {label:'情境設置（10%）', items:['o1']},
+    {label:'教案指引（30%）', items:['o2','o3','o4']},
+    {label:'評分設計（20%）', items:['o5','o6']},
+    {label:'教案目標（10%）', items:['o7']},
+    {label:'影片品質（30%）', items:['o8','o9','o10']},
+  ];
+  OSCE_CRITERIA.forEach(c=>{
+    const v=draft[c.id]!==undefined?draft[c.id]:'';
+    html+=`<div class="score-item">
+      <div class="score-item-label"><strong>${c.label}</strong><span class="score-item-sub">滿分 ${c.max} 分</span></div>
       <div class="score-input-wrap">
-        <input type="number" class="score-input" id="sc_${c.id}" min="0" max="${c.max}" value="${v}" placeholder="—"
-          ${isDone?'readonly':''}  oninput="validateScore(this,${c.max}); updatePosterTotal(); markEmptyInputs()">
+        <input type="number" class="score-input" id="sc_${c.id}" min="0" max="${c.max}" value="${v}" placeholder="—" ${dis}
+          oninput="validateScore(this,${c.max});updateOsceTotal()">
         <span class="score-max">/ ${c.max}</span>
-      </div></div>`;
-  });
-  html+=`</div>`;
-  html+=`<div class="total-bar"><div><div class="total-lbl">合計總分</div></div><div class="total-num" id="posterTotal">—<small> / ${POSTER_MAX}</small></div></div>`;
-  const isRec=!!(draft.recommend);
-  html+=`<div class="recommend-zone"><div class="recommend-zone-head">
-    <input type="checkbox" class="recommend-checkbox" id="recChk" ${isRec?'checked':''} ${dis}>
-    <label for="recChk">⭐ 推薦此論文進行「實體壁報」展示</label></div>
-    <div class="recommend-note">勾選代表建議此篇論文值得於研討會中進行實體壁報展示</div></div>`;
-  html+=`<div class="cmt-wrap"><label>評語（選填）</label>
-    <textarea id="cmtArea" placeholder="可填寫對本篇論文的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea></div>`;
-  html+=`<div class="cat-adjust-block"><label>✏️ 建議調整類別（選填）</label>
-    <select class="cat-adjust-sel" id="catAdjSel" ${dis}>
-      <option value="">（維持原類別）</option>
-      <option value="A" ${draft.catAdjust==='A'?'selected':''}>A — 臨床技能教育、模擬教學與跨專業學習</option>
-      <option value="B" ${draft.catAdjust==='B'?'selected':''}>B — 評量、信任決策與能力導向醫學教育</option>
-      <option value="C" ${draft.catAdjust==='C'?'selected':''}>C — 人文素養、醫療韌性與專業認同</option>
-    </select></div>`;
-  const isRej=!!(draft.rejected);
-  html+=`<div class="reject-zone"><div class="reject-zone-head" onclick="toggleReject()">
-    <input type="checkbox" class="reject-checkbox" id="rejChk" ${isRej?'checked':''} ${dis} onchange="toggleReject()">
-    <label for="rejChk">⚠️ 此論文不符合投稿範疇（退稿）</label></div>
-    <div class="reject-reason-wrap ${isRej?'show':''}" id="rejReasonWrap">
-      <label>退稿原因（必填）</label>
-      <textarea id="rejReason" placeholder="請說明退稿原因…" ${dis}>${esc(draft.rejectReason||'')}</textarea>
-    </div></div>`;
-  return html;
-}
-
-function updatePosterTotal(){
-  let t=0; POSTER_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e) t+=parseInt(e.value)||0; });
-  const tEl=el('posterTotal'); if(tEl) tEl.innerHTML=`${t}<small> / ${POSTER_MAX}</small>`;
-  const hNum=el('scoreHeadNum'), hDen=el('scoreHeadDenom'), hTot=el('scoreHeadTotal');
-  if(hNum){ hNum.textContent=t; hDen.textContent='/ '+POSTER_MAX; hTot.style.display='flex'; }
-}
-
-function renderOsceContent(i){
-  const p=papers.osce[i]; if(!p) return;
-  const isDone=!!submitted[p.id]; const draft=drafts[p.id]||{};
-  el('colContent').innerHTML=`
-    <div class="p-info-card">
-      <div class="p-info-head">
-        <div class="p-tags">
-          <span class="tag tg-no">${esc(p.caseNo||'—')}</span>
-          ${p.unit?`<span class="tag tg-cat">${esc(p.unit)}</span>`:''}
-          ${p.target?`<span class="tag tg-wc">對象：${esc(p.target)}</span>`:''}
-        </div>
-        <div class="p-title">${esc(p.title)}</div>
-      </div>
-      <div class="p-info-body">
-        ${p.driveUrl?`<div class="drive-preview-wrap">
-          <div class="drive-preview-head">
-            <div><strong>Google 雲端教案資料</strong>
-              ${p.contactName?'<span style="font-size:.75rem;color:#7a6e68;margin-left:.5rem">聯絡人：'+esc(p.contactName)+'</span>':''}</div>
-            <div class="drive-preview-btns">
-              <button class="drive-toggle-btn active" id="pt_${p.id}" onclick="toggleDrivePreview('${p.id}')">在此預覽</button>
-              <a class="drive-toggle-btn" href="${p.driveUrl}" target="_blank">開新分頁</a>
-            </div>
-          </div>
-          <div class="drive-iframe-wrap open" id="di_${p.id}">
-            <iframe src="${getDriveEmbedUrl(p.driveUrl)}" allowfullscreen loading="lazy"
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
-          </div>
-        </div>`:''}
-        ${p.summary?absBlk('教案摘要',p.summary):''}
-        
-        ${p.absMotivation?absBlk('設計動機',p.absMotivation):''}
-        ${p.method?absBlk('教學方法',p.method):''}
       </div>
     </div>`;
-  el('scoreHeadTitle').textContent='OSCE 教案評分';
-  el('scoreHeadNote').textContent=`基本滿分 ${OSCE_BASE_MAX} + 優良加分 ${OSCE_BONUS.max}`;
-  el('scoreArea').innerHTML=renderOsceScoreForm(p, draft, isDone);
-  el('scoreActions').style.display=isDone?'none':'flex';
-  if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">✅ 已完成評分，如需修改請聯絡依玲 06-2812811-57426・tsmcsd2018@gmail.com</div>');
-  markEmptyInputs(); updateOsceTotal();
-}
-function renderOsceContent(i){
-  const p=papers.osce[i]; if(!p) return;
-  const isDone=!!submitted[p.id]; const draft=drafts[p.id]||{};
-  el('colContent').innerHTML=`
-    <div class="p-info-card">
-      <div class="p-info-head">
-        <div class="p-tags">
-          <span class="tag tg-no">${esc(p.caseNo||'—')}</span>
-          ${p.unit?`<span class="tag tg-cat">${esc(p.unit)}</span>`:''}
-          ${p.target?`<span class="tag tg-wc">對象：${esc(p.target)}</span>`:''}
-        </div>
-        <div class="p-title">${esc(p.title)}</div>
-      </div>
-      <div class="p-info-body">
-        ${p.driveUrl?`<div class="drive-preview-wrap">
-          <div class="drive-preview-head">
-            <div><strong>Google 雲端教案資料</strong>
-              ${p.contactName?'<span style="font-size:.75rem;color:#7a6e68;margin-left:.5rem">聯絡人：'+esc(p.contactName)+'</span>':''}</div>
-            <div class="drive-preview-btns">
-              <button class="drive-toggle-btn active" id="pt_${p.id}" onclick="toggleDrivePreview('${p.id}')">在此預覽</button>
-              <a class="drive-toggle-btn" href="${p.driveUrl}" target="_blank">開新分頁</a>
-            </div>
-          </div>
-          <div class="drive-iframe-wrap open" id="di_${p.id}">
-            <iframe src="${getDriveEmbedUrl(p.driveUrl)}" allowfullscreen loading="lazy"
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
-          </div>
-        </div>`:''}
-        ${p.summary?absBlk('教案摘要',p.summary):''}
-        ${p.absMotivation?absBlk('設計動機',p.absMotivation):''}
-        ${p.method?absBlk('教學方法',p.method):''}
-      </div>
-    </div>`;
-  el('scoreHeadTitle').textContent='OSCE 教案評分';
-  el('scoreHeadNote').textContent=`基本滿分 ${OSCE_BASE_MAX} + 優良加分 ${OSCE_BONUS.max}`;
-  el('scoreArea').innerHTML=renderOsceScoreForm(p, draft, isDone);
-  el('scoreActions').style.display=isDone?'none':'flex';
-  if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">✅ 已完成評分，如需修改請聯絡依玲 06-2812811-57426・tsmcsd2018@gmail.com</div>');
-  markEmptyInputs(); updateOsceTotal();
-}
-
-function renderOsceScoreForm(p, draft, isDone){
-  const dis=isDone?'disabled':''; let html='';
-  OSCE_CRITERIA_GROUPS.forEach(g=>{
-    html+=`<div class="crit-group"><div class="crit-group-title">${g.group}</div>`;
-    g.items.forEach(c=>{
-      const v=draft[c.id]!==undefined?draft[c.id]:(isDone?'—':'');
-      html+=`<div class="crit-item"><div class="crit-info"><div class="crit-name">${c.label}</div><div class="crit-meta">滿分 ${c.max} 分</div></div>
-        <div class="score-input-wrap">
-          <input type="number" class="score-input" id="sc_${c.id}" min="0" max="${c.max}" value="${v}" placeholder="—"
-            ${isDone?'readonly':''}  oninput="validateScore(this,${c.max}); updateOsceTotal(); markEmptyInputs()">
-          <span class="score-max">/ ${c.max}</span>
-        </div></div>`;
-    });
-    html+=`</div>`;
   });
   const bv=draft[OSCE_BONUS.id]!==undefined?draft[OSCE_BONUS.id]:'';
-  html+=`<div class="crit-group"><div class="crit-group-title" style="background:#f5f0e8;color:#6b5c40;border-left-color:#c0a070">優良加分（額外・非必填）</div>
-    <div class="crit-item"><div class="crit-info"><div class="crit-name">${OSCE_BONUS.label}</div><div class="crit-meta">額外加分，最多 ${OSCE_BONUS.max} 分</div></div>
-      <div class="score-input-wrap"><input type="number" class="score-input" id="sc_${OSCE_BONUS.id}" min="0" max="${OSCE_BONUS.max}" value="${bv}" placeholder="0"
-        ${isDone?'readonly':''}  oninput="validateScore(this,${OSCE_BONUS.max}); updateOsceTotal()"><span class="score-max">/ ${OSCE_BONUS.max}</span></div>
-    </div></div>`;
-  html+=`<div class="total-bar"><div><div class="total-lbl">合計總分</div><div class="bonus-note">（基本100分＋優良加分）</div></div><div class="total-num" id="osceTotal">—<small> / 100+</small></div></div>`;
+  html+=`<div class="score-item" style="background:#fffbeb;border-color:#fde68a">
+    <div class="score-item-label"><strong>${OSCE_BONUS.label}</strong><span class="score-item-sub">最多加 ${OSCE_BONUS.max} 分</span></div>
+    <div class="score-input-wrap">
+      <input type="number" class="score-input" id="sc_${OSCE_BONUS.id}" min="0" max="${OSCE_BONUS.max}" value="${bv}" placeholder="—" ${dis}
+        oninput="validateScore(this,${OSCE_BONUS.max});updateOsceTotal()">
+      <span class="score-max">/ ${OSCE_BONUS.max}</span>
+    </div>
+  </div>`;
+  const rejChecked=draft.rejected?'checked':'';
+  html+=`<div class="reject-zone ${isDone&&draft.rejected?'active':''}">
+    <div class="reject-head">
+      <input type="checkbox" class="reject-cb" id="rejChk" ${rejChecked} ${dis} onchange="toggleReject(this)">
+      <label for="rejChk">⚠ 建議退稿</label>
+    </div>
+    <div class="reject-body" id="rejBody" style="display:${draft.rejected?'block':'none'}">
+      <textarea id="rejReason" placeholder="請說明退稿原因..." ${dis}>${esc(draft.rejectReason||'')}</textarea>
+    </div>
+  </div>`;
   html+=`<div class="cmt-wrap"><label>評語（選填）</label><textarea id="cmtArea" placeholder="可填寫對本篇教案的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea></div>`;
-  html+=`<div class="cmt-wrap"><label>優良加分說明（有填加分時請說明）</label><textarea id="bonusNote" placeholder="請說明優良表現原因…" ${dis}>${esc(draft.bonusNote||'')}</textarea></div>`;
-  const isRej=!!(draft.rejected);
-  html+=`<div class="reject-zone"><div class="reject-zone-head" onclick="toggleReject()">
-    <input type="checkbox" class="reject-checkbox" id="rejChk" ${isRej?'checked':''} ${dis} onchange="toggleReject()">
-    <label for="rejChk">⚠️ 此教案不符合投稿範疇（退稿）</label></div>
-    <div class="reject-reason-wrap ${isRej?'show':''}" id="rejReasonWrap">
-      <label>退稿原因（必填）</label>
-      <textarea id="rejReason" placeholder="請說明退稿原因…" ${dis}>${esc(draft.rejectReason||'')}</textarea>
-    </div></div>`;
+  html+=`<div class="cmt-wrap"><label>優良加分說明（填加分時必填）</label><textarea id="bonusNote" placeholder="請說明優良表現原因…" ${dis}>${esc(draft.bonusNote||'')}</textarea></div>`;
   return html;
 }
 
-function updateOsceTotal(){
-  let base=0; OSCE_ALL_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e) base+=parseInt(e.value)||0; });
-  const bonusEl=el('sc_'+OSCE_BONUS.id); const bonus=bonusEl?parseInt(bonusEl.value)||0:0;
-  const tEl=el('osceTotal'); if(tEl) tEl.innerHTML=`${base+bonus}<small> / ${OSCE_BASE_MAX}${bonus>0?'+'+bonus:''}</small>`;
-  const hNum=el('scoreHeadNum'), hDen=el('scoreHeadDenom'), hTot=el('scoreHeadTotal');
-  if(hNum){ hNum.textContent=base+bonus; hDen.textContent='/ '+OSCE_BASE_MAX+(bonus>0?'+':''); hTot.style.display='flex'; }
-}
+// ══ 分數計算 ══
 
+function updatePosterTotal(){
+  let total=0,allFilled=true;
+  CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(!inp||inp.disabled)return;const v=Number(inp.value);if(inp.value===''||isNaN(v)){allFilled=false;}else{total+=v;}});
+  el('scoreTotalNum').textContent=total;
+}
+function updateOsceTotal(){
+  let base=0,bonus=0,allFilled=true;
+  OSCE_CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(!inp||inp.disabled)return;const v=Number(inp.value);if(inp.value===''||isNaN(v)){allFilled=false;}else{base+=v;}});
+  const bInp=el('sc_'+OSCE_BONUS.id);if(bInp&&!bInp.disabled&&bInp.value!=='')bonus=Number(bInp.value)||0;
+  el('scoreTotalNum').textContent=base+bonus;
+}
 function markEmptyInputs(){
-  document.querySelectorAll('.score-input').forEach(input=>{
-    if(input.disabled||input.readOnly) return;
-    input.classList.toggle('empty', (input.value===''||input.value===null)&&!input.classList.contains('over'));
+  document.querySelectorAll('.score-input').forEach(inp=>{
+    inp.classList.toggle('empty',inp.value===''&&!inp.disabled);
   });
 }
-function validateScore(input, max){
-  let v=parseInt(input.value);
-  if(isNaN(v)||v<0){ input.value='0'; v=0; }
-  input.classList.toggle('over', v>max);
-  input.classList.remove('empty');
-}
-function toggleReject(){
-  const chk=el('rejChk'); if(!chk) return;
-  const wrap=el('rejReasonWrap'); if(!wrap) return;
-  wrap.classList.toggle('show', chk.checked);
-  const allCriteria=[...POSTER_CRITERIA,...OSCE_ALL_CRITERIA];
-  if(chk.checked){
-    allCriteria.forEach(c=>{ const e=el('sc_'+c.id); if(e&&!e.readOnly){ e.value=''; e.classList.remove('over','empty'); e.disabled=true; e.style.opacity='.4'; e.style.cursor='not-allowed'; e.style.background='#ede8e4'; }});
-    const bonusEl=el('sc_'+OSCE_BONUS.id); if(bonusEl&&!bonusEl.readOnly){ bonusEl.value=''; bonusEl.disabled=true; bonusEl.style.opacity='.4'; }
-    const recChk=el('recChk'); if(recChk){ recChk.disabled=true; recChk.checked=false; }
-    const catSel=el('catAdjSel'); if(catSel){ catSel.disabled=true; catSel.style.opacity='.4'; }
-    const pt=el('posterTotal'); if(pt) pt.innerHTML='<small style="color:rgba(255,255,255,.6)">已標記退稿</small>';
-    const ot=el('osceTotal');   if(ot) ot.innerHTML='<small style="color:rgba(255,255,255,.6)">已標記退稿</small>';
-    const ht=el('scoreHeadTotal'); if(ht) ht.style.display='none';
-  } else {
-    allCriteria.forEach(c=>{ const e=el('sc_'+c.id); if(e&&!e.readOnly){ e.disabled=false; e.style.opacity=''; e.style.cursor=''; e.style.background=''; }});
-    const bonusEl=el('sc_'+OSCE_BONUS.id); if(bonusEl&&!bonusEl.readOnly){ bonusEl.disabled=false; bonusEl.style.opacity=''; bonusEl.style.cursor=''; }
-    const recChk=el('recChk'); if(recChk) recChk.disabled=false;
-    const catSel=el('catAdjSel'); if(catSel){ catSel.disabled=false; catSel.style.opacity=''; }
-    if(curType==='poster') updatePosterTotal(); else updateOsceTotal();
-  }
-}
-
-function saveDraft(){
-  if(curIdx===null) return;
-  const list=papers[curType]; const p=list[curIdx]; if(!p) return;
-  const d={};
-  if(curType==='poster'){
-    POSTER_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e&&e.value!=='') d[c.id]=parseInt(e.value); });
-    const catSel=el('catAdjSel'); d.catAdjust=catSel?catSel.value:'';
-  } else {
-    OSCE_ALL_CRITERIA.forEach(c=>{ const e=el('sc_'+c.id); if(e&&e.value!=='') d[c.id]=parseInt(e.value); });
-    const bEl=el('sc_'+OSCE_BONUS.id); if(bEl&&bEl.value!=='') d[OSCE_BONUS.id]=parseInt(bEl.value);
-    const bnEl=el('bonusNote'); d.bonusNote=bnEl?bnEl.value:'';
-  }
-  const rejChk=el('rejChk'); d.rejected=rejChk?rejChk.checked:false;
-  const rejR=el('rejReason'); d.rejectReason=rejR?rejR.value:'';
-  const recChk=el('recChk'); d.recommend=recChk?recChk.checked:false;
-  const cmt=el('cmtArea'); d.comment=cmt?cmt.value:'';
-  drafts[p.id]=d;
-  renderList();
-  showToast('草稿已暫存','ok');
-}
-
 function validateAllFilled(type){
-  const criteria=type==='poster'?POSTER_CRITERIA:OSCE_ALL_CRITERIA;
-  return criteria.filter(c=>{ const e=el('sc_'+c.id); return !e||e.value===''||e.value===null; });
+  const missing=[];
+  if(type==='poster') CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(inp&&inp.value==='')missing.push(c.label);});
+  else OSCE_CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(inp&&inp.value==='')missing.push(c.label);});
+  return missing;
+}
+function validateScore(inp,max){const v=Number(inp.value);inp.classList.toggle('over',inp.value!==''&&(isNaN(v)||v<0||v>max));}
+function toggleReject(cb){
+  const body=el('rejBody');if(!body)return;
+  body.style.display=cb.checked?'block':'none';
+  const zone=cb.closest('.reject-zone');if(zone)zone.classList.toggle('active',cb.checked);
+  if(!cb.checked){const rr=el('rejReason');if(rr)rr.value='';}
+  document.querySelectorAll('.score-input').forEach(inp=>{
+    inp.disabled=cb.checked; if(cb.checked)inp.value='';
+  });
+  const bInp=el('sc_'+OSCE_BONUS.id);if(bInp){bInp.disabled=cb.checked;if(cb.checked)bInp.value='';}
+  if(curType==='poster')updatePosterTotal();else updateOsceTotal();
 }
 
+// ══ 暫存草稿 ══
+function saveDraft(){
+  const p=curType==='poster'?papers.poster[curIdx]:papers.osce[curIdx]; if(!p)return;
+  const d={};
+  const criteria=curType==='poster'?CRITERIA:OSCE_CRITERIA;
+  criteria.forEach(c=>{const inp=el('sc_'+c.id);if(inp)d[c.id]=inp.value;});
+  if(curType==='osce'){const bInp=el('sc_'+OSCE_BONUS.id);if(bInp)d[OSCE_BONUS.id]=bInp.value;}
+  const rejChk=el('rejChk');d.rejected=rejChk&&rejChk.checked;
+  const rejR=el('rejReason');d.rejectReason=rejR?rejR.value:'';
+  const recChk=el('recChk');d.recommend=recChk&&recChk.checked;
+  const cmt=el('cmtArea');d.comment=cmt?cmt.value:'';
+  const bn=el('bonusNote');if(bn)d.bonusNote=bn.value;
+  drafts[p.id]=d; renderList(); showToast('草稿已暫存','ok');
+}
+
+// ══ 提交評分 ══
 async function submitScore(){
-  if(curIdx===null) return;
-  const list=papers[curType]; const p=list[curIdx]; if(!p) return;
-  saveDraft();
+  const p=curType==='poster'?papers.poster[curIdx]:papers.osce[curIdx]; if(!p)return;
   const d=drafts[p.id]||{};
   if(!d.rejected){
     const missing=validateAllFilled(curType);
-    if(missing.length>0){ showToast(`請填寫所有評分項目（尚有 ${missing.length} 項未填）`,'err'); markEmptyInputs(); return; }
-    if(document.querySelectorAll('.score-input.over').length>0){ showToast('有分數超過滿分，請修正','err'); return; }
-    // OSCE：有填優良加分時，說明欄必填
+    if(missing.length>0){showToast(`請填寫所有評分項目（尚有 ${missing.length} 項未填）`,'err');markEmptyInputs();return;}
+    if(document.querySelectorAll('.score-input.over').length>0){showToast('有分數超過滿分，請修正','err');return;}
     if(curType==='osce'){
-      const bonusVal = d[OSCE_BONUS.id];
-      if(bonusVal && Number(bonusVal)>0){
-        const bonusNote = el('bonusNote');
-        if(!bonusNote||!bonusNote.value.trim()){
-          showToast('已填寫優良加分，請說明優良表現原因','err');
-          bonusNote&&bonusNote.focus();
-          if(bonusNote) bonusNote.style.borderColor='var(--red)';
-          return;
-        }
-      }
+      const bv=Number(el('sc_'+OSCE_BONUS.id)?.value||0);
+      if(bv>0){const bn=el('bonusNote');if(!bn||!bn.value.trim()){showToast('已填優良加分，請說明原因','err');bn&&bn.focus();return;}}
     }
-  } else { if(!d.rejectReason||!d.rejectReason.trim()){ showToast('請填寫退稿原因','err'); return; } }
-  let total=calcTotal(p.id, curType);
-  const label=curType==='osce'?'教案':'論文';
-  const numLabel=curType==='poster'?p.paperNo:p.caseNo;
-  const confirmHtml=`
-    <div class="confirm-info-block">
-      <div class="confirm-info-row"><span class="confirm-info-label">編號</span><strong>${numLabel||'—'}</strong></div>
-      <div class="confirm-info-row"><span class="confirm-info-label">${label}題目</span><span style="line-height:1.5">${esc(p.title)}</span></div>
-      <div class="confirm-info-row"><span class="confirm-info-label">合計總分</span><span class="confirm-score-big">${total}<span> / ${curType==='poster'?POSTER_MAX:OSCE_BASE_MAX}</span></span></div>
-      ${d.recommend?`<div class="confirm-info-row"><span class="confirm-info-label">推薦</span><span style="color:#3d6b54;font-weight:600">✓ 已勾選推薦</span></div>`:''}
-      ${d.catAdjust?`<div class="confirm-info-row"><span class="confirm-info-label">類別調整</span><span>建議改為 ${d.catAdjust}</span></div>`:''}
-      ${d.rejected?`<div class="confirm-info-row"><span class="confirm-info-label">退稿</span><span style="color:#7a3838;font-weight:600">⚠ 標記退稿</span></div>`:''}
-    </div>
-    <div class="confirm-warn-box">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      提交後無法自行修改，如需修改請聯絡依玲 06-2812811-57426
-    </div>`;
-  const ok=await showConfirm('確認提交評分', confirmHtml);
-  if(!ok) return;
-  setLdr(true);
-  const r=await doSubmit(p, curType, d, total);
-  setLdr(false);
+  } else {
+    if(!d.rejectReason||!d.rejectReason.trim()){showToast('請填寫退稿原因','err');return;}
+  }
+  saveDraft();
+  const p2=curType==='poster'?papers.poster[curIdx]:papers.osce[curIdx];
+  const d2=drafts[p2.id]||{};
+  const criteria=curType==='poster'?CRITERIA:OSCE_CRITERIA;
+  const scores={};
+  criteria.forEach(c=>{scores[c.id]=Number(el('sc_'+c.id)?.value||0);});
+  if(curType==='osce')scores[OSCE_BONUS.id]=Number(el('sc_'+OSCE_BONUS.id)?.value||0);
+  let total=Object.values(scores).reduce((a,b)=>a+b,0);
+  const confirmed=await showConfirm('確認提交評分',
+    `<p><strong>${p2.paperNo||p2.caseNo}</strong>・${esc(p2.title)}</p><p style="font-size:1.1rem;font-weight:700;margin-top:.5rem">${d2.rejected?'退稿':'總分：'+total+' 分'}</p>`);
+  if(!confirmed)return;
+  await doSubmit(p2,curType,d2,total);
 }
 
-async function bulkSubmit(){
-  const checks=document.querySelectorAll('.ov-check:checked');
-  if(!checks.length){ showToast('請勾選要送出的項目','warn'); return; }
-  const items=[];
-  checks.forEach(chk=>{ const pid=chk.dataset.pid, ptype=chk.dataset.ptype; const list=papers[ptype]||[]; const p=list.find(x=>x.id===pid); if(p&&!submitted[pid]) items.push({p, ptype}); });
-  if(!items.length){ showToast('勾選項目已全部提交過','warn'); return; }
-  const errors=[];
-  items.forEach(({p,ptype})=>{ const d=drafts[p.id]||{}; if(!d.rejected){ const criteria=ptype==='poster'?POSTER_CRITERIA:OSCE_ALL_CRITERIA; const missing=criteria.filter(c=>d[c.id]===undefined||d[c.id]===''); if(missing.length>0) errors.push(`「${p.paperNo||p.caseNo}」尚有 ${missing.length} 項未填`); } else { if(!d.rejectReason||!d.rejectReason.trim()) errors.push(`「${p.paperNo||p.caseNo}」退稿原因未填`); } });
-  if(errors.length>0){ alert('以下項目無法送出，請先補齊資料：\n\n'+errors.join('\n')); return; }
-  const bulkHtml=`
-    <div class="confirm-info-block">
-      ${items.map(({p,ptype})=>{ const num=ptype==='poster'?p.paperNo:p.caseNo; const d2=drafts[p.id]||{}; const t2=calcTotal(p.id,ptype); return `<div class="confirm-info-row"><span class="confirm-info-label">${num||'—'}</span><span style="flex:1;line-height:1.45;font-size:.88rem">${esc(p.title)}</span><strong style="color:#3a4550;margin-left:.5rem">${t2}分</strong>${d2.rejected?'<span style="color:#7a3838;font-size:.75rem;margin-left:.3rem">退稿</span>':''}</div>`; }).join('')}
-    </div>
-    <div class="confirm-warn-box">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      送出後無法自行修改，如需修改請聯絡依玲 06-2812811-57426
-    </div>`;
-  const bulkOk=await showConfirm(`確認送出 ${items.length} 筆評分`, bulkHtml);
-  if(!bulkOk) return;
-  setLdr(true); closeOverview();
-  let success=0, fail=0;
-  for(const {p,ptype} of items){ const d=drafts[p.id]||{}; const total=calcTotal(p.id,ptype); const ok=await doSubmit(p,ptype,d,total,true); if(ok) success++; else fail++; }
-  setLdr(false); renderList();
-  if(fail===0) showToast(`✅ ${success} 筆評分已成功送出！`,'ok');
-  else showToast(`${success} 筆成功，${fail} 筆失敗`,'warn');
-}
-
-async function doSubmit(p, ptype, d, total, silent=false){
+async function doSubmit(p,ptype,d,total,silent=false){
   try{
-    const r=await api({ action:'submitScore', reviewerUsername:reviewer.username, paperId:p.id, paperNo:ptype==='poster'?p.paperNo:p.caseNo, paperType:ptype, scoresJson:JSON.stringify(d), total, rejected:d.rejected?'true':'false', rejectReason:d.rejectReason||'', recommend:d.recommend?'true':'false', catAdjust:d.catAdjust||'', comment:d.comment||'' });
-    if(r.success){ submitted[p.id]=true; if(!silent){ renderList(); selectPaper(curIdx); showToast('評分已成功提交！','ok'); } return true; }
-    else { if(!silent) showToast('提交失敗：'+(r.message||'請稍後再試'),'err'); return false; }
-  } catch{ if(!silent) showToast('網路錯誤','err'); return false; }
-}
-
-function calcTotal(pid, ptype){
-  const d=drafts[pid]||{}; let t=0;
-  if(ptype==='poster') POSTER_CRITERIA.forEach(c=>{ t+=d[c.id]||0; });
-  else { OSCE_ALL_CRITERIA.forEach(c=>{ t+=d[c.id]||0; }); t+=d[OSCE_BONUS.id]||0; }
-  return t;
-}
-
-function showOverview(){
-  const allPapers=[...papers.poster.map(p=>({...p,type:'poster'})),...papers.osce.map(p=>({...p,type:'osce'}))];
-  if(!allPapers.length){ showToast('尚無指派項目','warn'); return; }
-  let html='';
-  ['poster','osce'].forEach(t=>{ const list=papers[t]; if(!list.length) return;
-    const label=t==='poster'?'海報論文':'OSCE 教案';
-    html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 .6rem"><h4 style="font-size:.9rem;font-weight:700;color:#3a4550">${label}</h4></div>`;
-    html+=`<table class="ov-table" style="margin-bottom:1.5rem"><thead><tr><th style="width:36px">送出</th><th>編號</th><th>題目</th><th>總分</th><th>推薦</th><th>狀態</th></tr></thead><tbody>`;
-    list.forEach(p=>{ const d=drafts[p.id]||{}; const isSub=!!submitted[p.id]; const isRej=d.rejected; const num=t==='poster'?p.paperNo:p.caseNo; const total=calcTotal(p.id,t); const totalTxt=total>0?total:'—';
-      const recTxt=isRej?'<span class="ov-rec rej">退稿</span>':(d.recommend?'<span class="ov-rec yes">推薦</span>':'<span class="ov-rec no">—</span>');
-      const statusTxt=isSub?'<span style="color:#3d6b54;font-weight:700">✅ 已提交</span>':(Object.keys(d).length?'<span style="color:#7a90a4">已暫存</span>':'<span class="ov-pending" style="color:var(--muted);font-size:.8rem">未填寫</span>');
-      html+=`<tr class="${isRej?'rejected-row':''}"><td style="text-align:center">${!isSub?`<input type="checkbox" class="ov-check" data-pid="${p.id}" data-ptype="${t}" onchange="updateBulkBtn()">`:''}</td><td><strong>${esc(num||'—')}</strong></td><td style="max-width:200px;line-height:1.5;font-size:.88rem">${esc(p.title)}</td><td class="ov-score">${totalTxt}</td><td>${recTxt}</td><td>${statusTxt}</td></tr>`;
+    const r=await api({
+      action:'submitScore', reviewerUsername:reviewer.username,
+      paperId:p.id, paperNo:ptype==='poster'?p.paperNo:p.caseNo, paperType:ptype,
+      scoresJson:JSON.stringify(d), total,
+      rejected:d.rejected?'true':'false', rejectReason:d.rejectReason||'',
+      recommend:d.recommend?'true':'false', catAdjust:d.catAdjust||'', comment:d.comment||''
     });
-    html+=`</tbody></table>`;
-  });
-  const pendingCount=allPapers.filter(p=>!submitted[p.id]).length;
-  if(pendingCount>0) html=`<div style="background:#f5eedf;border:1px solid #c0a070;border-radius:8px;padding:.65rem 1rem;font-size:.85rem;color:#7a6040;margin-bottom:1rem">⚠ 尚有 ${pendingCount} 筆未提交，截止日：<strong>115年7月3日（五）</strong></div>`+html;
-  el('overviewBody').innerHTML=html;
-  el('btnBulkSubmit').disabled=true;
-  el('ovSelectedCount').textContent='請勾選要送出的項目';
-  el('overviewModal').classList.add('show');
+    if(r.success){
+      submitted[p.id]=true;
+      if(!silent)showToast('評分已提交','ok');
+      renderList();
+      if(curType==='poster')renderPosterContent(curIdx);
+      else renderOsceContent(curIdx);
+    } else { showToast(r.message||'提交失敗','err'); }
+  }catch{ showToast('連線失敗','err'); }
 }
-function toggleSelectAll(ptype){ const checks=document.querySelectorAll(`.ov-check[data-ptype="${ptype}"]`); const allChecked=[...checks].every(c=>c.checked); checks.forEach(c=>{ c.checked=!allChecked; }); updateBulkBtn(); }
-function updateBulkBtn(){ const checked=document.querySelectorAll('.ov-check:checked').length; el('btnBulkSubmit').disabled=checked===0; el('ovSelectedCount').textContent=checked>0?`已勾選 ${checked} 筆`:'請勾選要送出的項目'; }
-function closeOverview(){ el('overviewModal').classList.remove('show'); }
 
-// ══════════════════════════════
-// 後台管理
-// ══════════════════════════════
+// ══ 總覽送出 ══
+function showOverview(){
+  const list=papers[curType]||[];
+  const pending=list.filter(p=>!submitted[p.id]);
+  if(!pending.length){showToast('所有項目皆已提交','ok');return;}
+  el('overviewList').innerHTML=pending.map(p=>{
+    const d=drafts[p.id]||{};
+    const num=curType==='osce'?p.caseNo:p.paperNo;
+    const hasDraft=Object.keys(d).length>0;
+    return `<div class="ov-item">
+      <input type="checkbox" class="ov-chk" id="ovc_${p.id}" ${hasDraft?'checked':''} ${hasDraft?'':'disabled'}>
+      <label for="ovc_${p.id}">
+        <span class="ov-num">${esc(num||'—')}</span>
+        <span class="ov-ttl">${esc(p.title)}</span>
+        ${hasDraft?'<span class="ov-badge">有草稿</span>':'<span class="ov-badge empty">尚未評分</span>'}
+      </label>
+    </div>`;
+  }).join('');
+  el('overviewModal').classList.add('show');
+  updateBulkBtn();
+}
+function closeOverview(){ el('overviewModal').classList.remove('show'); }
+function toggleSelectAll(cb){ document.querySelectorAll('.ov-chk:not(:disabled)').forEach(c=>c.checked=cb.checked); updateBulkBtn(); }
+function updateBulkBtn(){ el('bulkSubmitBtn').disabled=!document.querySelectorAll('.ov-chk:checked').length; }
+async function bulkSubmit(){
+  const list=papers[curType]||[];
+  const checked=[...document.querySelectorAll('.ov-chk:checked')].map(c=>c.id.replace('ovc_',''));
+  if(!checked.length)return;
+  const confirmed=await showConfirm('確認批次提交',`<p>確定提交已選的 <strong>${checked.length}</strong> 份評分？</p>`);
+  if(!confirmed)return;
+  setLdr(true);
+  let ok=0,fail=0;
+  for(const pid of checked){
+    const p=list.find(x=>x.id===pid); if(!p||submitted[pid])continue;
+    const d=drafts[pid]||{};
+    const criteria=curType==='poster'?CRITERIA:OSCE_CRITERIA;
+    const scores={};criteria.forEach(c=>{scores[c.id]=Number(d[c.id]||0);});
+    if(curType==='osce')scores[OSCE_BONUS.id]=Number(d[OSCE_BONUS.id]||0);
+    const total=Object.values(scores).reduce((a,b)=>a+b,0);
+    try{
+      const r=await api({action:'submitScore',reviewerUsername:reviewer.username,paperId:p.id,paperNo:curType==='poster'?p.paperNo:p.caseNo,paperType:curType,scoresJson:JSON.stringify(d),total,rejected:d.rejected?'true':'false',rejectReason:d.rejectReason||'',recommend:d.recommend?'true':'false',catAdjust:d.catAdjust||'',comment:d.comment||''});
+      if(r.success){submitted[p.id]=true;ok++;}else fail++;
+    }catch{fail++;}
+  }
+  setLdr(false);
+  closeOverview();
+  showToast(`提交完成：${ok} 筆成功${fail?' / '+fail+' 筆失敗':''}`,fail?'err':'ok');
+  renderList();
+}
+
+// ══ 後台管理 ══
 function admSwitchTab(t){
   admCurTab=t;
   document.querySelectorAll('.adm-tab').forEach(e=>e.classList.toggle('active',e.dataset.tab===t));
   ['dashboard','assign','results','reviewers','assignDetail'].forEach(id=>{
-    const d=el('adm-tab-'+id); if(d) d.style.display=id===t?'block':'none';
+    const d=el('adm-tab-'+id); if(d)d.style.display=id===t?'block':'none';
   });
-  if(t==='reviewers') loadReviewers();
-  if(t==='assignDetail') renderAssignDetailPage();
+  if(t==='reviewers')loadReviewers();
+  if(t==='assignDetail')renderAssignDetailPage();
 }
 
-function renderAssignDetailPage(){
-  const target=el('rvAssignDetail2');
-  if(!target) return;
-  const rvrs=(dashData&&dashData.reviewers)||[];
-  if(!rvrs.length){
-    target.innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">請先載入「總覽統計」資料</p>';
-    return;
+async function loadDashboard(){
+  setLdr(true);
+  try{
+    const r=await api({action:'adminGetDashboard'});
+    if(!r.success){showToast('載入失敗','err');setLdr(false);return;}
+    dashData=r;
+    if(r.reviewerNamesMap)Object.assign(reviewerNamesMap,r.reviewerNamesMap);
+    else(r.reviewers||[]).forEach(rv=>{reviewerNamesMap[rv.username]=rv.name||rv.username;});
+    const ar=await api({action:'adminGetAssignments'});
+    assignments=(ar&&ar.assignments)||{};
+    renderStats(r.stats);
+    renderDashTable(r.papers);
+    renderAssignTable(r.papers,r.reviewers);
+    renderResultsTable(r.papers);
+    renderRvTable(r.reviewers);
+    loadOsceDashboard();
+  }catch(e){showToast('連線失敗','err');console.error(e);}
+  setLdr(false);
+}
+
+function renderStats(s){
+  const osceS=osceData&&osceData.stats;
+  el('statsRow').innerHTML=`
+    <div class="stat-card blue"><div class="stat-num">${s?s.total||0:0}</div><div class="stat-lbl"><span class="chip chip-blue" style="font-size:.68rem;padding:.1rem .4rem">海報</span> 投稿篇數</div></div>
+    <div class="stat-card"><div class="stat-num">${s?(s.reviewed||0)+' <span style="font-size:.8rem;color:#718096">('+Math.round((s.reviewed||0)/(s.total||1)*100)+'%)</span>':0}</div><div class="stat-lbl"><span class="chip chip-blue" style="font-size:.68rem;padding:.1rem .4rem">海報</span> 已有評分</div></div>
+    <div class="stat-card green"><div class="stat-num">${s?s.recommended||0:0}</div><div class="stat-lbl"><span class="chip chip-blue" style="font-size:.68rem;padding:.1rem .4rem">海報</span> 推薦篇數</div></div>
+    ${osceS?`<div class="stat-card blue"><div class="stat-num">${osceS.total||0}</div><div class="stat-lbl"><span style="background:#fef3c7;color:#92400e;padding:.1rem .4rem;border-radius:4px;font-size:.68rem;font-weight:700">OSCE</span> 教案總數</div></div>
+    <div class="stat-card"><div class="stat-num">${osceS.reviewed||0}</div><div class="stat-lbl"><span style="background:#fef3c7;color:#92400e;padding:.1rem .4rem;border-radius:4px;font-size:.68rem;font-weight:700">OSCE</span> 已有評分</div></div>`:''}
+    <div class="stat-card"><div class="stat-num">${s?s.activeReviewers||0:0}</div><div class="stat-lbl">啟用委員數</div></div>`;
+}
+
+function renderDashTable(papers){
+  const body=el('dashBody'); if(!body)return;
+  if(!papers||!papers.length){body.innerHTML='<tr><td colspan="7" style="text-align:center;color:#718096;padding:2rem">尚無海報論文資料</td></tr>';return;}
+  body.innerHTML=papers.map(p=>{
+    const assigned=assignments[p.id]||[];
+    const done=p.reviews.length,total=assigned.length||0,pct=total?Math.round(done/total*100):0;
+    const fc=done===0?'none':done>=total?'done':'part';
+    return `<tr><td><span class="chip chip-blue">${p.paperNo||'—'}</span></td>
+      <td style="max-width:280px;line-height:1.5">${esc(p.title)}</td>
+      <td>${p.category||'—'}</td>
+      <td style="font-size:.85rem;color:#334155">${assigned.map(u=>rvName(u)).join('、')||'—'}</td>
+      <td><div class="sc-prog"><span>${done}/${total}</span><div class="sc-bar"><div class="sc-fill ${fc}" style="width:${pct}%"></div></div></div></td>
+      <td style="font-weight:600">${p.avgTotal!==null?p.avgTotal:'—'}</td>
+      <td>${p.avgTotal!==null?(p.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAssignTable(papers,reviewers){
+  const body=el('assignBody'); if(!body)return;
+  if(!papers||!papers.length){body.innerHTML='<tr><td colspan="4" style="text-align:center;color:#718096;padding:2rem">尚無論文資料</td></tr>';return;}
+  body.innerHTML=papers.map(p=>{
+    const assigned=assignments[p.id]||[];
+    const options=(reviewers||[]).map(r=>`<option value="${r.username}">${r.name}(${r.username})</option>`).join('');
+    return `<tr><td><span class="chip chip-blue">${p.paperNo||'—'}</span></td>
+      <td style="max-width:280px;line-height:1.5">${esc(p.title)}</td>
+      <td>${p.category||'—'}</td>
+      <td><div class="assign-wrap" id="aw_${p.id}">
+        ${assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeAssign('${p.id}','${u}')">✕</span></span>`).join('')}
+        <select class="assign-sel" id="asel_${p.id}" onchange="addAssign('${p.id}')"><option value="">＋ 委員</option>${options}</select>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function addAssign(pid){const sel=el('asel_'+pid);const u=sel.value;if(!u)return;sel.value='';if(!assignments[pid])assignments[pid]=[];if(assignments[pid].includes(u)){showToast('此委員已在列表中','err');return;}assignments[pid].push(u);refreshAssignRow(pid);}
+function removeAssign(pid,u){if(!assignments[pid])return;assignments[pid]=assignments[pid].filter(x=>x!==u);refreshAssignRow(pid);}
+function refreshAssignRow(pid){const wrap=el('aw_'+pid);if(!wrap)return;const assigned=assignments[pid]||[];const sel=el('asel_'+pid);const selHTML=sel?sel.outerHTML:'';wrap.innerHTML=assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeAssign('${pid}','${u}')">✕</span></span>`).join('')+selHTML;}
+
+async function saveAssignments(type){
+  const t=type||assignType;
+  if(!confirm('確認儲存所有指派設定？'))return;
+  setLdr(true);
+  try{
+    let r;
+    if(t==='osce')r=await api({action:'adminSaveOsceAssignments',assignmentsJson:JSON.stringify(osceAssignments)});
+    else r=await api({action:'adminSaveAssignments',assignmentsJson:JSON.stringify(assignments)});
+    if(r.success)showToast(`指派已儲存（${r.saved}筆）`,'ok');
+    else showToast('儲存失敗','err');
+  }catch{showToast('連線失敗','err');}
+  setLdr(false);
+}
+function autoAssign(type){
+  const t=type||assignType;
+  if(t==='osce'){
+    if(!osceData)return;
+    const {cases,reviewers}=osceData;
+    const active=(reviewers||[]).filter(r=>r.enabled);
+    if(!active.length){showToast('沒有啟用中的委員','err');return;}
+    if(!confirm(`將 ${cases.length} 個教案平均分配給 ${active.length} 位委員？`))return;
+    cases.forEach((c,i)=>{osceAssignments[c.id]=[active[i%active.length].username];});
+    renderOsceAssignTable(cases,reviewers);
+  } else {
+    if(!dashData)return;
+    const {papers,reviewers}=dashData;
+    const active=(reviewers||[]).filter(r=>r.enabled);
+    if(!active.length){showToast('沒有啟用中的委員','err');return;}
+    if(!confirm(`將 ${papers.length} 篇論文平均分配給 ${active.length} 位委員？`))return;
+    papers.forEach((p,i)=>{assignments[p.id]=[active[i%active.length].username];});
+    renderAssignTable(papers,reviewers);
   }
+  showToast('自動指派完成，請記得按「儲存指派」','ok');
+}
+
+function renderResultsTable(papers){
+  if(!papers)return;
+  const rankable=papers.filter(p=>p.avgTotal!==null);
+  const catRankMap={};
+  ['A','B','C'].forEach(cat=>{let r=1,prev=null;rankable.filter(p=>p.category===cat).sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i)=>{if(p.avgTotal!==prev){r=i+1;}catRankMap[p.id]=r;prev=p.avgTotal;});});
+  const allRankMap={};let r=1,prev=null;
+  [...rankable].sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i)=>{if(p.avgTotal!==prev){r=i+1;}allRankMap[p.id]=r;prev=p.avgTotal;});
+  function badge(rank,showCat,cat){if(rank===undefined)return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';const medals={1:'🥇',2:'🥈',3:'🥉'};const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}${showCat?cat+' ':''}第${rank}名</span>`;}
+  function gapCell(p){const valid=p.reviews.filter(r=>!r.rejected);if(valid.length>=2){const sc=valid.map(r=>r.total).sort((a,b)=>a-b);const g=sc[sc.length-1]-sc[0];return g>10?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700">⚠ ${g}分</span>`:`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;}if(valid.length===1)return '<span style="color:#718096;font-size:.78rem">僅1位</span>';return '—';}
+  function row(p,rb){const rc=p.reviews.filter(r=>r.rejected).length;return `<tr data-title="${esc(p.title).toLowerCase()}"><td style="text-align:center">${rb}</td><td><span class="chip chip-blue">${p.paperNo||'—'}</span></td><td style="max-width:240px;line-height:1.5;font-size:.88rem">${esc(p.title)}</td><td><span style="font-weight:600">${p.category||'—'}</span></td><td style="font-weight:700;font-size:1rem">${p.avgTotal!==null?p.avgTotal+'分':'—'}</td><td>${gapCell(p)}</td><td>${p.avgTotal!==null?(p.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td><td>${rc>0?`<span class="chip chip-red">${rc}位退稿</span>`:'—'}</td><td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button></td></tr>`;}
+  const sorted=[...papers].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1));
+  const catBody=el('resultsCatBody');
+  if(catBody){const catSorted=[...sorted].sort((a,b)=>{const o={A:0,B:1,C:2};return(o[a.category]??9)-(o[b.category]??9)||(catRankMap[a.id]??99)-(catRankMap[b.id]??99);});let html='',lastCat='';catSorted.forEach(p=>{if(p.category!==lastCat){const n={A:'A 類：臨床技能教育',B:'B 類：評量與能力導向',C:'C 類：人文素養'};html+=`<tr><td colspan="9" style="background:#f8fafc;font-size:.78rem;font-weight:700;color:#64748b;padding:.4rem .9rem;border-top:2px solid #e2e8f0">${n[p.category]||p.category}</td></tr>`;lastCat=p.category;}html+=row(p,badge(catRankMap[p.id],true,p.category));});catBody.innerHTML=html;}
+  const allBody=el('resultsAllBody');
+  if(allBody)allBody.innerHTML=sorted.map(p=>row(p,badge(allRankMap[p.id],false,''))).join('');
+}
+function filterResults(){const q=(el('resultSearch')||{}).value?.toLowerCase()||'';document.querySelectorAll('#resultsCatBody tr[data-title], #resultsAllBody tr[data-title]').forEach(tr=>{tr.style.display=!q||tr.dataset.title.includes(q)?'':'none';});}
+
+function renderRvTable(reviewers){
+  const body=el('rvBody');if(!body)return;
+  body.innerHTML=(reviewers||[]).map(r=>{
+    const pc=Object.values(assignments).filter(u=>(u||[]).includes(r.username)).length||(r.posterCount||0);
+    const oc=Object.values(osceAssignments).filter(u=>(u||[]).includes(r.username)).length||(r.osceCount||0);
+    const pb=pc>0?`<span style="background:#dbeafe;color:#1e4d8c;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">${pc}篇</span>`:'<span style="color:#cbd5e0;font-size:.8rem">—</span>';
+    const ob=oc>0?`<span style="background:#fef3c7;color:#92400e;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">${oc}案</span>`:'<span style="color:#cbd5e0;font-size:.8rem">—</span>';
+    return `<tr>
+      <td style="font-weight:500;font-family:monospace;font-size:.85rem">${r.username}</td>
+      <td style="color:#718096;font-family:monospace;font-size:.85rem">${r.password||''}</td>
+      <td style="font-weight:600">${r.name}</td>
+      <td><span class="chip ${r.enabled?'chip-green':'chip-gray'}">${r.enabled?'啟用':'停用'}</span></td>
+      <td style="text-align:center">${pb}</td>
+      <td style="text-align:center">${ob}</td>
+      <td><div style="display:flex;gap:.4rem">
+        <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="toggleReviewer('${r.username}',${!r.enabled})">${r.enabled?'停用':'啟用'}</button>
+        <button class="adm-btn adm-btn-danger adm-btn-sm" onclick="deleteReviewer('${r.username}')">刪除</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ══ OSCE 後台 ══
+function dashSwitchType(t){dashType=t;el('dashTypePoster').classList.toggle('active',t==='poster');el('dashTypeOsce').classList.toggle('active',t==='osce');el('dashPosterSection').style.display=t==='poster'?'':'none';el('dashOsceSection').style.display=t==='osce'?'':'none';if(t==='osce'&&!osceData)loadOsceDashboard();}
+function assignSwitchType(t){assignType=t;el('assignTypePoster').classList.toggle('active',t==='poster');el('assignTypeOsce').classList.toggle('active',t==='osce');el('assignPosterSection').style.display=t==='poster'?'':'none';el('assignOsceSection').style.display=t==='osce'?'':'none';if(t==='osce'){if(!osceData)loadOsceDashboard();else renderOsceAssignTable(osceData.cases,osceData.reviewers);}}
+function resultsSwitchType(t){resultsType=t;el('resultsTypePoster').classList.toggle('active',t==='poster');el('resultsTypeOsce').classList.toggle('active',t==='osce');el('resultsPosterSection').style.display=t==='poster'?'':'none';el('resultsOsceSection').style.display=t==='osce'?'':'none';if(t==='osce'){if(!osceData)loadOsceDashboard();else renderOsceResultsTable(osceData.cases);}}
+
+async function loadOsceDashboard(){
+  try{
+    const r=await api({action:'adminGetOsceDashboard'});
+    if(!r.success){osceData={cases:[],reviewers:[],stats:{total:0,reviewed:0}};}
+    else{osceData=r;(r.reviewers||[]).forEach(rv=>{if(rv.username&&rv.name)reviewerNamesMap[rv.username]=rv.name;});}
+    const ar=await api({action:'adminGetOsceAssignments'});
+    osceAssignments=(ar&&ar.assignments)||{};
+    renderOsceDashTable(osceData.cases);
+    renderOsceAssignTable(osceData.cases,osceData.reviewers);
+    renderOsceResultsTable(osceData.cases);
+    if(dashData)renderStats(dashData.stats);
+  }catch(e){console.error('OSCE:',e);osceData={cases:[],reviewers:[],stats:{}};}
+}
+
+function renderOsceDashTable(cases){
+  const body=el('osceDashBody');if(!body)return;
+  if(!cases||!cases.length){body.innerHTML='<tr><td colspan="6" style="text-align:center;color:#718096;padding:2rem">尚無 OSCE 教案資料</td></tr>';return;}
+  body.innerHTML=cases.map(c=>{const assigned=osceAssignments[c.id]||[];const done=c.reviews.length,total=assigned.length||0,pct=total?Math.round(done/total*100):0,fc=done===0?'none':done>=total?'done':'part';return `<tr><td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td><td style="max-width:260px;line-height:1.5">${esc(c.title)}</td><td style="font-size:.82rem">${esc(c.hospital||'—')}</td><td style="font-size:.85rem;color:#334155">${assigned.map(u=>rvName(u)).join('、')||'—'}</td><td><div class="sc-prog"><span>${done}/${total}</span><div class="sc-bar"><div class="sc-fill ${fc}" style="width:${pct}%"></div></div></div></td><td style="font-weight:600">${c.avgTotal!==null?c.avgTotal:'—'}</td></tr>`;}).join('');
+}
+
+function renderOsceAssignTable(cases,reviewers){
+  const body=el('osceAssignBody');if(!body)return;
+  if(!cases||!cases.length){body.innerHTML='<tr><td colspan="4" style="text-align:center;color:#718096;padding:2rem">尚無教案資料</td></tr>';return;}
+  body.innerHTML=cases.map(c=>{const assigned=osceAssignments[c.id]||[];const options=(reviewers||[]).map(r=>`<option value="${r.username}">${r.name}(${r.username})</option>`).join('');return `<tr><td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td><td style="max-width:240px;line-height:1.5">${esc(c.title)}</td><td style="font-size:.82rem">${esc(c.hospital||'—')}</td><td><div class="assign-wrap" id="oaw_${c.id}">${assigned.map(u=>`<span class="assign-chip">${rvName(u)}<span class="rm" onclick="removeOsceAssign('${c.id}','${u}')">✕</span></span>`).join('')}<select class="assign-sel" id="oasel_${c.id}" onchange="addOsceAssign('${c.id}')"><option value="">＋ 委員</option>${options}</select></div></td></tr>`;}).join('');
+}
+function addOsceAssign(cid){const sel=el('oasel_'+cid);const u=sel.value;if(!u)return;sel.value='';if(!osceAssignments[cid])osceAssignments[cid]=[];if(osceAssignments[cid].includes(u)){showToast('此委員已在列表中','err');return;}osceAssignments[cid].push(u);refreshOsceAssignRow(cid);}
+function removeOsceAssign(cid,u){if(!osceAssignments[cid])return;osceAssignments[cid]=osceAssignments[cid].filter(x=>x!==u);refreshOsceAssignRow(cid);}
+function refreshOsceAssignRow(cid){const wrap=el('oaw_'+cid);if(!wrap)return;const assigned=osceAssignments[cid]||[];const sel=el('oasel_'+cid);const sh=sel?sel.outerHTML:'';wrap.innerHTML=assigned.map(u=>`<span class="assign-chip">${rvName(u)}<span class="rm" onclick="removeOsceAssign('${cid}','${u}')">✕</span></span>`).join('')+sh;}
+
+function renderOsceResultsTable(cases){
+  const body=el('osceResultsBody');if(!body)return;
+  if(!cases||!cases.length){body.innerHTML='<tr><td colspan="8" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';return;}
+  const rankable=cases.filter(c=>c.avgTotal!==null);
+  const rankMap={};let rk=1,pv=null;
+  [...rankable].sort((a,b)=>b.avgTotal-a.avgTotal).forEach((c,i)=>{if(c.avgTotal!==pv){rk=i+1;}rankMap[c.id]=rk;pv=c.avgTotal;});
+  function osceBadge(r){if(r===undefined)return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';const medals={1:'🥇',2:'🥈',3:'🥉'};const bg=r===1?'#fef9c3':r===2?'#f0f4f8':r===3?'#fef3c7':'#f8fafc';const co=r===1?'#854d0e':r===2?'#334155':r===3?'#92400e':'#64748b';return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[r]||''}第${r}名</span>`;}
+  const sorted=[...cases].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1));
+  body.innerHTML=sorted.map(c=>{const rc=c.reviews.filter(r=>r.rejected).length;const valid=c.reviews.filter(r=>!r.rejected);let gap='—';if(valid.length>=2){const sc=valid.map(r=>r.total).sort((a,b)=>a-b);const g=sc[sc.length-1]-sc[0];gap=g>10?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700">⚠ ${g}分</span>`:`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;}else if(valid.length===1)gap='<span style="color:#718096;font-size:.78rem">僅1位</span>';return `<tr data-osce-title="${esc(c.title).toLowerCase()}"><td style="text-align:center">${badge(rankMap[c.id])}</td><td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td><td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(c.title)}</td><td style="font-size:.82rem">${esc(c.hospital||'—')}</td><td style="font-weight:700;font-size:1rem">${c.avgTotal!==null?c.avgTotal+'分':'—'}</td><td>${gap}</td><td>${rc>0?`<span class="chip chip-red">${rc}位退稿</span>`:'—'}</td><td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showOsceDetail('${c.id}')">詳細</button></td></tr>`;}).join('');
+}
+function filterOsceResults(){const q=(el('osceResultSearch')||{}).value?.toLowerCase()||'';document.querySelectorAll('#osceResultsBody tr[data-osce-title]').forEach(tr=>{tr.style.display=!q||tr.dataset.osceTitle.includes(q)?'':'none';});}
+
+// ══ 詳細視窗 ══
+const OSCE_CRITERIA_LABELS=[{label:'情境設置',max:10},{label:'教學/考官指引',max:10},{label:'考生指引/SP指引',max:10},{label:'SP腳本/助教指引',max:10},{label:'評分項目與教案目標相關',max:10},{label:'評分尺標與給分定義明確',max:10},{label:'教案目標明確一致',max:10},{label:'影片畫面品質優良',max:10},{label:'影片聲音清晰且有字幕',max:10},{label:'剪輯得宜有助於教案呈現',max:10}];
+function calcFrontendSmartAvg(scores){const s=scores.filter(v=>!isNaN(v)&&v!==null);if(!s.length)return null;if(s.length<=2)return Math.round(s.reduce((a,b)=>a+b,0)/s.length*10)/10;const sorted=[...s].sort((a,b)=>a-b);let minGap=Infinity,best=[sorted[0],sorted[1]];for(let i=0;i<sorted.length-1;i++){const g=sorted[i+1]-sorted[i];if(g<minGap){minGap=g;best=[sorted[i],sorted[i+1]];}}return Math.round((best[0]+best[1])/2*10)/10;}
+
+function _detailGrid(reviews,criteriaArr){
+  const cols=Math.min(reviews.length,3);
+  let html=`<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:.75rem;align-items:start">`;
+  reviews.forEach((r,i)=>{
+    html+=`<div style="background:#f8fafc;border:1px solid ${r.rejected?'#fecaca':'#e2e8f0'};border-radius:9px;padding:.85rem"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.65rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0"><span style="font-size:.82rem;font-weight:700;color:#1c1c2e">評審 ${i+1}</span><span style="font-size:.75rem;font-weight:600;color:#3b82f6">${rvName(r.reviewer)}</span></div>`;
+    if(r.rejected){html+=`<div style="background:#fff1f1;border:1px solid #fecaca;border-radius:6px;padding:.5rem .65rem;font-size:.82rem;color:#b91c1c">退稿：${esc(r.rejectReason||'（未填）')}</div>`;}
+    else{criteriaArr.forEach((c,j)=>{const id=c.id||('o'+(j+1));html+=`<div style="display:flex;justify-content:space-between;padding:.22rem 0;border-bottom:1px solid #f1f5f9;font-size:.8rem"><span style="color:#4a5568;line-height:1.4">${c.label}</span><span style="font-weight:700;color:var(--adm-blue);white-space:nowrap;margin-left:.5rem">${r.scores&&r.scores[id]!==undefined?r.scores[id]:0}/${c.max}</span></div>`;});if(r.bonus!==undefined)html+=`<div style="display:flex;justify-content:space-between;padding:.22rem 0;border-bottom:1px solid #f1f5f9;font-size:.8rem"><span style="color:#92400e">優良加分</span><span style="font-weight:700;color:#92400e">${r.bonus}/10</span></div>`;const max=criteriaArr.reduce((s,c)=>s+c.max,0)+(r.bonus!==undefined?10:0);const tc=r.total>=(r.bonus!==undefined?80:ADM_THRESHOLD)?'var(--adm-green)':'#1c1c2e';html+=`<div style="display:flex;justify-content:space-between;padding:.4rem 0 0;font-weight:700;font-size:.92rem"><span>總分</span><span style="color:${tc}">${r.total}/${max}</span></div>`;}
+    if(r.comment)html+=`<div style="font-size:.75rem;color:#718096;background:#f1f5f9;padding:.4rem .6rem;border-radius:5px;margin-top:.4rem">💬 ${esc(r.comment)}</div>`;
+    html+=`</div>`;
+  });
+  return html+`</div>`;
+}
+
+function showDetail(pid){
+  if(!dashData)return;
+  const p=dashData.papers.find(x=>x.id===pid);if(!p)return;
+  el('detailTitle').textContent=(p.paperNo||'—')+' 評分詳細';
+  let html=`<div style="margin-bottom:1rem"><div style="font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#718096;margin-bottom:.3rem">論文題目</div><div style="font-size:.9rem;color:#1c1c2e;line-height:1.65;font-weight:500">${esc(p.title)}</div></div>`;
+  if(!p.reviews.length){html+='<p style="color:#718096;font-size:.85rem;text-align:center;padding:1.5rem">尚無評分記錄</p>';}
+  else{
+    const valid=p.reviews.filter(r=>!r.rejected);
+    const avg=calcFrontendSmartAvg(valid.map(r=>r.total));
+    html+=_detailGrid(p.reviews,ADM_CRITERIA);
+    if(valid.length>=2)html+=`<div style="margin-top:.85rem;padding:.65rem 1rem;background:#f0faf5;border:1px solid #bbf7d0;border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:.82rem;color:#166534;font-weight:600">智慧平均分（取最接近2位）</span><span style="font-size:1.1rem;font-weight:700;color:#166534">${avg!==null?avg+'分':'—'}</span></div>`;
+  }
+  el('detailBody').innerHTML=html;
+  el('detailModal').classList.add('show');
+}
+function showOsceDetail(cid){
+  if(!osceData)return;
+  const c=osceData.cases.find(x=>x.id===cid);if(!c)return;
+  el('detailTitle').textContent=(c.caseNo||'')+' OSCE 評分詳細';
+  let html=`<div style="margin-bottom:.75rem"><div style="font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#718096;margin-bottom:.25rem">教案主題</div><div style="font-size:.9rem;color:#1c1c2e;line-height:1.65;font-weight:500">${esc(c.title)}</div></div><div style="font-size:.82rem;color:#718096;margin-bottom:1rem">${esc(c.hospital||'')}${c.target?' ・對象：'+esc(c.target):''}</div>`;
+  if(!c.reviews.length){html+='<p style="color:#718096;font-size:.85rem;text-align:center;padding:1.5rem">尚無評分記錄</p>';}
+  else{
+    const valid=c.reviews.filter(r=>!r.rejected);
+    const avg=calcFrontendSmartAvg(valid.map(r=>r.total));
+    html+=_detailGrid(c.reviews,OSCE_CRITERIA_LABELS.map((x,i)=>({...x,id:'o'+(i+1)})));
+    if(valid.length>=2)html+=`<div style="margin-top:.85rem;padding:.65rem 1rem;background:#f0faf5;border:1px solid #bbf7d0;border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:.82rem;color:#166534;font-weight:600">智慧平均分（取最接近2位）</span><span style="font-size:1.1rem;font-weight:700;color:#166534">${avg!==null?avg+'分':'—'}</span></div>`;
+  }
+  el('detailBody').innerHTML=html;
+  el('detailModal').classList.add('show');
+}
+function closeModal(){const m=el('detailModal');if(m)m.classList.remove('show');}
+
+// ══ 確認 Modal ══
+function showConfirm(title,bodyHtml){return new Promise(resolve=>{_confirmResolve=resolve;const cm=el('confirmModal');if(!cm){resolve(true);return;}el('confirmTitle').textContent=title;el('confirmBody').innerHTML=bodyHtml;cm.classList.add('show');});}
+function confirmOk(){const cm=el('confirmModal');if(cm)cm.classList.remove('show');if(_confirmResolve){_confirmResolve(true);_confirmResolve=null;}}
+function confirmCancel(){const cm=el('confirmModal');if(cm)cm.classList.remove('show');if(_confirmResolve){_confirmResolve(false);_confirmResolve=null;}}
+
+// ══ 指派明細 ══
+function renderAssignDetailPage(){
+  const target=el('rvAssignDetail2');if(!target)return;
+  const rvrs=(dashData&&dashData.reviewers)||[];
+  if(!rvrs.length){target.innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">請先載入「總覽統計」資料</p>';return;}
   let html='';
   rvrs.forEach(r=>{
     const myPosters=dashData.papers?dashData.papers.filter(p=>(assignments[p.id]||[]).includes(r.username)):[];
@@ -1491,34 +1663,17 @@ function renderAssignDetailPage(){
         <span class="chip ${r.enabled?'chip-green':'chip-gray'}" style="font-size:.72rem">${r.enabled?'啟用':'停用'}</span>
         <span style="margin-left:auto">
           <span style="background:#dbeafe;color:#1e4d8c;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600;margin-right:.3rem">海報 ${myPosters.length}篇</span>
-          <span style="background:#fef3c7;color:#92400e;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">OSCE ${myCases.length}個</span>
+          <span style="background:#fef3c7;color:#92400e;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">OSCE ${myCases.length}案</span>
         </span>
       </div>
       <div style="display:flex;flex-direction:column;gap:.6rem">
         <div>
-          <div style="font-size:.72rem;font-weight:700;color:#1e4d8c;margin-bottom:.35rem;letter-spacing:.04em">📋 海報論文</div>
-          ${myPosters.length?myPosters.map(p=>{
-            const cs={A:'background:#dbeafe;color:#1e4d8c',B:'background:#ede9fe;color:#5b21b6',C:'background:#dcfce7;color:#166534'};
-            const done=p.reviews&&p.reviews.some(rv=>rv.reviewer===r.username);
-            return `<div style="display:flex;align-items:center;gap:.4rem;padding:.28rem .45rem;background:#f8fafc;border-radius:5px;font-size:.8rem;margin-bottom:.2rem">
-              <span style="${cs[p.category]||''};padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700">${p.category||'?'}</span>
-              <span style="font-weight:600;font-family:monospace;font-size:.72rem;min-width:45px;color:#334155">${esc(p.paperNo||'—')}</span>
-              <span style="color:#334155;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.title)}">${esc(p.title)}</span>
-              ${done?'<span style="color:#16a34a;font-size:.68rem;font-weight:700;white-space:nowrap">✓已評</span>':'<span style="color:#d97706;font-size:.68rem;white-space:nowrap">待評</span>'}
-            </div>`;
-          }).join(''):'<span style="color:#cbd5e0;font-size:.82rem">尚未指派</span>'}
+          <div style="font-size:.72rem;font-weight:700;color:#1e4d8c;margin-bottom:.35rem">📋 海報論文</div>
+          ${myPosters.length?myPosters.map(p=>{const cs={A:'background:#dbeafe;color:#1e4d8c',B:'background:#ede9fe;color:#5b21b6',C:'background:#dcfce7;color:#166534'};const done=p.reviews&&p.reviews.some(rv=>rv.reviewer===r.username);return `<div style="display:flex;align-items:center;gap:.4rem;padding:.28rem .45rem;background:#f8fafc;border-radius:5px;font-size:.8rem;margin-bottom:.2rem"><span style="${cs[p.category]||''};padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700">${p.category||'?'}</span><span style="font-weight:600;font-family:monospace;font-size:.72rem;min-width:45px;color:#334155">${esc(p.paperNo||'—')}</span><span style="color:#334155;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.title)}">${esc(p.title)}</span>${done?'<span style="color:#16a34a;font-size:.68rem;font-weight:700;white-space:nowrap">✓已評</span>':'<span style="color:#d97706;font-size:.68rem;white-space:nowrap">待評</span>'}</div>`;}).join(''):'<span style="color:#cbd5e0;font-size:.82rem">尚未指派</span>'}
         </div>
         <div>
-          <div style="font-size:.72rem;font-weight:700;color:#92400e;margin-bottom:.35rem;letter-spacing:.04em">🎬 OSCE 教案</div>
-          ${myCases.length?myCases.map(c=>{
-            const done=c.reviews&&c.reviews.some(rv=>rv.reviewer===r.username);
-            return `<div style="display:flex;align-items:center;gap:.4rem;padding:.28rem .45rem;background:#fffbeb;border-radius:5px;font-size:.8rem;margin-bottom:.2rem">
-              <span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700">OSCE</span>
-              <span style="font-weight:600;font-family:monospace;font-size:.72rem;min-width:45px;color:#92400e">${esc(c.caseNo||'—')}</span>
-              <span style="color:#334155;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(c.title)}">${esc(c.title)}</span>
-              ${done?'<span style="color:#16a34a;font-size:.68rem;font-weight:700;white-space:nowrap">✓已評</span>':'<span style="color:#d97706;font-size:.68rem;white-space:nowrap">待評</span>'}
-            </div>`;
-          }).join(''):'<span style="color:#cbd5e0;font-size:.82rem">尚未指派</span>'}
+          <div style="font-size:.72rem;font-weight:700;color:#92400e;margin-bottom:.35rem">🎬 OSCE 教案</div>
+          ${myCases.length?myCases.map(c=>{const done=c.reviews&&c.reviews.some(rv=>rv.reviewer===r.username);return `<div style="display:flex;align-items:center;gap:.4rem;padding:.28rem .45rem;background:#fffbeb;border-radius:5px;font-size:.8rem;margin-bottom:.2rem"><span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700">OSCE</span><span style="font-weight:600;font-family:monospace;font-size:.72rem;min-width:45px;color:#92400e">${esc(c.caseNo||'—')}</span><span style="color:#334155;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(c.title)}">${esc(c.title)}</span>${done?'<span style="color:#16a34a;font-size:.68rem;font-weight:700;white-space:nowrap">✓已評</span>':'<span style="color:#d97706;font-size:.68rem;white-space:nowrap">待評</span>'}</div>`;}).join(''):'<span style="color:#cbd5e0;font-size:.82rem">尚未指派</span>'}
         </div>
       </div>
     </div>`;
@@ -1526,611 +1681,37 @@ function renderAssignDetailPage(){
   target.innerHTML=html||'<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">尚無委員資料</p>';
 }
 
-async function loadDashboard(){
-  setLdr(true);
-  try{
-    const r=await api({action:'adminGetDashboard'});
-    if(!r.success){ showToast('載入失敗','err'); setLdr(false); return; }
-    dashData=r;
-    // 先建立委員姓名對照，再渲染（確保 rvName() 可用）
-    if(r.reviewerNamesMap) Object.assign(reviewerNamesMap, r.reviewerNamesMap);
-    (r.reviewers||[]).forEach(rv=>{
-      if(rv.username && rv.name) reviewerNamesMap[rv.username]=rv.name;
-    });
-    const ar=await api({action:'adminGetAssignments'});
-    assignments=ar.assignments||{};
-    renderStats(r.stats);
-    renderDashTable(r.papers);
-    renderAssignTable(r.papers, r.reviewers);
-    renderResultsTable(r.papers);
-    // 載入 OSCE 資料（載入後更新統計卡）
-    loadOsceDashboard().then(()=>{
-      if(dashData) renderStats(dashData.stats);
-    });
-  } catch(e){ showToast('連線失敗','err'); console.error(e); }
-  setLdr(false);
-}
+// ══ 委員帳號管理 ══
+async function loadReviewers(){setLdr(true);try{const r=await api({action:'adminGetReviewers'});if(r.success){if(r.reviewerNamesMap)Object.assign(reviewerNamesMap,r.reviewerNamesMap);else(r.reviewers||[]).forEach(rv=>{reviewerNamesMap[rv.username]=rv.name||rv.username;});renderRvTable(r.reviewers);}else showToast('載入失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
+async function addReviewer(){const u=el('nwUser').value.trim(),pw=el('nwPw').value.trim(),n=el('nwName').value.trim();if(!u||!pw||!n){showToast('請填寫完整欄位','err');return;}setLdr(true);try{const r=await api({action:'adminAddReviewer',username:u,password:pw,name:n});if(r.success){showToast('委員已新增','ok');el('nwUser').value='';el('nwPw').value='';el('nwName').value='';loadReviewers();}else showToast(r.message||'新增失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
+async function toggleReviewer(u,enabled){setLdr(true);try{const r=await api({action:'adminUpdateReviewer',username:u,enabled:String(enabled)});if(r.success){showToast(`帳號已${enabled?'啟用':'停用'}`,'ok');loadReviewers();}else showToast('操作失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
+async function deleteReviewer(u){if(!confirm(`確定刪除委員「${u}」？`))return;setLdr(true);try{const r=await api({action:'adminDeleteReviewer',username:u});if(r.success){showToast('委員已刪除','ok');loadReviewers();}else showToast(r.message||'刪除失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
+function rvSwitchSub(){}
 
-function renderStats(s){
-  if(!s) return;
-  const pct=s.totalPapers?Math.round(s.reviewedPapers/s.totalPapers*100):0;
-  const osceS = osceData ? osceData.stats : null;
-  el('statsRow').innerHTML=`
-    <div class="stat-card blue"><div class="stat-num">${s.totalPapers}</div><div class="stat-lbl"><span class="poster-tag">海報</span> 投稿篇數</div></div>
-    <div class="stat-card"><div class="stat-num">${s.reviewedPapers}<span style="font-size:.9rem;color:#718096"> (${pct}%)</span></div><div class="stat-lbl"><span class="poster-tag">海報</span> 已有評分</div></div>
-    <div class="stat-card green"><div class="stat-num">${s.recommended}</div><div class="stat-lbl"><span class="poster-tag">海報</span> 推薦篇數</div></div>
-    ${osceS?`
-    <div class="stat-card blue"><div class="stat-num">${osceS.total||0}</div><div class="stat-lbl"><span class="osce-tag">OSCE</span> 教案總數</div></div>
-    <div class="stat-card"><div class="stat-num">${osceS.reviewed||0}</div><div class="stat-lbl"><span class="osce-tag">OSCE</span> 已有評分</div></div>`:''}
-    <div class="stat-card orange"><div class="stat-num">${s.activeReviewers}</div><div class="stat-lbl">啟用委員數</div></div>`;
-}
-
-function renderDashTable(papers){
-  if(!papers) return;
-  el('dashBody').innerHTML=papers.map(p=>{ const assigned=assignments[p.id]||[]; const done=p.reviews.length; const total=assigned.length||0; const pct=total?Math.round(done/total*100):0; const fillClass=done===0?'none':done>=total?'done':'part';
-    return `<tr><td><span class="chip chip-blue">${p.paperNo}</span></td><td style="max-width:280px;line-height:1.5">${esc(p.title)}</td><td>${p.category}</td><td style="font-size:.78rem;color:#718096">${assigned.map(u=>rvName(u)).join('、')||'—'}</td><td><div class="sc-prog"><span>${done}/${total}</span><div class="sc-bar"><div class="sc-fill ${fillClass}" style="width:${pct}%"></div></div></div></td><td class="avg-num" style="font-weight:600">${p.avgTotal!==null?p.avgTotal:'—'}</td><td>${p.avgTotal!==null?(p.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td></tr>`;
-  }).join('');
-}
-
-function renderAssignTable(papers, reviewers){
-  if(!papers) return;
-  el('assignBody').innerHTML=papers.map(p=>{ const assigned=assignments[p.id]||[]; const options=(reviewers||[]).map(r=>`<option value="${r.username}">${r.name}(${r.username})</option>`).join('');
-    return `<tr><td><span class="chip chip-blue">${p.paperNo}</span></td><td style="max-width:260px;line-height:1.5">${esc(p.title)}</td><td>${p.category}</td><td><div class="assign-wrap" id="aw_${p.id}">${assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeAssign('${p.id}','${u}')">✕</span></span>`).join('')}<select class="assign-sel" id="asel_${p.id}" onchange="addAssign('${p.id}')"><option value="">＋ 委員</option>${options}</select></div></td></tr>`;
-  }).join('');
-}
-
-function addAssign(pid){ const sel=el('asel_'+pid); const u=sel.value; if(!u) return; sel.value=''; if(!assignments[pid]) assignments[pid]=[]; if(assignments[pid].includes(u)){ showToast('此委員已在列表中','err'); return; } assignments[pid].push(u); refreshAssignRow(pid); }
-function removeAssign(pid,u){ if(!assignments[pid]) return; assignments[pid]=assignments[pid].filter(x=>x!==u); refreshAssignRow(pid); }
-function refreshAssignRow(pid){ const wrap=el('aw_'+pid); if(!wrap) return; const assigned=assignments[pid]||[]; const sel=el('asel_'+pid); const selHTML=sel?sel.outerHTML:''; wrap.innerHTML=assigned.map(u=>`<span class="assign-chip">${u}<span class="rm" onclick="removeAssign('${pid}','${u}')">✕</span></span>`).join('')+selHTML; }
-async function saveAssignments(){ if(!confirm('確認儲存所有指派設定？')) return; setLdr(true); try{ const r=await api({action:'adminSaveAssignments',assignmentsJson:JSON.stringify(assignments)}); if(r.success) showToast(`指派已儲存（${r.saved} 筆）`,'ok'); else showToast('儲存失敗','err'); } catch{ showToast('連線失敗','err'); } setLdr(false); }
-function autoAssign(){ if(!dashData) return; const {papers,reviewers}=dashData; const active=(reviewers||[]).filter(r=>r.enabled); if(!active.length){ showToast('沒有啟用中的委員','err'); return; } if(!confirm(`將 ${papers.length} 篇論文平均分配給 ${active.length} 位委員？`)) return; papers.forEach((p,i)=>{ assignments[p.id]=[active[i%active.length].username]; }); renderAssignTable(papers,reviewers); showToast('自動指派完成，請記得按「儲存指派」','ok'); }
-
-function renderResultsTable(papers){
-  if(!papers) return;
-
-  const rankable = papers.filter(p=>p.avgTotal!==null);
-  const sorted   = [...papers].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1));
-
-  // ── 名次徽章 ──
-  function rankBadge(rank, showCat, cat){
-    if(rank===undefined) return '<span style="color:#cbd5e0;font-size:.8rem">未評分</span>';
-    const medals={1:'🥇',2:'🥈',3:'🥉'};
-    const medal=medals[rank]||'';
-    const catLabel=showCat?`<span style="font-size:.7rem;opacity:.7">${cat}</span> `:'';
-    const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';
-    const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';
-    const bdr=rank===1?'#fde68a':rank===2?'#cbd5e1':rank===3?'#fcd34d':'#e2e8f0';
-    return `<span style="display:inline-flex;align-items:center;gap:.25rem;background:${bg};color:${co};border:1px solid ${bdr};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700;white-space:nowrap">${medal}${catLabel}第${rank}名</span>`;
-  }
-
-  // ── 差距計算（共用）──
-  function gapHtml(p){
-    const valid=p.reviews.filter(r=>!r.rejected);
-    if(valid.length>=2){
-      const sc=valid.map(r=>r.total).sort((a,b)=>a-b);
-      const gap=sc[sc.length-1]-sc[0];
-      return gap>10
-        ?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700;display:inline-flex;align-items:center;gap:.2rem">⚠ ${gap}分<span style="font-weight:400;font-size:.68rem">需第3位</span></span>`
-        :`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${gap}分</span>`;
-    }
-    if(valid.length===1) return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
-    return '—';
-  }
-
-  // ── 單列渲染 ──
-  function makeRow(p, rankBadgeHtml){
-    const rejCount=p.reviews.filter(r=>r.rejected).length;
-    return `<tr data-title="${esc(p.title).toLowerCase()}">
-      <td style="text-align:center">${rankBadgeHtml}</td>
-      <td><span class="chip chip-blue">${p.paperNo||'—'}</span></td>
-      <td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(p.title)}</td>
-      <td><span style="font-weight:600">${p.category||'—'}</span></td>
-      <td style="font-weight:700;font-size:1rem;color:#1c1c2e">${p.avgTotal!==null?p.avgTotal+'分':'—'}</td>
-      <td>${gapHtml(p)}</td>
-      <td>${p.avgTotal!==null?(p.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td>
-      <td>${rejCount>0?`<span class="chip chip-red">${rejCount}位退稿</span>`:'—'}</td>
-      <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button></td>
-    </tr>`;
-  }
-
-  // ══ 分類排名表格 ══
-  const catRankMap={};
-  ['A','B','C'].forEach(cat=>{
-    let rank=1, prev=null;
-    rankable.filter(p=>p.category===cat).sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i,arr)=>{
-      if(p.avgTotal!==prev){ rank=i+1; } catRankMap[p.id]=rank; prev=p.avgTotal;
-    });
-  });
-
-  // 分類排名：先按類別再按名次排序
-  const catSorted=[...sorted].sort((a,b)=>{
-    const catOrd={A:0,B:1,C:2};
-    const co=(catOrd[a.category]??9)-(catOrd[b.category]??9);
-    if(co!==0) return co;
-    return (catRankMap[a.id]??99)-(catRankMap[b.id]??99);
-  });
-
-  const catRows=catSorted.map(p=>{
-    const badge=p.avgTotal!==null?rankBadge(catRankMap[p.id],true,p.category):'<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';
-    return makeRow(p, badge);
-  }).join('');
-
-  // 類別分隔行
-  let catHtml='', lastCat='';
-  catRows.split('</tr>').filter(Boolean).forEach((row,i)=>{
-    const p=catSorted[i]; if(!p) return;
-    if(p.category!==lastCat){
-      const catNames={A:'A 類：臨床技能教育',B:'B 類：評量與能力導向',C:'C 類：人文素養'};
-      catHtml+=`<tr><td colspan="9" style="background:#f8fafc;font-size:.78rem;font-weight:700;color:#64748b;padding:.4rem .9rem;border-top:2px solid #e2e8f0">${catNames[p.category]||p.category}</td></tr>`;
-      lastCat=p.category;
-    }
-    catHtml+=row+'</tr>';
-  });
-  const catBody=el('resultsCatBody'); if(catBody) catBody.innerHTML=catHtml;
-
-  // ══ 總排名表格 ══
-  const allRankMap={};
-  let rank=1, prev=null;
-  rankable.sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i)=>{
-    if(p.avgTotal!==prev){ rank=i+1; } allRankMap[p.id]=rank; prev=p.avgTotal;
-  });
-
-  const allBody=el('resultsAllBody');
-  if(allBody) allBody.innerHTML=sorted.map(p=>{
-    const badge=p.avgTotal!==null?rankBadge(allRankMap[p.id],false,''):'<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';
-    return makeRow(p, badge);
-  }).join('');
-}
-function filterResults(){ const q=el('resultSearch').value.toLowerCase(); document.querySelectorAll('#resultsBody tr').forEach(tr=>{ tr.style.display=!q||tr.dataset.title.includes(q)?'':'none'; }); }
-
-function showDetail(pid){
-  if(!dashData) return;
-  const p=dashData.papers.find(x=>x.id===pid); if(!p) return;
-  el('detailTitle').textContent=(p.paperNo||'—')+' 評分詳細';
-  const maxTotal=ADM_CRITERIA.reduce((s,c)=>s+c.max,0);
-  let html=`<div style="margin-bottom:1rem">
-    <div style="font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#718096;margin-bottom:.3rem">論文題目</div>
-    <div style="font-size:.9rem;color:#1c1c2e;line-height:1.65;font-weight:500">${esc(p.title)}</div>
-  </div>`;
-  if(!p.reviews.length){
-    html+='<p style="color:#718096;font-size:.85rem;text-align:center;padding:1.5rem">尚無評分記錄</p>';
-  } else {
-    const validRevs=p.reviews.filter(r=>!r.rejected);
-    const smartAvg=calcFrontendSmartAvg(validRevs.map(r=>r.total));
-    const cols=Math.min(p.reviews.length,3);
-    html+=`<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:.75rem;align-items:start">`;
-    p.reviews.forEach((r,i)=>{
-      html+=`<div style="background:#f8fafc;border:1px solid ${r.rejected?'#fecaca':'#e2e8f0'};border-radius:9px;padding:.85rem">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.65rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0">
-          <span style="font-size:.82rem;font-weight:700;color:#1c1c2e">評審 ${i+1}</span>
-          <span style="font-size:.75rem;font-weight:600;color:#3b82f6">${rvName(r.reviewer)}</span>
-        </div>`;
-      if(r.rejected){
-        html+=`<div style="background:#fff1f1;border:1px solid #fecaca;border-radius:6px;padding:.5rem .65rem;font-size:.82rem;color:#b91c1c">退稿：${esc(r.rejectReason||'（未填）')}</div>`;
-      } else {
-        ADM_CRITERIA.forEach(c=>{
-          html+=`<div style="display:flex;justify-content:space-between;padding:.22rem 0;border-bottom:1px solid #f1f5f9;font-size:.8rem">
-            <span style="color:#4a5568;line-height:1.4">${c.label}</span>
-            <span style="font-weight:700;color:var(--adm-blue);white-space:nowrap;margin-left:.5rem">${r.scores&&r.scores[c.id]!==undefined?r.scores[c.id]:0}/${c.max}</span>
-          </div>`;
-        });
-        const tc=r.total>=ADM_THRESHOLD?'var(--adm-green)':'#1c1c2e';
-        html+=`<div style="display:flex;justify-content:space-between;padding:.4rem 0 0;font-weight:700;font-size:.92rem">
-          <span>總分</span><span style="color:${tc}">${r.total}/${maxTotal}</span></div>`;
-      }
-      if(r.comment) html+=`<div style="font-size:.75rem;color:#718096;background:#f1f5f9;padding:.4rem .6rem;border-radius:5px;margin-top:.4rem">💬 ${esc(r.comment)}</div>`;
-      html+=`</div>`;
-    });
-    html+=`</div>`;
-    if(validRevs.length>=2){
-      html+=`<div style="margin-top:.85rem;padding:.65rem 1rem;background:#f0faf5;border:1px solid #bbf7d0;border-radius:8px;display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:.82rem;color:#166534;font-weight:600">智慧平均分（取最接近2位）</span>
-        <span style="font-size:1.1rem;font-weight:700;color:#166534">${smartAvg!==null?smartAvg+'分':'—'}</span>
-      </div>`;
-    }
-  }
-  el('detailBody').innerHTML=html;
-  el('detailModal').classList.add('show');
-}
-
-function showOsceDetail(cid){
-  if(!osceData) return;
-  const c=osceData.cases.find(x=>x.id===cid); if(!c) return;
-  el('detailTitle').textContent=(c.caseNo||'')+' OSCE 教案評分詳細';
-  let html=`<div style="margin-bottom:.75rem">
-    <div style="font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#718096;margin-bottom:.25rem">教案主題</div>
-    <div style="font-size:.9rem;color:#1c1c2e;line-height:1.65;font-weight:500">${esc(c.title)}</div>
-  </div>
-  <div style="font-size:.82rem;color:#718096;margin-bottom:1rem">${esc(c.hospital||'')}${c.target?' ・對象：'+esc(c.target):''}</div>`;
-  if(!c.reviews.length){
-    html+='<p style="color:#718096;font-size:.85rem;text-align:center;padding:1.5rem">尚無評分記錄</p>';
-  } else {
-    const osceValid=c.reviews.filter(r=>!r.rejected);
-    const osceAvg=calcFrontendSmartAvg(osceValid.map(r=>r.total));
-    const cols=Math.min(c.reviews.length,3);
-    html+=`<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:.75rem;align-items:start">`;
-    c.reviews.forEach((r,i)=>{
-      html+=`<div style="background:#f8fafc;border:1px solid ${r.rejected?'#fecaca':'#e2e8f0'};border-radius:9px;padding:.85rem">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.65rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0">
-          <span style="font-size:.82rem;font-weight:700;color:#1c1c2e">評審 ${i+1}</span>
-          <span style="font-size:.75rem;font-weight:600;color:#3b82f6">${rvName(r.reviewer)}</span>
-        </div>`;
-      if(r.rejected){
-        html+=`<div style="background:#fff1f1;border:1px solid #fecaca;border-radius:6px;padding:.5rem .65rem;font-size:.82rem;color:#b91c1c">退稿：${esc(r.rejectReason||'（未填）')}</div>`;
-      } else {
-        OSCE_CRITERIA_LABELS.forEach((c2,idx2)=>{
-          const id='o'+(idx2+1);
-          html+=`<div style="display:flex;justify-content:space-between;padding:.22rem 0;border-bottom:1px solid #f1f5f9;font-size:.8rem">
-            <span style="color:#4a5568;line-height:1.35">${c2.label}</span>
-            <span style="font-weight:700;color:var(--adm-blue);white-space:nowrap;margin-left:.5rem">${r.scores&&r.scores[id]!==undefined?r.scores[id]:0}/${c2.max}</span>
-          </div>`;
-        });
-        if(r.bonus) html+=`<div style="display:flex;justify-content:space-between;padding:.22rem 0;border-bottom:1px solid #f1f5f9;font-size:.8rem"><span style="color:#92400e">優良加分</span><span style="font-weight:700;color:#92400e">${r.bonus}/10</span></div>`;
-        const tc=r.total>=80?'var(--adm-green)':'#1c1c2e';
-        html+=`<div style="display:flex;justify-content:space-between;padding:.4rem 0 0;font-weight:700;font-size:.92rem">
-          <span>總分</span><span style="color:${tc}">${r.total}分</span></div>`;
-      }
-      if(r.comment) html+=`<div style="font-size:.75rem;color:#718096;background:#f1f5f9;padding:.4rem .6rem;border-radius:5px;margin-top:.4rem">💬 ${esc(r.comment)}</div>`;
-      html+=`</div>`;
-    });
-    html+=`</div>`;
-    if(osceValid.length>=2){
-      html+=`<div style="margin-top:.85rem;padding:.65rem 1rem;background:#f0faf5;border:1px solid #bbf7d0;border-radius:8px;display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:.82rem;color:#166534;font-weight:600">智慧平均分（取最接近2位）</span>
-        <span style="font-size:1.1rem;font-weight:700;color:#166534">${osceAvg!==null?osceAvg+'分':'—'}</span>
-      </div>`;
-    }
-  }
-  el('detailBody').innerHTML=html;
-  el('detailModal').classList.add('show');
-}
-
-// 前端版智慧平均（取差距最小的2位）
-function calcFrontendSmartAvg(scores){
-  const s=scores.filter(v=>!isNaN(v)&&v!==null&&v!==undefined);
-  if(!s.length) return null;
-  if(s.length<=2) return Math.round(s.reduce((a,b)=>a+b,0)/s.length*10)/10;
-  const sorted=[...s].sort((a,b)=>a-b);
-  let minGap=Infinity, bestPair=[sorted[0],sorted[1]];
-  for(let i=0;i<sorted.length-1;i++){
-    const gap=sorted[i+1]-sorted[i];
-    if(gap<minGap){minGap=gap;bestPair=[sorted[i],sorted[i+1]];}
-  }
-  return Math.round((bestPair[0]+bestPair[1])/2*10)/10;
-}
-
-function closeModal(){ el('detailModal').classList.remove('show'); }
-
-// ── Reviewers ──
-async function loadReviewers(){
-  setLdr(true);
-  try{
-    const r=await api({action:'adminGetReviewers'});
-    if(r.success){
-      if(r.reviewerNamesMap) Object.assign(reviewerNamesMap, r.reviewerNamesMap);
-      else (r.reviewers||[]).forEach(rv=>{ reviewerNamesMap[rv.username]=rv.name||rv.username; });
-      renderRvTable(r.reviewers);
-    } else showToast('載入失敗','err');
-  } catch{ showToast('連線失敗','err'); }
-  setLdr(false);
-}
-
-async function addReviewer(){
-  const u=el('nwUser').value.trim(), pw=el('nwPw').value.trim(), n=el('nwName').value.trim();
-  if(!u||!pw||!n){ showToast('請填寫完整欄位','err'); return; }
-  setLdr(true);
-  try{
-    const r=await api({action:'adminAddReviewer',username:u,password:pw,name:n});
-    if(r.success){ showToast('委員已新增','ok'); el('nwUser').value=''; el('nwPw').value=''; el('nwName').value=''; loadReviewers(); }
-    else showToast(r.message||'新增失敗','err');
-  } catch{ showToast('連線失敗','err'); }
-  setLdr(false);
-}
-
-async function toggleReviewer(u,enabled){
-  setLdr(true);
-  try{
-    const r=await api({action:'adminUpdateReviewer',username:u,enabled:String(enabled)});
-    if(r.success){ showToast(`帳號已${enabled?'啟用':'停用'}`,'ok'); loadReviewers(); }
-    else showToast('操作失敗','err');
-  } catch{ showToast('連線失敗','err'); }
-  setLdr(false);
-}
-
-async function deleteReviewer(u){
-  if(!confirm(`確定刪除委員「${u}」？`)) return;
-  setLdr(true);
-  try{
-    const r=await api({action:'adminDeleteReviewer',username:u});
-    if(r.success){ showToast('委員已刪除','ok'); loadReviewers(); }
-    else showToast(r.message||'刪除失敗','err');
-  } catch{ showToast('連線失敗','err'); }
-  setLdr(false);
-}
-
-// ══ Helpers ══
-async function api(params){
-  const fd=new FormData();
-  Object.entries(params).forEach(([k,v])=>fd.append(k,String(v??'')));
-  const resp = await fetch(APPS_SCRIPT_URL, {
-    method:'POST', body:fd,
-    redirect:'follow'
-  });
-  if(!resp.ok) throw new Error('HTTP '+resp.status+' '+resp.statusText);
-  const text = await resp.text();
-  try { return JSON.parse(text); }
-  catch(e){ throw new Error('回應非 JSON：'+text.substring(0,100)); }
-}
-function el(id){ return document.getElementById(id); }
-function setLdr(v){ el('ldr').style.display=v?'flex':'none'; }
-function showToast(msg,type){
-  const t=document.createElement('div'); t.className='toast '+type; t.textContent=msg;
-  document.body.appendChild(t); setTimeout(()=>t.remove(),3200);
-}
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-// ══ State 變數（OSCE 後台）══
-let osceData = null;
-let osceAssignments = {};
-let dashType = 'poster';
-let assignType = 'poster';
-let resultsType = 'poster';
-
-// ══ 確認 Modal ══
-// _confirmResolve 已在前面宣告
-function showConfirm(title, bodyHtml){
-  return new Promise(resolve => {
-    _confirmResolve = resolve;
-    const cm = el('confirmModal'); if(!cm) { resolve(true); return; }
-    el('confirmTitle').textContent = title;
-    el('confirmBody').innerHTML = bodyHtml;
-    cm.classList.add('show');
-  });
-}
-function confirmOk(){ const cm=el('confirmModal'); if(cm) cm.classList.remove('show'); if(_confirmResolve){ _confirmResolve(true); _confirmResolve=null; } }
-function confirmCancel(){ const cm=el('confirmModal'); if(cm) cm.classList.remove('show'); if(_confirmResolve){ _confirmResolve(false); _confirmResolve=null; } }
-
-// ══ Drive 預覽 ══
-function getDriveEmbedUrl(url){
-  if(!url) return '';
-  const folderMatch = url.match(/drive\.google\.com\/drive\/folders\/([a-zA-Z0-9_-]+)/);
-  if(folderMatch) return 'https://drive.google.com/embeddedfolderview?id='+folderMatch[1]+'#list';
-  const fileMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if(fileMatch) return 'https://drive.google.com/file/d/'+fileMatch[1]+'/preview';
-  return url;
-}
-function toggleDrivePreview(pid){
-  const wrap = el('di_'+pid) || el('driveIframe_'+pid);
-  const btn  = el('pt_'+pid) || el('previewToggle_'+pid);
-  if(!wrap) return;
-  const isOpen = wrap.classList.contains('open');
-  wrap.classList.toggle('open', !isOpen);
-  if(btn) btn.classList.toggle('active', !isOpen);
-}
-
-// ══ Draggable 分隔線 ══
+// ══ Draggable ══
 function initDraggable(){
   ['divider1','divider2'].forEach(id=>{
-    const div = el(id); if(!div) return;
-    let startX, startPrev, startNext;
-    div.addEventListener('mousedown', e=>{
-      const prev = div.previousElementSibling;
-      const next = div.nextElementSibling;
-      if(!prev||!next) return;
-      startX = e.clientX;
-      startPrev = prev.offsetWidth;
-      startNext = next.offsetWidth;
-      div.classList.add('dragging');
-      document.body.style.cursor='col-resize';
-      document.body.style.userSelect='none';
-      function onMove(e2){
-        const dx = e2.clientX - startX;
-        const prevMin = parseInt(getComputedStyle(prev).minWidth)||100;
-        const nextMin = parseInt(getComputedStyle(next).minWidth)||100;
-        const newPrev = Math.max(prevMin, Math.min(startPrev+dx, startPrev+startNext-nextMin));
-        const newNext = startPrev+startNext-newPrev;
-        prev.style.width = newPrev+'px'; prev.style.flex = '0 0 '+newPrev+'px';
-        next.style.width = newNext+'px'; next.style.flex = '0 0 '+newNext+'px';
-      }
-      function onUp(){
-        div.classList.remove('dragging');
-        document.body.style.cursor=''; document.body.style.userSelect='';
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-      }
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
-      e.preventDefault();
+    const div=el(id);if(!div)return;
+    let startX,sp,sn;
+    div.addEventListener('mousedown',e=>{
+      const prev=div.previousElementSibling,next=div.nextElementSibling;if(!prev||!next)return;
+      startX=e.clientX;sp=prev.offsetWidth;sn=next.offsetWidth;
+      div.classList.add('dragging');document.body.style.cursor='col-resize';document.body.style.userSelect='none';
+      const onMove=e2=>{const dx=e2.clientX-startX;const pm=parseInt(getComputedStyle(prev).minWidth)||100;const nm=parseInt(getComputedStyle(next).minWidth)||100;const np=Math.max(pm,Math.min(sp+dx,sp+sn-nm));const nn=sp+sn-np;prev.style.width=np+'px';prev.style.flex='0 0 '+np+'px';next.style.width=nn+'px';next.style.flex='0 0 '+nn+'px';};
+      const onUp=()=>{div.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};
+      document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);e.preventDefault();
     });
   });
 }
+function toggleAssignDetail(sid,did){const s=el(sid),d=el(did);if(!s||!d)return;const o=d.classList.contains('show');d.classList.toggle('show',!o);s.classList.toggle('expanded',!o);}
 
-// ══ 展開/收合 ══
-function toggleAssignDetail(summaryId, detailId){
-  const summary=el(summaryId), detail=el(detailId);
-  if(!summary||!detail) return;
-  const isOpen=detail.classList.contains('show');
-  detail.classList.toggle('show',!isOpen);
-  summary.classList.toggle('expanded',!isOpen);
-}
+// ══ Core Helpers ══
+async function api(params){const fd=new FormData();Object.entries(params).forEach(([k,v])=>fd.append(k,String(v??'')));const resp=await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd,redirect:'follow'});if(!resp.ok)throw new Error('HTTP '+resp.status);const text=await resp.text();try{return JSON.parse(text);}catch(e){throw new Error('非JSON:'+text.substring(0,100));}}
+function el(id){return document.getElementById(id);}
+function setLdr(v){const l=el('ldr');if(l)l.style.display=v?'flex':'none';}
+function showToast(msg,type){const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3200);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-// ══ 後台分頁切換 ══
-function dashSwitchType(t){
-  dashType=t;
-  el('dashTypePoster').classList.toggle('active',t==='poster');
-  el('dashTypeOsce').classList.toggle('active',t==='osce');
-  el('dashPosterSection').style.display=t==='poster'?'':'none';
-  el('dashOsceSection').style.display=t==='osce'?'':'none';
-  if(t==='osce'&&!osceData) loadOsceDashboard();
-}
-function assignSwitchType(t){
-  assignType=t;
-  el('assignTypePoster').classList.toggle('active',t==='poster');
-  el('assignTypeOsce').classList.toggle('active',t==='osce');
-  el('assignPosterSection').style.display=t==='poster'?'':'none';
-  el('assignOsceSection').style.display=t==='osce'?'':'none';
-  if(t==='osce'){ if(!osceData) loadOsceDashboard(); else renderOsceAssignTable(osceData.cases,osceData.reviewers); }
-}
-function resultsSwitchType(t){
-  resultsType=t;
-  el('resultsTypePoster').classList.toggle('active',t==='poster');
-  el('resultsTypeOsce').classList.toggle('active',t==='osce');
-  el('resultsPosterSection').style.display=t==='poster'?'':'none';
-  el('resultsOsceSection').style.display=t==='osce'?'':'none';
-  if(t==='osce'){ if(!osceData) loadOsceDashboard(); else renderOsceResultsTable(osceData.cases); }
-}
-function rvSwitchSub(tab){
-  el('rvSubAccounts').classList.toggle('active',tab==='accounts');
-  el('rvSubAssign').classList.toggle('active',tab==='assign');
-  el('rvPanelAccounts').style.display=tab==='accounts'?'':'none';
-  el('rvPanelAssign').style.display=tab==='assign'?'':'none';
-}
-
-// ══ OSCE 後台資料 ══
-async function loadOsceDashboard(){
-  try{
-    const r=await api({action:'adminGetOsceDashboard'});
-    if(!r.success){ osceData={cases:[],reviewers:[],stats:{}}; }
-    else{
-      osceData=r;
-      (r.reviewers||[]).forEach(rv=>{ if(rv.username&&rv.name) reviewerNamesMap[rv.username]=rv.name; });
-    }
-    const ar=await api({action:'adminGetOsceAssignments'});
-    osceAssignments=(ar&&ar.assignments)||{};
-    renderOsceDashTable(osceData.cases);
-    renderOsceAssignTable(osceData.cases,osceData.reviewers);
-    renderOsceResultsTable(osceData.cases);
-    if(dashData) renderStats(dashData.stats);
-  }catch(e){ console.error('OSCE 載入錯誤:',e); osceData={cases:[],reviewers:[],stats:{}}; }
-}
-
-function renderOsceDashTable(cases){
-  const body=el('osceDashBody'); if(!body) return;
-  if(!cases||!cases.length){ body.innerHTML='<tr><td colspan="6" style="text-align:center;color:#718096;padding:2rem">尚無 OSCE 教案資料</td></tr>'; return; }
-  body.innerHTML=cases.map(c=>{
-    const assigned=osceAssignments[c.id]||[];
-    const done=c.reviews.length, total=assigned.length||0;
-    const pct=total?Math.round(done/total*100):0;
-    const fillClass=done===0?'none':done>=total?'done':'part';
-    return `<tr>
-      <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
-      <td style="max-width:260px;line-height:1.5">${esc(c.title)}</td>
-      <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
-      <td style="font-size:.85rem;color:#334155">${assigned.map(u=>rvName(u)).join('、')||'—'}</td>
-      <td><div class="sc-prog"><span>${done}/${total}</span><div class="sc-bar"><div class="sc-fill ${fillClass}" style="width:${pct}%"></div></div></div></td>
-      <td style="font-weight:600">${c.avgTotal!==null?c.avgTotal:'—'}</td>
-    </tr>`;
-  }).join('');
-}
-
-function renderOsceAssignTable(cases,reviewers){
-  const body=el('osceAssignBody'); if(!body) return;
-  if(!cases||!cases.length){ body.innerHTML='<tr><td colspan="4" style="text-align:center;color:#718096;padding:2rem">尚無教案資料</td></tr>'; return; }
-  body.innerHTML=cases.map(c=>{
-    const assigned=osceAssignments[c.id]||[];
-    const options=(reviewers||[]).map(r=>`<option value="${r.username}">${r.name}(${r.username})</option>`).join('');
-    return `<tr>
-      <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
-      <td style="max-width:240px;line-height:1.5">${esc(c.title)}</td>
-      <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
-      <td><div class="assign-wrap" id="oaw_${c.id}">
-        ${assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeOsceAssign('${c.id}','${u}')">✕</span></span>`).join('')}
-        <select class="assign-sel" id="oasel_${c.id}" onchange="addOsceAssign('${c.id}')"><option value="">＋ 委員</option>${options}</select>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-function addOsceAssign(cid){ const sel=el('oasel_'+cid); const u=sel.value; if(!u) return; sel.value=''; if(!osceAssignments[cid]) osceAssignments[cid]=[]; if(osceAssignments[cid].includes(u)){showToast('此委員已在列表中','err');return;} osceAssignments[cid].push(u); refreshOsceAssignRow(cid); }
-function removeOsceAssign(cid,u){ if(!osceAssignments[cid]) return; osceAssignments[cid]=osceAssignments[cid].filter(x=>x!==u); refreshOsceAssignRow(cid); }
-function refreshOsceAssignRow(cid){ const wrap=el('oaw_'+cid); if(!wrap) return; const assigned=osceAssignments[cid]||[]; const sel=el('oasel_'+cid); const selHTML=sel?sel.outerHTML:''; wrap.innerHTML=assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeOsceAssign('${cid}','${u}')">✕</span></span>`).join('')+selHTML; }
-
-function renderOsceResultsTable(cases){
-  const body=el('osceResultsBody'); if(!body) return;
-  if(!cases||!cases.length){ body.innerHTML='<tr><td colspan="8" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>'; return; }
-  const rankable=cases.filter(c=>c.avgTotal!==null);
-  const rankMap={};
-  let rank=1,prev=null;
-  rankable.sort((a,b)=>b.avgTotal-a.avgTotal).forEach((c,i)=>{ if(c.avgTotal!==prev){rank=i+1;} rankMap[c.id]=rank; prev=c.avgTotal; });
-  function badge(rank){ if(rank===undefined) return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>'; const medals={1:'🥇',2:'🥈',3:'🥉'}; const medal=medals[rank]||''; const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc'; const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b'; const bdr=rank===1?'#fde68a':rank===2?'#cbd5e1':rank===3?'#fcd34d':'#e2e8f0'; return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};border:1px solid ${bdr};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700;white-space:nowrap">${medal}第${rank}名</span>`; }
-  function gapHtml(c){ const valid=c.reviews.filter(r=>!r.rejected); if(valid.length>=2){ const sc=valid.map(r=>r.total).sort((a,b)=>a-b); const gap=sc[sc.length-1]-sc[0]; return gap>10?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700;display:inline-flex;align-items:center;gap:.2rem">⚠ ${gap}分<span style="font-weight:400;font-size:.68rem">需第3位</span></span>`:`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${gap}分</span>`; } if(valid.length===1) return '<span style="color:#718096;font-size:.78rem">僅1位</span>'; return '—'; }
-  const sorted=[...cases].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1));
-  body.innerHTML=sorted.map(c=>{ const rejCount=c.reviews.filter(r=>r.rejected).length; return `<tr data-osce-title="${esc(c.title).toLowerCase()}">
-    <td style="text-align:center">${badge(rankMap[c.id])}</td>
-    <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
-    <td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(c.title)}</td>
-    <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
-    <td style="font-weight:700;font-size:1rem;color:#1c1c2e">${c.avgTotal!==null?c.avgTotal+'分':'—'}</td>
-    <td>${gapHtml(c)}</td>
-    <td>${rejCount>0?`<span class="chip chip-red">${rejCount}位退稿</span>`:'—'}</td>
-    <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showOsceDetail('${c.id}')">詳細</button></td>
-  </tr>`; }).join('');
-}
-function filterOsceResults(){ const q=el('osceResultSearch').value.toLowerCase(); document.querySelectorAll('#osceResultsBody tr').forEach(tr=>{ tr.style.display=!q||(tr.dataset.osceTitle||'').includes(q)?'':'none'; }); }
-
-async function saveAssignments(type){
-  const t=type||assignType;
-  if(!confirm('確認儲存所有指派設定？')) return;
-  setLdr(true);
-  try{
-    let r;
-    if(t==='osce') r=await api({action:'adminSaveOsceAssignments',assignmentsJson:JSON.stringify(osceAssignments)});
-    else r=await api({action:'adminSaveAssignments',assignmentsJson:JSON.stringify(assignments)});
-    if(r.success) showToast(`指派已儲存（${r.saved}筆）`,'ok');
-    else showToast('儲存失敗','err');
-  }catch{ showToast('連線失敗','err'); }
-  setLdr(false);
-}
-function autoAssign(type){
-  const t=type||assignType;
-  if(t==='osce'){
-    if(!osceData) return;
-    const {cases,reviewers}=osceData;
-    const active=(reviewers||[]).filter(r=>r.enabled);
-    if(!active.length){showToast('沒有啟用中的委員','err');return;}
-    if(!confirm(`將 ${cases.length} 個教案平均分配給 ${active.length} 位委員？`)) return;
-    cases.forEach((c,i)=>{osceAssignments[c.id]=[active[i%active.length].username];});
-    renderOsceAssignTable(cases,reviewers);
-    showToast('自動指派完成，請記得按「儲存指派」','ok');
-  } else {
-    if(!dashData) return;
-    const {papers,reviewers}=dashData;
-    const active=(reviewers||[]).filter(r=>r.enabled);
-    if(!active.length){showToast('沒有啟用中的委員','err');return;}
-    if(!confirm(`將 ${papers.length} 篇論文平均分配給 ${active.length} 位委員？`)) return;
-    papers.forEach((p,i)=>{assignments[p.id]=[active[i%active.length].username];});
-    renderAssignTable(papers,reviewers);
-    showToast('自動指派完成，請記得按「儲存指派」','ok');
-  }
-}
-
-// 帳號轉姓名
-function rvName(username){ return reviewerNamesMap[username]||username; }
-
-// 委員帳號列表渲染
-function renderRvTable(reviewers){
-  const pc_map={}, oc_map={};
-  if(assignments){ Object.values(assignments).forEach(users=>(users||[]).forEach(u=>{ pc_map[u]=(pc_map[u]||0)+1; })); }
-  if(osceAssignments){ Object.values(osceAssignments).forEach(users=>(users||[]).forEach(u=>{ oc_map[u]=(oc_map[u]||0)+1; })); }
-  const body=el('rvBody'); if(!body) return;
-  body.innerHTML=(reviewers||[]).map(r=>{
-    const pc=r.posterCount!==undefined?r.posterCount:(pc_map[r.username]||0);
-    const oc=r.osceCount!==undefined?r.osceCount:(oc_map[r.username]||0);
-    const posterBadge=pc>0?`<span style="background:#dbeafe;color:#1e4d8c;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">${pc}篇</span>`:'<span style="color:#cbd5e0;font-size:.8rem">—</span>';
-    const osceBadge=oc>0?`<span style="background:#fef3c7;color:#92400e;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">${oc}個</span>`:'<span style="color:#cbd5e0;font-size:.8rem">—</span>';
-    return `<tr>
-      <td style="font-weight:500;font-family:monospace;font-size:.85rem">${r.username}</td>
-      <td style="color:#718096;font-family:monospace;font-size:.85rem">${r.password||''}</td>
-      <td style="font-weight:600">${r.name}</td>
-      <td><span class="chip ${r.enabled?'chip-green':'chip-gray'}">${r.enabled?'啟用':'停用'}</span></td>
-      <td style="text-align:center">${posterBadge}</td>
-      <td style="text-align:center">${osceBadge}</td>
-      <td><div style="display:flex;gap:.4rem">
-        <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="toggleReviewer('${r.username}',${!r.enabled})">${r.enabled?'停用':'啟用'}</button>
-        <button class="adm-btn adm-btn-danger adm-btn-sm" onclick="deleteReviewer('${r.username}')">刪除</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
 </script>
 </body>
 </html>
