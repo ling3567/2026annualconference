@@ -195,7 +195,7 @@ h1,h2,h3,h4,h5,h6{ font-weight:700; }
 .col-list{
   background:var(--white); border-right:none;
   display:flex; flex-direction:column; overflow:hidden;
-  width:200px; min-width:120px; max-width:320px; flex-shrink:0;
+  width:200px; min-width:120px; max-width:35vw; flex-shrink:0;
 }
 .col-list-head{ padding:.9rem 1rem; border-bottom:1px solid var(--border2); background:var(--bg); }
 .prog-row{ display:flex; justify-content:space-between; align-items:center; font-size:.78rem; margin-bottom:.45rem; }
@@ -258,7 +258,7 @@ h1,h2,h3,h4,h5,h6{ font-weight:700; }
 .btn-cloud{ padding:.42rem .9rem; background:#546070; color:white; border:none; border-radius:7px; font-size:.82rem; font-family:inherit; font-weight:500; cursor:pointer; text-decoration:none; display:inline-block; }
 .btn-cloud:hover{ opacity:.85; }
 
-.col-score{ background:white; border-left:none; display:flex; flex-direction:column; overflow:hidden; width:380px; min-width:260px; max-width:520px; flex-shrink:0; }
+.col-score{ background:white; border-left:none; display:flex; flex-direction:column; overflow:hidden; width:380px; min-width:260px; max-width:55vw; flex-shrink:0; }
 .col-score-head{ padding:.7rem 1rem; background:#546070; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; gap:.5rem; }
 .col-score-head h3{ font-size:.9rem; font-weight:700; color:white; }
 .col-score-head-note{ font-size:.7rem; color:rgba(255,255,255,.5); }
@@ -551,6 +551,42 @@ tr:hover td{ background:#fafafa; }
   background:var(--border); opacity:.6;
 }
 
+
+/* 評分總分條 */
+.score-sum-bar{
+  display:flex; align-items:center; gap:.5rem;
+  background:linear-gradient(135deg,#2d3e50,#3a4f63);
+  color:white; padding:.7rem 1.1rem; border-radius:9px;
+  margin-bottom:.9rem; box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.score-sum-lbl{ font-size:.8rem; opacity:.85; }
+.score-sum-num{
+  font-size:1.6rem; font-weight:800; margin-left:auto;
+  font-variant-numeric:tabular-nums; letter-spacing:-.02em;
+}
+.score-sum-max{ font-size:.82rem; opacity:.7; }
+
+/* 評分項目橫向佈局 */
+.score-item{
+  display:flex; align-items:center; gap:.75rem;
+  padding:.55rem .1rem; border-bottom:1px solid var(--border);
+}
+.score-item-label{
+  flex:1; display:flex; align-items:baseline; gap:.5rem; flex-wrap:wrap;
+  min-width:0;
+}
+.score-item-name{
+  font-size:.88rem; font-weight:600; color:var(--slate);
+  white-space:nowrap;
+}
+.score-item-sub{
+  font-size:.75rem; color:var(--muted);
+  white-space:nowrap;
+}
+.score-input-wrap{
+  display:flex; align-items:center; gap:.35rem; flex-shrink:0;
+}
+
 /* ══ Toast / Loader ══ */
 .toast{ position:fixed; bottom:1.5rem; right:1.5rem; padding:.75rem 1.1rem; border-radius:9px; font-size:.9rem; color:white; box-shadow:0 8px 24px rgba(0,0,0,.15); z-index:9999; animation:tIn .3s ease; max-width:340px; }
 .toast.ok{ background:#3d6b54; }
@@ -619,7 +655,7 @@ tr:hover td{ background:#fafafa; }
 
 <!-- ══ 評審委員畫面 ══ -->
 <div id="reviewerApp">
-  <div class="topbar">
+  <div class="topbar" ondblclick="resetColWidths()" title="雙擊頂欄可重置欄位寬度">
     <div class="tb-left">
       <span class="tb-logo">TSMCSD 2026 競賽活動評審</span>
       <div class="tb-sep"></div>
@@ -1121,7 +1157,7 @@ function renderPosterContent(i){
       <div class="p-info-head">
         <div class="p-tags">
           <span class="tag tg-no">${esc(p.paperNo||'—')}</span>
-          <span class="tag tg-cat">${p.category||''} | ${esc(p.catFull||'')}</span>
+          ${p.category?`<span class="tag tg-cat">${normCat(p.category)} | ${esc({A:'臨床技能教育、模擬教學與跨專業學習',B:'評量、信任決策與能力導向醫學教育',C:'人文素養、醫療韌性與專業認同'}[normCat(p.category)]||p.category)}</span>`:''}
           ${p.wordCount?`<span class="tag tg-wc">摘要 ${p.wordCount} 字</span>`:''}
         </div>
         <div class="p-title">${esc(p.title)}</div>
@@ -1197,11 +1233,19 @@ function toggleDrivePreview(pid){
 // ══ 評分表單（海報）══
 function renderPosterScoreForm(p,draft,isDone){
   const dis=isDone?'disabled':'';
-  let html=`<div class="score-group-head">各項評分（滿分 100 分・全部必填）</div>`;
+  let html=`<div class="score-sum-bar">
+    <span class="score-sum-lbl">目前總分</span>
+    <span class="score-sum-num" id="scoreTotalNum">0</span>
+    <span class="score-sum-max">/ 100</span>
+  </div>
+  <div class="score-group-head">各項評分（滿分 100 分・全部必填）</div>`;
   CRITERIA.forEach(c=>{
     const v=draft[c.id]!==undefined?draft[c.id]:'';
     html+=`<div class="score-item">
-      <div class="score-item-label"><strong>${c.label}</strong><span class="score-item-sub">佔比${Math.round(c.max)}%・滿分 ${c.max} 分</span></div>
+      <div class="score-item-label">
+        <span class="score-item-name">${c.label}</span>
+        <span class="score-item-sub">${c.weight}・滿分 ${c.max} 分</span>
+      </div>
       <div class="score-input-wrap">
         <input type="number" class="score-input" id="sc_${c.id}" min="0" max="${c.max}" value="${v}" placeholder="—" ${dis}
           oninput="validateScore(this,${c.max});updatePosterTotal()">
@@ -1209,6 +1253,12 @@ function renderPosterScoreForm(p,draft,isDone){
       </div>
     </div>`;
   });
+  html+=`<div class="recommend-zone">
+    <input type="checkbox" class="recommend-checkbox" id="recChk" ${draft.recommend?'checked':''} ${dis}>
+    <label for="recChk">⭐ 推薦此論文</label>
+    <div class="recommend-note">勾選代表建議此論文值得於研討會中展示</div>
+  </div>`;
+  html+=`<div class="cmt-wrap"><label>評語（選填）</label><textarea id="cmtArea" placeholder="可填寫對本篇論文的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea></div>`;
   const rejChecked=draft.rejected?'checked':'';
   html+=`<div class="reject-zone ${isDone&&draft.rejected?'active':''}">
     <div class="reject-head">
@@ -1219,19 +1269,17 @@ function renderPosterScoreForm(p,draft,isDone){
       <textarea id="rejReason" placeholder="請說明退稿原因..." ${dis}>${esc(draft.rejectReason||'')}</textarea>
     </div>
   </div>`;
-  html+=`<div class="recommend-zone">
-    <input type="checkbox" class="recommend-checkbox" id="recChk" ${draft.recommend?'checked':''} ${dis}>
-    <label for="recChk">⭐ 推薦此論文</label>
-    <div class="recommend-note">勾選代表建議此論文值得於研討會中展示</div>
-  </div>`;
-  html+=`<div class="cmt-wrap"><label>評語（選填）</label><textarea id="cmtArea" placeholder="可填寫對本篇論文的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea></div>`;
   return html;
 }
 
 // ══ 評分表單（OSCE）══
 function renderOsceScoreForm(p,draft,isDone){
   const dis=isDone?'disabled':'';
-  let html='';
+  let html=`<div class="score-sum-bar">
+    <span class="score-sum-lbl">目前總分</span>
+    <span class="score-sum-num" id="scoreTotalNum">0</span>
+    <span class="score-sum-max">/ ${OSCE_BASE_MAX + OSCE_BONUS.max}</span>
+  </div>`;
   const groups=[
     {label:'情境設置（10%）', items:['o1']},
     {label:'教案指引（30%）', items:['o2','o3','o4']},
@@ -1883,6 +1931,15 @@ async function deleteReviewer(u){if(!confirm(`確定刪除委員「${u}」？`))
 function rvSwitchSub(){}
 
 // ══ Draggable ══
+
+function resetColWidths(){
+  const cols=['.col-list','.col-content','.col-score'];
+  const widths=['200px','1fr','380px'];
+  cols.forEach((sel,i)=>{
+    const el2=document.querySelector(sel);
+    if(el2){el2.style.width=i===1?'':widths[i];el2.style.flex=i===1?'1':'0 0 '+widths[i];}
+  });
+}
 function initDraggable(){
   ['divider1','divider2'].forEach(id=>{
     const div=el(id);if(!div)return;
