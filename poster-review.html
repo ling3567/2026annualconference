@@ -863,7 +863,7 @@ tr:hover td{ background:#fafafa; }
           <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadReviewers()">重新整理</button>
         </div>
         <div class="sec-body"><div class="tbl-wrap"><table>
-          <thead><tr><th>帳號</th><th>密碼</th><th>姓名</th><th>狀態</th><th>操作</th></tr></thead>
+          <thead><tr><th>帳號</th><th>密碼</th><th>姓名</th><th>狀態</th><th style="text-align:center">海報指派</th><th style="text-align:center">OSCE指派</th><th>操作</th></tr></thead>
           <tbody id="rvBody"></tbody>
         </table></div></div>
       </div>
@@ -978,7 +978,10 @@ const ADM_CRITERIA = [
 ];
 const ADM_THRESHOLD = 80;
 
-// ══ State ══
+// 別名（委員端評分表用）
+const CRITERIA = POSTER_CRITERIA;
+const OSCE_CRITERIA = OSCE_ALL_CRITERIA;
+
 // ══ State ══
 let currentRole = null;
 let reviewer = null;
@@ -1399,8 +1402,15 @@ function admSwitchTab(t){
   ['dashboard','assign','results','reviewers','assignDetail'].forEach(id=>{
     const d=el('adm-tab-'+id); if(d)d.style.display=id===t?'block':'none';
   });
-  if(t==='reviewers')loadReviewers();
-  if(t==='assignDetail')renderAssignDetailPage();
+  if(t==='reviewers') loadReviewers();
+  if(t==='assignDetail') renderAssignDetailPage();
+  // 切換到指派/結果頁時，補渲染 OSCE 資料（若已載入）
+  if(t==='assign'&&osceData){
+    renderOsceAssignTable(osceData.cases,osceData.reviewers);
+  }
+  if(t==='results'&&osceData){
+    renderOsceResultsTable(osceData.cases);
+  }
 }
 
 async function loadDashboard(){
@@ -1562,7 +1572,12 @@ async function loadOsceDashboard(){
     renderOsceDashTable(osceData.cases);
     renderOsceAssignTable(osceData.cases,osceData.reviewers);
     renderOsceResultsTable(osceData.cases);
-    if(dashData)renderStats(dashData.stats);
+    if(dashData){
+      renderStats(dashData.stats);
+      // 同步更新指派頁和結果頁的 OSCE section（若已在對應分頁）
+      if(assignType==='osce') renderOsceAssignTable(osceData.cases,osceData.reviewers);
+      if(resultsType==='osce') renderOsceResultsTable(osceData.cases);
+    }
   }catch(e){console.error('OSCE:',e);osceData={cases:[],reviewers:[],stats:{}};}
 }
 
@@ -1712,6 +1727,22 @@ function setLdr(v){const l=el('ldr');if(l)l.style.display=v?'flex':'none';}
 function showToast(msg,type){const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3200);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+// ══ 頁面載入時自我檢查 ══
+(function checkHealth(){
+  // 函式用 typeof window[n]
+  const fns=['doLogin','renderList','renderPosterContent','renderOsceContent',
+    'renderPosterScoreForm','renderOsceScoreForm','loadDashboard','loadOsceDashboard',
+    'renderDashTable','renderAssignTable','renderResultsTable','renderRvTable',
+    'renderOsceDashTable','renderOsceAssignTable','renderOsceResultsTable',
+    'showDetail','showOsceDetail','rvName','saveDraft','submitScore'];
+  const missingFns=fns.filter(n=>typeof window[n]==='undefined');
+  // const 常數用 try/catch
+  const consts=['CRITERIA','OSCE_CRITERIA','ADM_CRITERIA','POSTER_CRITERIA','OSCE_ALL_CRITERIA'];
+  const missingConsts=consts.filter(n=>{try{return eval('typeof '+n)==='undefined';}catch{return true;}});
+  const all=[...missingFns,...missingConsts];
+  if(all.length) console.warn('⚠️ 缺少:', all.join(', '));
+  else console.log('✅ 所有必要函式/常數均已載入');
+})();
 </script>
 </body>
 </html>
