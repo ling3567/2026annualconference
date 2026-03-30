@@ -725,6 +725,10 @@ tr:hover td{ background:#fafafa; }
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
       指派明細
     </div>
+    <div class="adm-tab" data-tab="opinions" onclick="admSwitchTab('opinions')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      評審意見
+    </div>
   </div>
   <div class="adm-content" id="adm-tab-dashboard">
     <!-- 統計卡 -->
@@ -806,12 +810,17 @@ tr:hover td{ background:#fafafa; }
 
           <!-- 分類排名 -->
           <div style="margin-bottom:1.5rem">
-            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem">
-              <span style="font-size:.88rem;font-weight:700;color:#1c1c2e">分類排名</span>
-              <span style="font-size:.75rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名</span>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+              <div style="display:flex;align-items:center;gap:.5rem">
+                <span style="font-size:.88rem;font-weight:700;color:#1c1c2e">分類排名</span>
+                <span style="font-size:.75rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名・可拖動調整順序</span>
+              </div>
+              <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')" title="匯出目前排列順序（含拖動調整後）">
+                ⬇ 匯出 CSV
+              </button>
             </div>
             <div class="tbl-wrap"><table><thead><tr>
-              <th style="width:90px">名次</th><th>編號</th><th>論文題目</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
+              <th style="width:90px">名次</th><th>編號</th><th>論文題目</th><th>投稿單位</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
             </tr></thead><tbody id="resultsCatBody"></tbody></table></div>
           </div>
 
@@ -822,7 +831,7 @@ tr:hover td{ background:#fafafa; }
               <span style="font-size:.75rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">所有論文不分類別</span>
             </div>
             <div class="tbl-wrap"><table><thead><tr>
-              <th style="width:72px">名次</th><th>編號</th><th>論文題目</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
+              <th style="width:72px">名次</th><th>編號</th><th>論文題目</th><th>投稿單位</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
             </tr></thead><tbody id="resultsAllBody"></tbody></table></div>
           </div>
         </div>
@@ -838,7 +847,7 @@ tr:hover td{ background:#fafafa; }
           </div>
         </div>
         <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
-          <th>名次</th><th>編號</th><th>教案主題</th><th>服務醫院</th><th>平均總分</th><th>分數差距</th><th>退稿</th><th>詳細</th>
+          <th>名次</th><th>編號</th><th>教案主題</th><th>服務醫院</th><th>平均總分</th><th>分數差距</th><th>詳細</th>
         </tr></thead><tbody id="osceResultsBody"></tbody></table></div></div>
       </div>
     </div>
@@ -863,7 +872,7 @@ tr:hover td{ background:#fafafa; }
           <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadReviewers()">重新整理</button>
         </div>
         <div class="sec-body"><div class="tbl-wrap"><table>
-          <thead><tr><th>帳號</th><th>密碼</th><th>姓名</th><th>狀態</th><th style="text-align:center">海報指派</th><th style="text-align:center">OSCE指派</th><th>操作</th></tr></thead>
+          <thead><tr><th>帳號</th><th>密碼</th><th>姓名</th><th>狀態</th><th style="text-align:center">海報論文指派</th><th style="text-align:center">OSCE教案指派</th><th>操作</th></tr></thead>
           <tbody id="rvBody"></tbody>
         </table></div></div>
       </div>
@@ -879,6 +888,24 @@ tr:hover td{ background:#fafafa; }
         <span style="font-size:.8rem;color:#718096">各委員的海報論文與 OSCE 教案指派狀況・含已評/待評</span>
       </div>
       <div class="sec-body" id="rvAssignDetail2">
+        <p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">載入中…</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 評審意見分頁 ══ -->
+  <div class="adm-content" id="adm-tab-opinions" style="display:none">
+    <div class="sec">
+      <div class="sec-head">
+        <h3>評審意見彙整</h3>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <div class="type-switcher" style="margin-bottom:0;padding:.3rem">
+            <button class="type-btn active" id="opinTypePoster" onclick="opinSwitchType('poster')">📋 海報論文</button>
+            <button class="type-btn" id="opinTypeOsce" onclick="opinSwitchType('osce')">🎬 OSCE 教案</button>
+          </div>
+        </div>
+      </div>
+      <div class="sec-body" id="opinionsBody">
         <p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">載入中…</p>
       </div>
     </div>
@@ -926,7 +953,7 @@ tr:hover td{ background:#fafafa; }
 <div class="ldr" id="ldr"><div class="spinner"></div></div>
 
 <script>
-
+const APPS
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2njUGr6eORWe6V5iMITA_dbpuOzhOebyxDW43P8RySVezxUevEOvQZGUV0tl_Mhm9/exec';
 
 // ══ 評分向度 ══
@@ -999,6 +1026,9 @@ let admCurTab = 'dashboard';
 let dashType = 'poster', assignType = 'poster', resultsType = 'poster';
 let _confirmResolve = null;
 
+
+// 類別正規化（A/B/C，去除「類」等後綴）
+function normCat(raw){ const m=String(raw||'').match(/^[ABC]/i); return m?m[0].toUpperCase():''; }
 // ══ 帳號轉姓名 ══
 function rvName(u){ return reviewerNamesMap[u]||u; }
 
@@ -1230,16 +1260,7 @@ function renderOsceScoreForm(p,draft,isDone){
       <span class="score-max">/ ${OSCE_BONUS.max}</span>
     </div>
   </div>`;
-  const rejChecked=draft.rejected?'checked':'';
-  html+=`<div class="reject-zone ${isDone&&draft.rejected?'active':''}">
-    <div class="reject-head">
-      <input type="checkbox" class="reject-cb" id="rejChk" ${rejChecked} ${dis} onchange="toggleReject(this)">
-      <label for="rejChk">⚠ 建議退稿</label>
-    </div>
-    <div class="reject-body" id="rejBody" style="display:${draft.rejected?'block':'none'}">
-      <textarea id="rejReason" placeholder="請說明退稿原因..." ${dis}>${esc(draft.rejectReason||'')}</textarea>
-    </div>
-  </div>`;
+  // OSCE 無退稿機制
   html+=`<div class="cmt-wrap"><label>評語（選填）</label><textarea id="cmtArea" placeholder="可填寫對本篇教案的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea></div>`;
   html+=`<div class="cmt-wrap"><label>優良加分說明（填加分時必填）</label><textarea id="bonusNote" placeholder="請說明優良表現原因…" ${dis}>${esc(draft.bonusNote||'')}</textarea></div>`;
   return html;
@@ -1399,17 +1420,23 @@ async function bulkSubmit(){
 function admSwitchTab(t){
   admCurTab=t;
   document.querySelectorAll('.adm-tab').forEach(e=>e.classList.toggle('active',e.dataset.tab===t));
-  ['dashboard','assign','results','reviewers','assignDetail'].forEach(id=>{
+  ['dashboard','assign','results','reviewers','assignDetail','opinions'].forEach(id=>{
     const d=el('adm-tab-'+id); if(d)d.style.display=id===t?'block':'none';
   });
   if(t==='reviewers') loadReviewers();
-  if(t==='assignDetail') renderAssignDetailPage();
-  // 切換到指派/結果頁時，補渲染 OSCE 資料（若已載入）
-  if(t==='assign'&&osceData){
-    renderOsceAssignTable(osceData.cases,osceData.reviewers);
+  if(t==='assignDetail'){
+    if(!osceData) loadOsceDashboard().then(()=>renderAssignDetailPage());
+    else renderAssignDetailPage();
   }
-  if(t==='results'&&osceData){
-    renderOsceResultsTable(osceData.cases);
+  if(t==='opinions') renderOpinionsPage('poster');
+  // 切換到指派/結果頁時，補渲染 OSCE 資料（若已載入）
+  if(t==='assign'){
+    if(osceData) renderOsceAssignTable(osceData.cases,osceData.reviewers);
+    else loadOsceDashboard();  // 若尚未載入則觸發載入
+  }
+  if(t==='results'){
+    if(osceData) renderOsceResultsTable(osceData.cases);
+    else loadOsceDashboard();
   }
 }
 
@@ -1434,14 +1461,23 @@ async function loadDashboard(){
 }
 
 function renderStats(s){
-  const osceS=osceData&&osceData.stats;
+  // Apps Script 欄位：totalPapers, reviewedPapers, recommended, activeReviewers
+  // OSCE stats 欄位：total, reviewed
+  const total    = s ? (s.total    || s.totalPapers    || 0) : 0;
+  const reviewed = s ? (s.reviewed || s.reviewedPapers || 0) : 0;
+  const recommended = s ? (s.recommended || 0) : 0;
+  const active   = s ? (s.activeReviewers || 0) : 0;
+  const pct = total ? Math.round(reviewed/total*100) : 0;
+  const osceS = osceData && osceData.stats;
+  const osceTotal    = osceS ? (osceS.total    || osceS.totalCases    || 0) : null;
+  const osceReviewed = osceS ? (osceS.reviewed || osceS.reviewedCases || 0) : null;
   el('statsRow').innerHTML=`
-    <div class="stat-card blue"><div class="stat-num">${s?s.total||0:0}</div><div class="stat-lbl"><span class="chip chip-blue" style="font-size:.68rem;padding:.1rem .4rem">海報</span> 投稿篇數</div></div>
-    <div class="stat-card"><div class="stat-num">${s?(s.reviewed||0)+' <span style="font-size:.8rem;color:#718096">('+Math.round((s.reviewed||0)/(s.total||1)*100)+'%)</span>':0}</div><div class="stat-lbl"><span class="chip chip-blue" style="font-size:.68rem;padding:.1rem .4rem">海報</span> 已有評分</div></div>
-    <div class="stat-card green"><div class="stat-num">${s?s.recommended||0:0}</div><div class="stat-lbl"><span class="chip chip-blue" style="font-size:.68rem;padding:.1rem .4rem">海報</span> 推薦篇數</div></div>
-    ${osceS?`<div class="stat-card blue"><div class="stat-num">${osceS.total||0}</div><div class="stat-lbl"><span style="background:#fef3c7;color:#92400e;padding:.1rem .4rem;border-radius:4px;font-size:.68rem;font-weight:700">OSCE</span> 教案總數</div></div>
-    <div class="stat-card"><div class="stat-num">${osceS.reviewed||0}</div><div class="stat-lbl"><span style="background:#fef3c7;color:#92400e;padding:.1rem .4rem;border-radius:4px;font-size:.68rem;font-weight:700">OSCE</span> 已有評分</div></div>`:''}
-    <div class="stat-card"><div class="stat-num">${s?s.activeReviewers||0:0}</div><div class="stat-lbl">啟用委員數</div></div>`;
+    <div class="stat-card blue"><div class="stat-num">${total}</div><div class="stat-lbl"><span class="chip chip-blue" style="font-size:.68rem;padding:.1rem .4rem">海報</span> 投稿篇數</div></div>
+    <div class="stat-card"><div class="stat-num">${reviewed} <span style="font-size:.8rem;color:#718096">(${pct}%)</span></div><div class="stat-lbl"><span class="chip chip-blue" style="font-size:.68rem;padding:.1rem .4rem">海報</span> 已有評分</div></div>
+    <div class="stat-card green"><div class="stat-num">${recommended}</div><div class="stat-lbl"><span class="chip chip-blue" style="font-size:.68rem;padding:.1rem .4rem">海報</span> 推薦篇數</div></div>
+    ${osceTotal!==null?`<div class="stat-card blue"><div class="stat-num">${osceTotal}</div><div class="stat-lbl"><span style="background:#fef3c7;color:#92400e;padding:.1rem .4rem;border-radius:4px;font-size:.68rem;font-weight:700">OSCE</span> 教案總數</div></div>
+    <div class="stat-card"><div class="stat-num">${osceReviewed}</div><div class="stat-lbl"><span style="background:#fef3c7;color:#92400e;padding:.1rem .4rem;border-radius:4px;font-size:.68rem;font-weight:700">OSCE</span> 已有評分</div></div>`:''}
+    <div class="stat-card"><div class="stat-num">${active}</div><div class="stat-lbl">啟用委員數</div></div>`;
 }
 
 function renderDashTable(papers){
@@ -1453,7 +1489,7 @@ function renderDashTable(papers){
     const fc=done===0?'none':done>=total?'done':'part';
     return `<tr><td><span class="chip chip-blue">${p.paperNo||'—'}</span></td>
       <td style="max-width:280px;line-height:1.5">${esc(p.title)}</td>
-      <td>${p.category||'—'}</td>
+      <td>${normCat(p.category)||'—'}</td>
       <td style="font-size:.85rem;color:#334155">${assigned.map(u=>rvName(u)).join('、')||'—'}</td>
       <td><div class="sc-prog"><span>${done}/${total}</span><div class="sc-bar"><div class="sc-fill ${fc}" style="width:${pct}%"></div></div></div></td>
       <td style="font-weight:600">${p.avgTotal!==null?p.avgTotal:'—'}</td>
@@ -1470,7 +1506,7 @@ function renderAssignTable(papers,reviewers){
     const options=(reviewers||[]).map(r=>`<option value="${r.username}">${r.name}(${r.username})</option>`).join('');
     return `<tr><td><span class="chip chip-blue">${p.paperNo||'—'}</span></td>
       <td style="max-width:280px;line-height:1.5">${esc(p.title)}</td>
-      <td>${p.category||'—'}</td>
+      <td>${normCat(p.category)||'—'}</td>
       <td><div class="assign-wrap" id="aw_${p.id}">
         ${assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeAssign('${p.id}','${u}')">✕</span></span>`).join('')}
         <select class="assign-sel" id="asel_${p.id}" onchange="addAssign('${p.id}')"><option value="">＋ 委員</option>${options}</select>
@@ -1519,20 +1555,137 @@ function autoAssign(type){
 
 function renderResultsTable(papers){
   if(!papers)return;
-  const rankable=papers.filter(p=>p.avgTotal!==null);
+
+  // 正規化 category
+  papers.forEach(p=>{ p.category=normCat(p.category); });
+
+  // 區分退稿論文（全部委員都退稿）vs 有效論文
+  function isFullyRejected(p){
+    const valid=p.reviews.filter(r=>!r.rejected);
+    return p.reviews.length>0 && valid.length===0;
+  }
+  const rejected  = papers.filter(p=>isFullyRejected(p));
+  const rankable  = papers.filter(p=>p.avgTotal!==null && !isFullyRejected(p));
+  const noScore   = papers.filter(p=>p.avgTotal===null && !isFullyRejected(p));
+
+  // ── 名次計算（只含有效論文）──
   const catRankMap={};
-  ['A','B','C'].forEach(cat=>{let r=1,prev=null;rankable.filter(p=>p.category===cat).sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i)=>{if(p.avgTotal!==prev){r=i+1;}catRankMap[p.id]=r;prev=p.avgTotal;});});
+  ['A','B','C'].forEach(cat=>{
+    let r=1,prev=null;
+    [...rankable].filter(p=>p.category===cat).sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i)=>{
+      if(p.avgTotal!==prev){r=i+1;} catRankMap[p.id]=r; prev=p.avgTotal;
+    });
+  });
   const allRankMap={};let r=1,prev=null;
-  [...rankable].sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i)=>{if(p.avgTotal!==prev){r=i+1;}allRankMap[p.id]=r;prev=p.avgTotal;});
-  function badge(rank,showCat,cat){if(rank===undefined)return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';const medals={1:'🥇',2:'🥈',3:'🥉'};const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}${showCat?cat+' ':''}第${rank}名</span>`;}
-  function gapCell(p){const valid=p.reviews.filter(r=>!r.rejected);if(valid.length>=2){const sc=valid.map(r=>r.total).sort((a,b)=>a-b);const g=sc[sc.length-1]-sc[0];return g>10?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700">⚠ ${g}分</span>`:`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;}if(valid.length===1)return '<span style="color:#718096;font-size:.78rem">僅1位</span>';return '—';}
-  function row(p,rb){const rc=p.reviews.filter(r=>r.rejected).length;return `<tr data-title="${esc(p.title).toLowerCase()}"><td style="text-align:center">${rb}</td><td><span class="chip chip-blue">${p.paperNo||'—'}</span></td><td style="max-width:240px;line-height:1.5;font-size:.88rem">${esc(p.title)}</td><td><span style="font-weight:600">${p.category||'—'}</span></td><td style="font-weight:700;font-size:1rem">${p.avgTotal!==null?p.avgTotal+'分':'—'}</td><td>${gapCell(p)}</td><td>${p.avgTotal!==null?(p.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td><td>${rc>0?`<span class="chip chip-red">${rc}位退稿</span>`:'—'}</td><td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button></td></tr>`;}
-  const sorted=[...papers].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1));
+  [...rankable].sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i)=>{
+    if(p.avgTotal!==prev){r=i+1;} allRankMap[p.id]=r; prev=p.avgTotal;
+  });
+
+  // ── 名次徽章 ──
+  function badge(rank,showCat,cat){
+    if(rank===undefined)return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';
+    const medals={1:'🥇',2:'🥈',3:'🥉'};
+    const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';
+    const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';
+    return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}${showCat?cat+' ':''}第${rank}名</span>`;
+  }
+
+  // ── 分數差距 ──
+  function gapCell(p){
+    const valid=p.reviews.filter(r=>!r.rejected);
+    if(valid.length>=2){
+      const sc=valid.map(r=>r.total).sort((a,b)=>a-b);
+      const g=sc[sc.length-1]-sc[0];
+      return g>10
+        ?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700;display:inline-flex;align-items:center;gap:.2rem">⚠ ${g}分<span style="font-weight:400;font-size:.68rem">需第3位</span></span>`
+        :`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;
+    }
+    if(valid.length===1)return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
+    return '—';
+  }
+
+  // ── 有效論文列（含拖動排序）──
+  function row(p,rb){
+    const catAdjusts=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>normCat(r.catAdjust)||r.catAdjust))].filter(Boolean);
+    const catAdjustBadge=catAdjusts.length
+      ?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem" title="委員建議改類">→${catAdjusts.join('/')}</span>`:'';
+    return `<tr draggable="true" data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}"
+      ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)"
+      ondragleave="this.style.borderTop=''" style="cursor:grab">
+      <td style="text-align:center;user-select:none" title="拖動調整名次">
+        <span style="color:#94a3b8;font-size:.9rem;margin-right:.2rem">⠿</span>${rb}</td>
+      <td><span class="chip chip-blue">${p.paperNo||'—'}</span></td>
+      <td style="max-width:200px;line-height:1.5;font-size:.88rem">${esc(p.title)}</td>
+      <td style="font-size:.82rem;color:#64748b">${esc(p.contactUnit||'—')}</td>
+      <td><span style="font-weight:600">${normCat(p.category)||'—'}</span>${catAdjustBadge}</td>
+      <td style="font-weight:700;font-size:1rem">${p.avgTotal!==null?p.avgTotal+'分':'—'}</td>
+      <td>${gapCell(p)}</td>
+      <td>${p.avgTotal!==null?(p.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td>
+      <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button></td>
+    </tr>`;
+  }
+
+  // ── 退稿論文列（不含排名欄、分數欄）──
+  function rejRow(p){
+    const rejReasons=p.reviews.filter(r=>r.rejected&&r.rejectReason).map(r=>esc(r.rejectReason));
+    const catAdjusts=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>normCat(r.catAdjust)||r.catAdjust))].filter(Boolean);
+    const catAdjustBadge=catAdjusts.length
+      ?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem" title="委員建議改類">→${catAdjusts.join('/')}</span>`:'';
+    return `<tr data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" style="opacity:.7;background:#fff8f8">
+      <td style="text-align:center"><span style="background:#fee2e2;color:#991b1b;padding:.2rem .6rem;border-radius:7px;font-size:.78rem;font-weight:700">退稿</span></td>
+      <td><span class="chip" style="background:#fee2e2;color:#991b1b">${p.paperNo||'—'}</span></td>
+      <td style="max-width:200px;line-height:1.5;font-size:.88rem;color:#6b7280">${esc(p.title)}</td>
+      <td style="font-size:.82rem;color:#9ca3af">${esc(p.contactUnit||'—')}</td>
+      <td><span style="color:#9ca3af">${normCat(p.category)||'—'}</span>${catAdjustBadge}</td>
+      <td colspan="3" style="font-size:.78rem;color:#dc2626">${rejReasons.length?'退稿原因：'+rejReasons.join('；'):'（委員未填原因）'}</td>
+      <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button></td>
+    </tr>`;
+  }
+
+  // ── 分隔行 ──
+  function sepRow(label, colspan=9){
+    return `<tr><td colspan="${colspan}" style="background:#f8fafc;font-size:.75rem;font-weight:700;color:#64748b;padding:.4rem .9rem;border-top:2px solid #e2e8f0;letter-spacing:.04em">${label}</td></tr>`;
+  }
+
+  // ══ 分類排名表格 ══
   const catBody=el('resultsCatBody');
-  if(catBody){const catSorted=[...sorted].sort((a,b)=>{const o={A:0,B:1,C:2};return(o[a.category]??9)-(o[b.category]??9)||(catRankMap[a.id]??99)-(catRankMap[b.id]??99);});let html='',lastCat='';catSorted.forEach(p=>{if(p.category!==lastCat){const n={A:'A 類：臨床技能教育',B:'B 類：評量與能力導向',C:'C 類：人文素養'};html+=`<tr><td colspan="9" style="background:#f8fafc;font-size:.78rem;font-weight:700;color:#64748b;padding:.4rem .9rem;border-top:2px solid #e2e8f0">${n[p.category]||p.category}</td></tr>`;lastCat=p.category;}html+=row(p,badge(catRankMap[p.id],true,p.category));});catBody.innerHTML=html;}
+  if(catBody){
+    let html='';
+    ['A','B','C'].forEach(cat=>{
+      const catPapers=[...rankable].filter(p=>p.category===cat).sort((a,b)=>{
+        const ra=catRankMap[a.id]??99, rb2=catRankMap[b.id]??99;
+        return ra-rb2 || b.avgTotal-a.avgTotal;
+      });
+      const catNoScore=noScore.filter(p=>p.category===cat);
+      const catRejected=rejected.filter(p=>p.category===cat);
+      if(!catPapers.length&&!catNoScore.length&&!catRejected.length) return;
+      const catNames={A:'A 類：臨床技能教育、模擬教學與跨專業學習',B:'B 類：評量、信任決策與能力導向醫學教育',C:'C 類：人文素養、醫療韌性與專業認同'};
+      html+=sepRow(catNames[cat]||cat);
+      catPapers.forEach(p=>{ html+=row(p,badge(catRankMap[p.id],false,cat)); });
+      catNoScore.forEach(p=>{ html+=row(p,badge(undefined,false,cat)); });
+      if(catRejected.length){
+        html+=`<tr><td colspan="9" style="background:#fff0f0;font-size:.72rem;font-weight:600;color:#dc2626;padding:.3rem .9rem;border-top:1px dashed #fca5a5">⚠ 退稿論文（不列入排名）</td></tr>`;
+        catRejected.forEach(p=>{ html+=rejRow(p); });
+      }
+    });
+    catBody.innerHTML=html;
+  }
+
+  // ══ 總排名表格 ══
   const allBody=el('resultsAllBody');
-  if(allBody)allBody.innerHTML=sorted.map(p=>row(p,badge(allRankMap[p.id],false,''))).join('');
+  if(allBody){
+    const sortedRankable=[...rankable].sort((a,b)=>(allRankMap[a.id]??99)-(allRankMap[b.id]??99)||b.avgTotal-a.avgTotal);
+    let html='';
+    sortedRankable.forEach(p=>{ html+=row(p,badge(allRankMap[p.id],false,'')); });
+    noScore.forEach(p=>{ html+=row(p,badge(undefined,false,'')); });
+    if(rejected.length){
+      html+=`<tr><td colspan="9" style="background:#fff0f0;font-size:.72rem;font-weight:600;color:#dc2626;padding:.4rem .9rem;border-top:2px dashed #fca5a5;margin-top:.5rem">⚠ 退稿論文（不列入排名，共 ${rejected.length} 篇）</td></tr>`;
+      rejected.forEach(p=>{ html+=rejRow(p); });
+    }
+    allBody.innerHTML=html;
+  }
 }
+
 function filterResults(){const q=(el('resultSearch')||{}).value?.toLowerCase()||'';document.querySelectorAll('#resultsCatBody tr[data-title], #resultsAllBody tr[data-title]').forEach(tr=>{tr.style.display=!q||tr.dataset.title.includes(q)?'':'none';});}
 
 function renderRvTable(reviewers){
@@ -1540,7 +1693,7 @@ function renderRvTable(reviewers){
   body.innerHTML=(reviewers||[]).map(r=>{
     const pc=Object.values(assignments).filter(u=>(u||[]).includes(r.username)).length||(r.posterCount||0);
     const oc=Object.values(osceAssignments).filter(u=>(u||[]).includes(r.username)).length||(r.osceCount||0);
-    const pb=pc>0?`<span style="background:#dbeafe;color:#1e4d8c;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">${pc}篇</span>`:'<span style="color:#cbd5e0;font-size:.8rem">—</span>';
+    const pb=pc>0?`<span title="海報論文指派" style="background:#dbeafe;color:#1e4d8c;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">${pc}篇</span>`:'<span style="color:#cbd5e0;font-size:.8rem">—</span>';
     const ob=oc>0?`<span style="background:#fef3c7;color:#92400e;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">${oc}案</span>`:'<span style="color:#cbd5e0;font-size:.8rem">—</span>';
     return `<tr>
       <td style="font-weight:500;font-family:monospace;font-size:.85rem">${r.username}</td>
@@ -1599,13 +1752,40 @@ function refreshOsceAssignRow(cid){const wrap=el('oaw_'+cid);if(!wrap)return;con
 function renderOsceResultsTable(cases){
   const body=el('osceResultsBody');if(!body)return;
   if(!cases||!cases.length){body.innerHTML='<tr><td colspan="8" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';return;}
+
+  // 名次（全部教案一起排，avgTotal 有值才計入）
   const rankable=cases.filter(c=>c.avgTotal!==null);
   const rankMap={};let rk=1,pv=null;
-  [...rankable].sort((a,b)=>b.avgTotal-a.avgTotal).forEach((c,i)=>{if(c.avgTotal!==pv){rk=i+1;}rankMap[c.id]=rk;pv=c.avgTotal;});
-  function osceBadge(r){if(r===undefined)return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';const medals={1:'🥇',2:'🥈',3:'🥉'};const bg=r===1?'#fef9c3':r===2?'#f0f4f8':r===3?'#fef3c7':'#f8fafc';const co=r===1?'#854d0e':r===2?'#334155':r===3?'#92400e':'#64748b';return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[r]||''}第${r}名</span>`;}
-  const sorted=[...cases].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1));
-  body.innerHTML=sorted.map(c=>{const rc=c.reviews.filter(r=>r.rejected).length;const valid=c.reviews.filter(r=>!r.rejected);let gap='—';if(valid.length>=2){const sc=valid.map(r=>r.total).sort((a,b)=>a-b);const g=sc[sc.length-1]-sc[0];gap=g>10?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700">⚠ ${g}分</span>`:`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;}else if(valid.length===1)gap='<span style="color:#718096;font-size:.78rem">僅1位</span>';return `<tr data-osce-title="${esc(c.title).toLowerCase()}"><td style="text-align:center">${badge(rankMap[c.id])}</td><td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td><td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(c.title)}</td><td style="font-size:.82rem">${esc(c.hospital||'—')}</td><td style="font-weight:700;font-size:1rem">${c.avgTotal!==null?c.avgTotal+'分':'—'}</td><td>${gap}</td><td>${rc>0?`<span class="chip chip-red">${rc}位退稿</span>`:'—'}</td><td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showOsceDetail('${c.id}')">詳細</button></td></tr>`;}).join('');
+  [...rankable].sort((a,b)=>b.avgTotal-a.avgTotal).forEach((c,i)=>{
+    if(c.avgTotal!==pv){rk=i+1;} rankMap[c.id]=rk; pv=c.avgTotal;
+  });
+
+  function badge(r){
+    if(r===undefined)return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';
+    const medals={1:'🥇',2:'🥈',3:'🥉'};
+    const bg=r===1?'#fef9c3':r===2?'#f0f4f8':r===3?'#fef3c7':'#f8fafc';
+    const co=r===1?'#854d0e':r===2?'#334155':r===3?'#92400e':'#64748b';
+    return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[r]||''}第${r}名</span>`;
+  }
+  function osceGap(c){
+    const valid=c.reviews;
+    if(valid.length>=2){const sc=valid.map(r=>r.total).sort((a,b)=>a-b);const g=sc[sc.length-1]-sc[0];return g>10?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700">⚠ ${g}分</span>`:`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;}
+    if(valid.length===1)return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
+    return '—';
+  }
+
+  const sorted=[...cases].sort((a,b)=>(rankMap[a.id]??99)-(rankMap[b.id]??99)||(b.avgTotal??-1)-(a.avgTotal??-1));
+  body.innerHTML=sorted.map(c=>`<tr data-osce-title="${esc(c.title).toLowerCase()}">
+    <td style="text-align:center">${badge(rankMap[c.id])}</td>
+    <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
+    <td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(c.title)}</td>
+    <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
+    <td style="font-weight:700;font-size:1rem">${c.avgTotal!==null?c.avgTotal+'分':'—'}</td>
+    <td>${osceGap(c)}</td>
+    <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showOsceDetail('${c.id}')">詳細</button></td>
+  </tr>`).join('')||'<tr><td colspan="7" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';
 }
+
 function filterOsceResults(){const q=(el('osceResultSearch')||{}).value?.toLowerCase()||'';document.querySelectorAll('#osceResultsBody tr[data-osce-title]').forEach(tr=>{tr.style.display=!q||tr.dataset.osceTitle.includes(q)?'':'none';});}
 
 // ══ 詳細視窗 ══
@@ -1727,6 +1907,78 @@ function setLdr(v){const l=el('ldr');if(l)l.style.display=v?'flex':'none';}
 function showToast(msg,type){const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3200);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+
+// ══ 評審意見分頁 ══
+let opinType = 'poster';
+function opinSwitchType(t){
+  opinType=t;
+  el('opinTypePoster').classList.toggle('active',t==='poster');
+  el('opinTypeOsce').classList.toggle('active',t==='osce');
+  renderOpinionsPage(t);
+}
+
+function renderOpinionsPage(t){
+  const body=el('opinionsBody'); if(!body) return;
+  opinType=t||opinType;
+
+  if(opinType==='poster'){
+    if(!dashData||!dashData.papers){ body.innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">請先載入總覽統計資料</p>'; return; }
+    const papers=dashData.papers;
+    // 只顯示有意見的論文
+    const withOpinions=papers.filter(p=>p.reviews.some(r=>r.catAdjust||r.comment||r.rejectReason));
+    if(!withOpinions.length){ body.innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">尚無評審意見</p>'; return; }
+    let html='';
+    withOpinions.forEach(p=>{
+      html+=`<div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid #e2e8f0">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-wrap:wrap">
+          <span class="chip chip-blue" style="font-size:.78rem">${p.paperNo||'—'}</span>
+          <span style="font-weight:600;font-size:.92rem;color:#1c1c2e">${esc(p.title)}</span>
+          <span style="font-size:.78rem;color:#64748b;background:#f1f5f9;padding:.1rem .45rem;border-radius:4px">${normCat(p.category)||'—'} 類・${esc(p.contactUnit||'—')}</span>
+          ${p.avgTotal!==null?`<span style="font-size:.78rem;font-weight:700;color:#166534;background:#f0faf5;padding:.1rem .45rem;border-radius:4px">平均 ${p.avgTotal}分</span>`:''}
+        </div>`;
+      p.reviews.forEach((r,i)=>{
+        const hasOpinion=r.catAdjust||r.comment||r.rejectReason;
+        if(!hasOpinion) return;
+        html+=`<div style="margin-left:.5rem;margin-bottom:.5rem;padding:.6rem .8rem;background:#f8fafc;border-left:3px solid ${r.rejected?'#fca5a5':'#bfdbfe'};border-radius:0 6px 6px 0">
+          <div style="font-size:.78rem;font-weight:600;color:#3b82f6;margin-bottom:.35rem">評審 ${i+1}・${rvName(r.reviewer)}</div>`;
+        if(r.catAdjust) html+=`<div style="font-size:.82rem;margin-bottom:.25rem"><span style="background:#fef3c7;color:#92400e;padding:.1rem .4rem;border-radius:4px;font-size:.7rem;font-weight:700;margin-right:.4rem">建議改類</span>${esc(r.catAdjust)}</div>`;
+        if(r.comment)   html+=`<div style="font-size:.82rem;color:#334155;margin-bottom:.2rem"><span style="color:#64748b;font-size:.75rem">💬 </span>${esc(r.comment)}</div>`;
+        if(r.rejectReason) html+=`<div style="font-size:.82rem;color:#dc2626"><span style="font-size:.75rem">⚠ 退稿原因：</span>${esc(r.rejectReason)}</div>`;
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+    });
+    body.innerHTML=html;
+
+  } else {
+    // OSCE
+    if(!osceData||!osceData.cases){ body.innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">請先載入 OSCE 資料</p>'; return; }
+    const cases=osceData.cases;
+    const withOpinions=cases.filter(c=>c.reviews.some(r=>r.comment||r.rejectReason));
+    if(!withOpinions.length){ body.innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">尚無評審意見</p>'; return; }
+    let html='';
+    withOpinions.forEach(c=>{
+      html+=`<div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid #e2e8f0">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-wrap:wrap">
+          <span class="chip chip-blue" style="font-size:.78rem">${c.caseNo||'—'}</span>
+          <span style="font-weight:600;font-size:.92rem;color:#1c1c2e">${esc(c.title)}</span>
+          <span style="font-size:.78rem;color:#64748b;background:#f1f5f9;padding:.1rem .45rem;border-radius:4px">${esc(c.hospital||'—')}</span>
+          ${c.avgTotal!==null?`<span style="font-size:.78rem;font-weight:700;color:#166534;background:#f0faf5;padding:.1rem .45rem;border-radius:4px">平均 ${c.avgTotal}分</span>`:''}
+        </div>`;
+      c.reviews.forEach((r,i)=>{
+        const hasOpinion=r.comment||r.rejectReason;
+        if(!hasOpinion) return;
+        html+=`<div style="margin-left:.5rem;margin-bottom:.5rem;padding:.6rem .8rem;background:#fffbeb;border-left:3px solid ${r.rejected?'#fca5a5':'#fde68a'};border-radius:0 6px 6px 0">
+          <div style="font-size:.78rem;font-weight:600;color:#3b82f6;margin-bottom:.35rem">評審 ${i+1}・${rvName(r.reviewer)}</div>`;
+        if(r.comment)      html+=`<div style="font-size:.82rem;color:#334155;margin-bottom:.2rem"><span style="color:#64748b;font-size:.75rem">💬 </span>${esc(r.comment)}</div>`;
+        if(r.rejectReason) html+=`<div style="font-size:.82rem;color:#dc2626"><span style="font-size:.75rem">⚠ 退稿原因：</span>${esc(r.rejectReason)}</div>`;
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+    });
+    body.innerHTML=html;
+  }
+}
 // ══ 頁面載入時自我檢查 ══
 (function checkHealth(){
   // 函式用 typeof window[n]
@@ -1743,6 +1995,112 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
   if(all.length) console.warn('⚠️ 缺少:', all.join(', '));
   else console.log('✅ 所有必要函式/常數均已載入');
 })();
-</script>
-</body>
+
+// ══ 拖動排序 ══
+let _dragSrcRow=null;
+function dragStart(e){
+  _dragSrcRow=e.currentTarget;
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain','');
+  setTimeout(()=>{if(_dragSrcRow)_dragSrcRow.style.opacity='0.4';},0);
+}
+function dragOver(e){
+  e.preventDefault();e.dataTransfer.dropEffect='move';
+  const tr=e.currentTarget;
+  if(tr&&tr!==_dragSrcRow)tr.style.borderTop='2px solid #3b82f6';
+  return false;
+}
+function dragDrop(e){
+  e.stopPropagation();
+  const target=e.currentTarget;
+  document.querySelectorAll('tr[draggable]').forEach(tr=>tr.style.borderTop='');
+  if(_dragSrcRow&&target&&_dragSrcRow!==target){
+    const tbody=target.parentNode;
+    const rows=[...tbody.querySelectorAll('tr[draggable]')];
+    const si=rows.indexOf(_dragSrcRow),ti=rows.indexOf(target);
+    if(si>ti)tbody.insertBefore(_dragSrcRow,target);
+    else tbody.insertBefore(_dragSrcRow,target.nextSibling);
+    reNumberRows(tbody);
+  }
+  return false;
+}
+document.addEventListener('dragend',()=>{
+  document.querySelectorAll('tr[draggable]').forEach(tr=>{tr.style.opacity='';tr.style.borderTop='';});
+  _dragSrcRow=null;
+});
+function reNumberRows(tbody){
+  const rows=[...tbody.querySelectorAll('tr[draggable]')];
+  rows.forEach((tr,i)=>{
+    const rankCell=tr.querySelector('td:first-child');if(!rankCell)return;
+    const rank=i+1;
+    const medals={1:'🥇',2:'🥈',3:'🥉'};
+    const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';
+    const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';
+    rankCell.innerHTML='<span style="color:#94a3b8;font-size:.9rem;margin-right:.2rem">⠿</span>'
+      +`<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}第${rank}名</span>`;
+  });
+}
+
+// ══ 匯出評分結果 CSV ══
+function exportResultsCSV(type){
+  type = type || resultsType;
+  let rows = [], title = '';
+
+  if(type === 'poster'){
+    title = 'TSMCSD2026_海報論文評分結果';
+    // 讀取目前表格排列（含拖動後的順序）
+    const tbody = el('resultsCatBody') || el('resultsAllBody');
+    const trs = tbody ? [...tbody.querySelectorAll('tr[data-pid]')] : [];
+    if(!trs.length && dashData){
+      // 若表格沒有拖動列，用原始資料
+      rows.push(['名次','編號','論文題目','投稿單位','類別','建議改類','平均總分','推薦','退稿數','分數差距']);
+      let rank=1;
+      [...(dashData.papers||[])].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1)).forEach(p=>{
+        const rc=p.reviews.filter(r=>r.rejected).length;
+        const valid=p.reviews.filter(r=>!r.rejected);
+        const gap=valid.length>=2?Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)):'';
+        const catAdj=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
+        rows.push([rank++, p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.recommended?'是':'否', rc, gap]);
+      });
+    } else {
+      rows.push(['名次','編號','論文題目','投稿單位','類別','建議改類','平均總分','推薦','退稿數']);
+      trs.forEach((tr,i)=>{
+        const pid=tr.dataset.pid;
+        const p=dashData&&dashData.papers?dashData.papers.find(x=>x.id===pid):null;
+        if(!p) return;
+        const rc=p.reviews.filter(r=>r.rejected).length;
+        const catAdj=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
+        rows.push([i+1, p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.recommended?'是':'否', rc]);
+      });
+    }
+  } else {
+    // OSCE
+    title = 'TSMCSD2026_OSCE教案評分結果';
+    rows.push(['名次','編號','教案主題','服務醫院','平均總分','退稿數','分數差距']);
+    const cases = osceData&&osceData.cases ? [...osceData.cases].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1)) : [];
+    cases.forEach((c,i)=>{
+      const rc=c.reviews.filter(r=>r.rejected).length;
+      const valid=c.reviews.filter(r=>!r.rejected);
+      const gap=valid.length>=2?Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)):'';
+      rows.push([i+1, c.caseNo||'', c.title||'', c.hospital||'', c.avgTotal!==null?c.avgTotal:'', rc, gap]);
+    });
+  }
+
+  // 轉 CSV
+  const csv = rows.map(r=>r.map(v=>{
+    const s = String(v??'').replace(/"/g,'""');
+    return s.includes(',')||s.includes('"')||s.includes('\n') ? `"${s}"` : s;
+  }).join(',')).join('\n');
+
+  // 下載（加 BOM 讓 Excel 正確顯示中文）
+  const bom = '\uFEFF';
+  const blob = new Blob([bom+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=title+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('CSV 已匯出','ok');
+}
+/body>
 </html>
