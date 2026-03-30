@@ -844,19 +844,7 @@ tr:hover td{ background:#fafafa; }
     </div>
   </div>
   <div class="adm-content" id="adm-tab-reviewers" style="display:none">
-    <!-- 子分頁切換 -->
-    <div class="sub-tabbar">
-      <div class="sub-tab active" id="rvSubAccounts" onclick="rvSwitchSub('accounts')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        帳號管理
-      </div>
-      <div class="sub-tab" id="rvSubAssign" onclick="rvSwitchSub('assign')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
-        指派明細
-      </div>
-    </div>
-
-    <!-- 帳號管理 -->
+    <!-- 帳號管理（移除子分頁，直接顯示） -->
     <div id="rvPanelAccounts">
       <div class="sec">
         <div class="sec-head"><h3>新增委員帳號</h3></div>
@@ -881,18 +869,6 @@ tr:hover td{ background:#fafafa; }
       </div>
     </div>
 
-    <!-- 指派明細 -->
-    <div id="rvPanelAssign" style="display:none">
-      <div class="sec">
-        <div class="sec-head">
-          <h3>委員指派明細</h3>
-          <span style="font-size:.8rem;color:#718096">各委員的海報論文與 OSCE 教案指派狀況</span>
-        </div>
-        <div class="sec-body" id="rvAssignDetail">
-          <p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">載入中…</p>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- 指派明細（獨立分頁）-->
@@ -1518,7 +1494,7 @@ function renderAssignDetailPage(){
           <span style="background:#fef3c7;color:#92400e;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">OSCE ${myCases.length}個</span>
         </span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+      <div style="display:flex;flex-direction:column;gap:.6rem">
         <div>
           <div style="font-size:.72rem;font-weight:700;color:#1e4d8c;margin-bottom:.35rem;letter-spacing:.04em">📋 海報論文</div>
           ${myPosters.length?myPosters.map(p=>{
@@ -1563,12 +1539,15 @@ async function loadDashboard(){
     });
     const ar=await api({action:'adminGetAssignments'});
     assignments=ar.assignments||{};
+    console.log('loadDashboard papers:', r.papers&&r.papers.length, 'first:', r.papers&&r.papers[0]);
     renderStats(r.stats);
     renderDashTable(r.papers);
     renderAssignTable(r.papers, r.reviewers);
     renderResultsTable(r.papers);
-    // 同步載入 OSCE 資料（背景）
-    loadOsceDashboard();
+    // 載入 OSCE 資料（載入後更新統計卡）
+    loadOsceDashboard().then(()=>{
+      if(dashData) renderStats(dashData.stats);
+    });
   } catch(e){ showToast('連線失敗','err'); console.error(e); }
   setLdr(false);
 }
@@ -1589,6 +1568,7 @@ function renderStats(s){
 
 function renderDashTable(papers){
   if(!papers) return;
+  console.log('renderDashTable papers:', papers.length, papers[0]);
   el('dashBody').innerHTML=papers.map(p=>{ const assigned=assignments[p.id]||[]; const done=p.reviews.length; const total=assigned.length||0; const pct=total?Math.round(done/total*100):0; const fillClass=done===0?'none':done>=total?'done':'part';
     return `<tr><td><span class="chip chip-blue">${p.paperNo}</span></td><td style="max-width:280px;line-height:1.5">${esc(p.title)}</td><td>${p.category}</td><td style="font-size:.78rem;color:#718096">${assigned.map(u=>rvName(u)).join('、')||'—'}</td><td><div class="sc-prog"><span>${done}/${total}</span><div class="sc-bar"><div class="sc-fill ${fillClass}" style="width:${pct}%"></div></div></div></td><td class="avg-num" style="font-weight:600">${p.avgTotal!==null?p.avgTotal:'—'}</td><td>${p.avgTotal!==null?(p.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td></tr>`;
   }).join('');
