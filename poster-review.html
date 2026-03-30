@@ -1539,7 +1539,6 @@ async function loadDashboard(){
     });
     const ar=await api({action:'adminGetAssignments'});
     assignments=ar.assignments||{};
-    console.log('loadDashboard papers:', r.papers&&r.papers.length, 'first:', r.papers&&r.papers[0]);
     renderStats(r.stats);
     renderDashTable(r.papers);
     renderAssignTable(r.papers, r.reviewers);
@@ -1568,7 +1567,6 @@ function renderStats(s){
 
 function renderDashTable(papers){
   if(!papers) return;
-  console.log('renderDashTable papers:', papers.length, papers[0]);
   el('dashBody').innerHTML=papers.map(p=>{ const assigned=assignments[p.id]||[]; const done=p.reviews.length; const total=assigned.length||0; const pct=total?Math.round(done/total*100):0; const fillClass=done===0?'none':done>=total?'done':'part';
     return `<tr><td><span class="chip chip-blue">${p.paperNo}</span></td><td style="max-width:280px;line-height:1.5">${esc(p.title)}</td><td>${p.category}</td><td style="font-size:.78rem;color:#718096">${assigned.map(u=>rvName(u)).join('、')||'—'}</td><td><div class="sc-prog"><span>${done}/${total}</span><div class="sc-bar"><div class="sc-fill ${fillClass}" style="width:${pct}%"></div></div></div></td><td class="avg-num" style="font-weight:600">${p.avgTotal!==null?p.avgTotal:'—'}</td><td>${p.avgTotal!==null?(p.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td></tr>`;
   }).join('');
@@ -2103,6 +2101,35 @@ function autoAssign(type){
     renderAssignTable(papers,reviewers);
     showToast('自動指派完成，請記得按「儲存指派」','ok');
   }
+}
+
+// 帳號轉姓名
+function rvName(username){ return reviewerNamesMap[username]||username; }
+
+// 委員帳號列表渲染
+function renderRvTable(reviewers){
+  const pc_map={}, oc_map={};
+  if(assignments){ Object.values(assignments).forEach(users=>(users||[]).forEach(u=>{ pc_map[u]=(pc_map[u]||0)+1; })); }
+  if(osceAssignments){ Object.values(osceAssignments).forEach(users=>(users||[]).forEach(u=>{ oc_map[u]=(oc_map[u]||0)+1; })); }
+  const body=el('rvBody'); if(!body) return;
+  body.innerHTML=(reviewers||[]).map(r=>{
+    const pc=r.posterCount!==undefined?r.posterCount:(pc_map[r.username]||0);
+    const oc=r.osceCount!==undefined?r.osceCount:(oc_map[r.username]||0);
+    const posterBadge=pc>0?`<span style="background:#dbeafe;color:#1e4d8c;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">${pc}篇</span>`:'<span style="color:#cbd5e0;font-size:.8rem">—</span>';
+    const osceBadge=oc>0?`<span style="background:#fef3c7;color:#92400e;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">${oc}個</span>`:'<span style="color:#cbd5e0;font-size:.8rem">—</span>';
+    return `<tr>
+      <td style="font-weight:500;font-family:monospace;font-size:.85rem">${r.username}</td>
+      <td style="color:#718096;font-family:monospace;font-size:.85rem">${r.password||''}</td>
+      <td style="font-weight:600">${r.name}</td>
+      <td><span class="chip ${r.enabled?'chip-green':'chip-gray'}">${r.enabled?'啟用':'停用'}</span></td>
+      <td style="text-align:center">${posterBadge}</td>
+      <td style="text-align:center">${osceBadge}</td>
+      <td><div style="display:flex;gap:.4rem">
+        <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="toggleReviewer('${r.username}',${!r.enabled})">${r.enabled?'停用':'啟用'}</button>
+        <button class="adm-btn adm-btn-danger adm-btn-sm" onclick="deleteReviewer('${r.username}')">刪除</button>
+      </div></td>
+    </tr>`;
+  }).join('');
 }
 </script>
 </body>
