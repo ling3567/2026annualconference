@@ -587,6 +587,19 @@ tr:hover td{ background:#fafafa; }
   display:flex; align-items:center; gap:.35rem; flex-shrink:0;
 }
 
+
+.score-head{ display:flex; align-items:center; gap:.75rem; }
+.score-head-total{
+  display:flex; flex-direction:column; align-items:center;
+  background:rgba(255,255,255,.12); border-radius:8px;
+  padding:.3rem .75rem; flex-shrink:0; min-width:64px;
+}
+.score-head-total-lbl{ font-size:.68rem; opacity:.75; letter-spacing:.04em; }
+.score-head-total-num{
+  font-size:1.35rem; font-weight:800; font-variant-numeric:tabular-nums;
+  line-height:1.1;
+}
+
 /* ══ Toast / Loader ══ */
 .toast{ position:fixed; bottom:1.5rem; right:1.5rem; padding:.75rem 1.1rem; border-radius:9px; font-size:.9rem; color:white; box-shadow:0 8px 24px rgba(0,0,0,.15); z-index:9999; animation:tIn .3s ease; max-width:340px; }
 .toast.ok{ background:#3d6b54; }
@@ -978,14 +991,6 @@ tr:hover td{ background:#fafafa; }
 </div>
 
 <!-- 評分詳細（後台） -->
-<div class="modal-bg" id="detailModal">
-  <div class="modal narrow">
-    <div class="modal-head light"><h4 id="detailTitle">評分詳細</h4><button class="modal-close dark" onclick="closeModal()">✕</button></div>
-    <div class="modal-body" id="detailBody"></div>
-    <div class="modal-foot adm"><button class="adm-btn adm-btn-outline" onclick="closeModal()">關閉</button></div>
-  </div>
-</div>
-
 <div class="ldr" id="ldr"><div class="spinner"></div></div>
 
 <script>
@@ -1192,18 +1197,18 @@ function renderOsceContent(i){
       </div>
       <div class="p-info-body">
         ${p.summary?absBlk('教案摘要',p.summary):''}
-        ${p.driveUrl?`<div class="drive-preview-wrap">
-          <div class="drive-preview-head">
-            <div><strong>Google 雲端教案資料</strong>
-              ${p.contactName?'<span style="font-size:.75rem;color:#7a6e68;margin-left:.5rem">聯絡人：'+esc(p.contactName)+'</span>':''}</div>
-            <div class="drive-preview-btns">
-              <button class="drive-toggle-btn active" id="pt_${p.id}" onclick="toggleDrivePreview('${p.id}')">在此預覽</button>
-              <a class="drive-toggle-btn" href="${p.driveUrl}" target="_blank">開新分頁</a>
+        ${p.driveUrl?`<div class="abs-sec">
+          <div class="abs-lbl" style="display:flex;align-items:center;justify-content:space-between">
+            <span>Google 雲端教案資料</span>
+            <div style="display:flex;gap:.4rem">
+              <button class="drive-toggle-btn" style="font-size:.75rem;padding:.2rem .6rem" id="pt_${p.id}" onclick="toggleDrivePreview('${p.id}')">在此預覽</button>
+              <a class="drive-toggle-btn" style="font-size:.75rem;padding:.2rem .6rem" href="${p.driveUrl}" target="_blank">開新分頁 ↗</a>
             </div>
           </div>
-          <div class="drive-iframe-wrap open" id="di_${p.id}">
+          <div class="drive-iframe-wrap" id="di_${p.id}" style="height:0;overflow:hidden;transition:height .3s">
             <iframe src="${getDriveEmbedUrl(p.driveUrl)}" allowfullscreen loading="lazy"
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+              style="width:100%;height:480px;border:none;display:block;margin-top:.5rem"></iframe>
           </div>
         </div>`:''}
       </div>
@@ -1233,18 +1238,13 @@ function toggleDrivePreview(pid){
 // ══ 評分表單（海報）══
 function renderPosterScoreForm(p,draft,isDone){
   const dis=isDone?'disabled':'';
-  let html=`<div class="score-sum-bar">
-    <span class="score-sum-lbl">目前總分</span>
-    <span class="score-sum-num" id="scoreTotalNum">0</span>
-    <span class="score-sum-max">/ 100</span>
-  </div>
-  <div class="score-group-head">各項評分（滿分 100 分・全部必填）</div>`;
+  let html=`<div class="score-group-head">各項評分（滿分 100 分・全部必填）</div>`;
   CRITERIA.forEach(c=>{
     const v=draft[c.id]!==undefined?draft[c.id]:'';
     html+=`<div class="score-item">
       <div class="score-item-label">
         <span class="score-item-name">${c.label}</span>
-        <span class="score-item-sub">${c.weight}・滿分 ${c.max} 分</span>
+        <span class="score-item-sub">${c.weight}</span>
       </div>
       <div class="score-input-wrap">
         <input type="number" class="score-input" id="sc_${c.id}" min="0" max="${c.max}" value="${v}" placeholder="—" ${dis}
@@ -1256,7 +1256,7 @@ function renderPosterScoreForm(p,draft,isDone){
   html+=`<div class="recommend-zone">
     <input type="checkbox" class="recommend-checkbox" id="recChk" ${draft.recommend?'checked':''} ${dis}>
     <label for="recChk">⭐ 推薦此論文</label>
-    <div class="recommend-note">勾選代表建議此論文值得於研討會中展示</div>
+    <div class="recommend-note">勾選代表推薦此篇論文進行紙本實體張貼展示</div>
   </div>`;
   html+=`<div class="cmt-wrap"><label>評語（選填）</label><textarea id="cmtArea" placeholder="可填寫對本篇論文的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea></div>`;
   const rejChecked=draft.rejected?'checked':'';
@@ -1275,11 +1275,7 @@ function renderPosterScoreForm(p,draft,isDone){
 // ══ 評分表單（OSCE）══
 function renderOsceScoreForm(p,draft,isDone){
   const dis=isDone?'disabled':'';
-  let html=`<div class="score-sum-bar">
-    <span class="score-sum-lbl">目前總分</span>
-    <span class="score-sum-num" id="scoreTotalNum">0</span>
-    <span class="score-sum-max">/ ${OSCE_BASE_MAX + OSCE_BONUS.max}</span>
-  </div>`;
+  let html=``;
   const groups=[
     {label:'情境設置（10%）', items:['o1']},
     {label:'教案指引（30%）', items:['o2','o3','o4']},
@@ -1290,7 +1286,7 @@ function renderOsceScoreForm(p,draft,isDone){
   OSCE_CRITERIA.forEach(c=>{
     const v=draft[c.id]!==undefined?draft[c.id]:'';
     html+=`<div class="score-item">
-      <div class="score-item-label"><strong>${c.label}</strong><span class="score-item-sub">滿分 ${c.max} 分</span></div>
+      <div class="score-item-label"><span class="score-item-name">${c.label}</span><span class="score-item-sub">${c.max}分</span></div>
       <div class="score-input-wrap">
         <input type="number" class="score-input" id="sc_${c.id}" min="0" max="${c.max}" value="${v}" placeholder="—" ${dis}
           oninput="validateScore(this,${c.max});updateOsceTotal()">
@@ -1316,15 +1312,15 @@ function renderOsceScoreForm(p,draft,isDone){
 // ══ 分數計算 ══
 
 function updatePosterTotal(){
-  let total=0,allFilled=true;
-  CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(!inp||inp.disabled)return;const v=Number(inp.value);if(inp.value===''||isNaN(v)){allFilled=false;}else{total+=v;}});
-  el('scoreTotalNum').textContent=total;
+  let total=0,anyFilled=false;
+  CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(!inp||inp.disabled)return;const v=Number(inp.value);if(inp.value!==''&&!isNaN(v)){total+=v;anyFilled=true;}});
+  const tn=el('scoreTotalNum'); if(tn) tn.textContent=anyFilled?total:'—';
 }
 function updateOsceTotal(){
-  let base=0,bonus=0,allFilled=true;
-  OSCE_CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(!inp||inp.disabled)return;const v=Number(inp.value);if(inp.value===''||isNaN(v)){allFilled=false;}else{base+=v;}});
-  const bInp=el('sc_'+OSCE_BONUS.id);if(bInp&&!bInp.disabled&&bInp.value!=='')bonus=Number(bInp.value)||0;
-  el('scoreTotalNum').textContent=base+bonus;
+  let base=0,bonus=0,anyFilled=false;
+  OSCE_CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(!inp||inp.disabled)return;const v=Number(inp.value);if(inp.value!==''&&!isNaN(v)){base+=v;anyFilled=true;}});
+  const bInp=el('sc_'+OSCE_BONUS.id);if(bInp&&!bInp.disabled&&bInp.value!==''){bonus=Number(bInp.value)||0;anyFilled=true;}
+  const tn=el('scoreTotalNum'); if(tn) tn.textContent=anyFilled?base+bonus:'—';
 }
 function markEmptyInputs(){
   document.querySelectorAll('.score-input').forEach(inp=>{
@@ -1337,7 +1333,17 @@ function validateAllFilled(type){
   else OSCE_CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(inp&&inp.value==='')missing.push(c.label);});
   return missing;
 }
-function validateScore(inp,max){const v=Number(inp.value);inp.classList.toggle('over',inp.value!==''&&(isNaN(v)||v<0||v>max));}
+function validateScore(inp,max){
+  const v=Number(inp.value);
+  const over=inp.value!==''&&(isNaN(v)||v<0||v>max);
+  inp.classList.toggle('over',over);
+  if(over){
+    inp.style.borderColor='#dc2626';inp.style.background='#fff1f1';
+    inp.title='超過滿分 '+max+' 分！';
+  } else {
+    inp.style.borderColor='';inp.style.background='';inp.title='';
+  }
+}
 function toggleReject(cb){
   const body=el('rejBody');if(!body)return;
   body.style.display=cb.checked?'block':'none';
@@ -1353,6 +1359,9 @@ function toggleReject(cb){
 // ══ 暫存草稿 ══
 function saveDraft(){
   const p=curType==='poster'?papers.poster[curIdx]:papers.osce[curIdx]; if(!p)return;
+  if(document.querySelectorAll('.score-input.over').length>0){
+    showToast('有分數超過滿分，請先修正','err'); return;
+  }
   const d={};
   const criteria=curType==='poster'?CRITERIA:OSCE_CRITERIA;
   criteria.forEach(c=>{const inp=el('sc_'+c.id);if(inp)d[c.id]=inp.value;});
@@ -1362,6 +1371,10 @@ function saveDraft(){
   const recChk=el('recChk');d.recommend=recChk&&recChk.checked;
   const cmt=el('cmtArea');d.comment=cmt?cmt.value:'';
   const bn=el('bonusNote');if(bn)d.bonusNote=bn.value;
+  // 超過滿分不允許暫存
+  if(document.querySelectorAll('.score-input.over').length>0){
+    showToast('有評分項目超過滿分，請修正後再暫存','err'); return;
+  }
   drafts[p.id]=d; renderList(); showToast('草稿已暫存','ok');
 }
 
@@ -1372,7 +1385,10 @@ async function submitScore(){
   if(!d.rejected){
     const missing=validateAllFilled(curType);
     if(missing.length>0){showToast(`請填寫所有評分項目（尚有 ${missing.length} 項未填）`,'err');markEmptyInputs();return;}
-    if(document.querySelectorAll('.score-input.over').length>0){showToast('有分數超過滿分，請修正','err');return;}
+    if(document.querySelectorAll('.score-input.over').length>0){
+      showToast('有評分項目超過滿分，請修正後再送出','err');
+      markEmptyInputs(); return;
+    }
     if(curType==='osce'){
       const bv=Number(el('sc_'+OSCE_BONUS.id)?.value||0);
       if(bv>0){const bn=el('bonusNote');if(!bn||!bn.value.trim()){showToast('已填優良加分，請說明原因','err');bn&&bn.focus();return;}}
@@ -1418,7 +1434,7 @@ function showOverview(){
   const list=papers[curType]||[];
   const pending=list.filter(p=>!submitted[p.id]);
   if(!pending.length){showToast('所有項目皆已提交','ok');return;}
-  el('overviewList').innerHTML=pending.map(p=>{
+  el('overviewBody').innerHTML=pending.map(p=>{
     const d=drafts[p.id]||{};
     const num=curType==='osce'?p.caseNo:p.paperNo;
     const hasDraft=Object.keys(d).length>0;
@@ -1435,8 +1451,27 @@ function showOverview(){
   updateBulkBtn();
 }
 function closeOverview(){ el('overviewModal').classList.remove('show'); }
-function toggleSelectAll(cb){ document.querySelectorAll('.ov-chk:not(:disabled)').forEach(c=>c.checked=cb.checked); updateBulkBtn(); }
-function updateBulkBtn(){ el('bulkSubmitBtn').disabled=!document.querySelectorAll('.ov-chk:checked').length; }
+function toggleSelectAll(type){
+  // type: 'poster'|'osce'|true|false，或 checkbox 元素
+  let checked;
+  if(typeof type==='string'){
+    // 海報/OSCE 全選：根據 curType 全選
+    checked=true;
+  } else if(type && type.checked!==undefined){
+    checked=type.checked;
+  } else {
+    checked=!!type;
+  }
+  document.querySelectorAll('.ov-chk:not(:disabled)').forEach(c=>c.checked=checked);
+  updateBulkBtn();
+}
+function updateBulkBtn(){
+  const btn=el('btnBulkSubmit');
+  const cnt=document.querySelectorAll('.ov-chk:checked').length;
+  if(btn) btn.disabled=!cnt;
+  const countEl=el('ovSelectedCount');
+  if(countEl) countEl.textContent=cnt?`已選 ${cnt} 項，點送出確認`:'請勾選要送出的項目';
+}
 async function bulkSubmit(){
   const list=papers[curType]||[];
   const checked=[...document.querySelectorAll('.ov-chk:checked')].map(c=>c.id.replace('ovc_',''));
@@ -2104,41 +2139,43 @@ function exportResultsCSV(type){
 
   if(type === 'poster'){
     title = 'TSMCSD2026_海報論文評分結果';
-    // 讀取目前表格排列（含拖動後的順序）
+    rows.push(['名次','編號','論文題目','投稿單位','類別','建議改類','平均總分','推薦','退稿數','分數差距']);
+
+    // 優先用目前表格排列（含拖動後的順序）
     const tbody = el('resultsCatBody') || el('resultsAllBody');
     const trs = tbody ? [...tbody.querySelectorAll('tr[data-pid]')] : [];
-    if(!trs.length && dashData){
-      // 若表格沒有拖動列，用原始資料
-      rows.push(['名次','編號','論文題目','投稿單位','類別','建議改類','平均總分','推薦','退稿數','分數差距']);
-      let rank=1;
-      [...(dashData.papers||[])].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1)).forEach(p=>{
-        const rc=p.reviews.filter(r=>r.rejected).length;
-        const valid=p.reviews.filter(r=>!r.rejected);
-        const gap=valid.length>=2?Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)):'';
-        const catAdj=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
+
+    if(trs.length && dashData && dashData.papers){
+      trs.forEach((tr,i)=>{
+        const pid = tr.dataset.pid;
+        const p = dashData.papers.find(x=>x.id===pid);
+        if(!p) return;
+        const rc = p.reviews.filter(r=>r.rejected).length;
+        const valid = p.reviews.filter(r=>!r.rejected);
+        const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
+        const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
+        rows.push([i+1, p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.recommended?'是':'否', rc, gap]);
+      });
+    } else if(dashData && dashData.papers){
+      let rank = 1;
+      [...dashData.papers].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1)).forEach(p=>{
+        const rc = p.reviews.filter(r=>r.rejected).length;
+        const valid = p.reviews.filter(r=>!r.rejected);
+        const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
+        const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
         rows.push([rank++, p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.recommended?'是':'否', rc, gap]);
       });
-    } else {
-      rows.push(['名次','編號','論文題目','投稿單位','類別','建議改類','平均總分','推薦','退稿數']);
-      trs.forEach((tr,i)=>{
-        const pid=tr.dataset.pid;
-        const p=dashData&&dashData.papers?dashData.papers.find(x=>x.id===pid):null;
-        if(!p) return;
-        const rc=p.reviews.filter(r=>r.rejected).length;
-        const catAdj=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        rows.push([i+1, p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.recommended?'是':'否', rc]);
-      });
     }
+
   } else {
-    // OSCE
     title = 'TSMCSD2026_OSCE教案評分結果';
-    rows.push(['名次','編號','教案主題','服務醫院','平均總分','退稿數','分數差距']);
+    rows.push(['名次','編號','教案主題','服務醫院','平均總分','分數差距']);
     const cases = osceData&&osceData.cases ? [...osceData.cases].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1)) : [];
-    cases.forEach((c,i)=>{
-      const rc=c.reviews.filter(r=>r.rejected).length;
-      const valid=c.reviews.filter(r=>!r.rejected);
-      const gap=valid.length>=2?Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)):'';
-      rows.push([i+1, c.caseNo||'', c.title||'', c.hospital||'', c.avgTotal!==null?c.avgTotal:'', rc, gap]);
+    let rank = 1;
+    cases.forEach(c=>{
+      const valid = c.reviews;
+      const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
+      rows.push([rank++, c.caseNo||'', c.title||'', c.hospital||'', c.avgTotal!==null?c.avgTotal:'', gap]);
     });
   }
 
@@ -2157,6 +2194,8 @@ function exportResultsCSV(type){
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
   showToast('CSV 已匯出','ok');
-}</script>
+}
+
+</script>
 </body>
 </html>
