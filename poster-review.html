@@ -579,7 +579,7 @@ tr:hover td{ background:#fafafa; }
 }
 .score-item-name{
   font-size:.88rem; font-weight:600; color:var(--slate);
-  white-space:nowrap;
+  white-space:normal; word-break:break-all; line-height:1.4;
 }
 .score-item-sub{
   font-size:.75rem; color:var(--muted);
@@ -1224,9 +1224,9 @@ function renderOsceContent(i){
 
 function getDriveEmbedUrl(url){
   if(!url) return '';
-  // Google Drive 資料夾 → embeddedfolderview list 模式
+  // Google Drive 資料夾 → embeddedfolderview grid 模式（不顯示修改日期）
   const fm=url.match(/drive\.google\.com\/drive\/folders\/([a-zA-Z0-9_-]+)/);
-  if(fm) return 'https://drive.google.com/embeddedfolderview?id='+fm[1]+'#list';
+  if(fm) return 'https://drive.google.com/embeddedfolderview?id='+fm[1]+'#grid';
   // 單一檔案
   const fm2=url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
   if(fm2) return 'https://drive.google.com/file/d/'+fm2[1]+'/preview';
@@ -1293,8 +1293,10 @@ function renderOsceScoreForm(p,draft,isDone){
   OSCE_CRITERIA.forEach(c=>{
     const v=draft[c.id]!==undefined?draft[c.id]:'';
     html+=`<div class="score-item">
-      <div class="score-item-label"><span class="score-item-name">${c.label}</span><span class="score-item-sub">${c.max}分</span></div>
-      <div class="score-input-wrap">
+      <div class="score-item-label">
+        <span class="score-item-name">${c.label}</span>
+      </div>
+      <div class="score-input-wrap" style="flex-shrink:0">
         <input type="number" class="score-input" id="sc_${c.id}" min="0" max="${c.max}" value="${v}" placeholder="—" ${dis}
           oninput="validateScore(this,${c.max});updateOsceTotal()">
         <span class="score-max">/ ${c.max}</span>
@@ -1418,15 +1420,23 @@ async function submitScore(){
   const confirmed=await showConfirm('確認提交評分',
     `<p><strong>${p2.paperNo||p2.caseNo}</strong>・${esc(p2.title)}</p><p style="font-size:1.1rem;font-weight:700;margin-top:.5rem">${d2.rejected?'退稿':'總分：'+total+' 分'}</p>`);
   if(!confirmed)return;
-  await doSubmit(p2,curType,d2,total);
+  await doSubmit(p2,curType,d2,total,scores,false);
 }
 
-async function doSubmit(p,ptype,d,total,silent=false){
+async function doSubmit(p,ptype,d,total,scoresObj,silent=false){
+  // scoresObj：純分數 {c1:20, c2:15...}，若無則從草稿取（bulkSubmit 路徑）
+  const pureScores = scoresObj || (()=>{
+    const criteria = ptype==='poster' ? CRITERIA : OSCE_CRITERIA;
+    const s={};
+    criteria.forEach(c=>{ const v=Number(d[c.id]); s[c.id]=isNaN(v)?0:v; });
+    if(ptype==='osce' && d[OSCE_BONUS.id]!==undefined) s[OSCE_BONUS.id]=Number(d[OSCE_BONUS.id])||0;
+    return s;
+  })();
   try{
     const r=await api({
       action:'submitScore', reviewerUsername:reviewer.username,
       paperId:p.id, paperNo:ptype==='poster'?p.paperNo:p.caseNo, paperType:ptype,
-      scoresJson:JSON.stringify(d), total,
+      scoresJson:JSON.stringify(pureScores), total,
       rejected:d.rejected?'true':'false', rejectReason:d.rejectReason||'',
       recommend:d.recommend?'true':'false', catAdjust:d.catAdjust||'', comment:d.comment||''
     });
@@ -2220,7 +2230,6 @@ function exportResultsCSV(type){
   document.body.removeChild(a); URL.revokeObjectURL(url);
   showToast('CSV 已匯出','ok');
 }
-
 </script>
 </body>
 </html>
