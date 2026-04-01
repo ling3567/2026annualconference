@@ -419,6 +419,8 @@ tr:hover td{ background:#fafafa; }
 .ov-rec.yes{ background:var(--green-bg); color:var(--green); }
 .ov-rec.no{ background:var(--border2); color:var(--muted); }
 .ov-rec.rej{ background:var(--red-bg); color:var(--red); }
+.ov-badge.score{ background:#d1fae5; color:#166534; font-weight:700; }
+.ov-badge.rej{ background:#fee2e2; color:#dc2626; }
 .ov-check{ width:18px; height:18px; accent-color:#546070; cursor:pointer; }
 
 /* Confirm Modal */
@@ -985,14 +987,7 @@ tr:hover td{ background:#fafafa; }
     <div class="modal-body" id="confirmBody"></div>
     <div class="modal-foot">
       <button class="adm-btn adm-btn-outline" onclick="confirmCancel()">取消</button>
-      <button class="confirm-ok-btn" onclick="confirmOk()">確認送出</button>
-    </div>
-  </div>
-</div>
-
-<!-- 評分詳細（後台） -->
-<div class="ldr" id="ldr"><div class="spinner"></div></div>
-
+      <button class="confirm-ok-btn" onclick="confirmOk()">確認送出</
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2njUGr6eORWe6V5iMITA_dbpuOzhOebyxDW43P8RySVezxUevEOvQZGUV0tl_Mhm9/exec';
 
@@ -1069,6 +1064,8 @@ let _confirmResolve = null;
 
 // 類別正規化（A/B/C，去除「類」等後綴）
 function normCat(raw){ const m=String(raw||'').match(/^[ABC]/i); return m?m[0].toUpperCase():''; }
+
+
 // ══ 帳號轉姓名 ══
 function rvName(u){ return reviewerNamesMap[u]||u; }
 
@@ -1197,19 +1194,17 @@ function renderOsceContent(i){
       </div>
       <div class="p-info-body">
         ${p.summary?absBlk('教案摘要',p.summary):''}
-        ${p.driveUrl?`<div class="abs-sec">
-          <div class="abs-lbl" style="display:flex;align-items:center;justify-content:space-between">
-            <span>Google 雲端教案資料</span>
-            <div style="display:flex;gap:.4rem">
-              <button class="drive-toggle-btn" style="font-size:.75rem;padding:.2rem .6rem" id="pt_${p.id}" onclick="toggleDrivePreview('${p.id}')">在此預覽</button>
-              <a class="drive-toggle-btn" style="font-size:.75rem;padding:.2rem .6rem" href="${p.driveUrl}" target="_blank">開新分頁 ↗</a>
-            </div>
+        ${p.driveUrl?`<div class="abs-sec drive-folder-sec">
+          <div class="abs-lbl" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+            <span>📁 Google 雲端教案資料</span>
+            <a style="font-size:.75rem;color:#3b82f6;text-decoration:none" href="${p.driveUrl}" target="_blank">在 Drive 開啟 ↗</a>
           </div>
-          <div class="drive-iframe-wrap" id="di_${p.id}" style="height:0;overflow:hidden;transition:height .3s">
-            <iframe src="${getDriveEmbedUrl(p.driveUrl)}" allowfullscreen loading="lazy"
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-              style="width:100%;height:480px;border:none;display:block;margin-top:.5rem"></iframe>
-          </div>
+          <iframe
+            src="${getDriveEmbedUrl(p.driveUrl)}"
+            style="width:100%;height:420px;border:1px solid var(--border2);border-radius:6px;display:block"
+            allow="autoplay"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation">
+          </iframe>
         </div>`:''}
       </div>
     </div>`;
@@ -1222,17 +1217,23 @@ function renderOsceContent(i){
 }
 
 function getDriveEmbedUrl(url){
-  if(!url)return '';
+  if(!url) return '';
+  // Google Drive 資料夾 → embeddedfolderview list 模式
   const fm=url.match(/drive\.google\.com\/drive\/folders\/([a-zA-Z0-9_-]+)/);
-  if(fm)return 'https://drive.google.com/embeddedfolderview?id='+fm[1]+'#list';
+  if(fm) return 'https://drive.google.com/embeddedfolderview?id='+fm[1]+'#list';
+  // 單一檔案
   const fm2=url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if(fm2)return 'https://drive.google.com/file/d/'+fm2[1]+'/preview';
+  if(fm2) return 'https://drive.google.com/file/d/'+fm2[1]+'/preview';
+  // Google Docs/Sheets/Slides
+  const fm3=url.match(/docs\.google\.com\/(document|spreadsheets|presentation)\/d\/([a-zA-Z0-9_-]+)/);
+  if(fm3) return url.replace(/\/edit.*$/, '/preview');
   return url;
 }
 function toggleDrivePreview(pid){
   const w=el('di_'+pid),b=el('pt_'+pid); if(!w)return;
-  const o=w.classList.contains('open');
-  w.classList.toggle('open',!o); if(b)b.classList.toggle('active',!o);
+  const isOpen=w.style.height!=='0px'&&w.style.height!=='';
+  if(isOpen){ w.style.height='0'; if(b)b.textContent='展開預覽'; }
+  else { w.style.height='480px'; if(b)b.textContent='收合預覽'; }
 }
 
 // ══ 評分表單（海報）══
@@ -1314,13 +1315,17 @@ function renderOsceScoreForm(p,draft,isDone){
 function updatePosterTotal(){
   let total=0,anyFilled=false;
   CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(!inp||inp.disabled)return;const v=Number(inp.value);if(inp.value!==''&&!isNaN(v)){total+=v;anyFilled=true;}});
-  const tn=el('scoreTotalNum'); if(tn) tn.textContent=anyFilled?total:'—';
+  const hn=el('scoreHeadNum'); if(hn) hn.textContent=anyFilled?total:'—';
+  const ht=el('scoreHeadTotal'); if(ht) ht.style.display='';
+  const hd=el('scoreHeadDenom'); if(hd) hd.textContent='/ 100';
 }
 function updateOsceTotal(){
   let base=0,bonus=0,anyFilled=false;
   OSCE_CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(!inp||inp.disabled)return;const v=Number(inp.value);if(inp.value!==''&&!isNaN(v)){base+=v;anyFilled=true;}});
   const bInp=el('sc_'+OSCE_BONUS.id);if(bInp&&!bInp.disabled&&bInp.value!==''){bonus=Number(bInp.value)||0;anyFilled=true;}
-  const tn=el('scoreTotalNum'); if(tn) tn.textContent=anyFilled?base+bonus:'—';
+  const hn=el('scoreHeadNum'); if(hn) hn.textContent=anyFilled?base+bonus:'—';
+  const ht=el('scoreHeadTotal'); if(ht) ht.style.display='';
+  const hd=el('scoreHeadDenom'); if(hd) hd.textContent='/ '+(OSCE_BASE_MAX+OSCE_BONUS.max);
 }
 function markEmptyInputs(){
   document.querySelectorAll('.score-input').forEach(inp=>{
@@ -1438,12 +1443,26 @@ function showOverview(){
     const d=drafts[p.id]||{};
     const num=curType==='osce'?p.caseNo:p.paperNo;
     const hasDraft=Object.keys(d).length>0;
+    // 計算目前草稿總分
+    let draftTotal = null;
+    if(hasDraft && !d.rejected){
+      const criteria = curType==='poster' ? CRITERIA : OSCE_CRITERIA;
+      let t = 0, filled = true;
+      criteria.forEach(c=>{ const v=Number(d[c.id]); if(isNaN(v)||d[c.id]===undefined||d[c.id]==='') filled=false; else t+=v; });
+      if(curType==='osce' && d[OSCE_BONUS.id]) t+=Number(d[OSCE_BONUS.id])||0;
+      draftTotal = filled ? t : null;
+    }
     return `<div class="ov-item">
       <input type="checkbox" class="ov-chk" id="ovc_${p.id}" ${hasDraft?'checked':''} ${hasDraft?'':'disabled'}>
       <label for="ovc_${p.id}">
         <span class="ov-num">${esc(num||'—')}</span>
         <span class="ov-ttl">${esc(p.title)}</span>
-        ${hasDraft?'<span class="ov-badge">有草稿</span>':'<span class="ov-badge empty">尚未評分</span>'}
+        ${d.rejected
+          ? '<span class="ov-badge rej">建議退稿</span>'
+          : draftTotal!==null
+            ? `<span class="ov-badge score">${draftTotal} 分</span>`
+            : hasDraft?'<span class="ov-badge">有草稿（未完整填分）</span>':'<span class="ov-badge empty">尚未評分</span>'
+        }
       </label>
     </div>`;
   }).join('');
