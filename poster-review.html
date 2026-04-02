@@ -602,6 +602,12 @@ tr:hover td{ background:#fafafa; }
   line-height:1.1;
 }
 
+
+/* Drive 預覽 iframe */
+.drive-preview-frame {
+  width: 100%; border: 1px solid var(--border2);
+  border-radius: 7px; display: block;
+}
 /* ══ Toast / Loader ══ */
 .toast{ position:fixed; bottom:1.5rem; right:1.5rem; padding:.75rem 1.1rem; border-radius:9px; font-size:.9rem; color:white; box-shadow:0 8px 24px rgba(0,0,0,.15); z-index:9999; animation:tIn .3s ease; max-width:340px; }
 .toast.ok{ background:#3d6b54; }
@@ -1113,6 +1119,85 @@ function bonusInputChange(inp){
     noteWrap.querySelector('label').textContent='優良加分說明（填加分時必填）';
   }
 }
+
+// ══ Drive 檔案清單（需 Drive API）══
+const _driveCache = {};  // 避免重複 API 呼叫
+
+async function loadDriveFiles(caseId, driveUrl) {
+  const container = el('driveFiles_' + caseId);
+  if (!container || !driveUrl) return;
+
+  // 快取
+  if (_driveCache[caseId]) {
+    renderDriveFileList(container, caseId, _driveCache[caseId]);
+    return;
+  }
+
+  container.innerHTML = '<span style="font-size:.78rem;color:var(--muted)">載入檔案清單…</span>';
+  try {
+    const r = await api({ action: 'getDriveFiles', driveUrl });
+    if (!r.success || !r.files || !r.files.length) {
+      container.innerHTML = '<span style="font-size:.78rem;color:var(--muted)">（無法取得檔案清單，請使用「在 Drive 開啟」）</span>';
+      return;
+    }
+    _driveCache[caseId] = r.files;
+    renderDriveFileList(container, caseId, r.files);
+  } catch(e) {
+    container.innerHTML = '<span style="font-size:.78rem;color:var(--muted)">（檔案清單載入失敗）</span>';
+    console.error('loadDriveFiles:', e);
+  }
+}
+
+function renderDriveFileList(container, caseId, files) {
+  const typeIcon = {
+    video: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`,
+    pdf:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+    doc:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+    slide: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+    other: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>`
+  };
+  const typeColor = { video:'#dc2626', pdf:'#2563eb', doc:'#16a34a', slide:'#d97706', other:'#718096' };
+
+  function fileSize(bytes) {
+    if (!bytes) return '';
+    if (bytes < 1024*1024) return Math.round(bytes/1024) + 'KB';
+    return (bytes/1024/1024).toFixed(1) + 'MB';
+  }
+
+  let html = '<div style="display:flex;flex-direction:column;gap:0">';
+  files.forEach((f, i) => {
+    const icon = typeIcon[f.type] || typeIcon.other;
+    const color = typeColor[f.type] || typeColor.other;
+    const canPreview = f.type === 'video' || f.type === 'pdf' || f.type === 'slide';
+    html += `<div style="display:flex;align-items:center;gap:.5rem;padding:.38rem .5rem;border-bottom:1px solid var(--border2);${i===0?'border-top:1px solid var(--border2)':''}">
+      <span style="color:${color};flex-shrink:0">${icon}</span>
+      <span style="flex:1;font-size:.82rem;color:#1c1c2e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(f.name)}">${esc(f.name)}</span>
+      <span style="font-size:.7rem;color:var(--muted);white-space:nowrap;flex-shrink:0">${fileSize(f.size)}</span>
+      ${canPreview
+        ? `<button onclick="previewDriveFile('${caseId}','${f.previewUrl}','${esc(f.name)}')"
+            style="flex-shrink:0;padding:.2rem .55rem;font-size:.72rem;border:1px solid var(--border);border-radius:5px;background:white;color:#546070;cursor:pointer;font-family:inherit;white-space:nowrap">預覽</button>`
+        : `<a href="https://drive.google.com/file/d/${f.id}/view" target="_blank"
+            style="flex-shrink:0;padding:.2rem .55rem;font-size:.72rem;border:1px solid var(--border);border-radius:5px;background:white;color:#546070;cursor:pointer;text-decoration:none;white-space:nowrap">開啟</a>`
+      }
+    </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function previewDriveFile(caseId, previewUrl, fileName) {
+  // 更新預覽 iframe
+  const preview = el('drivePreview_' + caseId);
+  const previewWrap = el('drivePreviewWrap_' + caseId);
+  const previewTitle = el('drivePreviewTitle_' + caseId);
+  if (!preview || !previewWrap) return;
+
+  preview.src = previewUrl;
+  if (previewTitle) previewTitle.textContent = fileName;
+  previewWrap.style.display = 'block';
+  // 捲動到預覽區
+  previewWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 // ══ 帳號轉姓名 ══
 function rvName(u){ return reviewerNamesMap[u]||u; }
 
@@ -1241,17 +1326,29 @@ function renderOsceContent(i){
       </div>
       <div class="p-info-body">
         ${p.summary?absBlk('教案摘要',p.summary):''}
-        ${p.driveUrl?`<div class="abs-sec drive-folder-sec">
-          <div class="abs-lbl" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
-            <span>📁 Google 雲端教案資料</span>
+        ${p.driveUrl?`<div class="abs-sec">
+          <div class="abs-lbl" style="display:flex;align-items:center;justify-content:space-between">
+            <span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:.3rem"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              Google 雲端教案資料
+            </span>
             <a style="font-size:.75rem;color:#3b82f6;text-decoration:none" href="${p.driveUrl}" target="_blank">在 Drive 開啟 ↗</a>
           </div>
-          <iframe
-            src="${getDriveEmbedUrl(p.driveUrl)}"
-            style="width:100%;height:420px;border:1px solid var(--border2);border-radius:6px;display:block"
-            allow="autoplay"
-            sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation">
-          </iframe>
+          <div id="driveFiles_${p.id}" style="margin:.4rem 0 .6rem">
+            <span style="font-size:.78rem;color:var(--muted)">載入檔案清單…</span>
+          </div>
+          <div id="drivePreviewWrap_${p.id}" style="display:none;margin-top:.5rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem">
+              <span id="drivePreviewTitle_${p.id}" style="font-size:.8rem;font-weight:600;color:#3a4550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1"></span>
+              <button onclick="el('drivePreviewWrap_${p.id}').style.display='none';el('drivePreview_${p.id}').src=''"
+                style="flex-shrink:0;margin-left:.5rem;padding:.15rem .5rem;font-size:.72rem;border:1px solid var(--border);border-radius:5px;background:white;color:#718096;cursor:pointer;font-family:inherit">關閉</button>
+            </div>
+            <iframe id="drivePreview_${p.id}"
+              src="" allow="autoplay"
+              style="width:100%;height:520px;border:1px solid var(--border2);border-radius:7px;display:block"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation">
+            </iframe>
+          </div>
         </div>`:''}
       </div>
     </div>`;
@@ -1259,6 +1356,7 @@ function renderOsceContent(i){
   el('scoreHeadNote').textContent=`基本滿分 ${OSCE_BASE_MAX} + 優良加分 ${OSCE_BONUS.max}`;
   el('scoreArea').innerHTML=renderOsceScoreForm(p, draft, isDone);
   el('scoreActions').style.display=isDone?'none':'flex';
+  if(p.driveUrl) loadDriveFiles(p.id, p.driveUrl);
   if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">已完成評分，如需修改請聯絡依玲 06-2812811-57426・tsmcsd2018@gmail.com</div>');
   markEmptyInputs(); updateOsceTotal();
 }
@@ -2332,9 +2430,8 @@ function switchResultsTab(tab){
   const cp=el('rPanelCat'),ap=el('rPanelAll'),ct=el('rTabCat'),at=el('rTabAll');
   if(cp) cp.style.display=isCat?'':'none';
   if(ap) ap.style.display=isCat?'none':'';
-  if(ct){ct.style.color=isCat?'#3b82f6':'#718096';ct.style.borderBottomColor=isCat?'#3b82f6':'transparent';ct.style.fontWeight=isCat?'600':'500';}
-  if(at){at.style.color=isCat?'#718096':'#3b82f6';at.style.borderBottomColor=isCat?'transparent':'#3b82f6';at.style.fontWeight=isCat?'500':'600';}
-}
-</script>
+  if(ct){ ct.style.color=isCat?'#3b82f6':'#718096'; ct.style.borderBottomColor=isCat?'#3b82f6':'transparent'; ct.style.fontWeight=isCat?'600':'500'; }
+  if(at){ at.style.color=isCat?'#718096':'#3b82f6'; at.style.borderBottomColor=isCat?'transparent':'#3b82f6'; at.style.fontWeight=isCat?'500':'600'; }
+}</script>
 </body>
 </html>
