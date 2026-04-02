@@ -852,39 +852,51 @@ tr:hover td{ background:#fafafa; }
       <div class="sec">
         <div class="sec-head"><h3>海報論文 — 評分結果</h3>
           <div style="display:flex;align-items:center;gap:.5rem">
-            <input type="text" id="resultSearch" placeholder="搜尋題目…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:180px;font-family:inherit" oninput="filterResults()">
+            <input type="text" id="resultSearch" placeholder="搜尋題目/投稿單位…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:200px;font-family:inherit" oninput="filterResults()">
             <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">重新整理</button>
           </div>
         </div>
         <div class="sec-body">
-          <p style="font-size:.82rem;color:#718096;margin-bottom:1.1rem">名次依平均總分計算・退稿論文不列入排名・同分同名次</p>
+          <p style="font-size:.82rem;color:#718096;margin-bottom:1rem">名次依平均總分計算・退稿論文不列入排名・同分同名次</p>
+
+          <!-- 分頁標籤 -->
+          <div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:1.1rem">
+            <button class="results-tab-btn active" id="rTabCat" onclick="switchResultsTab('cat')"
+              style="padding:.55rem 1.3rem;font-size:.88rem;font-weight:600;border:none;background:none;cursor:pointer;color:#3b82f6;border-bottom:2.5px solid #3b82f6;margin-bottom:-2px;font-family:inherit">
+              分類排名
+            </button>
+            <button class="results-tab-btn" id="rTabAll" onclick="switchResultsTab('all')"
+              style="padding:.55rem 1.3rem;font-size:.88rem;font-weight:500;border:none;background:none;cursor:pointer;color:#718096;border-bottom:2.5px solid transparent;margin-bottom:-2px;font-family:inherit">
+              總排名
+            </button>
+          </div>
 
           <!-- 分類排名 -->
-          <div style="margin-bottom:1.5rem">
+          <div id="rPanelCat">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
               <div style="display:flex;align-items:center;gap:.5rem">
-                <span style="font-size:.88rem;font-weight:700;color:#1c1c2e">分類排名</span>
-                <span style="font-size:.75rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名・可拖動調整順序</span>
+                <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名・可拖動調整順序</span>
               </div>
-              <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')" title="匯出目前排列順序（含拖動調整後）">
-                ⬇ 匯出 CSV
-              </button>
+              <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">⬇ 匯出 CSV</button>
             </div>
-            <div class="tbl-wrap"><table><thead><tr>
-              <th style="width:90px">名次</th><th>編號</th><th>論文題目</th><th>投稿單位</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
-            </tr></thead><tbody id="resultsCatBody"></tbody></table></div>
+            <div class="tbl-wrap"><table>
+              <thead><tr>
+                <th style="width:90px">名次</th><th>編號</th><th>論文題目</th><th>投稿單位</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
+              </tr></thead>
+              <tbody id="resultsCatBody"></tbody>
+            </table></div>
           </div>
 
           <!-- 總排名 -->
-          <div>
-            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem">
-              <span style="font-size:.88rem;font-weight:700;color:#1c1c2e">總排名</span>
-              <span style="font-size:.75rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">所有論文不分類別</span>
-            </div>
-            <div class="tbl-wrap"><table><thead><tr>
-              <th style="width:72px">名次</th><th>編號</th><th>論文題目</th><th>投稿單位</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
-            </tr></thead><tbody id="resultsAllBody"></tbody></table></div>
+          <div id="rPanelAll" style="display:none">
+            <div class="tbl-wrap"><table>
+              <thead><tr>
+                <th style="width:72px">名次</th><th>編號</th><th>論文題目</th><th>投稿單位</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
+              </tr></thead>
+              <tbody id="resultsAllBody"></tbody>
+            </table></div>
           </div>
+        </div>
         </div>
       </div>
     </div>
@@ -980,20 +992,23 @@ tr:hover td{ background:#fafafa; }
   </div>
 </div>
 
-<!-- 確認提交 -->
-<div class="modal-bg" id="confirmModal">
-  <div class="modal narrow">
-    <div class="modal-head"><h3 id="confirmTitle">確認提交評分</h3><button class="modal-close" onclick="confirmCancel()">✕</button></div>
-    <div class="modal-body" id="confirmBody"></div>
-    <div class="modal-foot">
-      <button class="adm-btn adm-btn-outline" onclick="confirmCancel()">取消</button>
-      <button class="confirm-ok-btn" onclick="confirmOk()">確認送出</button>
+<!-- 評分詳細 Modal -->
+<div class="modal-bg" id="detailModal">
+  <div class="modal" style="width:860px">
+    <div class="modal-head">
+      <h3 id="detailTitle">評分詳細</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-foot adm">
+      <button class="adm-btn adm-btn-outline" onclick="closeModal()">關閉</button>
     </div>
   </div>
 </div>
 
-<div class="ldr" id="ldr"><div class="spinner"></div></div>
-
+<!-- 確認提交 -->
+<div class="modal-bg" id="confirmModal">
+  <div
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2njUGr6eORWe6V5iMITA_dbpuOzhOebyxDW43P8RySVezxUevEOvQZGUV0tl_Mhm9/exec';
 
@@ -1419,6 +1434,7 @@ function saveDraft(){
   const rejChk=el('rejChk');d.rejected=rejChk&&rejChk.checked;
   const rejR=el('rejReason');d.rejectReason=rejR?rejR.value:'';
   const recChk=el('recChk');d.recommend=recChk&&recChk.checked;
+  const catSel=el('catAdjSel');d.catAdjust=catSel?catSel.value:'';
   const cmt=el('cmtArea');d.comment=cmt?cmt.value:'';
   const bn=el('bonusNote');if(bn)d.bonusNote=bn.value;
   // 超過滿分不允許暫存
@@ -1782,7 +1798,7 @@ function renderResultsTable(papers){
     const catAdjusts=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>normCat(r.catAdjust)||r.catAdjust))].filter(Boolean);
     const catAdjustBadge=catAdjusts.length
       ?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem" title="委員建議改類">→${catAdjusts.join('/')}</span>`:'';
-    return `<tr draggable="true" data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}"
+    return `<tr draggable="true" data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}"
       ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)"
       ondragleave="this.style.borderTop=''" style="cursor:grab">
       <td style="text-align:center;user-select:none" title="拖動調整名次">
@@ -1804,7 +1820,7 @@ function renderResultsTable(papers){
     const catAdjusts=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>normCat(r.catAdjust)||r.catAdjust))].filter(Boolean);
     const catAdjustBadge=catAdjusts.length
       ?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem" title="委員建議改類">→${catAdjusts.join('/')}</span>`:'';
-    return `<tr data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" style="opacity:.7;background:#fff8f8">
+    return `<tr data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}" style="opacity:.7;background:#fff8f8">
       <td style="text-align:center"><span style="background:#fee2e2;color:#991b1b;padding:.2rem .6rem;border-radius:7px;font-size:.78rem;font-weight:700">退稿</span></td>
       <td><span class="chip" style="background:#fee2e2;color:#991b1b">${p.paperNo||'—'}</span></td>
       <td style="max-width:200px;line-height:1.5;font-size:.88rem;color:#6b7280">${esc(p.title)}</td>
@@ -1859,7 +1875,14 @@ function renderResultsTable(papers){
   }
 }
 
-function filterResults(){const q=(el('resultSearch')||{}).value?.toLowerCase()||'';document.querySelectorAll('#resultsCatBody tr[data-title], #resultsAllBody tr[data-title]').forEach(tr=>{tr.style.display=!q||tr.dataset.title.includes(q)?'':'none';});}
+function filterResults(){
+  const q=(el('resultSearch')||{}).value?.toLowerCase()||'';
+  document.querySelectorAll('#resultsCatBody tr[data-pid], #resultsAllBody tr[data-pid]').forEach(tr=>{
+    const matchTitle=!q||( tr.dataset.title||'').includes(q);
+    const matchUnit=!q||(tr.dataset.unit||'').includes(q);
+    tr.style.display=(matchTitle||matchUnit)?'':'none';
+  });
+}
 
 function renderRvTable(reviewers){
   const body=el('rvBody');if(!body)return;
@@ -2285,6 +2308,15 @@ function exportResultsCSV(type){
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
   showToast('CSV 已匯出','ok');
+}
+// ══ 評分結果分頁標籤切換 ══
+function switchResultsTab(tab){
+  const isCat=tab==='cat';
+  const cp=el('rPanelCat'),ap=el('rPanelAll'),ct=el('rTabCat'),at=el('rTabAll');
+  if(cp) cp.style.display=isCat?'':'none';
+  if(ap) ap.style.display=isCat?'none':'';
+  if(ct){ct.style.color=isCat?'#3b82f6':'#718096';ct.style.borderBottomColor=isCat?'#3b82f6':'transparent';ct.style.fontWeight=isCat?'600':'500';}
+  if(at){at.style.color=isCat?'#718096':'#3b82f6';at.style.borderBottomColor=isCat?'transparent':'#3b82f6';at.style.fontWeight=isCat?'500':'600';}
 }
 </script>
 </body>
