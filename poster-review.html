@@ -1301,6 +1301,15 @@ function renderPosterScoreForm(p,draft,isDone){
       </div>
     </div>`;
   });
+  html+=`<div class="cat-adjust-block">
+    <label>建議調整類別（如認為本篇適合其他類別，請選擇）</label>
+    <select class="cat-adjust-sel" id="catAdjSel" ${dis}>
+      <option value="">-- 維持原類別，不調整 --</option>
+      <option value="A" ${d.catAdjust==='A'?'selected':''}>A 類｜臨床技能教育、模擬教學與跨專業學習</option>
+      <option value="B" ${d.catAdjust==='B'?'selected':''}>B 類｜評量、信任決策與能力導向醫學教育</option>
+      <option value="C" ${d.catAdjust==='C'?'selected':''}>C 類｜人文素養、醫療韌性與專業認同</option>
+    </select>
+  </div>`;
   html+=`<div class="recommend-zone">
     <input type="checkbox" class="recommend-checkbox" id="recChk" ${draft.recommend?'checked':''} ${dis}>
     <label for="recChk">★ 推薦此論文</label>
@@ -1625,10 +1634,18 @@ function admSwitchTab(t){
   });
   if(t==='reviewers') loadReviewers();
   if(t==='assignDetail'){
-    if(!osceData) loadOsceDashboard().then(()=>renderAssignDetailPage());
-    else renderAssignDetailPage();
+    if(!dashData){
+      loadDashboard().then(()=>renderAssignDetailPage());
+    } else if(!osceData){
+      loadOsceDashboard().then(()=>renderAssignDetailPage());
+    } else {
+      renderAssignDetailPage();
+    }
   }
-  if(t==='opinions') renderOpinionsPage('poster');
+  if(t==='opinions'){
+    if(!dashData) loadDashboard().then(()=>renderOpinionsPage('poster'));
+    else renderOpinionsPage('poster');
+  }
   // 切換到指派/結果頁時，補渲染 OSCE 資料（若已載入）
   if(t==='assign'){
     if(osceData) renderOsceAssignTable(osceData.cases,osceData.reviewers);
@@ -1755,20 +1772,14 @@ function autoAssign(type){
 
 function renderResultsTable(papers){
   if(!papers)return;
-
-  // 正規化 category
   papers.forEach(p=>{ p.category=normCat(p.category); });
 
-  // 區分退稿論文（全部委員都退稿）vs 有效論文
-  function isFullyRejected(p){
-    const valid=p.reviews.filter(r=>!r.rejected);
-    return p.reviews.length>0 && valid.length===0;
-  }
+  function isFullyRejected(p){ return p.reviews.length>0 && p.reviews.filter(r=>!r.rejected).length===0; }
   const rejected  = papers.filter(p=>isFullyRejected(p));
   const rankable  = papers.filter(p=>p.avgTotal!==null && !isFullyRejected(p));
   const noScore   = papers.filter(p=>p.avgTotal===null && !isFullyRejected(p));
 
-  // ── 名次計算（只含有效論文）──
+  // ── 每類獨立排名 ──
   const catRankMap={};
   ['A','B','C'].forEach(cat=>{
     let r=1,prev=null;
@@ -1776,110 +1787,105 @@ function renderResultsTable(papers){
       if(p.avgTotal!==prev){r=i+1;} catRankMap[p.id]=r; prev=p.avgTotal;
     });
   });
-  const allRankMap={};let r=1,prev=null;
+  const allRankMap={};let ar=1,ap=null;
   [...rankable].sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i)=>{
-    if(p.avgTotal!==prev){r=i+1;} allRankMap[p.id]=r; prev=p.avgTotal;
+    if(p.avgTotal!==ap){ar=i+1;} allRankMap[p.id]=ar; ap=p.avgTotal;
   });
 
-  // ── 名次徽章 ──
-  function badge(rank,showCat,cat){
+  function badge(rank){
     if(rank===undefined)return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';
     const medals={1:'🥇',2:'🥈',3:'🥉'};
     const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';
     const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';
-    return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}${showCat?cat+' ':''}第${rank}名</span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}第${rank}名</span>`;
   }
-
-  // ── 分數差距 ──
   function gapCell(p){
     const valid=p.reviews.filter(r=>!r.rejected);
-    if(valid.length>=2){
-      const sc=valid.map(r=>r.total).sort((a,b)=>a-b);
-      const g=sc[sc.length-1]-sc[0];
-      return g>10
-        ?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700;display:inline-flex;align-items:center;gap:.2rem">⚠ ${g}分<span style="font-weight:400;font-size:.68rem">需第3位</span></span>`
-        :`<span style="color:#16a34a;font-size:.82rem;font-weight:600">${g}分</span>`;
-    }
+    if(valid.length>=2){const sc=valid.map(r=>r.total).sort((a,b)=>a-b);const g=sc[sc.length-1]-sc[0];return g>10?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700">⚠ ${g}分</span>`:`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;}
     if(valid.length===1)return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
     return '—';
   }
+  function sepRow(label){return `<tr><td colspan="10" style="background:#f8fafc;font-size:.78rem;font-weight:700;color:#3a4550;padding:.4rem .9rem;border-top:2px solid #dce6ec;letter-spacing:.03em">${label}</td></tr>`;}
 
-  // ── 有效論文列（含拖動排序）──
+  // ── 有效論文列 ──
   function row(p,rb){
+    // 退稿狀態（部分評審退稿）
+    const rejCount=p.reviews.filter(r=>r.rejected).length;
+    const totalRevs=p.reviews.length;
+    let rejCell='—';
+    if(rejCount>0){
+      rejCell=`<span style="background:#fee2e2;color:#991b1b;padding:.15rem .5rem;border-radius:5px;font-size:.75rem;font-weight:700">${rejCount}/${totalRevs}位退稿</span>`;
+    }
+    // 推薦：以委員實際勾選為準（不以分數自動判斷）
+    const recCount=p.reviews.filter(r=>r.recommended||r.recommend).length;
+    let recCell='—';
+    if(p.avgTotal!==null){
+      recCell=recCount>0
+        ?`<span class="chip chip-green">推薦（${recCount}位）</span>`
+        :`<span class="chip chip-gray">未推薦</span>`;
+    }
     const catAdjusts=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>normCat(r.catAdjust)||r.catAdjust))].filter(Boolean);
-    const catAdjustBadge=catAdjusts.length
-      ?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem" title="委員建議改類">→${catAdjusts.join('/')}</span>`:'';
+    const catAdjustBadge=catAdjusts.length?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem">→${catAdjusts.join('/')}</span>`:'';
     return `<tr draggable="true" data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}"
       ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)"
       ondragleave="this.style.borderTop=''" style="cursor:grab">
-      <td style="text-align:center;user-select:none" title="拖動調整名次">
-        <span style="color:#94a3b8;font-size:.9rem;margin-right:.2rem">⠿</span>${rb}</td>
+      <td style="text-align:center;user-select:none"><span style="color:#94a3b8;font-size:.9rem;margin-right:.2rem">⠿</span>${rb}</td>
       <td><span class="chip chip-blue">${p.paperNo||'—'}</span></td>
       <td style="max-width:200px;line-height:1.5;font-size:.88rem">${esc(p.title)}</td>
       <td style="font-size:.82rem;color:#64748b">${esc(p.contactUnit||'—')}</td>
       <td><span style="font-weight:600">${normCat(p.category)||'—'}</span>${catAdjustBadge}</td>
       <td style="font-weight:700;font-size:1rem">${p.avgTotal!==null?p.avgTotal+'分':'—'}</td>
       <td>${gapCell(p)}</td>
-      <td>${p.avgTotal!==null?(p.recommended?'<span class="chip chip-green">推薦</span>':'<span class="chip chip-gray">未達標</span>'):'—'}</td>
+      <td>${recCell}</td>
+      <td>${rejCell}</td>
       <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button></td>
     </tr>`;
   }
 
-  // ── 退稿論文列（不含排名欄、分數欄）──
+  // ── 退稿論文列 ──
   function rejRow(p){
     const rejReasons=p.reviews.filter(r=>r.rejected&&r.rejectReason).map(r=>esc(r.rejectReason));
-    const catAdjusts=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>normCat(r.catAdjust)||r.catAdjust))].filter(Boolean);
-    const catAdjustBadge=catAdjusts.length
-      ?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem" title="委員建議改類">→${catAdjusts.join('/')}</span>`:'';
-    return `<tr data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}" style="opacity:.7;background:#fff8f8">
+    return `<tr data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}" style="opacity:.75;background:#fff8f8">
       <td style="text-align:center"><span style="background:#fee2e2;color:#991b1b;padding:.2rem .6rem;border-radius:7px;font-size:.78rem;font-weight:700">退稿</span></td>
       <td><span class="chip" style="background:#fee2e2;color:#991b1b">${p.paperNo||'—'}</span></td>
       <td style="max-width:200px;line-height:1.5;font-size:.88rem;color:#6b7280">${esc(p.title)}</td>
       <td style="font-size:.82rem;color:#9ca3af">${esc(p.contactUnit||'—')}</td>
-      <td><span style="color:#9ca3af">${normCat(p.category)||'—'}</span>${catAdjustBadge}</td>
-      <td colspan="3" style="font-size:.78rem;color:#dc2626">${rejReasons.length?'退稿原因：'+rejReasons.join('；'):'（委員未填原因）'}</td>
+      <td colspan="5" style="font-size:.78rem;color:#dc2626">${rejReasons.length?'退稿原因：'+rejReasons.join('；'):'（委員未填原因）'}</td>
       <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button></td>
     </tr>`;
   }
 
-  // ── 分隔行 ──
-  function sepRow(label, colspan=9){
-    return `<tr><td colspan="${colspan}" style="background:#f8fafc;font-size:.75rem;font-weight:700;color:#64748b;padding:.4rem .9rem;border-top:2px solid #e2e8f0;letter-spacing:.04em">${label}</td></tr>`;
-  }
-
-  // ══ 分類排名表格 ══
+  // ══ 分類排名（每類獨立第1、2、3名）══
   const catBody=el('resultsCatBody');
   if(catBody){
     let html='';
     ['A','B','C'].forEach(cat=>{
-      const catPapers=[...rankable].filter(p=>p.category===cat).sort((a,b)=>{
-        const ra=catRankMap[a.id]??99, rb2=catRankMap[b.id]??99;
-        return ra-rb2 || b.avgTotal-a.avgTotal;
-      });
+      const catPapers=[...rankable].filter(p=>p.category===cat)
+        .sort((a,b)=>(catRankMap[a.id]??99)-(catRankMap[b.id]??99)||b.avgTotal-a.avgTotal);
       const catNoScore=noScore.filter(p=>p.category===cat);
-      const catRejected=rejected.filter(p=>p.category===cat);
-      if(!catPapers.length&&!catNoScore.length&&!catRejected.length) return;
+      const catRej=rejected.filter(p=>p.category===cat);
+      if(!catPapers.length&&!catNoScore.length&&!catRej.length) return;
       const catNames={A:'A 類：臨床技能教育、模擬教學與跨專業學習',B:'B 類：評量、信任決策與能力導向醫學教育',C:'C 類：人文素養、醫療韌性與專業認同'};
-      html+=sepRow(catNames[cat]||cat);
-      catPapers.forEach(p=>{ html+=row(p,badge(catRankMap[p.id],false,cat)); });
-      catNoScore.forEach(p=>{ html+=row(p,badge(undefined,false,cat)); });
-      if(catRejected.length){
-        html+=`<tr><td colspan="9" style="background:#fff0f0;font-size:.72rem;font-weight:600;color:#dc2626;padding:.3rem .9rem;border-top:1px dashed #fca5a5">⚠ 退稿論文（不列入排名）</td></tr>`;
-        catRejected.forEach(p=>{ html+=rejRow(p); });
+      html+=sepRow(catNames[cat]);
+      catPapers.forEach(p=>{ html+=row(p,badge(catRankMap[p.id])); });
+      catNoScore.forEach(p=>{ html+=row(p,badge(undefined)); });
+      if(catRej.length){
+        html+=`<tr><td colspan="10" style="background:#fff0f0;font-size:.72rem;font-weight:600;color:#dc2626;padding:.3rem .9rem;border-top:1px dashed #fca5a5">退稿論文（不列入排名）</td></tr>`;
+        catRej.forEach(p=>{ html+=rejRow(p); });
       }
     });
     catBody.innerHTML=html;
   }
 
-  // ══ 總排名表格 ══
+  // ══ 總排名 ══
   const allBody=el('resultsAllBody');
   if(allBody){
-    const sortedRankable=[...rankable].sort((a,b)=>(allRankMap[a.id]??99)-(allRankMap[b.id]??99)||b.avgTotal-a.avgTotal);
     let html='';
-    sortedRankable.forEach(p=>{ html+=row(p,badge(allRankMap[p.id],false,'')); });
-    noScore.forEach(p=>{ html+=row(p,badge(undefined,false,'')); });
+    const sortedRankable=[...rankable].sort((a,b)=>(allRankMap[a.id]??99)-(allRankMap[b.id]??99)||b.avgTotal-a.avgTotal);
+    sortedRankable.forEach(p=>{ html+=row(p,badge(allRankMap[p.id])); });
+    noScore.forEach(p=>{ html+=row(p,badge(undefined)); });
     if(rejected.length){
-      html+=`<tr><td colspan="9" style="background:#fff0f0;font-size:.72rem;font-weight:600;color:#dc2626;padding:.4rem .9rem;border-top:2px dashed #fca5a5;margin-top:.5rem">⚠ 退稿論文（不列入排名，共 ${rejected.length} 篇）</td></tr>`;
+      html+=`<tr><td colspan="10" style="background:#fff0f0;font-size:.72rem;font-weight:600;color:#dc2626;padding:.4rem .9rem;border-top:2px dashed #fca5a5">退稿論文（不列入排名，共 ${rejected.length} 篇）</td></tr>`;
       rejected.forEach(p=>{ html+=rejRow(p); });
     }
     allBody.innerHTML=html;
