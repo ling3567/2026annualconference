@@ -1008,7 +1008,18 @@ tr:hover td{ background:#fafafa; }
 
 <!-- 確認提交 -->
 <div class="modal-bg" id="confirmModal">
-  <div
+  <div class="modal narrow">
+    <div class="modal-head light"><h4 id="confirmTitle">確認</h4></div>
+    <div class="modal-body" id="confirmBody"></div>
+    <div class="modal-foot">
+      <button class="adm-btn adm-btn-outline" onclick="confirmCancel()">取消</button>
+      <button class="confirm-ok-btn" onclick="confirmOk()">確認送出</button>
+    </div>
+  </div>
+</div>
+
+<div class="ldr" id="ldr"><div class="spinner"></div></div>
+
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2njUGr6eORWe6V5iMITA_dbpuOzhOebyxDW43P8RySVezxUevEOvQZGUV0tl_Mhm9/exec';
 
