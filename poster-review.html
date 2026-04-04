@@ -1470,15 +1470,16 @@ function renderOsceScoreForm(p,draft,isDone){
 
 function updatePosterTotal(){
   let total=0,anyFilled=false;
-  CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(!inp||inp.disabled)return;const v=Number(inp.value);if(inp.value!==''&&!isNaN(v)){total+=v;anyFilled=true;}});
+  CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(!inp)return;const v=Number(inp.value);if(inp.value!==''&&!isNaN(v)){total+=v;anyFilled=true;}});
   const hn=el('scoreHeadNum'); if(hn) hn.textContent=anyFilled?total:'—';
   const ht=el('scoreHeadTotal'); if(ht) ht.style.display='';
   const hd=el('scoreHeadDenom'); if(hd) hd.textContent='/ 100';
 }
 function updateOsceTotal(){
   let base=0,bonus=0,anyFilled=false;
-  OSCE_CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(!inp||inp.disabled)return;const v=Number(inp.value);if(inp.value!==''&&!isNaN(v)){base+=v;anyFilled=true;}});
-  const bInp=el('sc_'+OSCE_BONUS.id);if(bInp&&!bInp.disabled&&bInp.value!==''){bonus=Number(bInp.value)||0;anyFilled=true;}
+  // disabled 也計入（已提交狀態）
+  OSCE_CRITERIA.forEach(c=>{const inp=el('sc_'+c.id);if(!inp)return;const v=Number(inp.value);if(inp.value!==''&&!isNaN(v)){base+=v;anyFilled=true;}});
+  const bInp=el('sc_'+OSCE_BONUS.id);if(bInp&&bInp.value!==''){bonus=Number(bInp.value)||0;anyFilled=true;}
   const hn=el('scoreHeadNum'); if(hn) hn.textContent=anyFilled?base+bonus:'—';
   const ht=el('scoreHeadTotal'); if(ht) ht.style.display='';
   const hd=el('scoreHeadDenom'); if(hd) hd.textContent='/ '+(OSCE_BASE_MAX+OSCE_BONUS.max);
