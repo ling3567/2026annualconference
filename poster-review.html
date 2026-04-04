@@ -1520,9 +1520,6 @@ function toggleReject(cb){
 // ══ 暫存草稿 ══
 function saveDraft(){
   const p=curType==='poster'?papers.poster[curIdx]:papers.osce[curIdx]; if(!p)return;
-  if(document.querySelectorAll('.score-input.over').length>0){
-    showToast('有分數超過滿分，請先修正','err'); return;
-  }
   // OSCE 優良加分 > 0 時說明為必填（暫存也提醒）
   if(curType==='osce'){
     const bv=Number(el('sc_'+OSCE_BONUS.id)?.value||0);
@@ -1532,16 +1529,6 @@ function saveDraft(){
         showToast('已填優良加分，請填寫說明原因後再暫存','err');
         if(bn){ bn.focus(); bn.style.borderColor='var(--red)'; bn.style.background='#fff1f1'; }
         return;
-      }
-    }
-  }
-  // OSCE：優良加分>0 但未填說明，暫存時給 warn 提醒
-  if(curType==='osce'){
-    const bInp=el('sc_'+OSCE_BONUS.id);
-    if(bInp&&Number(bInp.value)>0){
-      const bn=el('bonusNote');
-      if(!bn||!bn.value.trim()){
-        showToast('提醒：優良加分已填，請記得填寫說明再送出','warn');
       }
     }
   }
