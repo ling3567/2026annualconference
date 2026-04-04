@@ -1628,6 +1628,7 @@ async function doSubmit(p,ptype,d,total,scoresObj,silent=false){
       paperId:p.id, paperNo:ptype==='poster'?p.paperNo:p.caseNo, paperType:ptype,
       scoresJson:JSON.stringify(pureScores), total,
       rejected:d.rejected?'true':'false', rejectReason:d.rejectReason||'',
+      bonusNote:d.bonusNote||'',
       recommend:d.recommend?'true':'false', catAdjust:d.catAdjust||'', comment:d.comment||''
     });
     if(r.success){
@@ -1761,7 +1762,6 @@ async function loadDashboard(){
     const r=await api({action:'adminGetDashboard'});
     if(!r.success){showToast('載入失敗','err');setLdr(false);return;}
     dashData=r;
-    console.log('📊 loadDashboard success, reviewers:', r.reviewers?.length, 'papers:', r.papers?.length);
     if(r.reviewerNamesMap)Object.assign(reviewerNamesMap,r.reviewerNamesMap);
     else(r.reviewers||[]).forEach(rv=>{reviewerNamesMap[rv.username]=rv.name||rv.username;});
     const ar=await api({action:'adminGetAssignments'});
@@ -1771,7 +1771,6 @@ async function loadDashboard(){
     renderAssignTable(r.papers,r.reviewers);
     renderResultsTable(r.papers);
     renderRvTable(r.reviewers);
-    console.log('✅ renderRvTable called with', r.reviewers?.length, 'reviewers');
     loadOsceDashboard();
   }catch(e){showToast('連線失敗','err');console.error(e);}
   setLdr(false);
@@ -2111,7 +2110,8 @@ function _detailGrid(reviews,criteriaArr){
   reviews.forEach((r,i)=>{
     html+=`<div style="background:#f8fafc;border:1px solid ${r.rejected?'#fecaca':'#e2e8f0'};border-radius:9px;padding:.85rem"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.65rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0"><span style="font-size:.82rem;font-weight:700;color:#1c1c2e">評審 ${i+1}</span><span style="font-size:.75rem;font-weight:600;color:#3b82f6">${rvName(r.reviewer)}</span></div>`;
     if(r.rejected){html+=`<div style="background:#fff1f1;border:1px solid #fecaca;border-radius:6px;padding:.5rem .65rem;font-size:.82rem;color:#b91c1c">退稿：${esc(r.rejectReason||'（未填）')}</div>`;}
-    else{criteriaArr.forEach((c,j)=>{const id=c.id||('o'+(j+1));html+=`<div style="display:flex;justify-content:space-between;padding:.22rem 0;border-bottom:1px solid #f1f5f9;font-size:.8rem"><span style="color:#4a5568;line-height:1.4">${c.label}</span><span style="font-weight:700;color:var(--adm-blue);white-space:nowrap;margin-left:.5rem">${r.scores&&r.scores[id]!==undefined?r.scores[id]:0}/${c.max}</span></div>`;});if(r.bonus!==undefined)html+=`<div style="display:flex;justify-content:space-between;padding:.22rem 0;border-bottom:1px solid #f1f5f9;font-size:.8rem"><span style="color:#92400e">優良加分</span><span style="font-weight:700;color:#92400e">${r.bonus}/10</span></div>`;const max=criteriaArr.reduce((s,c)=>s+c.max,0)+(r.bonus!==undefined?10:0);const tc=r.total>=(r.bonus!==undefined?80:ADM_THRESHOLD)?'var(--adm-green)':'#1c1c2e';html+=`<div style="display:flex;justify-content:space-between;padding:.4rem 0 0;font-weight:700;font-size:.92rem"><span>總分</span><span style="color:${tc}">${r.total}/${max}</span></div>`;}
+    else{criteriaArr.forEach((c,j)=>{const id=c.id||('o'+(j+1));html+=`<div style="display:flex;justify-content:space-between;padding:.22rem 0;border-bottom:1px solid #f1f5f9;font-size:.8rem"><span style="color:#4a5568;line-height:1.4">${c.label}</span><span style="font-weight:700;color:var(--adm-blue);white-space:nowrap;margin-left:.5rem">${r.scores&&r.scores[id]!==undefined?r.scores[id]:0}/${c.max}</span></div>`;});if(r.bonus!==undefined)html+=`<div style="display:flex;justify-content:space-between;padding:.22rem 0;border-bottom:1px solid #f1f5f9;font-size:.8rem"><span style="color:#92400e">優良加分</span><span style="font-weight:700;color:#92400e">${r.bonus}/10</span></div>`;
+        if(r.bonus&&r.bonusNote)html+=`<div style="font-size:.78rem;color:#92400e;background:#fffbeb;padding:.3rem .5rem;border-radius:4px;margin-bottom:.2rem">說明：${esc(r.bonusNote)}</div>`;const max=criteriaArr.reduce((s,c)=>s+c.max,0)+(r.bonus!==undefined?10:0);const tc=r.total>=(r.bonus!==undefined?80:ADM_THRESHOLD)?'var(--adm-green)':'#1c1c2e';html+=`<div style="display:flex;justify-content:space-between;padding:.4rem 0 0;font-weight:700;font-size:.92rem"><span>總分</span><span style="color:${tc}">${r.total}/${max}</span></div>`;}
     if(r.comment)html+=`<div style="font-size:.75rem;color:#718096;background:#f1f5f9;padding:.4rem .6rem;border-radius:5px;margin-top:.4rem"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> ${esc(r.comment)}</div>`;
     html+=`</div>`;
   });
@@ -2190,7 +2190,7 @@ function renderAssignDetailPage(){
 }
 
 // ══ 委員帳號管理 ══
-async function loadReviewers(){setLdr(true);try{const r=await api({action:'adminGetReviewers'});if(r.success){console.log('👥 loadReviewers:', r.reviewers?.length);if(r.reviewerNamesMap)Object.assign(reviewerNamesMap,r.reviewerNamesMap);else(r.reviewers||[]).forEach(rv=>{reviewerNamesMap[rv.username]=rv.name||rv.username;});renderRvTable(r.reviewers);}else showToast('載入失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
+async function loadReviewers(){setLdr(true);try{const r=await api({action:'adminGetReviewers'});if(r.success){if(r.reviewerNamesMap)Object.assign(reviewerNamesMap,r.reviewerNamesMap);else(r.reviewers||[]).forEach(rv=>{reviewerNamesMap[rv.username]=rv.name||rv.username;});renderRvTable(r.reviewers);}else showToast('載入失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
 async function addReviewer(){const u=el('nwUser').value.trim(),pw=el('nwPw').value.trim(),n=el('nwName').value.trim();if(!u||!pw||!n){showToast('請填寫完整欄位','err');return;}setLdr(true);try{const r=await api({action:'adminAddReviewer',username:u,password:pw,name:n});if(r.success){showToast('委員已新增','ok');el('nwUser').value='';el('nwPw').value='';el('nwName').value='';loadReviewers();}else showToast(r.message||'新增失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
 async function toggleReviewer(u,enabled){setLdr(true);try{const r=await api({action:'adminUpdateReviewer',username:u,enabled:String(enabled)});if(r.success){showToast(`帳號已${enabled?'啟用':'停用'}`,'ok');loadReviewers();}else showToast('操作失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
 async function deleteReviewer(u){if(!confirm(`確定刪除委員「${u}」？`))return;setLdr(true);try{const r=await api({action:'adminDeleteReviewer',username:u});if(r.success){showToast('委員已刪除','ok');loadReviewers();}else showToast(r.message||'刪除失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
