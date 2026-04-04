@@ -1135,7 +1135,21 @@ async function loadDriveFiles(caseId, driveUrl) {
 
   container.innerHTML = '<span style="font-size:.78rem;color:var(--muted)">載入檔案清單…</span>';
   try {
-    const r = await api({ action: 'getDriveFiles', driveUrl });
+    // 設定 8 秒 timeout，避免 Drive API 慢導致阻塞提交
+    let r;
+    try {
+      const controller = new AbortController();
+      const tid = setTimeout(()=>controller.abort(), 8000);
+      const fd = new FormData();
+      fd.append('action','getDriveFiles'); fd.append('driveUrl',driveUrl);
+      const resp = await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd,redirect:'follow',signal:controller.signal});
+      clearTimeout(tid);
+      const text = await resp.text();
+      r = JSON.parse(text);
+    } catch(e) {
+      container.innerHTML = '<span style="font-size:.78rem;color:var(--muted)">（檔案清單載入逾時，請使用「在 Drive 開啟」）</span>';
+      return;
+    }
     if (!r.success || !r.files || !r.files.length) {
       container.innerHTML = '<span style="font-size:.78rem;color:var(--muted)">（無法取得檔案清單，請使用「在 Drive 開啟」）</span>';
       return;
@@ -1215,6 +1229,21 @@ async function doLogin(){
       submitted=r.submitted||{};
       const ss=r.submittedScores||{};
       Object.entries(ss).forEach(([pid,sc])=>{ drafts[pid]=sc; });
+      // 從 localStorage 讀回未提交的草稿
+      try{
+        const prefix='tsmcsd_draft_'+r.reviewer.username+'_';
+        for(let i=0;i<localStorage.length;i++){
+          const k=localStorage.key(i);
+          if(k&&k.startsWith(prefix)){
+            const pid=k.slice(prefix.length);
+            if(!submitted[pid]){  // 只讀未提交的
+              try{ drafts[pid]=JSON.parse(localStorage.getItem(k)); }catch(e){}
+            } else {
+              localStorage.removeItem(k);  // 已提交的清除 localStorage
+            }
+          }
+        }
+      }catch(e){}
       reviewerNamesMap=r.reviewerNames||{};
       el('rvName').textContent=reviewer.name;
       setTimeout(initDraggable,100);
@@ -1547,12 +1576,19 @@ function saveDraft(){
   if(document.querySelectorAll('.score-input.over').length>0){
     showToast('有評分項目超過滿分，請修正後再暫存','err'); return;
   }
-  drafts[p.id]=d; renderList(); showToast('草稿已暫存','ok');
+  drafts[p.id]=d;
+  // 同步寫入 localStorage（跨登入保留）
+  try{
+    const key='tsmcsd_draft_'+reviewer.username+'_'+p.id;
+    localStorage.setItem(key, JSON.stringify(d));
+  }catch(e){}
+  renderList(); showToast('草稿已暫存','ok');
 }
 
 // ══ 提交評分 ══
 async function submitScore(){
   const p=curType==='poster'?papers.poster[curIdx]:papers.osce[curIdx]; if(!p)return;
+  setLdr(true);
   const d=drafts[p.id]||{};
   if(!d.rejected){
     const missing=validateAllFilled(curType);
@@ -1587,6 +1623,7 @@ async function submitScore(){
     `<p><strong>${p2.paperNo||p2.caseNo}</strong>・${esc(p2.title)}</p><p style="font-size:1.1rem;font-weight:700;margin-top:.5rem">${d2.rejected?'退稿':'總分：'+total+' 分'}</p>`);
   if(!confirmed)return;
   await doSubmit(p2,curType,d2,total,scores,false);
+  setLdr(false);
 }
 
 async function doSubmit(p,ptype,d,total,scoresObj,silent=false){
@@ -1626,7 +1663,8 @@ async function doSubmit(p,ptype,d,total,scoresObj,silent=false){
       if(curType==='poster')renderPosterContent(curIdx);
       else renderOsceContent(curIdx);
     } else { showToast(r.message||'提交失敗','err'); }
-  }catch{ showToast('連線失敗','err'); }
+  }catch(e){ showToast('連線失敗，請重試','err'); console.error('doSubmit error:',e); }
+  finally{ setLdr(false); }
 }
 
 // ══ 總覽送出 ══
