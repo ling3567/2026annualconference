@@ -1588,8 +1588,9 @@ function saveDraft(){
 // ══ 提交評分 ══
 async function submitScore(){
   const p=curType==='poster'?papers.poster[curIdx]:papers.osce[curIdx]; if(!p)return;
-  setLdr(true);
   const d=drafts[p.id]||{};
+
+  // ── 驗證階段（不顯示 loading）──
   if(!d.rejected){
     const missing=validateAllFilled(curType);
     if(missing.length>0){showToast(`請填寫所有評分項目（尚有 ${missing.length} 項未填）`,'err');markEmptyInputs();return;}
@@ -1611,6 +1612,8 @@ async function submitScore(){
   } else {
     if(!d.rejectReason||!d.rejectReason.trim()){showToast('請填寫退稿原因','err');return;}
   }
+
+  // ── 暫存當前表單狀態 ──
   saveDraft();
   const p2=curType==='poster'?papers.poster[curIdx]:papers.osce[curIdx];
   const d2=drafts[p2.id]||{};
@@ -1619,12 +1622,18 @@ async function submitScore(){
   criteria.forEach(c=>{scores[c.id]=Number(el('sc_'+c.id)?.value||0);});
   if(curType==='osce')scores[OSCE_BONUS.id]=Number(el('sc_'+OSCE_BONUS.id)?.value||0);
   let total=Object.values(scores).reduce((a,b)=>a+b,0);
+
+  // ── 確認送出 Modal ──
   const confirmed=await showConfirm('確認提交評分',
     `<p><strong>${p2.paperNo||p2.caseNo}</strong>・${esc(p2.title)}</p><p style="font-size:1.1rem;font-weight:700;margin-top:.5rem">${d2.rejected?'退稿':'總分：'+total+' 分'}</p>`);
   if(!confirmed)return;
+
+  // ── 驗證通過後才顯示 loading ──
+  setLdr(true);
   await doSubmit(p2,curType,d2,total,scores,false);
   setLdr(false);
 }
+
 
 async function doSubmit(p,ptype,d,total,scoresObj,silent=false){
   // scoresObj：純分數 {c1:20, c2:15...}，若無則從草稿取（bulkSubmit 路徑）
