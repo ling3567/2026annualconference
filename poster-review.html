@@ -1436,9 +1436,9 @@ function renderPosterScoreForm(p,draft,isDone){
     <label>建議調整類別（如認為本篇適合其他類別，請選擇）</label>
     <select class="cat-adjust-sel" id="catAdjSel" ${dis}>
       <option value="">-- 維持原類別，不調整 --</option>
-      <option value="A" ${d.catAdjust==='A'?'selected':''}>A 類｜臨床技能教育、模擬教學與跨專業學習</option>
-      <option value="B" ${d.catAdjust==='B'?'selected':''}>B 類｜評量、信任決策與能力導向醫學教育</option>
-      <option value="C" ${d.catAdjust==='C'?'selected':''}>C 類｜人文素養、醫療韌性與專業認同</option>
+      <option value="A" ${draft.catAdjust==='A'?'selected':''}>A 類｜臨床技能教育、模擬教學與跨專業學習</option>
+      <option value="B" ${draft.catAdjust==='B'?'selected':''}>B 類｜評量、信任決策與能力導向醫學教育</option>
+      <option value="C" ${draft.catAdjust==='C'?'selected':''}>C 類｜人文素養、醫療韌性與專業認同</option>
     </select>
   </div>`;
   html+=`<div class="recommend-zone">
