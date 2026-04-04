@@ -1669,9 +1669,7 @@ async function doSubmit(p,ptype,d,total,scoresObj,silent=false){
       bonusNote:d.bonusNote||'',
       recommend:d.recommend?'true':'false', catAdjust:d.catAdjust||'', comment:d.comment||''
     };
-    console.log('📤 submitScore params:', JSON.stringify(params));
     const r=await api(params);
-    console.log('📥 submitScore result:', JSON.stringify(r));
     if(r.success){
       submitted[p.id]=true;
       if(!silent)showToast('評分已提交','ok');
@@ -1794,28 +1792,21 @@ function admSwitchTab(t){
     const d=el('adm-tab-'+id); if(d)d.style.display=id===t?'block':'none';
   });
   if(t==='reviewers'){
-    console.log('切換到委員帳號, dashData:', !!dashData);
-    loadReviewers();
+    if(!dashData) loadDashboard().then(()=>loadReviewers());
+    else loadReviewers();
   }
   if(t==='assignDetail'){
-    console.log('切換到指派明細, dashData:', !!dashData, 'osceData:', !!osceData);
-    if(!dashData){
-      loadDashboard().then(()=>renderAssignDetailPage());
-    } else if(!osceData){
-      loadOsceDashboard().then(()=>renderAssignDetailPage());
-    } else {
-      renderAssignDetailPage();
-    }
+    if(!dashData) loadDashboard().then(()=>loadOsceDashboard().then(()=>renderAssignDetailPage()));
+    else if(!osceData) loadOsceDashboard().then(()=>renderAssignDetailPage());
+    else renderAssignDetailPage();
   }
   if(t==='opinions'){
-    console.log('切換到評審意見, dashData:', !!dashData, 'papers:', dashData?.papers?.length);
-    if(!dashData) loadDashboard().then(()=>renderOpinionsPage('poster'));
-    else renderOpinionsPage('poster');
+    if(!dashData) loadDashboard().then(()=>renderOpinionsPage(opinType||'poster'));
+    else renderOpinionsPage(opinType||'poster');
   }
-  // 切換到指派/結果頁時，補渲染 OSCE 資料（若已載入）
   if(t==='assign'){
     if(osceData) renderOsceAssignTable(osceData.cases,osceData.reviewers);
-    else loadOsceDashboard();  // 若尚未載入則觸發載入
+    else loadOsceDashboard();
   }
   if(t==='results'){
     if(osceData) renderOsceResultsTable(osceData.cases);
@@ -2068,9 +2059,8 @@ function filterResults(){
 }
 
 function renderRvTable(reviewers){
-  console.log('renderRvTable, reviewers:', reviewers?.length, 'body:', !!el('rvBody'));
   const body=el('rvBody');if(!body)return;
-  body.innerHTML=(reviewers||[]).map(r=>{
+  const rows=(reviewers||[]).map(r=>{
     const pc=Object.values(assignments).filter(u=>(u||[]).includes(r.username)).length||(r.posterCount||0);
     const oc=Object.values(osceAssignments).filter(u=>(u||[]).includes(r.username)).length||(r.osceCount||0);
     const pb=pc>0?`<span title="海報論文指派" style="background:#dbeafe;color:#1e4d8c;padding:.15rem .55rem;border-radius:5px;font-size:.78rem;font-weight:600">${pc}篇</span>`:'<span style="color:#cbd5e0;font-size:.8rem">—</span>';
@@ -2088,6 +2078,7 @@ function renderRvTable(reviewers){
       </div></td>
     </tr>`;
   }).join('');
+  body.innerHTML=rows;
 }
 
 // ══ OSCE 後台 ══
@@ -2225,7 +2216,6 @@ function confirmCancel(){const cm=el('confirmModal');if(cm)cm.classList.remove('
 
 // ══ 指派明細 ══
 function renderAssignDetailPage(){
-  console.log('renderAssignDetailPage, target:', !!el('rvAssignDetail2'), 'dashData:', !!dashData, 'reviewers:', dashData?.reviewers?.length);
   const target=el('rvAssignDetail2');if(!target)return;
   const rvrs=(dashData&&dashData.reviewers)||[];
   if(!rvrs.length){target.innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">請先載入「總覽統計」資料</p>';return;}
@@ -2325,7 +2315,6 @@ function opinSwitchType(t){
 }
 
 function renderOpinionsPage(t){
-  console.log('renderOpinionsPage, t:', t, 'dashData:', !!dashData, 'body:', !!el('opinionsBody'));
   const body=el('opinionsBody'); if(!body) return;
   opinType=t||opinType;
 
