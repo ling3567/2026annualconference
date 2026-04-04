@@ -1661,22 +1661,33 @@ async function doSubmit(p,ptype,d,total,scoresObj,silent=false){
   })();
   const pureScores = normScoreKeys(rawScores, ptype);
   try{
-    const r=await api({
+    const params = {
       action:'submitScore', reviewerUsername:reviewer.username,
       paperId:p.id, paperNo:ptype==='poster'?p.paperNo:p.caseNo, paperType:ptype,
       scoresJson:JSON.stringify(pureScores), total,
       rejected:d.rejected?'true':'false', rejectReason:d.rejectReason||'',
       bonusNote:d.bonusNote||'',
       recommend:d.recommend?'true':'false', catAdjust:d.catAdjust||'', comment:d.comment||''
-    });
+    };
+    console.log('📤 submitScore params:', JSON.stringify(params));
+    const r=await api(params);
+    console.log('📥 submitScore result:', JSON.stringify(r));
     if(r.success){
       submitted[p.id]=true;
       if(!silent)showToast('評分已提交','ok');
       renderList();
       if(curType==='poster')renderPosterContent(curIdx);
       else renderOsceContent(curIdx);
-    } else { showToast(r.message||'提交失敗','err'); }
-  }catch(e){ showToast('連線失敗，請重試','err'); console.error('doSubmit error:',e); }
+    } else { 
+      const msg = r.message||'提交失敗';
+      console.error('submitScore failed:', r);
+      showToast(msg, 'err'); 
+    }
+  }catch(e){ 
+    const msg = e.message||'連線失敗，請重試';
+    showToast(msg.substring(0,50),'err'); 
+    console.error('doSubmit error:', e); 
+  }
   finally{ setLdr(false); }
 }
 
