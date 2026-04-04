@@ -1698,11 +1698,21 @@ async function bulkSubmit(){
     const p=list.find(x=>x.id===pid); if(!p||submitted[pid])continue;
     const d=drafts[pid]||{};
     const criteria=curType==='poster'?CRITERIA:OSCE_CRITERIA;
-    const scores={};criteria.forEach(c=>{scores[c.id]=Number(d[c.id]||0);});
-    if(curType==='osce')scores[OSCE_BONUS.id]=Number(d[OSCE_BONUS.id]||0);
-    const total=Object.values(scores).reduce((a,b)=>a+b,0);
+    // 建立純分數物件（與 submitScore 相同邏輯）
+    const rawScores={};
+    criteria.forEach(c=>{rawScores[c.id]=Number(d[c.id]||0);});
+    if(curType==='osce') rawScores[OSCE_BONUS.id]=Number(d[OSCE_BONUS.id]||0);
+    const pureScores=normScoreKeys(rawScores,curType);
+    const total=Object.values(rawScores).reduce((a,b)=>a+b,0);
     try{
-      const r=await api({action:'submitScore',reviewerUsername:reviewer.username,paperId:p.id,paperNo:curType==='poster'?p.paperNo:p.caseNo,paperType:curType,scoresJson:JSON.stringify(d),total,rejected:d.rejected?'true':'false',rejectReason:d.rejectReason||'',recommend:d.recommend?'true':'false',catAdjust:d.catAdjust||'',comment:d.comment||''});
+      const r=await api({
+        action:'submitScore', reviewerUsername:reviewer.username,
+        paperId:p.id, paperNo:curType==='poster'?p.paperNo:p.caseNo, paperType:curType,
+        scoresJson:JSON.stringify(pureScores), total,
+        rejected:d.rejected?'true':'false', rejectReason:d.rejectReason||'',
+        bonusNote:d.bonusNote||'',
+        recommend:d.recommend?'true':'false', catAdjust:d.catAdjust||'', comment:d.comment||''
+      });
       if(r.success){submitted[p.id]=true;ok++;}else fail++;
     }catch{fail++;}
   }
