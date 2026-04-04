@@ -1793,8 +1793,12 @@ function admSwitchTab(t){
   ['dashboard','assign','results','reviewers','assignDetail','opinions'].forEach(id=>{
     const d=el('adm-tab-'+id); if(d)d.style.display=id===t?'block':'none';
   });
-  if(t==='reviewers') loadReviewers();
+  if(t==='reviewers'){
+    console.log('切換到委員帳號, dashData:', !!dashData);
+    loadReviewers();
+  }
   if(t==='assignDetail'){
+    console.log('切換到指派明細, dashData:', !!dashData, 'osceData:', !!osceData);
     if(!dashData){
       loadDashboard().then(()=>renderAssignDetailPage());
     } else if(!osceData){
@@ -1804,6 +1808,7 @@ function admSwitchTab(t){
     }
   }
   if(t==='opinions'){
+    console.log('切換到評審意見, dashData:', !!dashData, 'papers:', dashData?.papers?.length);
     if(!dashData) loadDashboard().then(()=>renderOpinionsPage('poster'));
     else renderOpinionsPage('poster');
   }
@@ -2063,6 +2068,7 @@ function filterResults(){
 }
 
 function renderRvTable(reviewers){
+  console.log('renderRvTable, reviewers:', reviewers?.length, 'body:', !!el('rvBody'));
   const body=el('rvBody');if(!body)return;
   body.innerHTML=(reviewers||[]).map(r=>{
     const pc=Object.values(assignments).filter(u=>(u||[]).includes(r.username)).length||(r.posterCount||0);
@@ -2219,6 +2225,7 @@ function confirmCancel(){const cm=el('confirmModal');if(cm)cm.classList.remove('
 
 // ══ 指派明細 ══
 function renderAssignDetailPage(){
+  console.log('renderAssignDetailPage, target:', !!el('rvAssignDetail2'), 'dashData:', !!dashData, 'reviewers:', dashData?.reviewers?.length);
   const target=el('rvAssignDetail2');if(!target)return;
   const rvrs=(dashData&&dashData.reviewers)||[];
   if(!rvrs.length){target.innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">請先載入「總覽統計」資料</p>';return;}
@@ -2318,6 +2325,7 @@ function opinSwitchType(t){
 }
 
 function renderOpinionsPage(t){
+  console.log('renderOpinionsPage, t:', t, 'dashData:', !!dashData, 'body:', !!el('opinionsBody'));
   const body=el('opinionsBody'); if(!body) return;
   opinType=t||opinType;
 
