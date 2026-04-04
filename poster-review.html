@@ -1792,8 +1792,17 @@ function admSwitchTab(t){
     const d=el('adm-tab-'+id); if(d)d.style.display=id===t?'block':'none';
   });
   if(t==='reviewers'){
-    if(!dashData) loadDashboard().then(()=>loadReviewers());
-    else loadReviewers();
+    const _load = ()=>{
+      loadReviewers().then(()=>{
+        setTimeout(()=>{
+          const b=el('rvBody');
+          console.log('rvBody rows:', b ? b.querySelectorAll('tr').length : 'NOT FOUND');
+          console.log('rvBody innerHTML length:', b ? b.innerHTML.length : 0);
+          console.log('adm-tab-reviewers display:', el('adm-tab-reviewers')?.style.display);
+        }, 500);
+      });
+    };
+    if(!dashData) loadDashboard().then(_load); else _load();
   }
   if(t==='assignDetail'){
     if(!dashData) loadDashboard().then(()=>loadOsceDashboard().then(()=>renderAssignDetailPage()));
