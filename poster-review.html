@@ -1639,19 +1639,19 @@ async function submitScore(){
 }
 
 
+// ══ 分數 key 正規化（p1~p6 → c1~c6）══
+function normScoreKeys(s, ptype){
+  if(ptype!=='poster') return s;
+  const out={};
+  Object.entries(s).forEach(([k,v])=>{
+    const mapped = k.replace(/^p(\d+)$/, 'c$1');
+    out[mapped] = v;
+  });
+  return out;
+}
+
 async function doSubmit(p,ptype,d,total,scoresObj,silent=false){
   // scoresObj：純分數 {c1:20, c2:15...}，若無則從草稿取（bulkSubmit 路徑）
-  // 正規化分數 key：前端 p1~p6 → Apps Script 期望的 c1~c6
-  function normScoreKeys(s, ptype){
-    if(ptype!=='poster') return s;
-    const out={};
-    Object.entries(s).forEach(([k,v])=>{
-      // p1→c1, p2→c2 ... p6→c6
-      const mapped = k.replace(/^p(\d+)$/, 'c$1');
-      out[mapped] = v;
-    });
-    return out;
-  }
   const rawScores = scoresObj || (()=>{
     const criteria = ptype==='poster' ? CRITERIA : OSCE_CRITERIA;
     const s={};
