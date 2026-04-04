@@ -1275,6 +1275,10 @@ function switchType(t){
   el('scoreHeadNote').textContent=t==='osce'?`基本滿分 ${OSCE_BASE_MAX} + 優良加分 ${OSCE_BONUS.max}`:'';
   el('scoreArea').innerHTML='<p style="color:var(--muted);text-align:center;padding:2rem;font-size:.85rem">請先選擇'+( t==='osce'?'教案':'論文')+'</p>';
   el('scoreActions').style.display='none';
+  // 清空總分顯示
+  const hn=el('scoreHeadNum'); if(hn) hn.textContent='—';
+  const hd=el('scoreHeadDenom'); if(hd) hd.textContent='/ 100';
+  const ht=el('scoreHeadTotal'); if(ht) ht.style.display='none';
   renderList();
 }
 
@@ -1740,7 +1744,9 @@ async function bulkSubmit(){
   const confirmed=await showConfirm('確認批次提交',`<p>確定提交已選的 <strong>${checked.length}</strong> 份評分？</p>`);
   if(!confirmed)return;
   setLdr(true);
+  closeOverview();
   let ok=0,fail=0;
+  try{
   for(const pid of checked){
     const p=list.find(x=>x.id===pid); if(!p||submitted[pid])continue;
     const d=drafts[pid]||{};
@@ -1763,8 +1769,8 @@ async function bulkSubmit(){
       if(r.success){submitted[p.id]=true;ok++;}else fail++;
     }catch{fail++;}
   }
-  setLdr(false);
-  closeOverview();
+  }catch(e){ console.error('bulkSubmit error:',e); fail++; }
+  finally{ setLdr(false); }
   showToast(`提交完成：${ok} 筆成功${fail?' / '+fail+' 筆失敗':''}`,fail?'err':'ok');
   renderList();
 }
@@ -2268,7 +2274,23 @@ function initDraggable(){
 function toggleAssignDetail(sid,did){const s=el(sid),d=el(did);if(!s||!d)return;const o=d.classList.contains('show');d.classList.toggle('show',!o);s.classList.toggle('expanded',!o);}
 
 // ══ Core Helpers ══
-async function api(params){const fd=new FormData();Object.entries(params).forEach(([k,v])=>fd.append(k,String(v??'')));const resp=await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd,redirect:'follow'});if(!resp.ok)throw new Error('HTTP '+resp.status);const text=await resp.text();try{return JSON.parse(text);}catch(e){throw new Error('非JSON:'+text.substring(0,100));}}
+async function api(params, timeoutMs=30000){
+  const fd=new FormData();
+  Object.entries(params).forEach(([k,v])=>fd.append(k,String(v??'')));
+  const controller=new AbortController();
+  const tid=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+    const resp=await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd,redirect:'follow',signal:controller.signal});
+    clearTimeout(tid);
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    const text=await resp.text();
+    try{return JSON.parse(text);}catch(e){throw new Error('非JSON:'+text.substring(0,100));}
+  }catch(e){
+    clearTimeout(tid);
+    if(e.name==='AbortError')throw new Error('請求逾時（'+timeoutMs/1000+'秒），請重試');
+    throw e;
+  }
+}
 function el(id){return document.getElementById(id);}
 function setLdr(v){const l=el('ldr');if(l)l.style.display=v?'flex':'none';}
 function showToast(msg,type){const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3200);}
