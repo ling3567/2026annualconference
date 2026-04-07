@@ -1020,7 +1020,15 @@ tr:hover td{ background:#fafafa; }
     <div class="modal-body" id="confirmBody"></div>
     <div class="modal-foot">
       <button class="adm-btn adm-btn-outline" onclick="confirmCancel()">取消</button>
- 
+       <button class="confirm-ok-btn" onclick="confirmOk()">確認送出</button>
+    </div>
+  </div>
+</div>
+
+<div class="ldr" id="ldr"><div class="spinner"></div></div>
+
+<script>
+
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2njUGr6eORWe6V5iMITA_dbpuOzhOebyxDW43P8RySVezxUevEOvQZGUV0tl_Mhm9/exec';
 
 // ══ 評分向度 ══
@@ -1334,7 +1342,7 @@ function renderPosterContent(i){
   el('scoreHeadNote').textContent='滿分 100 分';
   el('scoreArea').innerHTML=renderPosterScoreForm(p, draft, isDone);
   el('scoreActions').style.display=isDone?'none':'flex';
-  if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">已完成評分，如需修改請聯絡依玲 06-2812811-57426・tsmcsd2018@gmail.com</div>');
+  if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">已完成評分，如需修改請聯絡依玲 06-2812811-57426・<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f98d8a949a8a9dcbc9c8c1b99e94989095d79a9694">[email&#160;protected]</a></div>');
   markEmptyInputs(); updatePosterTotal();
 }
 
@@ -1384,7 +1392,7 @@ function renderOsceContent(i){
   el('scoreArea').innerHTML=renderOsceScoreForm(p, draft, isDone);
   el('scoreActions').style.display=isDone?'none':'flex';
   if(p.driveUrl) loadDriveFiles(p.id, p.driveUrl);
-  if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">已完成評分，如需修改請聯絡依玲 06-2812811-57426・tsmcsd2018@gmail.com</div>');
+  if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">已完成評分，如需修改請聯絡依玲 06-2812811-57426・<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="99edeaf4faeafdaba9a8a1d9fef4f8f0f5b7faf6f4">[email&#160;protected]</a></div>');
   markEmptyInputs(); updateOsceTotal();
 }
 
@@ -2515,8 +2523,10 @@ function switchResultsTab(tab){
   if(ap) ap.style.display=isCat?'none':'';
   if(ct){ ct.style.color=isCat?'#3b82f6':'#718096'; ct.style.borderBottomColor=isCat?'#3b82f6':'transparent'; ct.style.fontWeight=isCat?'600':'500'; }
   if(at){ at.style.color=isCat?'#718096':'#3b82f6'; at.style.borderBottomColor=isCat?'transparent':'#3b82f6'; at.style.fontWeight=isCat?'500':'600'; }
-}t?'600':'500'; }
-  if(at){ at.style.color=isCat?'#718096':'#3b82f6'; at.style.borderBottomColor=isCat?'transparent':'#3b82f6'; at.style.fontWeight=isCat?'500':'600'; }
-}</script>
+}
+
+
+</script>
+
 </body>
 </html>
