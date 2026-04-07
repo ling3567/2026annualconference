@@ -770,21 +770,21 @@ tr:hover td{ background:#fafafa; }
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
       指派評審
     </div>
-    <div class="adm-tab" data-tab="results" onclick="admSwitchTab('results')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      評分結果
-    </div>
-    <div class="adm-tab" data-tab="reviewers" onclick="admSwitchTab('reviewers')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      委員帳號
-    </div>
     <div class="adm-tab" data-tab="assignDetail" onclick="admSwitchTab('assignDetail')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
       指派明細
     </div>
+    <div class="adm-tab" data-tab="results" onclick="admSwitchTab('results')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      評分結果
+    </div>
     <div class="adm-tab" data-tab="opinions" onclick="admSwitchTab('opinions')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       評審意見
+    </div>
+    <div class="adm-tab" data-tab="reviewers" onclick="admSwitchTab('reviewers')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      委員帳號
     </div>
   </div>
   <div class="adm-content" id="adm-tab-dashboard">
@@ -854,7 +854,7 @@ tr:hover td{ background:#fafafa; }
       <button class="type-btn" id="resultsTypeOsce" onclick="resultsSwitchType('osce')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> OSCE 教案</button>
     </div>
     <!-- 海報評分結果 -->
-    <div id="resultsPosterSection">
+    <div id="resultsPosterSection" style="display:block">
       <div class="sec">
         <div class="sec-head"><h3>海報論文 — 評分結果</h3>
           <div style="display:flex;align-items:center;gap:.5rem">
@@ -1794,6 +1794,21 @@ function admSwitchTab(t){
   ['dashboard','assign','results','reviewers','assignDetail','opinions'].forEach(id=>{
     const d=el('adm-tab-'+id); if(d)d.style.display=id===t?'block':'none';
   });
+  // 離開 results 時，強制隱藏子 section 避免殘留
+  if(t!=='results'){
+    const op=el('resultsPosterSection'); if(op) op.style.display='none';
+    const os=el('resultsOsceSection');   if(os) os.style.display='none';
+  }
+  // 離開 assign 時，重置子 section
+  if(t!=='assign'){
+    const ap=el('assignPosterSection'); if(ap) ap.style.display='none';
+    const ao=el('assignOsceSection');   if(ao) ao.style.display='none';
+  }
+  // 離開 dashboard 時，重置子 section
+  if(t!=='dashboard'){
+    const dp=el('dashPosterSection'); if(dp) dp.style.display='none';
+    const do_=el('dashOsceSection'); if(do_) do_.style.display='none';
+  }
   if(t==='reviewers'){
     if(!dashData) loadDashboard().then(()=>loadReviewers());
     else loadReviewers();
@@ -1812,6 +1827,13 @@ function admSwitchTab(t){
     else loadOsceDashboard();
   }
   if(t==='results'){
+    // 預設顯示海報論文（重置子 section 狀態）
+    const rp=el('resultsPosterSection'); if(rp) rp.style.display='block';
+    const ro=el('resultsOsceSection');   if(ro) ro.style.display='none';
+    const rbt=el('resultsTypePoster'); if(rbt) rbt.classList.add('active');
+    const rbo=el('resultsTypeOsce');   if(rbo) rbo.classList.remove('active');
+    resultsType='poster';
+    renderResultsTable(dashData?.papers||[]);
     if(osceData) renderOsceResultsTable(osceData.cases);
     else loadOsceDashboard();
   }
