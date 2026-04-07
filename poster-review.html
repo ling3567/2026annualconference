@@ -923,6 +923,7 @@ tr:hover td{ background:#fafafa; }
   </div>
   <div class="adm-content" id="adm-tab-reviewers" style="display:none">
     <!-- 帳號管理（移除子分頁，直接顯示） -->
+    <div id="rvTestBanner" style="background:#dcfce7;color:#166534;padding:.75rem 1rem;border-radius:8px;font-weight:700;margin-bottom:1rem;display:block">等待載入...</div>
     <div id="rvPanelAccounts">
       <div class="sec">
         <div class="sec-head"><h3>新增委員帳號</h3></div>
@@ -1019,14 +1020,7 @@ tr:hover td{ background:#fafafa; }
     <div class="modal-body" id="confirmBody"></div>
     <div class="modal-foot">
       <button class="adm-btn adm-btn-outline" onclick="confirmCancel()">取消</button>
-      <button class="confirm-ok-btn" onclick="confirmOk()">確認送出</button>
-    </div>
-  </div>
-</div>
-
-<div class="ldr" id="ldr"><div class="spinner"></div></div>
-
-<script>
+ 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2njUGr6eORWe6V5iMITA_dbpuOzhOebyxDW43P8RySVezxUevEOvQZGUV0tl_Mhm9/exec';
 
 // ══ 評分向度 ══
@@ -2069,6 +2063,9 @@ function filterResults(){
 
 function renderRvTable(reviewers){
   const body=el('rvBody');if(!body)return;
+  // 測試：在表格上方加入醒目標記
+  const testBanner = el('rvTestBanner');
+  if(testBanner) testBanner.textContent = '✅ renderRvTable 已執行，委員數：' + (reviewers||[]).length;
   const rows=(reviewers||[]).map(r=>{
     const pc=Object.values(assignments).filter(u=>(u||[]).includes(r.username)).length||(r.posterCount||0);
     const oc=Object.values(osceAssignments).filter(u=>(u||[]).includes(r.username)).length||(r.osceCount||0);
@@ -2517,6 +2514,8 @@ function switchResultsTab(tab){
   if(cp) cp.style.display=isCat?'':'none';
   if(ap) ap.style.display=isCat?'none':'';
   if(ct){ ct.style.color=isCat?'#3b82f6':'#718096'; ct.style.borderBottomColor=isCat?'#3b82f6':'transparent'; ct.style.fontWeight=isCat?'600':'500'; }
+  if(at){ at.style.color=isCat?'#718096':'#3b82f6'; at.style.borderBottomColor=isCat?'transparent':'#3b82f6'; at.style.fontWeight=isCat?'500':'600'; }
+}t?'600':'500'; }
   if(at){ at.style.color=isCat?'#718096':'#3b82f6'; at.style.borderBottomColor=isCat?'transparent':'#3b82f6'; at.style.fontWeight=isCat?'500':'600'; }
 }</script>
 </body>
