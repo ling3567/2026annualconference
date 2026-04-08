@@ -849,79 +849,83 @@ tr:hover td{ background:#fafafa; }
     </div>
   </div>
   <div class="adm-content" id="adm-tab-results" style="display:none">
-    <div class="type-switcher">
-      <button class="type-btn active" id="resultsTypePoster" onclick="resultsSwitchType('poster')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg> 海報論文</button>
-      <button class="type-btn" id="resultsTypeOsce" onclick="resultsSwitchType('osce')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> OSCE 教案</button>
-    </div>
-    <!-- 海報評分結果 -->
-    <div id="resultsPosterSection" style="display:block">
-      <div class="sec">
-        <div class="sec-head"><h3>海報論文 — 評分結果</h3>
-          <div style="display:flex;align-items:center;gap:.5rem">
-            <input type="text" id="resultSearch" placeholder="搜尋題目/投稿單位…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:200px;font-family:inherit" oninput="filterResults()">
-            <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">重新整理</button>
-          </div>
+
+  <!-- 類型切換 -->
+  <div class="type-switcher" style="margin-bottom:1.25rem">
+    <button class="type-btn active" id="resultsTypePoster" onclick="resultsSwitchType('poster')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> 海報論文</button>
+    <button class="type-btn" id="resultsTypeOsce" onclick="resultsSwitchType('osce')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> OSCE 教案</button>
+  </div>
+
+  <!-- 海報論文 評分結果 -->
+  <div id="resultsPosterSection" style="display:block">
+    <div class="sec">
+      <div class="sec-head">
+        <h3>海報論文 — 評分結果</h3>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <input type="text" id="resultSearch" placeholder="搜尋題目/投稿單位…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:200px;font-family:inherit" oninput="filterResults()">
+          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">重新整理</button>
         </div>
-        <div class="sec-body">
-          <p style="font-size:.82rem;color:#718096;margin-bottom:1rem">名次依平均總分計算・退稿論文不列入排名・同分同名次</p>
+      </div>
+      <div class="sec-body">
+        <p style="font-size:.82rem;color:#718096;margin-bottom:1rem">名次依平均總分計算・退稿論文不列入排名・同分同名次</p>
 
-          <!-- 分頁標籤 -->
-          <div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:1.1rem">
-            <button class="results-tab-btn active" id="rTabCat" onclick="switchResultsTab('cat')"
-              style="padding:.55rem 1.3rem;font-size:.88rem;font-weight:600;border:none;background:none;cursor:pointer;color:#3b82f6;border-bottom:2.5px solid #3b82f6;margin-bottom:-2px;font-family:inherit">
-              分類排名
-            </button>
-            <button class="results-tab-btn" id="rTabAll" onclick="switchResultsTab('all')"
-              style="padding:.55rem 1.3rem;font-size:.88rem;font-weight:500;border:none;background:none;cursor:pointer;color:#718096;border-bottom:2.5px solid transparent;margin-bottom:-2px;font-family:inherit">
-              總排名
-            </button>
-          </div>
-
-          <!-- 分類排名 -->
-          <div id="rPanelCat">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
-              <div style="display:flex;align-items:center;gap:.5rem">
-                <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名・可拖動調整順序</span>
-              </div>
-              <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">⬇ 匯出 CSV</button>
-            </div>
-            <div class="tbl-wrap"><table>
-              <thead><tr>
-                <th style="width:90px">名次</th><th>編號</th><th>論文題目</th><th>投稿單位</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
-              </tr></thead>
-              <tbody id="resultsCatBody"></tbody>
-            </table></div>
-          </div>
-
-          <!-- 總排名 -->
-          <div id="rPanelAll" style="display:none">
-            <div class="tbl-wrap"><table>
-              <thead><tr>
-                <th style="width:72px">名次</th><th>編號</th><th>論文題目</th><th>投稿單位</th><th>類別</th><th>平均總分</th><th>分數差距</th><th>推薦</th><th>退稿</th><th>詳細</th>
-              </tr></thead>
-              <tbody id="resultsAllBody"></tbody>
-            </table></div>
-          </div>
+        <!-- 分頁標籤 -->
+        <div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:1.1rem">
+          <button class="results-tab-btn active" id="rTabCat" onclick="switchResultsTab('cat')"
+            style="padding:.55rem 1.3rem;font-size:.88rem;font-weight:600;border:none;background:none;cursor:pointer;color:#3b82f6;border-bottom:2.5px solid #3b82f6;margin-bottom:-2px;font-family:inherit">
+            分類排名
+          </button>
+          <button class="results-tab-btn" id="rTabAll" onclick="switchResultsTab('all')"
+            style="padding:.55rem 1.3rem;font-size:.88rem;font-weight:500;border:none;background:none;cursor:pointer;color:#718096;border-bottom:2.5px solid transparent;margin-bottom:-2px;font-family:inherit">
+            總排名
+          </button>
         </div>
+
+        <!-- 分類排名 -->
+        <div id="rPanelCat">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+            <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名・可拖動調整順序</span>
+            <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">⬇ 匯出 CSV</button>
+          </div>
+          <div class="tbl-wrap"><table>
+            <thead><tr>
+              <th style="width:80px">名次</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px">平均總分</th><th style="width:80px">分數差距</th><th style="width:70px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
+            </tr></thead>
+            <tbody id="resultsCatBody"></tbody>
+          </table></div>
+        </div>
+
+        <!-- 總排名 -->
+        <div id="rPanelAll" style="display:none">
+          <div class="tbl-wrap"><table>
+            <thead><tr>
+              <th style="width:72px">名次</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px">平均總分</th><th style="width:80px">分數差距</th><th style="width:70px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
+            </tr></thead>
+            <tbody id="resultsAllBody"></tbody>
+          </table></div>
         </div>
       </div>
     </div>
-    <!-- OSCE 評分結果 -->
-    <div id="resultsOsceSection" style="display:none">
-      <div class="sec">
-        <div class="sec-head"><h3>OSCE 教案 — 評分結果</h3>
-          <div style="display:flex;align-items:center;gap:.5rem">
-            <input type="text" id="osceResultSearch" placeholder="搜尋教案…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:180px;font-family:inherit" oninput="filterOsceResults()">
-            <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadOsceDashboard()">重新整理</button>
-          </div>
+  </div>
+
+  <!-- OSCE 教案 評分結果 -->
+  <div id="resultsOsceSection" style="display:none">
+    <div class="sec">
+      <div class="sec-head"><h3>OSCE 教案 — 評分結果</h3>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <input type="text" id="osceResultSearch" placeholder="搜尋教案…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:180px;font-family:inherit" oninput="filterOsceResults()">
+          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadOsceDashboard()">重新整理</button>
         </div>
-        <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
-          <th>名次</th><th>編號</th><th>教案主題</th><th>服務醫院</th><th>平均總分</th><th>分數差距</th><th>詳細</th>
-        </tr></thead><tbody id="osceResultsBody"></tbody></table></div></div>
       </div>
+      <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
+        <th>名次</th><th>編號</th><th>教案主題</th><th>服務醫院</th><th>平均總分</th><th>分數差距</th><th>詳細</th>
+      </tr></thead><tbody id="osceResultsBody"></tbody></table></div></div>
     </div>
-  
-  <div class="adm-content" id="adm-tab-reviewers" style="display:none">
+  </div>
+
+</div>
+
+<div class="adm-content" id="adm-tab-reviewers" style="display:none">
     <!-- 帳號管理（移除子分頁，直接顯示） -->
     <div id="rvPanelAccounts">
       <div class="sec">
@@ -2007,7 +2011,8 @@ function renderResultsTable(papers){
         :`<span class="chip chip-gray">未推薦</span>`;
     }
     const catAdjusts=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>normCat(r.catAdjust)||r.catAdjust))].filter(Boolean);
-    const catAdjustBadge=catAdjusts.length?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem">→${catAdjusts.join('/')}</span>`:'';
+    const catFull={A:'A 類｜臨床技能教育、模擬教學與跨專業學習',B:'B 類｜評量、信任決策與能力導向醫學教育',C:'C 類｜人文素養、醫療韌性與專業認同'};
+    const catAdjustBadge=catAdjusts.length?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem" title="${catAdjusts.map(c=>catFull[c]||c).join('；')}">建議改→${catAdjusts.join('/')}</span>`:'';
     return `<tr draggable="true" data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}"
       ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)"
       ondragleave="this.style.borderTop=''" style="cursor:grab">
@@ -2363,7 +2368,10 @@ function renderOpinionsPage(t){
         if(!hasOpinion) return;
         html+=`<div style="margin-left:.5rem;margin-bottom:.5rem;padding:.6rem .8rem;background:#f8fafc;border-left:3px solid ${r.rejected?'#fca5a5':'#bfdbfe'};border-radius:0 6px 6px 0">
           <div style="font-size:.78rem;font-weight:600;color:#3b82f6;margin-bottom:.35rem">評審 ${i+1}・${rvName(r.reviewer)}</div>`;
-        if(r.catAdjust) html+=`<div style="font-size:.82rem;margin-bottom:.25rem"><span style="background:#fef3c7;color:#92400e;padding:.1rem .4rem;border-radius:4px;font-size:.7rem;font-weight:700;margin-right:.4rem">建議改類</span>${esc(r.catAdjust)}</div>`;
+        if(r.catAdjust){
+          const catFull={A:'A 類｜臨床技能教育、模擬教學與跨專業學習',B:'B 類｜評量、信任決策與能力導向醫學教育',C:'C 類｜人文素養、醫療韌性與專業認同'};
+          html+=`<div style="font-size:.82rem;margin-bottom:.25rem"><span style="background:#fef3c7;color:#92400e;padding:.1rem .4rem;border-radius:4px;font-size:.7rem;font-weight:700;margin-right:.4rem">建議改類</span>${esc(catFull[r.catAdjust]||r.catAdjust)}</div>`;
+        }
         if(r.comment)   html+=`<div style="font-size:.82rem;color:#334155;margin-bottom:.2rem"><span style="color:#64748b;font-size:.75rem"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> </span>${esc(r.comment)}</div>`;
         if(r.rejectReason) html+=`<div style="font-size:.82rem;color:#dc2626"><span style="font-size:.75rem">⚠ 退稿原因：</span>${esc(r.rejectReason)}</div>`;
         html+=`</div>`;
