@@ -285,8 +285,8 @@ h1,h2,h3,h4,h5,h6{ font-weight:700; }
 .score-input:focus{ outline:none; border-color:#7a90a4; background:white; }
 .score-input:disabled{ opacity:1; cursor:default; background:#e8edf0; color:#3a4550; border-color:#b8c8d4; }
 .score-input[readonly]{ opacity:1; cursor:default; background:#e8edf0; color:#3a4550; border-color:#b8c8d4; }
-.score-input.over{ border-color:var(--red); background:var(--red-bg); color:var(--red); }
-.score-input.empty{ border-color:var(--warm-d); background:var(--warm); }
+.score-input.over{ border-color:#dc2626; background:#fff1f1; color:#dc2626; box-shadow:0 0 0 2px rgba(220,38,38,.15); }
+.score-input.empty{ border-color:#3b82f6; background:#eff6ff; color:#1d4ed8; box-shadow:0 0 0 2px rgba(59,130,246,.12); }
 .score-max{ font-size:.78rem; color:var(--muted); white-space:nowrap; }
 
 .recommend-zone{ background:#eaf3ee; border:1.5px solid #9abfb0; border-radius:9px; padding:.85rem; margin-bottom:.9rem; }
@@ -305,6 +305,36 @@ h1,h2,h3,h4,h5,h6{ font-weight:700; }
 .cmt-wrap label{ display:block; font-size:.82rem; font-weight:600; color:var(--slate); margin-bottom:.35rem; }
 .cmt-wrap textarea{ width:100%; padding:.65rem .85rem; border:1.5px solid var(--border); border-radius:8px; font-size:.88rem; font-family:inherit; color:var(--ink); resize:vertical; min-height:68px; background:var(--bg); transition:border-color .2s; }
 .cmt-wrap textarea:focus{ outline:none; border-color:#7a90a4; background:white; }
+
+/* 已退稿遮罩 */
+.rejected-overlay{
+  position:relative; background:#fff0f0;
+  border:2.5px solid #dc2626; border-radius:12px;
+  padding:0; margin-bottom:1rem; overflow:hidden;
+}
+.rejected-overlay-banner{
+  background:linear-gradient(135deg,#dc2626 0%,#991b1b 100%);
+  color:white; padding:1rem 1.25rem;
+  display:flex; align-items:center; gap:.75rem;
+}
+.rejected-overlay-banner .rej-icon{
+  font-size:2rem; flex-shrink:0; line-height:1;
+}
+.rejected-overlay-banner .rej-text h3{
+  font-size:1.15rem; font-weight:800; letter-spacing:.04em; margin-bottom:.2rem;
+}
+.rejected-overlay-banner .rej-text p{
+  font-size:.82rem; color:rgba(255,255,255,.8); line-height:1.5;
+}
+.rejected-overlay-reason{
+  padding:.85rem 1.1rem; background:#fff8f8;
+  border-top:1px solid #fca5a5;
+  font-size:.88rem; color:#7a2020; line-height:1.6;
+}
+.rejected-overlay-reason strong{ color:#dc2626; display:block; font-size:.78rem; letter-spacing:.04em; margin-bottom:.2rem; }
+.rejected-overlay-body{
+  padding:1rem 1.1rem; opacity:.5; pointer-events:none; filter:grayscale(.5);
+}
 
 .reject-zone{ background:#fdf0f0; border:1.5px solid #d4a8a8; border-radius:9px; padding:.8rem; margin-bottom:.9rem; margin-top:.25rem; }
 .reject-zone-head{ display:flex; align-items:center; gap:.5rem; cursor:pointer; user-select:none; }
@@ -388,6 +418,18 @@ tr:hover td{ background:#fafafa; }
 .form-grp input:focus, .form-grp select:focus{ outline:none; border-color:var(--adm-blue); }
 .crit-score-row{ display:flex; justify-content:space-between; align-items:center; padding:.35rem 0; border-bottom:1px solid #edf2f7; font-size:.82rem; }
 .crit-score-row:last-child{ border-bottom:none; }
+
+/* 類別覆蓋模式 */
+body.cat-override-on .cat-override-cell{
+  cursor:pointer !important;
+  background:#fffbeb !important;
+  outline:1.5px dashed #f59e0b;
+  outline-offset:-2px;
+  transition:background .15s;
+}
+body.cat-override-on .cat-override-cell:hover{
+  background:#fef3c7 !important;
+}
 
 /* ══════════════════════════════════════════════
    共用 Modal
@@ -867,7 +909,19 @@ tr:hover td{ background:#fafafa; }
         </div>
       </div>
       <div class="sec-body">
-        <p style="font-size:.82rem;color:#718096;margin-bottom:1rem">名次依平均總分計算・退稿論文不列入排名・同分同名次</p>
+        <p style="font-size:.82rem;color:#718096;margin-bottom:.7rem">名次依平均總分自動計算・退稿論文不列入排名・同分同名次・<strong style="color:#3b82f6">可點擊「分數」欄標題重新排序</strong>・或直接拖動列調整</p>
+        <!-- 類別覆蓋說明列 -->
+        <div id="catOverrideBar" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:.6rem 1rem;margin-bottom:.9rem;font-size:.82rem;color:#78350f;align-items:center;gap:.75rem;flex-wrap:wrap">
+          <span>⚡ <strong>類別覆蓋模式</strong>：點擊論文列中的類別欄位可變更其所屬類別，變更後點「重新計算排名」套用。</span>
+          <button class="adm-btn adm-btn-sm" style="background:#f59e0b;color:white;border:none" onclick="recalcAfterCatOverride()">🔄 重新計算排名</button>
+          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="resetCatOverrides()">✕ 清除所有覆蓋</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.9rem">
+          <label style="font-size:.8rem;color:#718096;display:flex;align-items:center;gap:.4rem;cursor:pointer">
+            <input type="checkbox" id="chkCatOverride" onchange="toggleCatOverrideMode(this.checked)" style="accent-color:#f59e0b;width:14px;height:14px">
+            啟用類別覆蓋模式（委員建議更改類別後，由管理員在此手動確定）
+          </label>
+        </div>
 
         <!-- 分頁標籤 -->
         <div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:1.1rem">
@@ -884,12 +938,12 @@ tr:hover td{ background:#fafafa; }
         <!-- 分類排名 -->
         <div id="rPanelCat">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
-            <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名・可拖動調整順序</span>
+            <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名・可拖動調整順序・或點擊分數欄自動排序</span>
             <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">⬇ 匯出 CSV</button>
           </div>
           <div class="tbl-wrap"><table>
             <thead><tr>
-              <th style="width:80px">名次</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px">平均總分</th><th style="width:80px">分數差距</th><th style="width:70px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
+              <th style="width:80px">名次</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px;cursor:pointer;user-select:none" id="thCatScore" onclick="sortResultsByScore('cat')" title="點擊依分數排序">平均總分 <span id="thCatScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">分數差距</th><th style="width:70px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
             </tr></thead>
             <tbody id="resultsCatBody"></tbody>
           </table></div>
@@ -899,7 +953,7 @@ tr:hover td{ background:#fafafa; }
         <div id="rPanelAll" style="display:none">
           <div class="tbl-wrap"><table>
             <thead><tr>
-              <th style="width:72px">名次</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px">平均總分</th><th style="width:80px">分數差距</th><th style="width:70px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
+              <th style="width:72px">名次</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px;cursor:pointer;user-select:none" id="thAllScore" onclick="sortResultsByScore('all')" title="點擊依分數排序">平均總分 <span id="thAllScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">分數差距</th><th style="width:70px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
             </tr></thead>
             <tbody id="resultsAllBody"></tbody>
           </table></div>
@@ -1347,7 +1401,27 @@ function renderPosterContent(i){
   el('scoreHeadNote').textContent='滿分 100 分';
   el('scoreArea').innerHTML=renderPosterScoreForm(p, draft, isDone);
   el('scoreActions').style.display=isDone?'none':'flex';
-  if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">已完成評分，如需修改請聯絡依玲 06-2812811-57426・<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f98d8a949a8a9dcbc9c8c1b99e94989095d79a9694">[email&#160;protected]</a></div>');
+  if(isDone && draft.rejected){
+    // 大紅遮罩：整個 scoreArea 包入退稿 overlay
+    const reason=draft.rejectReason?draft.rejectReason.trim():'（未填寫退稿原因）';
+    const originalContent=el('scoreArea').innerHTML;
+    el('scoreArea').innerHTML=`
+      <div class="rejected-overlay">
+        <div class="rejected-overlay-banner">
+          <div class="rej-icon">🚫</div>
+          <div class="rej-text">
+            <h3>本篇已評定為「建議退稿」</h3>
+            <p>您已送出退稿評定，評分表已鎖定・如需修改請聯絡承辦人員</p>
+          </div>
+        </div>
+        <div class="rejected-overlay-reason">
+          <strong>退稿原因</strong>${esc(reason)}
+        </div>
+        <div class="rejected-overlay-body">${originalContent}</div>
+      </div>`;
+  } else if(isDone){
+    el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">已完成評分，如需修改請聯絡依玲 06-2812811-57426・<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f98d8a949a8a9dcbc9c8c1b99e94989095d79a9694">[email&#160;protected]</a></div>');
+  }
   markEmptyInputs(); updatePosterTotal();
 }
 
@@ -1425,6 +1499,13 @@ function toggleDrivePreview(pid){
 function renderPosterScoreForm(p,draft,isDone){
   const dis=isDone?'disabled':'';
   let html=`<div class="score-group-head">各項評分（滿分 100 分・全部必填）</div>`;
+  if(!isDone){
+    html+=`<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-wrap:wrap;font-size:.75rem;color:#546070">
+      <span style="font-weight:700;color:#3a4550">分數窗格說明：</span>
+      <span style="display:inline-flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:28px;height:22px;border:1.5px solid #3b82f6;background:#eff6ff;border-radius:5px;box-shadow:0 0 0 2px rgba(59,130,246,.12)"></span>尚未填寫</span>
+      <span style="display:inline-flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:28px;height:22px;border:1.5px solid #b8c8d4;background:#dce6ec;border-radius:5px"></span>已填入</span>
+      <span style="display:inline-flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:28px;height:22px;border:1.5px solid #dc2626;background:#fff1f1;border-radius:5px;box-shadow:0 0 0 2px rgba(220,38,38,.15)"></span>超出範圍</span>
+    </div>`;}
   CRITERIA.forEach(c=>{
     const v=draft[c.id]!==undefined?draft[c.id]:'';
     html+=`<div class="score-item">
@@ -1539,8 +1620,9 @@ function validateScore(inp,max){
   const v=Number(inp.value);
   const over=inp.value!==''&&(isNaN(v)||v<0||v>max);
   inp.classList.toggle('over',over);
+  inp.classList.toggle('empty', !over && inp.value==='');
   if(over){
-    inp.style.borderColor='#dc2626';inp.style.background='#fff1f1';
+    inp.style.borderColor='';inp.style.background='';
     inp.title='超過滿分 '+max+' 分！';
   } else {
     inp.style.borderColor='';inp.style.background='';inp.title='';
@@ -1958,7 +2040,12 @@ function autoAssign(type){
 
 function renderResultsTable(papers){
   if(!papers)return;
-  papers.forEach(p=>{ p.category=normCat(p.category); });
+  window.dashData = { papers }; // 存全域供排序/覆蓋使用
+  papers.forEach(p=>{
+    p.category=normCat(p.category);
+    // 若有管理員類別覆蓋，套用
+    if(typeof _catOverrides!=='undefined'&&_catOverrides[p.id]) p.category=_catOverrides[p.id];
+  });
 
   function isFullyRejected(p){ return p.reviews.length>0 && p.reviews.filter(r=>!r.rejected).length===0; }
   const rejected  = papers.filter(p=>isFullyRejected(p));
@@ -2013,6 +2100,9 @@ function renderResultsTable(papers){
     const catAdjusts=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>normCat(r.catAdjust)||r.catAdjust))].filter(Boolean);
     const catFull={A:'A 類｜臨床技能教育、模擬教學與跨專業學習',B:'B 類｜評量、信任決策與能力導向醫學教育',C:'C 類｜人文素養、醫療韌性與專業認同'};
     const catAdjustBadge=catAdjusts.length?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem" title="${catAdjusts.map(c=>catFull[c]||c).join('；')}">建議改→${catAdjusts.join('/')}</span>`:'';
+    const effectiveCat=(_catOverrides&&_catOverrides[p.id])||normCat(p.category)||'—';
+    const isOverridden=_catOverrides&&_catOverrides[p.id]&&_catOverrides[p.id]!==normCat(p.category);
+    const catCellContent=`<span style="font-weight:600">${effectiveCat}</span>${isOverridden?`<span style="background:#fef3c7;color:#92400e;font-size:.65rem;font-weight:700;padding:.1rem .3rem;border-radius:3px;margin-left:.25rem;display:inline-block">↑覆蓋</span>`:''}${catAdjustBadge}`;
     return `<tr draggable="true" data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}"
       ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)"
       ondragleave="this.style.borderTop=''" style="cursor:grab">
@@ -2020,7 +2110,7 @@ function renderResultsTable(papers){
       <td><span class="chip chip-blue">${p.paperNo||'—'}</span></td>
       <td style="max-width:200px;line-height:1.5;font-size:.88rem">${esc(p.title)}</td>
       <td style="font-size:.82rem;color:#64748b">${esc(p.contactUnit||'—')}</td>
-      <td><span style="font-weight:600">${normCat(p.category)||'—'}</span>${catAdjustBadge}</td>
+      <td class="cat-override-cell" data-pid="${p.id}" data-orig-cat="${normCat(p.category)||''}" onclick="clickCatCell('${p.id}','${effectiveCat}')" style="cursor:default">${catCellContent}</td>
       <td style="font-weight:700;font-size:1rem">${p.avgTotal!==null?p.avgTotal+'分':'—'}</td>
       <td>${gapCell(p)}</td>
       <td>${recCell}</td>
@@ -2469,6 +2559,123 @@ function reNumberRows(tbody){
     rankCell.innerHTML='<span style="color:#94a3b8;font-size:.9rem;margin-right:.2rem">⠿</span>'
       +`<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}第${rank}名</span>`;
   });
+}
+
+// ══ 點擊欄標題依分數排序 ══
+let _scoreSortDir = { cat: 'desc', all: 'desc' };
+function sortResultsByScore(panel) {
+  const bodyId = panel === 'cat' ? 'resultsCatBody' : 'resultsAllBody';
+  const iconId = panel === 'cat' ? 'thCatScoreIcon' : 'thAllScoreIcon';
+  const tbody = el(bodyId); if (!tbody) return;
+
+  // 切換排序方向
+  const dir = _scoreSortDir[panel] === 'desc' ? 'asc' : 'desc';
+  _scoreSortDir[panel] = dir;
+  const icon = el(iconId);
+  if (icon) icon.textContent = dir === 'desc' ? '↓' : '↑';
+
+  // 只排序 draggable 列（有效論文），分隔列（類別標題列）保持不動
+  if (panel === 'cat') {
+    // 分類排名：每類內部獨立排序
+    const sepRows = [...tbody.querySelectorAll('tr:not([draggable])')];
+    const draggableRows = [...tbody.querySelectorAll('tr[draggable]')];
+
+    // 找出每個分隔列後面跟著哪些 draggable 列
+    const allRows = [...tbody.children];
+    let currentSep = null;
+    const groups = []; // [{sep, rows:[]}]
+    for (const tr of allRows) {
+      if (!tr.draggable) { currentSep = tr; groups.push({ sep: tr, rows: [] }); }
+      else if (groups.length) groups[groups.length - 1].rows.push(tr);
+    }
+
+    // 每組內部排序
+    groups.forEach(g => {
+      g.rows.sort((a, b) => {
+        const pa = dashData && dashData.papers && dashData.papers.find(x => x.id === a.dataset.pid);
+        const pb = dashData && dashData.papers && dashData.papers.find(x => x.id === b.dataset.pid);
+        const sa = pa ? (pa.avgTotal ?? -1) : -1;
+        const sb = pb ? (pb.avgTotal ?? -1) : -1;
+        return dir === 'desc' ? sb - sa : sa - sb;
+      });
+      // 重新插入
+      g.rows.forEach(tr => tbody.insertBefore(tr, g.sep.nextSibling));
+      // 依排序後順序插回（需反向，因 insertBefore 是在 sep 之後）
+      // 實際上直接 append 到 sep 之後
+      let ref = g.sep.nextSibling;
+      g.rows.forEach(tr => {
+        tbody.insertBefore(tr, ref);
+        ref = tr.nextSibling;
+      });
+    });
+  } else {
+    // 總排名：所有 draggable 列一起排序
+    const rows = [...tbody.querySelectorAll('tr[draggable]')];
+    rows.sort((a, b) => {
+      const pa = dashData && dashData.papers && dashData.papers.find(x => x.id === a.dataset.pid);
+      const pb = dashData && dashData.papers && dashData.papers.find(x => x.id === b.dataset.pid);
+      const sa = pa ? (pa.avgTotal ?? -1) : -1;
+      const sb = pb ? (pb.avgTotal ?? -1) : -1;
+      return dir === 'desc' ? sb - sa : sa - sb;
+    });
+    // 找到第一個非退稿的分隔列前插入
+    const firstNonDrag = [...tbody.children].find(tr => !tr.draggable);
+    rows.forEach(tr => firstNonDrag ? tbody.insertBefore(tr, firstNonDrag) : tbody.appendChild(tr));
+  }
+  reNumberRows(tbody);
+  showToast('已依分數' + (dir === 'desc' ? '高→低' : '低→高') + '排序', 'ok');
+}
+
+// ══ 類別覆蓋模式 ══
+let _catOverrides = {}; // { paperId: 'A'|'B'|'C' }
+let _catOverrideMode = false;
+
+function toggleCatOverrideMode(on) {
+  _catOverrideMode = on;
+  const bar = el('catOverrideBar');
+  if (bar) bar.style.display = on ? 'flex' : 'none';
+  // 讓類別欄位變成可點擊
+  document.querySelectorAll('.cat-override-cell').forEach(td => {
+    td.style.cursor = on ? 'pointer' : 'default';
+    td.title = on ? '點擊切換類別' : '';
+  });
+  if (on) showToast('類別覆蓋模式已啟用，點擊類別欄位切換', 'ok');
+}
+
+function clickCatCell(pid, currentCat) {
+  if (!_catOverrideMode) return;
+  const cats = ['A', 'B', 'C'];
+  const next = cats[(cats.indexOf(currentCat) + 1) % 3];
+  _catOverrides[pid] = next;
+  showToast(`${pid} 類別暫改為 ${next}，請點「重新計算排名」套用`, 'ok');
+  // 即時更新格子顯示
+  document.querySelectorAll(`.cat-override-cell[data-pid="${pid}"]`).forEach(td => {
+    const orig = td.dataset.origCat || currentCat;
+    const isOverridden = _catOverrides[pid] && _catOverrides[pid] !== orig;
+    td.innerHTML = `<span style="font-weight:600">${next}</span>`
+      + (isOverridden ? `<span style="background:#fef3c7;color:#92400e;font-size:.68rem;font-weight:700;padding:.1rem .3rem;border-radius:3px;margin-left:.25rem">↑覆蓋</span>` : '');
+  });
+}
+
+function recalcAfterCatOverride() {
+  if (!dashData || !dashData.papers) return;
+  // 暫時把 catOverrides 套到 dashData
+  const origCats = {};
+  dashData.papers.forEach(p => {
+    origCats[p.id] = p.category;
+    if (_catOverrides[p.id]) p.category = _catOverrides[p.id];
+  });
+  renderDashboard(dashData);
+  // 還原（renderDashboard 後 dashData 已被 re-render，category 已改）
+  showToast('排名已依覆蓋類別重新計算', 'ok');
+}
+
+function resetCatOverrides() {
+  _catOverrides = {};
+  if (dashData && dashData.papers) renderDashboard(dashData);
+  el('chkCatOverride').checked = false;
+  toggleCatOverrideMode(false);
+  showToast('已清除所有類別覆蓋', 'ok');
 }
 
 // ══ 匯出評分結果 CSV ══
