@@ -909,7 +909,7 @@ body.cat-override-on .cat-override-cell:hover{
         </div>
       </div>
       <div class="sec-body">
-        <p style="font-size:.82rem;color:#718096;margin-bottom:.7rem">名次依平均總分自動計算・退稿論文不列入排名・同分同名次・<strong style="color:#3b82f6">可點擊「分數」欄標題重新排序</strong>・或直接拖動列調整</p>
+        <p style="font-size:.82rem;color:#718096;margin-bottom:.7rem">依平均總分由高到低排列・<strong style="color:#3b82f6">可點擊「平均總分」欄標題切換排序</strong>・退稿論文不列入排名（需全體評審一致退稿；部分退稿仍列入計分並加註提醒）</p>
         <!-- 類別覆蓋說明列 -->
         <div id="catOverrideBar" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:.6rem 1rem;margin-bottom:.9rem;font-size:.82rem;color:#78350f;align-items:center;gap:.75rem;flex-wrap:wrap">
           <span>⚡ <strong>類別覆蓋模式</strong>：點擊論文列中的類別欄位可變更其所屬類別，變更後點「重新計算排名」套用。</span>
@@ -938,12 +938,12 @@ body.cat-override-on .cat-override-cell:hover{
         <!-- 分類排名 -->
         <div id="rPanelCat">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
-            <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名・可拖動調整順序・或點擊分數欄自動排序</span>
+            <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名，依平均總分排列・可拖動調整順序・或點擊「平均總分」欄標題重新排序</span>
             <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">⬇ 匯出 CSV</button>
           </div>
           <div class="tbl-wrap"><table>
             <thead><tr>
-              <th style="width:80px">名次</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px;cursor:pointer;user-select:none" id="thCatScore" onclick="sortResultsByScore('cat')" title="點擊依分數排序">平均總分 <span id="thCatScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">分數差距</th><th style="width:70px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
+              <th style="width:90px">展出方式</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px;cursor:pointer;user-select:none" id="thCatScore" onclick="sortResultsByScore('cat')" title="點擊依分數排序">平均總分 <span id="thCatScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">分數差距</th><th style="width:45px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
             </tr></thead>
             <tbody id="resultsCatBody"></tbody>
           </table></div>
@@ -953,7 +953,7 @@ body.cat-override-on .cat-override-cell:hover{
         <div id="rPanelAll" style="display:none">
           <div class="tbl-wrap"><table>
             <thead><tr>
-              <th style="width:72px">名次</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px;cursor:pointer;user-select:none" id="thAllScore" onclick="sortResultsByScore('all')" title="點擊依分數排序">平均總分 <span id="thAllScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">分數差距</th><th style="width:70px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
+              <th style="width:90px">展出方式</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px;cursor:pointer;user-select:none" id="thAllScore" onclick="sortResultsByScore('all')" title="點擊依分數排序">平均總分 <span id="thAllScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">分數差距</th><th style="width:45px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
             </tr></thead>
             <tbody id="resultsAllBody"></tbody>
           </table></div>
@@ -2065,13 +2065,7 @@ function renderResultsTable(papers){
     if(p.avgTotal!==ap){ar=i+1;} allRankMap[p.id]=ar; ap=p.avgTotal;
   });
 
-  function badge(rank){
-    if(rank===undefined)return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';
-    const medals={1:'🥇',2:'🥈',3:'🥉'};
-    const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';
-    const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';
-    return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}第${rank}名</span>`;
-  }
+  function badge(_rank){ return ''; /* 名次欄已改為展出方式 */ }
   function gapCell(p){
     const valid=p.reviews.filter(r=>!r.rejected);
     if(valid.length>=2){const sc=valid.map(r=>r.total).sort((a,b)=>a-b);const g=sc[sc.length-1]-sc[0];return g>10?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700">⚠ ${g}分</span>`:`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;}
@@ -2089,24 +2083,21 @@ function renderResultsTable(papers){
     if(rejCount>0){
       rejCell=`<span style="background:#fee2e2;color:#991b1b;padding:.15rem .5rem;border-radius:5px;font-size:.75rem;font-weight:700">${rejCount}/${totalRevs}位退稿</span>`;
     }
-    // 推薦：以委員實際勾選為準（不以分數自動判斷）
+    // 推薦：純數字
     const recCount=p.reviews.filter(r=>r.recommended||r.recommend).length;
-    let recCell='—';
-    if(p.avgTotal!==null){
-      recCell=recCount>0
-        ?`<span class="chip chip-green">推薦（${recCount}位）</span>`
-        :`<span class="chip chip-gray">未推薦</span>`;
-    }
+    const recCell=p.avgTotal!==null?`<span style="font-weight:700;color:#1c1c2e">${recCount}</span>`:'—';
     const catAdjusts=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>normCat(r.catAdjust)||r.catAdjust))].filter(Boolean);
     const catFull={A:'A 類｜臨床技能教育、模擬教學與跨專業學習',B:'B 類｜評量、信任決策與能力導向醫學教育',C:'C 類｜人文素養、醫療韌性與專業認同'};
     const catAdjustBadge=catAdjusts.length?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem" title="${catAdjusts.map(c=>catFull[c]||c).join('；')}">建議改→${catAdjusts.join('/')}</span>`:'';
     const effectiveCat=(_catOverrides&&_catOverrides[p.id])||normCat(p.category)||'—';
     const isOverridden=_catOverrides&&_catOverrides[p.id]&&_catOverrides[p.id]!==normCat(p.category);
     const catCellContent=`<span style="font-weight:600">${effectiveCat}</span>${isOverridden?`<span style="background:#fef3c7;color:#92400e;font-size:.65rem;font-weight:700;padding:.1rem .3rem;border-radius:3px;margin-left:.25rem;display:inline-block">↑覆蓋</span>`:''}${catAdjustBadge}`;
+    const dispMode=_displayMode[p.id]||'eposter';
+    const dispCell=`<button onclick="toggleDisplay('${p.id}',this)" style="border:1.5px solid ${dispMode==='eposter'?'#cbd5e0':'#2563eb'};background:${dispMode==='eposter'?'#f8fafc':'#eff6ff'};color:${dispMode==='eposter'?'#64748b':'#1d4ed8'};border-radius:6px;padding:.3rem .65rem;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit">${dispMode==='eposter'?'ePoster':'實體展示'}</button>`;
     return `<tr draggable="true" data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}"
       ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)"
-      ondragleave="this.style.borderTop=''" style="cursor:grab">
-      <td style="text-align:center;user-select:none"><span style="color:#94a3b8;font-size:.9rem;margin-right:.2rem">⠿</span>${rb}</td>
+      ondragleave="this.style.borderTop=''">
+      <td style="text-align:center">${dispCell}</td>
       <td><span class="chip chip-blue">${p.paperNo||'—'}</span></td>
       <td style="max-width:200px;line-height:1.5;font-size:.88rem">${esc(p.title)}</td>
       <td style="font-size:.82rem;color:#64748b">${esc(p.contactUnit||'—')}</td>
@@ -2548,18 +2539,7 @@ document.addEventListener('dragend',()=>{
   document.querySelectorAll('tr[draggable]').forEach(tr=>{tr.style.opacity='';tr.style.borderTop='';});
   _dragSrcRow=null;
 });
-function reNumberRows(tbody){
-  const rows=[...tbody.querySelectorAll('tr[draggable]')];
-  rows.forEach((tr,i)=>{
-    const rankCell=tr.querySelector('td:first-child');if(!rankCell)return;
-    const rank=i+1;
-    const medals={1:'🥇',2:'🥈',3:'🥉'};
-    const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';
-    const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';
-    rankCell.innerHTML='<span style="color:#94a3b8;font-size:.9rem;margin-right:.2rem">⠿</span>'
-      +`<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}第${rank}名</span>`;
-  });
-}
+function reNumberRows(tbody){ /* 名次欄已移除，保留函式供拖動相容 */ }
 
 // ══ 點擊欄標題依分數排序 ══
 let _scoreSortDir = { cat: 'desc', all: 'desc' };
@@ -2628,6 +2608,18 @@ function sortResultsByScore(panel) {
 
 // ══ 類別覆蓋模式 ══
 let _catOverrides = {}; // { paperId: 'A'|'B'|'C' }
+let _displayMode = {}; // { paperId: 'eposter'|'physical' } 預設 eposter
+
+function toggleDisplay(pid, btn){
+  const cur=_displayMode[pid]||'eposter';
+  const next=cur==='eposter'?'physical':'eposter';
+  _displayMode[pid]=next;
+  const isPhys=next==='physical';
+  btn.textContent=isPhys?'實體展示':'ePoster';
+  btn.style.borderColor=isPhys?'#2563eb':'#cbd5e0';
+  btn.style.background=isPhys?'#eff6ff':'#f8fafc';
+  btn.style.color=isPhys?'#1d4ed8':'#64748b';
+}
 let _catOverrideMode = false;
 
 function toggleCatOverrideMode(on) {
@@ -2685,7 +2677,7 @@ function exportResultsCSV(type){
 
   if(type === 'poster'){
     title = 'TSMCSD2026_海報論文評分結果';
-    rows.push(['名次','編號','論文題目','投稿單位','類別','建議改類','平均總分','推薦','退稿數','分數差距']);
+    rows.push(['展出方式','編號','論文題目','投稿單位','類別','建議改類','平均總分','推薦票數','退稿數','分數差距']);
 
     // 優先用目前表格排列（含拖動後的順序）
     const tbody = el('resultsCatBody') || el('resultsAllBody');
@@ -2700,7 +2692,7 @@ function exportResultsCSV(type){
         const valid = p.reviews.filter(r=>!r.rejected);
         const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
         const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        rows.push([i+1, p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.recommended?'是':'否', rc, gap]);
+        const disp=_displayMode[p.id]||'eposter'; rows.push([disp==='physical'?'實體展示':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
       });
     } else if(dashData && dashData.papers){
       let rank = 1;
@@ -2709,7 +2701,7 @@ function exportResultsCSV(type){
         const valid = p.reviews.filter(r=>!r.rejected);
         const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
         const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        rows.push([rank++, p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.recommended?'是':'否', rc, gap]);
+        const disp2=_displayMode[p.id]||'eposter'; rows.push([disp2==='physical'?'實體展示':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
       });
     }
 
