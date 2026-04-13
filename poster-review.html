@@ -927,18 +927,18 @@ body.cat-override-on .cat-override-cell:hover{
         <div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:1.1rem">
           <button class="results-tab-btn active" id="rTabCat" onclick="switchResultsTab('cat')"
             style="padding:.55rem 1.3rem;font-size:.88rem;font-weight:600;border:none;background:none;cursor:pointer;color:#3b82f6;border-bottom:2.5px solid #3b82f6;margin-bottom:-2px;font-family:inherit">
-            分類排名
+            分類檢視
           </button>
           <button class="results-tab-btn" id="rTabAll" onclick="switchResultsTab('all')"
             style="padding:.55rem 1.3rem;font-size:.88rem;font-weight:500;border:none;background:none;cursor:pointer;color:#718096;border-bottom:2.5px solid transparent;margin-bottom:-2px;font-family:inherit">
-            總排名
+            總覽
           </button>
         </div>
 
         <!-- 分類排名 -->
         <div id="rPanelCat">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
-            <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名・可拖動調整順序・或點擊分數欄自動排序</span>
+            <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各類論文・依推薦票數→平均總分排列・可拖動調整・或點擊欄標題重新排序</span>
             <button class="adm-btn adm-btn-sm" style="background:#1d4ed8;color:white;border:none" onclick="saveDisplayModeToGAS()">儲存展出方式</button> <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">匯出 CSV</button>
           </div>
           <div class="tbl-wrap"><table>
@@ -2041,7 +2041,9 @@ function autoAssign(type){
 
 function renderResultsTable(papers){
   if(!papers)return;
-  window.dashData = { papers }; // 存全域供排序/覆蓋使用
+  // 同步到全域 dashData（只更新 papers，保留 reviewers/stats 等）
+  if(!window.dashData) window.dashData = {};
+  window.dashData.papers = papers;
   papers.forEach(p=>{
     p.category=normCat(p.category);
     // 若有管理員類別覆蓋，套用
@@ -2071,13 +2073,7 @@ function renderResultsTable(papers){
   const allRankMap={};
   [...rankable].sort(defaultSort).forEach((p,i)=>{ allRankMap[p.id]=i+1; });
 
-  function badge(rank){
-    if(rank===undefined)return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';
-    const medals={1:'🥇',2:'🥈',3:'🥉'};
-    const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';
-    const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';
-    return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}第${rank}名</span>`;
-  }
+  function badge(_rank){ return ''; /* 展出方式欄已取代名次 */ }
   function gapCell(p){
     const valid=p.reviews.filter(r=>!r.rejected);
     if(valid.length>=2){const sc=valid.map(r=>r.total).sort((a,b)=>a-b);const g=sc[sc.length-1]-sc[0];return g>10?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700">⚠ ${g}分</span>`:`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;}
@@ -2822,7 +2818,7 @@ function exportResultsCSV(type){
         const valid = p.reviews.filter(r=>!r.rejected);
         const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
         const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        rows.push([i+1, p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.recommended?'是':'否', rc, gap]);
+        const dm=_displayMode[p.id]||'eposter'; rows.push([dm==='physical'?'實體展示':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
       });
     } else if(dashData && dashData.papers){
       let rank = 1;
@@ -2831,7 +2827,7 @@ function exportResultsCSV(type){
         const valid = p.reviews.filter(r=>!r.rejected);
         const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
         const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        rows.push([rank++, p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.recommended?'是':'否', rc, gap]);
+        const dm2=_displayMode[p.id]||'eposter'; rows.push([dm2==='physical'?'實體展示':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
       });
     }
 
