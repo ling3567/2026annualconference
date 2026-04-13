@@ -905,7 +905,7 @@ body.cat-override-on .cat-override-cell:hover{
         <h3>海報論文 — 評分結果</h3>
         <div style="display:flex;align-items:center;gap:.5rem">
           <input type="text" id="resultSearch" placeholder="搜尋題目/投稿單位…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:200px;font-family:inherit" oninput="filterResults()">
-          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">重新整理</button>
+          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">資料載入</button>
         </div>
       </div>
       <div class="sec-body">
@@ -943,7 +943,7 @@ body.cat-override-on .cat-override-cell:hover{
           </div>
           <div class="tbl-wrap"><table>
             <thead><tr>
-              <th style="width:80px">名次</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px;cursor:pointer;user-select:none" id="thCatScore" onclick="sortResultsByScore('cat')" title="點擊依分數排序">平均總分 <span id="thCatScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">分數差距</th><th style="width:70px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
+              <th style="width:90px">展出方式</th><th style="width:72px">編號</th><th>論文題目</th><th style="width:110px">投稿單位</th><th style="width:46px">類別</th><th style="width:76px;cursor:pointer;user-select:none" id="thCatScore" onclick="sortResultsByScore('cat')" title="點擊依分數排序">平均總分 <span id="thCatScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:70px">分數差距</th><th style="width:46px;cursor:pointer;user-select:none" id="thCatRec" onclick="sortResultsByRec('cat')" title="點擊依推薦票數排序">推薦 <span id="thCatRecIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">退稿</th><th style="width:50px">詳細</th>
             </tr></thead>
             <tbody id="resultsCatBody"></tbody>
           </table></div>
@@ -953,7 +953,7 @@ body.cat-override-on .cat-override-cell:hover{
         <div id="rPanelAll" style="display:none">
           <div class="tbl-wrap"><table>
             <thead><tr>
-              <th style="width:72px">名次</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px;cursor:pointer;user-select:none" id="thAllScore" onclick="sortResultsByScore('all')" title="點擊依分數排序">平均總分 <span id="thAllScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">分數差距</th><th style="width:70px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
+              <th style="width:90px">展出方式</th><th style="width:72px">編號</th><th>論文題目</th><th style="width:110px">投稿單位</th><th style="width:46px">類別</th><th style="width:76px;cursor:pointer;user-select:none" id="thAllScore" onclick="sortResultsByScore('all')" title="點擊依分數排序">平均總分 <span id="thAllScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:70px">分數差距</th><th style="width:46px;cursor:pointer;user-select:none" id="thAllRec" onclick="sortResultsByRec('all')" title="點擊依推薦票數排序">推薦 <span id="thAllRecIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">退稿</th><th style="width:50px">詳細</th>
             </tr></thead>
             <tbody id="resultsAllBody"></tbody>
           </table></div>
@@ -1938,11 +1938,11 @@ async function loadDashboard(){
     renderStats(r.stats);
     renderDashTable(r.papers);
     renderAssignTable(r.papers,r.reviewers);
-    await loadDisplayMode();
-    renderResultsTable(r.papers);
+    try{ await loadDisplayMode(); }catch(ldErr){ console.warn('loadDisplayMode skip:',ldErr); }
+    try{ renderResultsTable(r.papers); }catch(rtErr){ console.error('renderResultsTable:',rtErr); }
     renderRvTable(r.reviewers);
     loadOsceDashboard();
-  }catch(e){showToast('連線失敗','err');console.error(e);}
+  }catch(e){showToast('連線失敗：'+( e&&e.message?e.message:String(e)),'err');console.error(e);}
   setLdr(false);
 }
 
@@ -2580,16 +2580,7 @@ document.addEventListener('dragend',()=>{
   _dragSrcRow=null;
 });
 function reNumberRows(tbody){
-  const rows=[...tbody.querySelectorAll('tr[draggable]')];
-  rows.forEach((tr,i)=>{
-    const rankCell=tr.querySelector('td:first-child');if(!rankCell)return;
-    const rank=i+1;
-    const medals={1:'🥇',2:'🥈',3:'🥉'};
-    const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';
-    const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';
-    rankCell.innerHTML='<span style="color:#94a3b8;font-size:.9rem;margin-right:.2rem">⠿</span>'
-      +`<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}第${rank}名</span>`;
-  });
+  /* 名次欄已改為「展出方式」，不再重新編號 */
 }
 
 // ══ 點擊欄標題依分數排序 ══
@@ -2803,7 +2794,7 @@ function exportResultsCSV(type){
 
   if(type === 'poster'){
     title = 'TSMCSD2026_海報論文評分結果';
-    rows.push(['名次','編號','論文題目','投稿單位','類別','建議改類','平均總分','推薦','退稿數','分數差距']);
+    rows.push(['展出方式','編號','論文題目','投稿單位','類別','建議改類','平均總分','推薦票數','退稿數','分數差距']);
 
     // 優先用目前表格排列（含拖動後的順序）
     const tbody = el('resultsCatBody') || el('resultsAllBody');
