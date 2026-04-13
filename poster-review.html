@@ -909,7 +909,7 @@ body.cat-override-on .cat-override-cell:hover{
         </div>
       </div>
       <div class="sec-body">
-        <p style="font-size:.82rem;color:#718096;margin-bottom:.7rem">依平均總分由高到低排列・<strong style="color:#3b82f6">可點擊「平均總分」欄標題切換排序</strong>・退稿論文不列入排名（需全體評審一致退稿；部分退稿仍列入計分並加註提醒）</p>
+        <p style="font-size:.82rem;color:#718096;margin-bottom:.7rem">依平均總分由高到低排列・<strong style="color:#3b82f6">點擊「平均總分」或「推薦」欄標題可排序</strong>・退稿論文不列入排名（需全體評審一致退稿；部分退稿仍列入計分並加註提醒）</p>
         <!-- 類別覆蓋說明列 -->
         <div id="catOverrideBar" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:.6rem 1rem;margin-bottom:.9rem;font-size:.82rem;color:#78350f;align-items:center;gap:.75rem;flex-wrap:wrap">
           <span>⚡ <strong>類別覆蓋模式</strong>：點擊論文列中的類別欄位可變更其所屬類別，變更後點「重新計算排名」套用。</span>
@@ -938,12 +938,12 @@ body.cat-override-on .cat-override-cell:hover{
         <!-- 分類排名 -->
         <div id="rPanelCat">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
-            <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名，依平均總分排列・可拖動調整順序・或點擊「平均總分」欄標題重新排序</span>
-            <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">⬇ 匯出 CSV</button>
+            <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各自排名・可拖動調整順序・或點擊分數欄自動排序</span>
+            <button class="adm-btn adm-btn-sm" style="background:#1d4ed8;color:white;border:none" onclick="saveDisplayModeToGAS()">儲存展出方式</button> <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">匯出 CSV</button>
           </div>
           <div class="tbl-wrap"><table>
             <thead><tr>
-              <th style="width:90px">展出方式</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px;cursor:pointer;user-select:none" id="thCatScore" onclick="sortResultsByScore('cat')" title="點擊依分數排序">平均總分 <span id="thCatScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">分數差距</th><th style="width:45px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
+              <th style="width:80px">名次</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px;cursor:pointer;user-select:none" id="thCatScore" onclick="sortResultsByScore('cat')" title="點擊依分數排序">平均總分 <span id="thCatScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">分數差距</th><th style="width:70px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
             </tr></thead>
             <tbody id="resultsCatBody"></tbody>
           </table></div>
@@ -953,7 +953,7 @@ body.cat-override-on .cat-override-cell:hover{
         <div id="rPanelAll" style="display:none">
           <div class="tbl-wrap"><table>
             <thead><tr>
-              <th style="width:90px">展出方式</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px;cursor:pointer;user-select:none" id="thAllScore" onclick="sortResultsByScore('all')" title="點擊依分數排序">平均總分 <span id="thAllScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">分數差距</th><th style="width:45px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
+              <th style="width:72px">名次</th><th style="width:80px">編號</th><th>論文題目</th><th style="width:130px">投稿單位</th><th style="width:50px">類別</th><th style="width:80px;cursor:pointer;user-select:none" id="thAllScore" onclick="sortResultsByScore('all')" title="點擊依分數排序">平均總分 <span id="thAllScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">分數差距</th><th style="width:70px">推薦</th><th style="width:90px">退稿</th><th style="width:50px">詳細</th>
             </tr></thead>
             <tbody id="resultsAllBody"></tbody>
           </table></div>
@@ -1938,6 +1938,7 @@ async function loadDashboard(){
     renderStats(r.stats);
     renderDashTable(r.papers);
     renderAssignTable(r.papers,r.reviewers);
+    await loadDisplayMode();
     renderResultsTable(r.papers);
     renderRvTable(r.reviewers);
     loadOsceDashboard();
@@ -2053,19 +2054,30 @@ function renderResultsTable(papers){
   const noScore   = papers.filter(p=>p.avgTotal===null && !isFullyRejected(p));
 
   // ── 每類獨立排名 ──
+  // 預設排序：推薦票數↓ → 平均分數↓
+  function defaultSort(a,b){
+    const ra=a.reviews.filter(r=>r.recommended||r.recommend).length;
+    const rb2=b.reviews.filter(r=>r.recommended||r.recommend).length;
+    if(rb2!==ra) return rb2-ra;
+    return (b.avgTotal||0)-(a.avgTotal||0);
+  }
   const catRankMap={};
   ['A','B','C'].forEach(cat=>{
-    let r=1,prev=null;
-    [...rankable].filter(p=>p.category===cat).sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i)=>{
-      if(p.avgTotal!==prev){r=i+1;} catRankMap[p.id]=r; prev=p.avgTotal;
+    let r=1;
+    [...rankable].filter(p=>p.category===cat).sort(defaultSort).forEach((p,i)=>{
+      catRankMap[p.id]=i+1;
     });
   });
-  const allRankMap={};let ar=1,ap=null;
-  [...rankable].sort((a,b)=>b.avgTotal-a.avgTotal).forEach((p,i)=>{
-    if(p.avgTotal!==ap){ar=i+1;} allRankMap[p.id]=ar; ap=p.avgTotal;
-  });
+  const allRankMap={};
+  [...rankable].sort(defaultSort).forEach((p,i)=>{ allRankMap[p.id]=i+1; });
 
-  function badge(_rank){ return ''; /* 名次欄已改為展出方式 */ }
+  function badge(rank){
+    if(rank===undefined)return '<span style="color:#cbd5e0;font-size:.78rem">未評分</span>';
+    const medals={1:'🥇',2:'🥈',3:'🥉'};
+    const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';
+    const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';
+    return `<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}第${rank}名</span>`;
+  }
   function gapCell(p){
     const valid=p.reviews.filter(r=>!r.rejected);
     if(valid.length>=2){const sc=valid.map(r=>r.total).sort((a,b)=>a-b);const g=sc[sc.length-1]-sc[0];return g>10?`<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .55rem;border-radius:6px;font-size:.78rem;font-weight:700">⚠ ${g}分</span>`:`<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;}
@@ -2076,38 +2088,70 @@ function renderResultsTable(papers){
 
   // ── 有效論文列 ──
   function row(p,rb){
-    // 退稿狀態（部分評審退稿）
+    // 退稿狀態
     const rejCount=p.reviews.filter(r=>r.rejected).length;
     const totalRevs=p.reviews.length;
     let rejCell='—';
-    if(rejCount>0){
-      rejCell=`<span style="background:#fee2e2;color:#991b1b;padding:.15rem .5rem;border-radius:5px;font-size:.75rem;font-weight:700">${rejCount}/${totalRevs}位退稿</span>`;
-    }
+    if(rejCount>0) rejCell=`<span style="background:#fee2e2;color:#991b1b;padding:.15rem .5rem;border-radius:5px;font-size:.75rem;font-weight:700">${rejCount}/${totalRevs}位退稿</span>`;
     // 推薦：純數字
     const recCount=p.reviews.filter(r=>r.recommended||r.recommend).length;
     const recCell=p.avgTotal!==null?`<span style="font-weight:700;color:#1c1c2e">${recCount}</span>`:'—';
+    // 類別
     const catAdjusts=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>normCat(r.catAdjust)||r.catAdjust))].filter(Boolean);
     const catFull={A:'A 類｜臨床技能教育、模擬教學與跨專業學習',B:'B 類｜評量、信任決策與能力導向醫學教育',C:'C 類｜人文素養、醫療韌性與專業認同'};
     const catAdjustBadge=catAdjusts.length?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem" title="${catAdjusts.map(c=>catFull[c]||c).join('；')}">建議改→${catAdjusts.join('/')}</span>`:'';
     const effectiveCat=(_catOverrides&&_catOverrides[p.id])||normCat(p.category)||'—';
     const isOverridden=_catOverrides&&_catOverrides[p.id]&&_catOverrides[p.id]!==normCat(p.category);
     const catCellContent=`<span style="font-weight:600">${effectiveCat}</span>${isOverridden?`<span style="background:#fef3c7;color:#92400e;font-size:.65rem;font-weight:700;padding:.1rem .3rem;border-radius:3px;margin-left:.25rem;display:inline-block">↑覆蓋</span>`:''}${catAdjustBadge}`;
+    // 展出方式
     const dispMode=_displayMode[p.id]||'eposter';
-    const dispCell=`<button onclick="toggleDisplay('${p.id}',this)" style="border:1.5px solid ${dispMode==='eposter'?'#cbd5e0':'#2563eb'};background:${dispMode==='eposter'?'#f8fafc':'#eff6ff'};color:${dispMode==='eposter'?'#64748b':'#1d4ed8'};border-radius:6px;padding:.3rem .65rem;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit">${dispMode==='eposter'?'ePoster':'實體展示'}</button>`;
-    return `<tr draggable="true" data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}"
+    const confirmed=p.memberConfirmed||'';
+    const canPhysical=confirmed==='會員已繳年費';
+    const contactName=p.contactName||'';
+    const sameContactPhysical=contactName?Object.entries(_displayMode).filter(([pid2,m])=>m==='physical'&&pid2!==p.id&&(window.dashData?.papers||[]).find(x=>x.id===pid2&&x.contactName===contactName)).length:0;
+    let dispCell;
+    if(!canPhysical){
+      dispCell=`<span style="color:#94a3b8;font-size:.78rem;font-weight:500;display:block;text-align:center">ePoster<br><span style="font-size:.68rem;color:#f87171">${confirmed==='非會員'?'非會員':'未繳費'}</span></span>`;
+    } else {
+      const isPhys=dispMode==='physical';
+      const warnDup=isPhys&&sameContactPhysical>0;
+      dispCell=`<button onclick="toggleDisplay('${p.id}',this,true)" data-pid="${p.id}"
+        style="border:1.5px solid ${isPhys?'#2563eb':'#cbd5e0'};background:${isPhys?'#eff6ff':'#f8fafc'};color:${isPhys?'#1d4ed8':'#64748b'};border-radius:6px;padding:.28rem .6rem;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;line-height:1.5">${isPhys?'實體展示':'ePoster'}${warnDup?'<br><span style="font-size:.65rem;color:#f59e0b;font-weight:700">⚠ 同人重複</span>':''}</button>`;
+    }
+    // 子列（點擊列展開）
+    const memberOk=confirmed==='會員已繳年費';
+    const memberBadge=memberOk
+      ?`<span style="color:#16a34a;font-size:.75rem;font-weight:600">已繳費</span>`
+      :confirmed==='非會員'
+        ?`<span style="color:#9ca3af;font-size:.75rem">非會員</span>`
+        :`<span style="color:#dc2626;font-size:.75rem;font-weight:600">未繳費</span>`;
+    const otherPapers=(window.dashData?.papers||[]).filter(x=>x.id!==p.id&&x.contactName===contactName&&contactName);
+    const otherStr=otherPapers.length?otherPapers.map(x=>{const m=_displayMode[x.id]||'eposter';return `${x.paperNo||x.id}（${m==='physical'?'<span style="color:#1d4ed8;font-weight:600">實體</span>':'ePoster'}）`;}).join('、'):'無';
+    const subRow=`<tr id="sub_${p.id}" style="display:none;background:#f8fafc">
+      <td colspan="10" style="padding:.55rem 1rem .7rem 2.5rem;border-top:1px dashed #e2e8f0">
+        <div style="display:flex;gap:2.5rem;flex-wrap:wrap;font-size:.82rem;color:#334155;align-items:flex-start">
+          <div><span style="color:#94a3b8;font-size:.72rem;display:block;margin-bottom:.1rem">聯絡人</span><strong>${esc(contactName||'—')}</strong></div>
+          <div><span style="color:#94a3b8;font-size:.72rem;display:block;margin-bottom:.1rem">學會會員</span><strong>${esc(p.memberNames||'—')}</strong>&ensp;${memberBadge}</div>
+          <div><span style="color:#94a3b8;font-size:.72rem;display:block;margin-bottom:.1rem">同投稿者其他篇</span><span style="font-size:.8rem">${otherStr}</span></div>
+        </div>
+        ${!memberOk?`<div style="margin-top:.4rem;font-size:.72rem;color:#dc2626">⚠ 未繳年費，不可設為實體展示</div>`:''}
+        ${sameContactPhysical>0?`<div style="margin-top:.4rem;font-size:.72rem;color:#92400e">⚠ 同投稿者已有 ${sameContactPhysical} 篇設為實體展示，請留意分配</div>`:''}
+      </td>
+    </tr>`;
+    return `<tr draggable="true" data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}" data-rec="${recCount}"
       ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)"
-      ondragleave="this.style.borderTop=''">
-      <td style="text-align:center">${dispCell}</td>
+      ondragleave="this.style.borderTop=''" onclick="toggleSubRow('${p.id}',event)" style="cursor:pointer">
+      <td style="text-align:center" onclick="event.stopPropagation()">${dispCell}</td>
       <td><span class="chip chip-blue">${p.paperNo||'—'}</span></td>
-      <td style="max-width:200px;line-height:1.5;font-size:.88rem">${esc(p.title)}</td>
+      <td style="max-width:180px;line-height:1.5;font-size:.88rem">${esc(p.title)}</td>
       <td style="font-size:.82rem;color:#64748b">${esc(p.contactUnit||'—')}</td>
-      <td class="cat-override-cell" data-pid="${p.id}" data-orig-cat="${normCat(p.category)||''}" onclick="clickCatCell('${p.id}','${effectiveCat}')" style="cursor:default">${catCellContent}</td>
+      <td class="cat-override-cell" data-pid="${p.id}" data-orig-cat="${normCat(p.category)||''}" onclick="event.stopPropagation();clickCatCell('${p.id}','${effectiveCat}')" style="cursor:default">${catCellContent}</td>
       <td style="font-weight:700;font-size:1rem">${p.avgTotal!==null?p.avgTotal+'分':'—'}</td>
       <td>${gapCell(p)}</td>
       <td>${recCell}</td>
       <td>${rejCell}</td>
-      <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button></td>
-    </tr>`;
+      <td onclick="event.stopPropagation()"><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button></td>
+    </tr>${subRow}`;
   }
 
   // ── 退稿論文列 ──
@@ -2129,7 +2173,7 @@ function renderResultsTable(papers){
     let html='';
     ['A','B','C'].forEach(cat=>{
       const catPapers=[...rankable].filter(p=>p.category===cat)
-        .sort((a,b)=>(catRankMap[a.id]??99)-(catRankMap[b.id]??99)||b.avgTotal-a.avgTotal);
+        .sort(defaultSort);
       const catNoScore=noScore.filter(p=>p.category===cat);
       const catRej=rejected.filter(p=>p.category===cat);
       if(!catPapers.length&&!catNoScore.length&&!catRej.length) return;
@@ -2149,7 +2193,7 @@ function renderResultsTable(papers){
   const allBody=el('resultsAllBody');
   if(allBody){
     let html='';
-    const sortedRankable=[...rankable].sort((a,b)=>(allRankMap[a.id]??99)-(allRankMap[b.id]??99)||b.avgTotal-a.avgTotal);
+    const sortedRankable=[...rankable].sort(defaultSort);
     sortedRankable.forEach(p=>{ html+=row(p,badge(allRankMap[p.id])); });
     noScore.forEach(p=>{ html+=row(p,badge(undefined)); });
     if(rejected.length){
@@ -2539,7 +2583,18 @@ document.addEventListener('dragend',()=>{
   document.querySelectorAll('tr[draggable]').forEach(tr=>{tr.style.opacity='';tr.style.borderTop='';});
   _dragSrcRow=null;
 });
-function reNumberRows(tbody){ /* 名次欄已移除，保留函式供拖動相容 */ }
+function reNumberRows(tbody){
+  const rows=[...tbody.querySelectorAll('tr[draggable]')];
+  rows.forEach((tr,i)=>{
+    const rankCell=tr.querySelector('td:first-child');if(!rankCell)return;
+    const rank=i+1;
+    const medals={1:'🥇',2:'🥈',3:'🥉'};
+    const bg=rank===1?'#fef9c3':rank===2?'#f0f4f8':rank===3?'#fef3c7':'#f8fafc';
+    const co=rank===1?'#854d0e':rank===2?'#334155':rank===3?'#92400e':'#64748b';
+    rankCell.innerHTML='<span style="color:#94a3b8;font-size:.9rem;margin-right:.2rem">⠿</span>'
+      +`<span style="display:inline-flex;align-items:center;gap:.2rem;background:${bg};color:${co};padding:.2rem .6rem;border-radius:7px;font-size:.82rem;font-weight:700">${medals[rank]||''}第${rank}名</span>`;
+  });
+}
 
 // ══ 點擊欄標題依分數排序 ══
 let _scoreSortDir = { cat: 'desc', all: 'desc' };
@@ -2606,20 +2661,95 @@ function sortResultsByScore(panel) {
   showToast('已依分數' + (dir === 'desc' ? '高→低' : '低→高') + '排序', 'ok');
 }
 
-// ══ 類別覆蓋模式 ══
-let _catOverrides = {}; // { paperId: 'A'|'B'|'C' }
-let _displayMode = {}; // { paperId: 'eposter'|'physical' } 預設 eposter
+// ══ 展開/收合子列（memberConfirmed 等資訊）══
+function toggleSubRow(pid, e){
+  if(e && e.target && (e.target.tagName==='BUTTON'||e.target.tagName==='A'||e.target.closest('button')||e.target.closest('a'))) return;
+  const sub=document.getElementById('sub_'+pid);
+  if(!sub) return;
+  const isOpen=sub.style.display!=='none'&&sub.style.display!=='';
+  sub.style.display=isOpen?'none':'table-row';
+}
 
-function toggleDisplay(pid, btn){
+// ══ 展出方式切換（含繳費檢查）══
+function toggleDisplay(pid, btn, canPhysical){
+  if(!canPhysical){ showToast('此篇會員未繳年費，不可設為實體展示','err'); return; }
   const cur=_displayMode[pid]||'eposter';
   const next=cur==='eposter'?'physical':'eposter';
   _displayMode[pid]=next;
-  const isPhys=next==='physical';
-  btn.textContent=isPhys?'實體展示':'ePoster';
-  btn.style.borderColor=isPhys?'#2563eb':'#cbd5e0';
-  btn.style.background=isPhys?'#eff6ff':'#f8fafc';
-  btn.style.color=isPhys?'#1d4ed8':'#64748b';
+  // 重新渲染以更新同投稿者警示
+  if(window.dashData&&window.dashData.papers) renderResultsTable(window.dashData.papers);
 }
+
+// ══ 存檔展出方式至 GAS ══
+async function saveDisplayModeToGAS(){
+  const entries=Object.entries(_displayMode).map(([pid,mode])=>({pid,mode}));
+  if(!entries.length){ showToast('尚無展出方式異動需要儲存','err'); return; }
+  setLdr(true);
+  try{
+    const r=await api({action:'saveDisplayMode', dataJson:JSON.stringify(entries)});
+    if(r&&r.success){ showToast('展出方式已儲存至 Google Sheets','ok'); }
+    else { showToast('儲存失敗，請重試','err'); }
+  }catch(e){ showToast('連線失敗','err'); console.error(e); }
+  finally{ setLdr(false); }
+}
+
+// ══ 載入已儲存的展出方式 ══
+async function loadDisplayMode(){
+  try{
+    const r=await api({action:'getDisplayMode'});
+    if(r&&r.success&&r.data){
+      r.data.forEach(({pid,mode})=>{ _displayMode[pid]=mode; });
+    }
+  }catch(e){ console.warn('loadDisplayMode failed',e); }
+}
+
+// ══ 推薦票數排序 ══
+let _recSortDir={cat:'desc',all:'desc'};
+function sortResultsByRec(panel){
+  const tbodyId=panel==='cat'?'resultsCatBody':'resultsAllBody';
+  const iconId=panel==='cat'?'thCatRecIcon':'thAllRecIcon';
+  const tbody=el(tbodyId); if(!tbody) return;
+  _recSortDir[panel]=_recSortDir[panel]==='desc'?'asc':'desc';
+  const dir=_recSortDir[panel];
+  const icon=el(iconId); if(icon) icon.textContent=dir==='desc'?'↓':'↑';
+  if(panel==='cat'){
+    const groups={};let curCat=null;
+    [...tbody.children].forEach(tr=>{
+      if(tr.id&&tr.id.startsWith('sub_')) return;
+      if(!tr.hasAttribute('draggable')){curCat=tr;return;}
+      if(!curCat)return;
+      const key=curCat.textContent.trim();
+      if(!groups[key]) groups[key]={sep:curCat,rows:[]};
+      groups[key].rows.push(tr);
+    });
+    Object.values(groups).forEach(g=>{
+      g.rows.sort((a,b)=>{
+        const ra=parseInt(a.dataset.rec||'0'),rb2=parseInt(b.dataset.rec||'0');
+        if(ra!==rb2) return dir==='desc'?rb2-ra:ra-rb2;
+        const sa=parseFloat(a.querySelector('td:nth-child(6)')?.textContent)||0;
+        const sb=parseFloat(b.querySelector('td:nth-child(6)')?.textContent)||0;
+        return dir==='desc'?sb-sa:sa-sb;
+      });
+      tbody.appendChild(g.sep);
+      g.rows.forEach(r=>{ tbody.appendChild(r); const sub=document.getElementById('sub_'+r.dataset.pid); if(sub) tbody.appendChild(sub); });
+    });
+  } else {
+    const rows=[...tbody.querySelectorAll('tr[draggable]')];
+    rows.sort((a,b)=>{
+      const ra=parseInt(a.dataset.rec||'0'),rb2=parseInt(b.dataset.rec||'0');
+      if(ra!==rb2) return dir==='desc'?rb2-ra:ra-rb2;
+      const sa=parseFloat(a.querySelector('td:nth-child(6)')?.textContent)||0;
+      const sb=parseFloat(b.querySelector('td:nth-child(6)')?.textContent)||0;
+      return dir==='desc'?sb-sa:sa-sb;
+    });
+    rows.forEach(r=>{ tbody.appendChild(r); const sub=document.getElementById('sub_'+r.dataset.pid); if(sub) tbody.appendChild(sub); });
+  }
+  reNumberRows(tbody);
+  showToast('已依推薦票數'+(dir==='desc'?'由高到低':'由低到高')+'排序','ok');
+}
+
+// ══ 類別覆蓋模式 ══
+let _catOverrides = {}; // { paperId: 'A'|'B'|'C' }
 let _catOverrideMode = false;
 
 function toggleCatOverrideMode(on) {
@@ -2677,7 +2807,7 @@ function exportResultsCSV(type){
 
   if(type === 'poster'){
     title = 'TSMCSD2026_海報論文評分結果';
-    rows.push(['展出方式','編號','論文題目','投稿單位','類別','建議改類','平均總分','推薦票數','退稿數','分數差距']);
+    rows.push(['名次','編號','論文題目','投稿單位','類別','建議改類','平均總分','推薦','退稿數','分數差距']);
 
     // 優先用目前表格排列（含拖動後的順序）
     const tbody = el('resultsCatBody') || el('resultsAllBody');
@@ -2692,7 +2822,7 @@ function exportResultsCSV(type){
         const valid = p.reviews.filter(r=>!r.rejected);
         const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
         const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        const disp=_displayMode[p.id]||'eposter'; rows.push([disp==='physical'?'實體展示':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
+        rows.push([i+1, p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.recommended?'是':'否', rc, gap]);
       });
     } else if(dashData && dashData.papers){
       let rank = 1;
@@ -2701,7 +2831,7 @@ function exportResultsCSV(type){
         const valid = p.reviews.filter(r=>!r.rejected);
         const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
         const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        const disp2=_displayMode[p.id]||'eposter'; rows.push([disp2==='physical'?'實體展示':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
+        rows.push([rank++, p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.recommended?'是':'否', rc, gap]);
       });
     }
 
