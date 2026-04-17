@@ -2607,61 +2607,62 @@ function sortResultsByScore(panel) {
   const iconId = panel === 'cat' ? 'thCatScoreIcon' : 'thAllScoreIcon';
   const tbody = el(bodyId); if (!tbody) return;
 
-  // 切換排序方向
   const dir = _scoreSortDir[panel] === 'desc' ? 'asc' : 'desc';
   _scoreSortDir[panel] = dir;
   const icon = el(iconId);
   if (icon) icon.textContent = dir === 'desc' ? '↓' : '↑';
 
-  // 只排序 draggable 列（有效論文），分隔列（類別標題列）保持不動
-  if (panel === 'cat') {
-    // 分類排名：每類內部獨立排序
-    const sepRows = [...tbody.querySelectorAll('tr:not([draggable])')];
-    const draggableRows = [...tbody.querySelectorAll('tr[draggable]')];
-
-    // 找出每個分隔列後面跟著哪些 draggable 列
-    const allRows = [...tbody.children];
-    let currentSep = null;
-    const groups = []; // [{sep, rows:[]}]
-    for (const tr of allRows) {
-      if (!tr.draggable) { currentSep = tr; groups.push({ sep: tr, rows: [] }); }
-      else if (groups.length) groups[groups.length - 1].rows.push(tr);
+  // 取得論文平均分數（從 dashData 找）
+  function getScore(tr){
+    const p = window.dashData?.papers?.find(x=>x.id===tr.dataset.pid);
+    return p ? (p.avgTotal??-1) : -1;
+  }
+  // 將主列+其子列一起移動
+  function appendWithSub(tr, refNode){
+    const sub = document.getElementById('sub_'+tr.dataset.pid);
+    if(refNode) {
+      tbody.insertBefore(tr, refNode);
+      if(sub) tbody.insertBefore(sub, refNode);
+    } else {
+      tbody.appendChild(tr);
+      if(sub) tbody.appendChild(sub);
     }
+  }
 
-    // 每組內部排序
+  if (panel === 'cat') {
+    // 分類檢視：每類內部獨立排序，類別分隔列保持不動
+    const allChildren = [...tbody.children];
+    const groups = []; // [{sep, rows:[tr,...]}]
+    let cur = null;
+    for (const tr of allChildren) {
+      // 子列（id=sub_xxx）跳過，跟主列一起處理
+      if (tr.id && tr.id.startsWith('sub_')) continue;
+      if (!tr.hasAttribute('draggable')) {
+        cur = { sep: tr, rows: [] };
+        groups.push(cur);
+      } else if (cur) {
+        cur.rows.push(tr);
+      }
+    }
     groups.forEach(g => {
-      g.rows.sort((a, b) => {
-        const pa = dashData && dashData.papers && dashData.papers.find(x => x.id === a.dataset.pid);
-        const pb = dashData && dashData.papers && dashData.papers.find(x => x.id === b.dataset.pid);
-        const sa = pa ? (pa.avgTotal ?? -1) : -1;
-        const sb = pb ? (pb.avgTotal ?? -1) : -1;
-        return dir === 'desc' ? sb - sa : sa - sb;
-      });
-      // 重新插入
-      g.rows.forEach(tr => tbody.insertBefore(tr, g.sep.nextSibling));
-      // 依排序後順序插回（需反向，因 insertBefore 是在 sep 之後）
-      // 實際上直接 append 到 sep 之後
+      g.rows.sort((a,b) => dir==='desc' ? getScore(b)-getScore(a) : getScore(a)-getScore(b));
+      // 先把 sep 放好，再依序插入主列+子列
       let ref = g.sep.nextSibling;
+      // 跳過已在正確位置的 sep 本身
       g.rows.forEach(tr => {
+        const sub = document.getElementById('sub_'+tr.dataset.pid);
         tbody.insertBefore(tr, ref);
-        ref = tr.nextSibling;
+        if(sub) tbody.insertBefore(sub, ref);
       });
     });
   } else {
-    // 總排名：所有 draggable 列一起排序
+    // 總覽：所有 draggable 列一起排序
     const rows = [...tbody.querySelectorAll('tr[draggable]')];
-    rows.sort((a, b) => {
-      const pa = dashData && dashData.papers && dashData.papers.find(x => x.id === a.dataset.pid);
-      const pb = dashData && dashData.papers && dashData.papers.find(x => x.id === b.dataset.pid);
-      const sa = pa ? (pa.avgTotal ?? -1) : -1;
-      const sb = pb ? (pb.avgTotal ?? -1) : -1;
-      return dir === 'desc' ? sb - sa : sa - sb;
-    });
-    // 找到第一個非退稿的分隔列前插入
-    const firstNonDrag = [...tbody.children].find(tr => !tr.draggable);
-    rows.forEach(tr => firstNonDrag ? tbody.insertBefore(tr, firstNonDrag) : tbody.appendChild(tr));
+    rows.sort((a,b) => dir==='desc' ? getScore(b)-getScore(a) : getScore(a)-getScore(b));
+    // 找退稿分隔列作為插入終點
+    const rejSep = [...tbody.children].find(tr => !tr.hasAttribute('draggable') && !tr.id?.startsWith('sub_'));
+    rows.forEach(tr => appendWithSub(tr, rejSep||null));
   }
-  reNumberRows(tbody);
   showToast('已依分數' + (dir === 'desc' ? '高→低' : '低→高') + '排序', 'ok');
 }
 
@@ -2717,25 +2718,27 @@ function sortResultsByRec(panel){
   const dir=_recSortDir[panel];
   const icon=el(iconId); if(icon) icon.textContent=dir==='desc'?'↓':'↑';
   if(panel==='cat'){
-    const groups={};let curCat=null;
-    [...tbody.children].forEach(tr=>{
-      if(tr.id&&tr.id.startsWith('sub_')) return;
-      if(!tr.hasAttribute('draggable')){curCat=tr;return;}
-      if(!curCat)return;
-      const key=curCat.textContent.trim();
-      if(!groups[key]) groups[key]={sep:curCat,rows:[]};
-      groups[key].rows.push(tr);
-    });
-    Object.values(groups).forEach(g=>{
+    const allChildren=[...tbody.children];
+    const groups=[];let cur=null;
+    for(const tr of allChildren){
+      if(tr.id&&tr.id.startsWith('sub_')) continue;
+      if(!tr.hasAttribute('draggable')){cur={sep:tr,rows:[]};groups.push(cur);}
+      else if(cur) cur.rows.push(tr);
+    }
+    groups.forEach(g=>{
       g.rows.sort((a,b)=>{
         const ra=parseInt(a.dataset.rec||'0'),rb2=parseInt(b.dataset.rec||'0');
         if(ra!==rb2) return dir==='desc'?rb2-ra:ra-rb2;
-        const sa=parseFloat(a.querySelector('td:nth-child(6)')?.textContent)||0;
-        const sb=parseFloat(b.querySelector('td:nth-child(6)')?.textContent)||0;
-        return dir==='desc'?sb-sa:sa-sb;
+        const pa=window.dashData?.papers?.find(x=>x.id===a.dataset.pid);
+        const pb=window.dashData?.papers?.find(x=>x.id===b.dataset.pid);
+        return dir==='desc'?(pb?.avgTotal??-1)-(pa?.avgTotal??-1):(pa?.avgTotal??-1)-(pb?.avgTotal??-1);
       });
-      tbody.appendChild(g.sep);
-      g.rows.forEach(r=>{ tbody.appendChild(r); const sub=document.getElementById('sub_'+r.dataset.pid); if(sub) tbody.appendChild(sub); });
+      let ref=g.sep.nextSibling;
+      g.rows.forEach(r=>{
+        const sub=document.getElementById('sub_'+r.dataset.pid);
+        tbody.insertBefore(r,ref);
+        if(sub) tbody.insertBefore(sub,ref);
+      });
     });
   } else {
     const rows=[...tbody.querySelectorAll('tr[draggable]')];
