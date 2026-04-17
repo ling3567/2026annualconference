@@ -1159,6 +1159,10 @@ let osceAssignments = {};
 let admCurTab = 'dashboard';
 let dashType = 'poster', assignType = 'poster', resultsType = 'poster';
 let _confirmResolve = null;
+// 管理員評分結果頁全域狀態
+let _displayMode = {};    // { paperId: 'eposter'|'physical' }
+let _catOverrides = {};   // { paperId: 'A'|'B'|'C' }
+let _catOverrideMode = false;
 
 
 // 類別正規化（A/B/C，去除「類」等後綴）
@@ -2749,8 +2753,7 @@ function sortResultsByRec(panel){
 }
 
 // ══ 類別覆蓋模式 ══
-let _catOverrides = {}; // { paperId: 'A'|'B'|'C' }
-let _catOverrideMode = false;
+// _catOverrides / _catOverrideMode / _displayMode 已於頂部全域宣告
 
 function toggleCatOverrideMode(on) {
   _catOverrideMode = on;
