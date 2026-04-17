@@ -1919,9 +1919,14 @@ function admSwitchTab(t){
     const rbt=el('resultsTypePoster'); if(rbt) rbt.classList.add('active');
     const rbo=el('resultsTypeOsce');   if(rbo) rbo.classList.remove('active');
     resultsType='poster';
-    renderResultsTable(dashData?.papers||[]);
-    if(osceData) renderOsceResultsTable(osceData.cases);
-    else loadOsceDashboard();
+    if(!dashData){
+      // 尚未載入 → 先載入再渲染
+      loadDashboard();
+    } else {
+      try{ renderResultsTable(dashData.papers||[]); }catch(e){ console.error('renderResultsTable:',e); }
+      if(osceData) renderOsceResultsTable(osceData.cases);
+      else loadOsceDashboard();
+    }
   }
 }
 
@@ -2040,7 +2045,15 @@ function autoAssign(type){
 }
 
 function renderResultsTable(papers){
-  if(!papers)return;
+  if(!papers) return;
+  // 空陣列時顯示提示（通常是資料未載入）
+  if(!papers.length){
+    const cb=el('resultsCatBody'), ab=el('resultsAllBody');
+    const emptyMsg='<tr><td colspan="10" style="text-align:center;color:#718096;padding:2.5rem;font-size:.85rem">尚無資料，請點「資料載入」重新整理</td></tr>';
+    if(cb) cb.innerHTML=emptyMsg;
+    if(ab) ab.innerHTML=emptyMsg;
+    return;
+  }
   // 同步到全域 dashData（只更新 papers，保留 reviewers/stats 等）
   if(!window.dashData) window.dashData = {};
   window.dashData.papers = papers;
