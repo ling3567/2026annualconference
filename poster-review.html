@@ -2146,30 +2146,33 @@ function renderResultsTable(papers){
     // 子列（點擊列展開）
     const memberOk=confirmed==='會員已繳年費';
     const memberBadge=memberOk
-      ?`<span style="color:#166534;font-size:.78rem;font-weight:700;background:#bbf7d0;padding:.1rem .5rem;border-radius:4px">已繳費</span>`
+      ?`<span style="background:#dcfce7;color:#166534;font-size:.75rem;font-weight:700;padding:.15rem .55rem;border-radius:4px;border:1px solid #86efac">已繳費</span>`
       :confirmed==='非會員'
-        ?`<span style="color:#374151;font-size:.78rem;font-weight:600;background:#e5e7eb;padding:.1rem .5rem;border-radius:4px">非會員</span>`
-        :`<span style="color:#991b1b;font-size:.78rem;font-weight:700;background:#fecaca;padding:.1rem .5rem;border-radius:4px">未繳費</span>`;
+        ?`<span style="background:#f1f5f9;color:#475569;font-size:.75rem;font-weight:600;padding:.15rem .55rem;border-radius:4px;border:1px solid #cbd5e0">非會員</span>`
+        :`<span style="background:#fee2e2;color:#b91c1c;font-size:.75rem;font-weight:700;padding:.15rem .55rem;border-radius:4px;border:1px solid #fca5a5">未繳費</span>`;
     const otherPapers=(window.dashData?.papers||[]).filter(x=>x.id!==p.id&&x.contactName===contactName&&contactName);
     const otherStr=otherPapers.length?otherPapers.map(x=>{const m=_displayMode[x.id]||'eposter';return `${x.paperNo||x.id}（${m==='physical'?'<span style="color:#1d4ed8;font-weight:600">實體</span>':'ePoster'}）`;}).join('、'):'無';
-    const subRow=`<tr id="sub_${p.id}" style="display:none;background:#dbeafe;border-left:4px solid #1e4d8c">
-      <td colspan="10" style="padding:.7rem 1rem .85rem 2rem;border-top:2px solid #93c5fd;border-bottom:2px solid #93c5fd">
-        <div style="display:flex;gap:2.5rem;flex-wrap:wrap;font-size:.85rem;color:#1e3a5f;align-items:flex-start">
+    const subRow=`<tr id="sub_${p.id}" style="display:none;background:#f0f4f8">
+      <td colspan="10" style="padding:.6rem 1rem .75rem 1.5rem;border-top:1px solid #cbd5e0;border-bottom:2px solid #94a3b8">
+        <div style="display:flex;gap:3rem;flex-wrap:wrap;font-size:.85rem;color:#1e293b;align-items:flex-start">
           <div>
-            <span style="color:#1e4d8c;font-size:.72rem;font-weight:700;letter-spacing:.05em;display:block;margin-bottom:.2rem">聯絡人</span>
-            <strong style="font-size:.92rem;color:#0f172a">${esc(contactName||'—')}</strong>
+            <div style="font-size:.7rem;font-weight:700;color:#475569;letter-spacing:.06em;margin-bottom:.25rem">聯絡人</div>
+            <div style="font-size:.92rem;font-weight:700;color:#0f172a">${esc(contactName||'—')}</div>
           </div>
           <div>
-            <span style="color:#1e4d8c;font-size:.72rem;font-weight:700;letter-spacing:.05em;display:block;margin-bottom:.2rem">學會會員</span>
-            <strong style="font-size:.92rem;color:#0f172a">${esc(p.memberNames||'—')}</strong>&ensp;${memberBadge}
+            <div style="font-size:.7rem;font-weight:700;color:#475569;letter-spacing:.06em;margin-bottom:.25rem">學會會員</div>
+            <div style="display:flex;align-items:center;gap:.5rem">
+              <span style="font-size:.92rem;font-weight:700;color:#0f172a">${esc(p.memberNames||'—')}</span>
+              ${memberBadge}
+            </div>
           </div>
           <div>
-            <span style="color:#1e4d8c;font-size:.72rem;font-weight:700;letter-spacing:.05em;display:block;margin-bottom:.2rem">同投稿者其他篇</span>
-            <span style="font-size:.85rem;color:#1e3a5f">${otherStr}</span>
+            <div style="font-size:.7rem;font-weight:700;color:#475569;letter-spacing:.06em;margin-bottom:.25rem">同投稿者其他篇</div>
+            <div style="font-size:.85rem;color:#334155">${otherStr}</div>
           </div>
         </div>
-        ${!memberOk?`<div style="margin-top:.5rem;padding:.3rem .75rem;background:#fee2e2;border:1px solid #fca5a5;border-radius:5px;font-size:.78rem;font-weight:700;color:#991b1b;display:inline-block">⚠ 未繳年費，不可設為實體展示</div>`:''}
-        ${sameContactPhysical>0?`<div style="margin-top:.5rem;padding:.3rem .75rem;background:#fef3c7;border:1px solid #fcd34d;border-radius:5px;font-size:.78rem;font-weight:700;color:#78350f;display:inline-block">⚠ 同投稿者已有 ${sameContactPhysical} 篇設為實體展示，請留意分配</div>`:''}
+        ${!memberOk?`<div style="margin-top:.5rem;padding:.28rem .7rem;background:#fef2f2;border-left:3px solid #ef4444;font-size:.78rem;font-weight:600;color:#b91c1c">⚠ 未繳年費，不可設為實體展示</div>`:''}
+        ${sameContactPhysical>0?`<div style="margin-top:.35rem;padding:.28rem .7rem;background:#fffbeb;border-left:3px solid #f59e0b;font-size:.78rem;font-weight:600;color:#92400e">⚠ 同投稿者已有 ${sameContactPhysical} 篇設為實體展示，請留意分配</div>`:''}
       </td>
     </tr>`;
     return `<tr draggable="true" data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}" data-rec="${recCount}"
@@ -2651,29 +2654,23 @@ function sortResultsByScore(panel) {
   }
 
   if (panel === 'cat') {
-    // 分類檢視：每類內部獨立排序，類別分隔列保持不動
-    const allChildren = [...tbody.children];
-    const groups = []; // [{sep, rows:[tr,...]}]
-    let cur = null;
-    for (const tr of allChildren) {
-      // 子列（id=sub_xxx）跳過，跟主列一起處理
-      if (tr.id && tr.id.startsWith('sub_')) continue;
-      if (!tr.hasAttribute('draggable')) {
-        cur = { sep: tr, rows: [] };
-        groups.push(cur);
-      } else if (cur) {
-        cur.rows.push(tr);
-      }
+    // 先移出所有子列避免干擾
+    const subMapCat={};
+    [...tbody.querySelectorAll('tr[id^="sub_"]')].forEach(sub=>{subMapCat[sub.id]=sub;sub.parentNode.removeChild(sub);});
+    // 分組（分隔列 + 主列）
+    const groups=[];let cur=null;
+    for(const tr of [...tbody.children]){
+      if(!tr.hasAttribute('draggable')){cur={sep:tr,rows:[]};groups.push(cur);}
+      else if(cur) cur.rows.push(tr);
     }
-    groups.forEach(g => {
-      g.rows.sort((a,b) => dir==='desc' ? getScore(b)-getScore(a) : getScore(a)-getScore(b));
-      // 先把 sep 放好，再依序插入主列+子列
-      let ref = g.sep.nextSibling;
-      // 跳過已在正確位置的 sep 本身
-      g.rows.forEach(tr => {
-        const sub = document.getElementById('sub_'+tr.dataset.pid);
-        tbody.insertBefore(tr, ref);
-        if(sub) tbody.insertBefore(sub, ref);
+    groups.forEach(g=>{
+      g.rows.sort((a,b)=>dir==='desc'?getScore(b)-getScore(a):getScore(a)-getScore(b));
+      // sep 已在正確位置，在 sep 之後依序插入主列+子列
+      let ref=g.sep.nextSibling;
+      g.rows.forEach(tr=>{
+        tbody.insertBefore(tr,ref);
+        const sub=subMapCat['sub_'+tr.dataset.pid];
+        if(sub) tbody.insertBefore(sub,ref);
       });
     });
   } else {
@@ -2771,10 +2768,10 @@ function sortResultsByRec(panel){
   const dir=_recSortDir[panel];
   const icon=el(iconId); if(icon) icon.textContent=dir==='desc'?'↓':'↑';
   if(panel==='cat'){
-    const allChildren=[...tbody.children];
+    const subMapRCat={};
+    [...tbody.querySelectorAll('tr[id^="sub_"]')].forEach(sub=>{subMapRCat[sub.id]=sub;sub.parentNode.removeChild(sub);});
     const groups=[];let cur=null;
-    for(const tr of allChildren){
-      if(tr.id&&tr.id.startsWith('sub_')) continue;
+    for(const tr of [...tbody.children]){
       if(!tr.hasAttribute('draggable')){cur={sep:tr,rows:[]};groups.push(cur);}
       else if(cur) cur.rows.push(tr);
     }
@@ -2788,8 +2785,8 @@ function sortResultsByRec(panel){
       });
       let ref=g.sep.nextSibling;
       g.rows.forEach(r=>{
-        const sub=document.getElementById('sub_'+r.dataset.pid);
         tbody.insertBefore(r,ref);
+        const sub=subMapRCat['sub_'+r.dataset.pid];
         if(sub) tbody.insertBefore(sub,ref);
       });
     });
@@ -2847,19 +2844,19 @@ function sortResultsByDisplay(panel){
   }
 
   if(panel==='cat'){
-    const allChildren=[...tbody.children];
+    const subMapDCat={};
+    [...tbody.querySelectorAll('tr[id^="sub_"]')].forEach(sub=>{subMapDCat[sub.id]=sub;sub.parentNode.removeChild(sub);});
     const groups=[];let cur=null;
-    for(const tr of allChildren){
-      if(tr.id&&tr.id.startsWith('sub_')) continue;
+    for(const tr of [...tbody.children]){
       if(!tr.hasAttribute('draggable')){cur={sep:tr,rows:[]};groups.push(cur);}
       else if(cur) cur.rows.push(tr);
     }
     groups.forEach(g=>{
-      g.rows.sort((a,b)=> dir==='desc' ? dispVal(a)-dispVal(b) : dispVal(b)-dispVal(a));
+      g.rows.sort((a,b)=>dir==='desc'?dispVal(a)-dispVal(b):dispVal(b)-dispVal(a));
       let ref=g.sep.nextSibling;
       g.rows.forEach(tr=>{
-        const sub=document.getElementById('sub_'+tr.dataset.pid);
         tbody.insertBefore(tr,ref);
+        const sub=subMapDCat['sub_'+tr.dataset.pid];
         if(sub) tbody.insertBefore(sub,ref);
       });
     });
