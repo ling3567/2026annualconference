@@ -944,17 +944,24 @@ body.cat-override-on .cat-override-cell:hover{
           </div>
           <div class="tbl-wrap"><table>
             <thead><tr>
-              <th style="width:90px">展出方式</th><th style="width:72px">編號</th><th>論文題目</th><th style="width:110px">投稿單位</th><th style="width:46px">類別</th><th style="width:76px;cursor:pointer;user-select:none" id="thCatScore" onclick="sortResultsByScore('cat')" title="點擊依分數排序">平均總分 <span id="thCatScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:70px">分數差距</th><th style="width:46px;cursor:pointer;user-select:none" id="thCatRec" onclick="sortResultsByRec('cat')" title="點擊依推薦票數排序">推薦 <span id="thCatRecIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">退稿</th><th style="width:50px">詳細</th>
+              <th style="width:90px;cursor:pointer;user-select:none" id="thCatDisp" onclick="sortResultsByDisplay('cat')" title="點擊依展出方式排序">展出方式 <span id="thCatDispIcon" style="font-size:.7rem">↕</span></th><th style="width:72px">編號</th><th>論文題目</th><th style="width:110px">投稿單位</th><th style="width:46px">類別</th><th style="width:76px;cursor:pointer;user-select:none" id="thCatScore" onclick="sortResultsByScore('cat')" title="點擊依分數排序">平均總分 <span id="thCatScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:70px">分數差距</th><th style="width:46px;cursor:pointer;user-select:none" id="thCatRec" onclick="sortResultsByRec('cat')" title="點擊依推薦票數排序">推薦 <span id="thCatRecIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">退稿</th><th style="width:50px">詳細</th>
             </tr></thead>
             <tbody id="resultsCatBody"></tbody>
           </table></div>
         </div>
 
-        <!-- 總排名 -->
+        <!-- 總覽 -->
         <div id="rPanelAll" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+            <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">全部論文・可拖動調整・或點擊欄標題重新排序</span>
+            <div style="display:flex;gap:.4rem">
+              <button class="adm-btn adm-btn-sm" style="background:#1d4ed8;color:white;border:none" onclick="saveDisplayModeToGAS()">儲存展出方式</button>
+              <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">匯出 CSV</button>
+            </div>
+          </div>
           <div class="tbl-wrap"><table>
             <thead><tr>
-              <th style="width:90px">展出方式</th><th style="width:72px">編號</th><th>論文題目</th><th style="width:110px">投稿單位</th><th style="width:46px">類別</th><th style="width:76px;cursor:pointer;user-select:none" id="thAllScore" onclick="sortResultsByScore('all')" title="點擊依分數排序">平均總分 <span id="thAllScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:70px">分數差距</th><th style="width:46px;cursor:pointer;user-select:none" id="thAllRec" onclick="sortResultsByRec('all')" title="點擊依推薦票數排序">推薦 <span id="thAllRecIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">退稿</th><th style="width:50px">詳細</th>
+              <th style="width:90px;cursor:pointer;user-select:none" id="thAllDisp" onclick="sortResultsByDisplay('all')" title="點擊依展出方式排序">展出方式 <span id="thAllDispIcon" style="font-size:.7rem">↕</span></th><th style="width:72px">編號</th><th>論文題目</th><th style="width:110px">投稿單位</th><th style="width:46px">類別</th><th style="width:76px;cursor:pointer;user-select:none" id="thAllScore" onclick="sortResultsByScore('all')" title="點擊依分數排序">平均總分 <span id="thAllScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:70px">分數差距</th><th style="width:46px;cursor:pointer;user-select:none" id="thAllRec" onclick="sortResultsByRec('all')" title="點擊依推薦票數排序">推薦 <span id="thAllRecIcon" style="font-size:.7rem">↕</span></th><th style="width:80px">退稿</th><th style="width:50px">詳細</th>
             </tr></thead>
             <tbody id="resultsAllBody"></tbody>
           </table></div>
@@ -2786,6 +2793,55 @@ function sortResultsByRec(panel){
   }
   reNumberRows(tbody);
   showToast('已依推薦票數'+(dir==='desc'?'由高到低':'由低到高')+'排序','ok');
+}
+
+// ══ 展出方式排序（實體展示優先）══
+let _dispSortDir = { cat: 'desc', all: 'desc' };
+function sortResultsByDisplay(panel){
+  const tbodyId = panel==='cat' ? 'resultsCatBody' : 'resultsAllBody';
+  const iconId  = panel==='cat' ? 'thCatDispIcon' : 'thAllDispIcon';
+  const tbody   = el(tbodyId); if(!tbody) return;
+
+  // desc = 實體展示優先；asc = ePoster 優先
+  _dispSortDir[panel] = _dispSortDir[panel]==='desc' ? 'asc' : 'desc';
+  const dir = _dispSortDir[panel];
+  const icon = el(iconId); if(icon) icon.textContent = dir==='desc' ? '↓' : '↑';
+
+  function dispVal(tr){
+    const pid = tr.dataset.pid;
+    const m = _displayMode[pid]||'eposter';
+    return m==='physical' ? 0 : 1; // 0=實體(排前), 1=ePoster(排後)
+  }
+  function appendWithSub(tr, ref){
+    const sub = document.getElementById('sub_'+tr.dataset.pid);
+    if(ref){ tbody.insertBefore(tr,ref); if(sub) tbody.insertBefore(sub,ref); }
+    else { tbody.appendChild(tr); if(sub) tbody.appendChild(sub); }
+  }
+
+  if(panel==='cat'){
+    const allChildren=[...tbody.children];
+    const groups=[];let cur=null;
+    for(const tr of allChildren){
+      if(tr.id&&tr.id.startsWith('sub_')) continue;
+      if(!tr.hasAttribute('draggable')){cur={sep:tr,rows:[]};groups.push(cur);}
+      else if(cur) cur.rows.push(tr);
+    }
+    groups.forEach(g=>{
+      g.rows.sort((a,b)=> dir==='desc' ? dispVal(a)-dispVal(b) : dispVal(b)-dispVal(a));
+      let ref=g.sep.nextSibling;
+      g.rows.forEach(tr=>{
+        const sub=document.getElementById('sub_'+tr.dataset.pid);
+        tbody.insertBefore(tr,ref);
+        if(sub) tbody.insertBefore(sub,ref);
+      });
+    });
+  } else {
+    const rows=[...tbody.querySelectorAll('tr[draggable]')];
+    rows.sort((a,b)=> dir==='desc' ? dispVal(a)-dispVal(b) : dispVal(b)-dispVal(a));
+    const rejSep=[...tbody.children].find(tr=>!tr.hasAttribute('draggable')&&!tr.id?.startsWith('sub_'));
+    rows.forEach(tr=> appendWithSub(tr, rejSep||null));
+  }
+  showToast('已依展出方式排序（'+(dir==='desc'?'實體展示優先':'ePoster 優先')+'）','ok');
 }
 
 // ══ 類別覆蓋模式 ══
