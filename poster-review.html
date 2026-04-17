@@ -2146,21 +2146,30 @@ function renderResultsTable(papers){
     // 子列（點擊列展開）
     const memberOk=confirmed==='會員已繳年費';
     const memberBadge=memberOk
-      ?`<span style="color:#16a34a;font-size:.75rem;font-weight:600">已繳費</span>`
+      ?`<span style="color:#166534;font-size:.78rem;font-weight:700;background:#bbf7d0;padding:.1rem .5rem;border-radius:4px">已繳費</span>`
       :confirmed==='非會員'
-        ?`<span style="color:#9ca3af;font-size:.75rem">非會員</span>`
-        :`<span style="color:#dc2626;font-size:.75rem;font-weight:600">未繳費</span>`;
+        ?`<span style="color:#374151;font-size:.78rem;font-weight:600;background:#e5e7eb;padding:.1rem .5rem;border-radius:4px">非會員</span>`
+        :`<span style="color:#991b1b;font-size:.78rem;font-weight:700;background:#fecaca;padding:.1rem .5rem;border-radius:4px">未繳費</span>`;
     const otherPapers=(window.dashData?.papers||[]).filter(x=>x.id!==p.id&&x.contactName===contactName&&contactName);
     const otherStr=otherPapers.length?otherPapers.map(x=>{const m=_displayMode[x.id]||'eposter';return `${x.paperNo||x.id}（${m==='physical'?'<span style="color:#1d4ed8;font-weight:600">實體</span>':'ePoster'}）`;}).join('、'):'無';
-    const subRow=`<tr id="sub_${p.id}" style="display:none;background:#f8fafc">
-      <td colspan="10" style="padding:.55rem 1rem .7rem 2.5rem;border-top:1px dashed #e2e8f0">
-        <div style="display:flex;gap:2.5rem;flex-wrap:wrap;font-size:.82rem;color:#334155;align-items:flex-start">
-          <div><span style="color:#94a3b8;font-size:.72rem;display:block;margin-bottom:.1rem">聯絡人</span><strong>${esc(contactName||'—')}</strong></div>
-          <div><span style="color:#94a3b8;font-size:.72rem;display:block;margin-bottom:.1rem">學會會員</span><strong>${esc(p.memberNames||'—')}</strong>&ensp;${memberBadge}</div>
-          <div><span style="color:#94a3b8;font-size:.72rem;display:block;margin-bottom:.1rem">同投稿者其他篇</span><span style="font-size:.8rem">${otherStr}</span></div>
+    const subRow=`<tr id="sub_${p.id}" style="display:none;background:#dbeafe;border-left:4px solid #1e4d8c">
+      <td colspan="10" style="padding:.7rem 1rem .85rem 2rem;border-top:2px solid #93c5fd;border-bottom:2px solid #93c5fd">
+        <div style="display:flex;gap:2.5rem;flex-wrap:wrap;font-size:.85rem;color:#1e3a5f;align-items:flex-start">
+          <div>
+            <span style="color:#1e4d8c;font-size:.72rem;font-weight:700;letter-spacing:.05em;display:block;margin-bottom:.2rem">聯絡人</span>
+            <strong style="font-size:.92rem;color:#0f172a">${esc(contactName||'—')}</strong>
+          </div>
+          <div>
+            <span style="color:#1e4d8c;font-size:.72rem;font-weight:700;letter-spacing:.05em;display:block;margin-bottom:.2rem">學會會員</span>
+            <strong style="font-size:.92rem;color:#0f172a">${esc(p.memberNames||'—')}</strong>&ensp;${memberBadge}
+          </div>
+          <div>
+            <span style="color:#1e4d8c;font-size:.72rem;font-weight:700;letter-spacing:.05em;display:block;margin-bottom:.2rem">同投稿者其他篇</span>
+            <span style="font-size:.85rem;color:#1e3a5f">${otherStr}</span>
+          </div>
         </div>
-        ${!memberOk?`<div style="margin-top:.4rem;font-size:.72rem;color:#dc2626">⚠ 未繳年費，不可設為實體展示</div>`:''}
-        ${sameContactPhysical>0?`<div style="margin-top:.4rem;font-size:.72rem;color:#92400e">⚠ 同投稿者已有 ${sameContactPhysical} 篇設為實體展示，請留意分配</div>`:''}
+        ${!memberOk?`<div style="margin-top:.5rem;padding:.3rem .75rem;background:#fee2e2;border:1px solid #fca5a5;border-radius:5px;font-size:.78rem;font-weight:700;color:#991b1b;display:inline-block">⚠ 未繳年費，不可設為實體展示</div>`:''}
+        ${sameContactPhysical>0?`<div style="margin-top:.5rem;padding:.3rem .75rem;background:#fef3c7;border:1px solid #fcd34d;border-radius:5px;font-size:.78rem;font-weight:700;color:#78350f;display:inline-block">⚠ 同投稿者已有 ${sameContactPhysical} 篇設為實體展示，請留意分配</div>`:''}
       </td>
     </tr>`;
     return `<tr draggable="true" data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}" data-rec="${recCount}"
@@ -2668,14 +2677,18 @@ function sortResultsByScore(panel) {
       });
     });
   } else {
-    // 總覽：所有 draggable 列一起排序
-    const rows = [...tbody.querySelectorAll('tr[draggable]')];
-    rows.sort((a,b) => dir==='desc' ? getScore(b)-getScore(a) : getScore(a)-getScore(b));
-    // 找退稿分隔列作為插入終點
-    const rejSep = [...tbody.children].find(tr => !tr.hasAttribute('draggable') && !tr.id?.startsWith('sub_'));
-    rows.forEach(tr => appendWithSub(tr, rejSep||null));
+    const subMapS={};
+    [...tbody.querySelectorAll('tr[id^="sub_"]')].forEach(sub=>{ subMapS[sub.id]=sub; sub.parentNode.removeChild(sub); });
+    const rows=[...tbody.querySelectorAll('tr[draggable]')];
+    rows.sort((a,b)=>dir==='desc'?getScore(b)-getScore(a):getScore(a)-getScore(b));
+    const rejSep=[...tbody.children].find(tr=>!tr.hasAttribute('draggable'));
+    rows.forEach(tr=>{
+      if(rejSep) tbody.insertBefore(tr,rejSep); else tbody.appendChild(tr);
+      const sub=subMapS['sub_'+tr.dataset.pid];
+      if(sub){ if(rejSep) tbody.insertBefore(sub,rejSep); else tbody.appendChild(sub); }
+    });
   }
-  showToast('已依分數' + (dir === 'desc' ? '高→低' : '低→高') + '排序', 'ok');
+  showToast('已依分數'+(dir==='desc'?'高→低':'低→高')+'排序','ok');
 }
 
 // ══ 展開/收合子列（memberConfirmed 等資訊）══
@@ -2789,7 +2802,22 @@ function sortResultsByRec(panel){
       const sb=parseFloat(b.querySelector('td:nth-child(6)')?.textContent)||0;
       return dir==='desc'?sb-sa:sa-sb;
     });
-    rows.forEach(r=>{ tbody.appendChild(r); const sub=document.getElementById('sub_'+r.dataset.pid); if(sub) tbody.appendChild(sub); });
+    const subMapR={};
+    [...tbody.querySelectorAll('tr[id^="sub_"]')].forEach(sub=>{ subMapR[sub.id]=sub; sub.parentNode.removeChild(sub); });
+    const rowsR=[...tbody.querySelectorAll('tr[draggable]')];
+    rowsR.sort((a,b)=>{
+      const ra=parseInt(a.dataset.rec||'0'),rb2=parseInt(b.dataset.rec||'0');
+      if(ra!==rb2) return dir==='desc'?rb2-ra:ra-rb2;
+      const pa=window.dashData?.papers?.find(x=>x.id===a.dataset.pid);
+      const pb=window.dashData?.papers?.find(x=>x.id===b.dataset.pid);
+      return dir==='desc'?(pb?.avgTotal??-1)-(pa?.avgTotal??-1):(pa?.avgTotal??-1)-(pb?.avgTotal??-1);
+    });
+    const rejSepR=[...tbody.children].find(tr=>!tr.hasAttribute('draggable'));
+    rowsR.forEach(r=>{
+      if(rejSepR) tbody.insertBefore(r,rejSepR); else tbody.appendChild(r);
+      const sub=subMapR['sub_'+r.dataset.pid];
+      if(sub){ if(rejSepR) tbody.insertBefore(sub,rejSepR); else tbody.appendChild(sub); }
+    });
   }
   reNumberRows(tbody);
   showToast('已依推薦票數'+(dir==='desc'?'由高到低':'由低到高')+'排序','ok');
@@ -2836,10 +2864,27 @@ function sortResultsByDisplay(panel){
       });
     });
   } else {
+    // 先把所有子列從 DOM 取出（避免干擾排序）
+    const subMap = {};
+    [...tbody.querySelectorAll('tr[id^="sub_"]')].forEach(sub=>{
+      subMap[sub.id] = sub;
+      sub.parentNode.removeChild(sub);
+    });
+    // 只取主列（draggable）排序
     const rows=[...tbody.querySelectorAll('tr[draggable]')];
     rows.sort((a,b)=> dir==='desc' ? dispVal(a)-dispVal(b) : dispVal(b)-dispVal(a));
-    const rejSep=[...tbody.children].find(tr=>!tr.hasAttribute('draggable')&&!tr.id?.startsWith('sub_'));
-    rows.forEach(tr=> appendWithSub(tr, rejSep||null));
+    // 找退稿分隔列（子列已移出，此時 children 只有主列和退稿分隔列）
+    const rejSep=[...tbody.children].find(tr=>!tr.hasAttribute('draggable'));
+    // 依排序後順序插入主列，並緊接插入對應子列
+    rows.forEach(tr=>{
+      if(rejSep) tbody.insertBefore(tr, rejSep);
+      else tbody.appendChild(tr);
+      const sub = subMap['sub_'+tr.dataset.pid];
+      if(sub){
+        if(rejSep) tbody.insertBefore(sub, rejSep);
+        else tbody.appendChild(sub);
+      }
+    });
   }
   showToast('已依展出方式排序（'+(dir==='desc'?'實體展示優先':'ePoster 優先')+'）','ok');
 }
