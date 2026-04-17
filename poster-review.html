@@ -912,9 +912,10 @@ body.cat-override-on .cat-override-cell:hover{
         <p style="font-size:.82rem;color:#718096;margin-bottom:.7rem">依平均總分由高到低排列・<strong style="color:#3b82f6">點擊「平均總分」或「推薦」欄標題可排序</strong>・退稿論文不列入排名（需全體評審一致退稿；部分退稿仍列入計分並加註提醒）</p>
         <!-- 類別覆蓋說明列 -->
         <div id="catOverrideBar" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:.6rem 1rem;margin-bottom:.9rem;font-size:.82rem;color:#78350f;align-items:center;gap:.75rem;flex-wrap:wrap">
-          <span>⚡ <strong>類別覆蓋模式</strong>：點擊論文列中的類別欄位可變更其所屬類別，變更後點「重新計算排名」套用。</span>
-          <button class="adm-btn adm-btn-sm" style="background:#f59e0b;color:white;border:none" onclick="recalcAfterCatOverride()">🔄 重新計算排名</button>
-          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="resetCatOverrides()">✕ 清除所有覆蓋</button>
+          <span>⚡ <strong>類別覆蓋模式</strong>：點擊論文列中的類別欄位可變更其所屬類別，變更後點「重新計算」套用，確認後按「儲存」持久保存。</span>
+          <button class="adm-btn adm-btn-sm" style="background:#f59e0b;color:white;border:none" onclick="recalcAfterCatOverride()">重新計算</button>
+          <button class="adm-btn adm-btn-sm" style="background:#16a34a;color:white;border:none" onclick="saveCatOverridesToGAS()">儲存類別覆蓋</button>
+          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="resetCatOverrides()">✕ 清除</button>
         </div>
         <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.9rem">
           <label style="font-size:.8rem;color:#718096;display:flex;align-items:center;gap:.4rem;cursor:pointer">
@@ -1948,6 +1949,7 @@ async function loadDashboard(){
     renderDashTable(r.papers);
     renderAssignTable(r.papers,r.reviewers);
     try{ await loadDisplayMode(); }catch(ldErr){ console.warn('loadDisplayMode skip:',ldErr); }
+    try{ await loadCatOverrides(); }catch(lcErr){ console.warn('loadCatOverrides skip:',lcErr); }
     try{ renderResultsTable(r.papers); }catch(rtErr){ console.error('renderResultsTable:',rtErr); }
     renderRvTable(r.reviewers);
     loadOsceDashboard();
@@ -2062,9 +2064,12 @@ function renderResultsTable(papers){
   if(!window.dashData) window.dashData = {};
   window.dashData.papers = papers;
   papers.forEach(p=>{
-    p.category=normCat(p.category);
-    // 若有管理員類別覆蓋，套用
-    if(typeof _catOverrides!=='undefined'&&_catOverrides[p.id]) p.category=_catOverrides[p.id];
+    // 保留原始類別，不直接覆蓋（避免清除覆蓋後找不回原始值）
+    if(!p.origCategory) p.origCategory = normCat(p.category);
+    else p.category = p.origCategory; // 每次渲染先還原原始類別
+    p.category = normCat(p.origCategory||p.category);
+    // 套用管理員覆蓋（只影響渲染用的 p.category，origCategory 不動）
+    if(_catOverrides[p.id]) p.category = _catOverrides[p.id];
   });
 
   function isFullyRejected(p){ return p.reviews.length>0 && p.reviews.filter(r=>!r.rejected).length===0; }
@@ -2685,6 +2690,34 @@ function toggleDisplay(pid, btn, canPhysical){
   if(window.dashData&&window.dashData.papers) renderResultsTable(window.dashData.papers);
 }
 
+
+// ══ 儲存類別覆蓋至 GAS ══
+async function saveCatOverridesToGAS(){
+  const entries=Object.entries(_catOverrides).map(([pid,cat])=>({pid,cat}));
+  if(!entries.length){ showToast('尚無類別覆蓋需要儲存','err'); return; }
+  setLdr(true);
+  try{
+    const r=await api({action:'saveCatOverride', dataJson:JSON.stringify(entries)});
+    if(r&&r.success){ showToast('類別覆蓋已儲存至 Google Sheets','ok'); }
+    else { showToast('儲存失敗，請重試','err'); }
+  }catch(e){ showToast('連線失敗','err'); console.error(e); }
+  finally{ setLdr(false); }
+}
+
+// ══ 載入已儲存的類別覆蓋 ══
+async function loadCatOverrides(){
+  try{
+    const r=await api({action:'getCatOverride'});
+    if(r&&r.success&&r.data&&r.data.length){
+      r.data.forEach(({pid,cat})=>{ if(pid&&cat) _catOverrides[pid]=cat; });
+      // _catOverrides 已填好，loadDashboard 之後的 renderResultsTable 會自動套用
+      if(Object.keys(_catOverrides).length>0){
+        console.log('類別覆蓋已載入:', Object.keys(_catOverrides).length, '筆');
+      }
+    }
+  }catch(e){ console.warn('loadCatOverrides failed',e); }
+}
+
 // ══ 存檔展出方式至 GAS ══
 async function saveDisplayModeToGAS(){
   const entries=Object.entries(_displayMode).map(([pid,mode])=>({pid,mode}));
@@ -2787,22 +2820,18 @@ function clickCatCell(pid, currentCat) {
 
 function recalcAfterCatOverride() {
   if (!dashData || !dashData.papers) return;
-  // 暫時把 catOverrides 套到 dashData
-  const origCats = {};
-  dashData.papers.forEach(p => {
-    origCats[p.id] = p.category;
-    if (_catOverrides[p.id]) p.category = _catOverrides[p.id];
-  });
-  renderDashboard(dashData);
-  // 還原（renderDashboard 後 dashData 已被 re-render，category 已改）
+  // 套用覆蓋類別到 papers（renderResultsTable 會讀 _catOverrides）
+  renderResultsTable(dashData.papers);
   showToast('排名已依覆蓋類別重新計算', 'ok');
 }
 
 function resetCatOverrides() {
   _catOverrides = {};
-  if (dashData && dashData.papers) renderDashboard(dashData);
-  el('chkCatOverride').checked = false;
-  toggleCatOverrideMode(false);
+  const chk = el('chkCatOverride'); if(chk) chk.checked = false;
+  _catOverrideMode = false;
+  const bar = el('catOverrideBar'); if(bar) bar.style.display = 'none';
+  document.body.classList.remove('cat-override-on');
+  if (dashData && dashData.papers) renderResultsTable(dashData.papers);
   showToast('已清除所有類別覆蓋', 'ok');
 }
 
