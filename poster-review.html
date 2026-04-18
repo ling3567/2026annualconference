@@ -363,7 +363,7 @@ h1,h2,h3,h4,h5,h6{ font-weight:700; }
 .adm-badge{ font-size:.8rem; color:rgba(255,255,255,.45); margin-left:.5rem; }
 .btn-adm-out{ background:none; border:1px solid rgba(255,255,255,.2); border-radius:6px; padding:.28rem .65rem; font-size:.72rem; color:rgba(255,255,255,.5); cursor:pointer; transition:all .2s; font-family:inherit; }
 .btn-adm-out:hover{ border-color:rgba(255,255,255,.5); color:white; }
-.adm-tabbar{ background:white; border-bottom:1px solid #e2e8f0; display:flex; align-items:stretch; justify-content:space-between; padding:0 1.5rem; }
+.adm-tabbar{ background:white; border-bottom:1px solid #e2e8f0; display:flex; align-items:stretch; padding:0 1.5rem; }
 .adm-tab{ padding:.9rem 1.2rem; font-size:.88rem; font-weight:500; color:#718096; cursor:pointer; border-bottom:2.5px solid transparent; transition:all .18s; white-space:nowrap; display:flex; align-items:center; gap:.4rem; }
 .adm-tab.active{ color:var(--adm-blue); border-bottom-color:var(--adm-blue); }
 .adm-tab:hover{ color:#4a5568; }
@@ -943,7 +943,7 @@ body.cat-override-on .cat-override-cell:hover{
         <div id="rPanelCat">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
             <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各類論文・依推薦票數→平均總分排列・可拖動調整・或點擊欄標題重新排序</span>
-<div style="display:flex;gap:.4rem"><button class="adm-btn adm-btn-sm" style="background:#1d4ed8;color:white;border:none" onclick="saveDisplayModeToGAS()">儲存展出方式</button><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">匯出 CSV</button></div>
+<div style="display:flex;gap:.4rem"><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="collapseAllSubRows('cat')" title="縮合所有展開的子列">縮合全部</button><button class="adm-btn adm-btn-sm" style="background:#1d4ed8;color:white;border:none" onclick="saveDisplayModeToGAS()">儲存展出方式</button><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">匯出 CSV</button></div>
           </div>
           <div class="tbl-wrap"><table>
             <thead><tr>
@@ -958,6 +958,7 @@ body.cat-override-on .cat-override-cell:hover{
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
             <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">全部論文・可拖動調整・或點擊欄標題重新排序</span>
             <div style="display:flex;gap:.4rem">
+              <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="collapseAllSubRows('all')" title="縮合所有展開的子列">縮合全部</button>
               <button class="adm-btn adm-btn-sm" style="background:#1d4ed8;color:white;border:none" onclick="saveDisplayModeToGAS()">儲存展出方式</button>
               <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">匯出 CSV</button>
             </div>
@@ -2706,9 +2707,38 @@ function sortResultsByScore(panel) {
 }
 
 // ══ 展開/收合子列（memberConfirmed 等資訊）══
+
+// ══ 縮合所有子列 ══
+function collapseAllSubRows(panel){
+  const tbodyId = panel==='cat' ? 'resultsCatBody' : 'resultsAllBody';
+  const tbody = el(tbodyId); if(!tbody) return;
+  let count=0;
+  tbody.querySelectorAll('tr[id^="sub_"]').forEach(sub=>{
+    if(sub.style.display!=='none'&&sub.style.display!==''){
+      sub.style.display='none'; count++;
+    }
+  });
+  if(count) showToast('已縮合 '+count+' 個子列','ok');
+  else showToast('目前無展開的子列','ok');
+}
+
 function toggleSubRow(pid, e){
   if(e && e.target && (e.target.tagName==='BUTTON'||e.target.tagName==='A'||e.target.closest('button')||e.target.closest('a'))) return;
-  const sub=document.getElementById('sub_'+pid);
+  // 從點擊的主列所在 tbody 尋找子列，避免 id 重複問題
+  const mainRow = e && e.currentTarget ? e.currentTarget : document.querySelector('tr[data-pid="'+pid+'"]');
+  const tbody = mainRow ? mainRow.closest('tbody') : null;
+  // 在同一個 tbody 內找緊接在主列後、id=sub_xxx 的列
+  let sub = null;
+  if(tbody){
+    let next = mainRow ? mainRow.nextElementSibling : null;
+    while(next){
+      if(next.id && next.id.startsWith('sub_')){ sub=next; break; }
+      if(next.hasAttribute('draggable')) break; // 碰到下一個主列就停
+      next = next.nextElementSibling;
+    }
+  }
+  // fallback：用 getElementById（舊行為）
+  if(!sub) sub = document.getElementById('sub_'+pid);
   if(!sub) return;
   const isOpen=sub.style.display!=='none'&&sub.style.display!=='';
   sub.style.display=isOpen?'none':'table-row';
