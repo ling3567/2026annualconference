@@ -939,9 +939,9 @@ body.cat-override-on .cat-override-cell:hover{
         </div>
 
         <!-- 分類排名 -->
+        <!-- 展出方式統計卡片（分類檢視/總覽共用）-->
+        <div id="dispStatsCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;margin-bottom:.9rem"></div>
         <div id="rPanelCat">
-          <!-- 展出方式統計卡片 -->
-          <div id="dispStatsCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;margin-bottom:.9rem"></div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
             <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各類論文・依推薦票數→平均總分排列・可拖動調整・或點擊欄標題重新排序</span>
 <div style="display:flex;gap:.4rem"><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="collapseAllSubRows('cat')" title="縮合所有展開的子列">縮合全部</button><button class="adm-btn adm-btn-sm" style="background:#1d4ed8;color:white;border:none" onclick="saveDisplayModeToGAS()">儲存展出方式</button><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">匯出 CSV</button></div>
@@ -985,7 +985,7 @@ body.cat-override-on .cat-override-cell:hover{
         </div>
       </div>
       <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
-        <th>名次</th><th>編號</th><th>教案主題</th><th>服務醫院</th><th>平均總分</th><th>分數差距</th><th>詳細</th>
+        <th>名次</th><th>編號</th><th>教案主題</th><th>服務醫院</th><th style="width:60px">繳費</th><th>平均總分</th><th>分數差距</th><th style="width:50px">詳細</th>
       </tr></thead><tbody id="osceResultsBody"></tbody></table></div></div>
     </div>
   </div>
@@ -1932,6 +1932,8 @@ function admSwitchTab(t){
   const rTypeBar=el('resultTypeInTab'); if(rTypeBar) rTypeBar.style.display=t==='results'?'flex':'none';
   const dTypeBar=el('dashTypeInTab');   if(dTypeBar) dTypeBar.style.display=t==='dashboard'?'flex':'none';
   const aTypeBar=el('assignTypeInTab'); if(aTypeBar) aTypeBar.style.display=t==='assign'?'flex':'none';
+  // 切換到總覽統計時若無資料則自動載入
+  if(t==='dashboard' && !dashData) loadDashboard();
   if(t==='results'){
     // 預設顯示海報論文（重置子 section 狀態）
     const rp=el('resultsPosterSection'); if(rp) rp.style.display='block';
@@ -2435,15 +2437,59 @@ function renderOsceResultsTable(cases){
   }
 
   const sorted=[...cases].sort((a,b)=>(rankMap[a.id]??99)-(rankMap[b.id]??99)||(b.avgTotal??-1)-(a.avgTotal??-1));
-  body.innerHTML=sorted.map(c=>`<tr data-osce-title="${esc(c.title).toLowerCase()}" data-osce-hospital="${esc(c.hospital||'').toLowerCase()}">
-    <td style="text-align:center">${badge(rankMap[c.id])}</td>
-    <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
-    <td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(c.title)}</td>
-    <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
-    <td style="font-weight:700;font-size:1rem">${c.avgTotal!==null?c.avgTotal+'分':'—'}</td>
-    <td>${osceGap(c)}</td>
-    <td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showOsceDetail('${c.id}')">詳細</button></td>
-  </tr>`).join('')||'<tr><td colspan="7" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';
+
+  function osceMemberBadge(confirmed){
+    if(confirmed==='會員已繳年費') return '<span style="background:#dcfce7;color:#166534;font-size:.72rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;border:1px solid #86efac;white-space:nowrap">已繳費</span>';
+    if(confirmed==='非會員')       return '<span style="background:#f1f5f9;color:#475569;font-size:.72rem;font-weight:600;padding:.15rem .5rem;border-radius:4px;border:1px solid #cbd5e0;white-space:nowrap">非會員</span>';
+    if(confirmed==='會員未繳年費') return '<span style="background:#fee2e2;color:#b91c1c;font-size:.72rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;border:1px solid #fca5a5;white-space:nowrap">未繳費</span>';
+    return '<span style="color:#94a3b8;font-size:.72rem">—</span>';
+  }
+
+  let html='';
+  sorted.forEach(c=>{
+    const confirmed=c.memberConfirmed||'';
+    const subRow=`<tr id="oscsub_${c.id}" style="display:none;background:#f0f4f8">
+      <td colspan="8" style="padding:.6rem 1rem .75rem 1.5rem;border-top:1px solid #cbd5e0;border-bottom:2px solid #94a3b8">
+        <div style="display:flex;gap:3rem;flex-wrap:wrap;font-size:.85rem;color:#1e293b">
+          <div>
+            <div style="font-size:.7rem;font-weight:700;color:#475569;letter-spacing:.06em;margin-bottom:.25rem">聯絡人</div>
+            <div style="font-size:.92rem;font-weight:700;color:#0f172a">${esc(c.contactName||'—')}</div>
+          </div>
+          <div>
+            <div style="font-size:.7rem;font-weight:700;color:#475569;letter-spacing:.06em;margin-bottom:.25rem">服務醫院・單位</div>
+            <div style="font-size:.88rem;font-weight:600;color:#0f172a">${esc(c.hospital||'—')}${c.unit?'・'+esc(c.unit):''}</div>
+          </div>
+          <div>
+            <div style="font-size:.7rem;font-weight:700;color:#475569;letter-spacing:.06em;margin-bottom:.25rem">繳費狀態</div>
+            <div>${osceMemberBadge(confirmed)}${!confirmed?'<span style="font-size:.72rem;color:#94a3b8;margin-left:.4rem">（Sheet 未填入）</span>':''}</div>
+          </div>
+        </div>
+        ${confirmed==='會員未繳年費'?'<div style="margin-top:.5rem;padding:.28rem .7rem;background:#fef2f2;border-left:3px solid #ef4444;font-size:.78rem;font-weight:600;color:#b91c1c">⚠ 未繳年費，請確認是否得展出</div>':''}
+      </td>
+    </tr>`;
+    html+=`<tr data-osce-title="${esc(c.title).toLowerCase()}" data-osce-hospital="${esc(c.hospital||'').toLowerCase()}"
+      onclick="toggleOsceSubRow('${c.id}',event)" style="cursor:pointer">
+      <td style="text-align:center">${badge(rankMap[c.id])}</td>
+      <td><span class="chip chip-blue chip-no">${esc(c.caseNo||'—')}</span></td>
+      <td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(c.title)}</td>
+      <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
+      <td style="text-align:center">${osceMemberBadge(confirmed)}</td>
+      <td style="font-weight:700;font-size:1rem">${c.avgTotal!==null?c.avgTotal+'分':'—'}</td>
+      <td>${osceGap(c)}</td>
+      <td onclick="event.stopPropagation()"><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showOsceDetail('${c.id}')">詳細</button></td>
+    </tr>${subRow}`;
+  });
+  body.innerHTML=html||'<tr><td colspan="8" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';
+}
+
+
+// ══ OSCE 結果子列展開/收合 ══
+function toggleOsceSubRow(cid, e){
+  if(e && e.target && (e.target.tagName==='BUTTON'||e.target.closest('button'))) return;
+  const sub=document.getElementById('oscsub_'+cid);
+  if(!sub) return;
+  const isOpen=sub.style.display!=='none'&&sub.style.display!=='';
+  sub.style.display=isOpen?'none':'table-row';
 }
 
 function filterOsceResults(){const q=(el('osceResultSearch')||{}).value?.toLowerCase()||'';document.querySelectorAll('#osceResultsBody tr[data-osce-title]').forEach(tr=>{const ok=!q||tr.dataset.osceTitle.includes(q)||( tr.dataset.osceHospital||'').includes(q);tr.style.display=ok?'':'none';});}
