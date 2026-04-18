@@ -829,23 +829,25 @@ body.cat-override-on .cat-override-cell:hover{
       委員帳號
     </div>
     <!-- 評分結果類型切換（僅在評分結果 tab 顯示）-->
+    <!-- 評分結果切換 -->
     <div id="resultTypeInTab" style="display:none;align-items:center;gap:.35rem;padding:.4rem 0 .4rem 1rem;border-left:1px solid #e2e8f0;margin-left:.5rem">
-      <button id="resultsTypePosterTab" class="adm-btn adm-btn-sm" style="background:#1e4d8c;color:white;border:none;padding:.3rem .75rem;font-size:.78rem" onclick="resultsSwitchType('poster')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:.2rem"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>海報
-      </button>
-      <button id="resultsTypeOsceTab" class="adm-btn adm-btn-sm" style="background:white;color:#64748b;border:1.5px solid #e2e8f0;padding:.3rem .75rem;font-size:.78rem" onclick="resultsSwitchType('osce')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:.2rem"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>OSCE
-      </button>
+      <button id="resultsTypePosterTab" class="adm-btn adm-btn-sm" style="background:#1e4d8c;color:white;border:none;padding:.3rem .75rem;font-size:.78rem" onclick="resultsSwitchType('poster')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:.2rem"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>海報</button>
+      <button id="resultsTypeOsceTab" class="adm-btn adm-btn-sm" style="background:white;color:#64748b;border:1.5px solid #e2e8f0;padding:.3rem .75rem;font-size:.78rem" onclick="resultsSwitchType('osce')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:.2rem"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>OSCE</button>
+    </div>
+    <!-- 總覽統計切換 -->
+    <div id="dashTypeInTab" style="display:none;align-items:center;gap:.35rem;padding:.4rem 0 .4rem 1rem;border-left:1px solid #e2e8f0;margin-left:.5rem">
+      <button id="dashTypePosterTab" class="adm-btn adm-btn-sm" style="background:#1e4d8c;color:white;border:none;padding:.3rem .75rem;font-size:.78rem" onclick="dashSwitchType('poster')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:.2rem"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>海報</button>
+      <button id="dashTypeOsceTab" class="adm-btn adm-btn-sm" style="background:white;color:#64748b;border:1.5px solid #e2e8f0;padding:.3rem .75rem;font-size:.78rem" onclick="dashSwitchType('osce')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:.2rem"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>OSCE</button>
+    </div>
+    <!-- 指派評審切換 -->
+    <div id="assignTypeInTab" style="display:none;align-items:center;gap:.35rem;padding:.4rem 0 .4rem 1rem;border-left:1px solid #e2e8f0;margin-left:.5rem">
+      <button id="assignTypePosterTab" class="adm-btn adm-btn-sm" style="background:#1e4d8c;color:white;border:none;padding:.3rem .75rem;font-size:.78rem" onclick="assignSwitchType('poster')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:.2rem"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>海報</button>
+      <button id="assignTypeOsceTab" class="adm-btn adm-btn-sm" style="background:white;color:#64748b;border:1.5px solid #e2e8f0;padding:.3rem .75rem;font-size:.78rem" onclick="assignSwitchType('osce')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:.2rem"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>OSCE</button>
     </div>
   </div>
   <div class="adm-content" id="adm-tab-dashboard">
     <!-- 統計卡 -->
     <div class="stats-row" id="statsRow"></div>
-    <!-- 類型切換 -->
-    <div class="type-switcher">
-      <button class="type-btn active" id="dashTypePoster" onclick="dashSwitchType('poster')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg> 海報論文</button>
-      <button class="type-btn" id="dashTypeOsce" onclick="dashSwitchType('osce')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> OSCE 教案</button>
-    </div>
     <!-- 海報論文進度 -->
     <div id="dashPosterSection">
       <div class="sec">
@@ -866,10 +868,6 @@ body.cat-override-on .cat-override-cell:hover{
     </div>
   </div>
   <div class="adm-content" id="adm-tab-assign" style="display:none">
-    <div class="type-switcher">
-      <button class="type-btn active" id="assignTypePoster" onclick="assignSwitchType('poster')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg> 海報論文</button>
-      <button class="type-btn" id="assignTypeOsce" onclick="assignSwitchType('osce')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> OSCE 教案</button>
-    </div>
     <!-- 海報指派 -->
     <div id="assignPosterSection">
       <div class="sec">
@@ -979,7 +977,7 @@ body.cat-override-on .cat-override-cell:hover{
     <div class="sec">
       <div class="sec-head"><h3>OSCE 教案 — 評分結果</h3>
         <div style="display:flex;align-items:center;gap:.5rem">
-          <input type="text" id="osceResultSearch" placeholder="搜尋教案…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:180px;font-family:inherit" oninput="filterOsceResults()">
+          <input type="text" id="osceResultSearch" placeholder="搜尋教案/投稿單位…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:200px;font-family:inherit" oninput="filterOsceResults()">
           <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadOsceDashboard()">重新整理</button>
         </div>
       </div>
@@ -1929,6 +1927,8 @@ function admSwitchTab(t){
     else loadOsceDashboard();
   }
   const rTypeBar=el('resultTypeInTab'); if(rTypeBar) rTypeBar.style.display=t==='results'?'flex':'none';
+  const dTypeBar=el('dashTypeInTab');   if(dTypeBar) dTypeBar.style.display=t==='dashboard'?'flex':'none';
+  const aTypeBar=el('assignTypeInTab'); if(aTypeBar) aTypeBar.style.display=t==='assign'?'flex':'none';
   if(t==='results'){
     // 預設顯示海報論文（重置子 section 狀態）
     const rp=el('resultsPosterSection'); if(rp) rp.style.display='block';
@@ -2139,15 +2139,23 @@ function renderResultsTable(papers){
     const canPhysical=confirmed==='會員已繳年費';
     const contactName=p.contactName||'';
     const sameContactPhysical=contactName?Object.entries(_displayMode).filter(([pid2,m])=>m==='physical'&&pid2!==p.id&&(window.dashData?.papers||[]).find(x=>x.id===pid2&&x.contactName===contactName)).length:0;
-    let dispCell;
-    if(!canPhysical){
-      dispCell=`<span style="color:#94a3b8;font-size:.78rem;font-weight:500;display:block;text-align:center">ePoster<br><span style="font-size:.68rem;color:#f87171">${confirmed==='非會員'?'非會員':'未繳費'}</span></span>`;
+    // 展出方式三態：eposter / physical / rejected
+    const isPhys=dispMode==='physical';
+    const isRej=dispMode==='rejected';
+    const warnDup=isPhys&&sameContactPhysical>0;
+    let dispLabel, dispStyle;
+    if(isRej){
+      dispLabel='退稿';
+      dispStyle='border:1.5px solid #dc2626;background:#fef2f2;color:#b91c1c;';
+    } else if(isPhys){
+      dispLabel='實體展示'+(warnDup?'<br><span style="font-size:.65rem;color:#f59e0b;font-weight:700">⚠ 同人重複</span>':'');
+      dispStyle='border:1.5px solid #2563eb;background:#eff6ff;color:#1d4ed8;';
     } else {
-      const isPhys=dispMode==='physical';
-      const warnDup=isPhys&&sameContactPhysical>0;
-      dispCell=`<button onclick="toggleDisplay('${p.id}',this,true)" data-pid="${p.id}"
-        style="border:1.5px solid ${isPhys?'#2563eb':'#cbd5e0'};background:${isPhys?'#eff6ff':'#f8fafc'};color:${isPhys?'#1d4ed8':'#64748b'};border-radius:6px;padding:.28rem .6rem;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;line-height:1.5">${isPhys?'實體展示':'ePoster'}${warnDup?'<br><span style="font-size:.65rem;color:#f59e0b;font-weight:700">⚠ 同人重複</span>':''}</button>`;
+      dispLabel='ePoster'+(canPhysical?'':('<br><span style="font-size:.65rem;color:#f87171">'+(confirmed==='非會員'?'非會員':'未繳費')+'</span>'));
+      dispStyle='border:1.5px solid #cbd5e0;background:#f8fafc;color:#64748b;';
     }
+    const dispCell=`<button onclick="toggleDisplay('${p.id}',this,${canPhysical})" data-pid="${p.id}"
+      style="${dispStyle}border-radius:6px;padding:.28rem .6rem;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;line-height:1.5">${dispLabel}</button>`;
     // 子列（點擊列展開）
     const memberOk=confirmed==='會員已繳年費';
     const memberBadge=memberOk
@@ -2156,7 +2164,7 @@ function renderResultsTable(papers){
         ?`<span style="background:#f1f5f9;color:#475569;font-size:.75rem;font-weight:600;padding:.15rem .55rem;border-radius:4px;border:1px solid #cbd5e0">非會員</span>`
         :`<span style="background:#fee2e2;color:#b91c1c;font-size:.75rem;font-weight:700;padding:.15rem .55rem;border-radius:4px;border:1px solid #fca5a5">未繳費</span>`;
     const otherPapers=(window.dashData?.papers||[]).filter(x=>x.id!==p.id&&x.contactName===contactName&&contactName);
-    const otherStr=otherPapers.length?otherPapers.map(x=>{const m=_displayMode[x.id]||'eposter';return `${x.paperNo||x.id}（${m==='physical'?'<span style="color:#1d4ed8;font-weight:600">實體</span>':'ePoster'}）`;}).join('、'):'無';
+    const otherStr=otherPapers.length?otherPapers.map(x=>{const m=_displayMode[x.id]||'eposter';return `${x.paperNo||x.id}（${m==='physical'?'<span style="color:#1d4ed8;font-weight:600">實體</span>':m==='rejected'?'<span style="color:#b91c1c;font-weight:600">退稿</span>':'ePoster'}）`;}).join('、'):'無';
     const subRow=`<tr id="sub_${p.id}" style="display:none;background:#f0f4f8">
       <td colspan="10" style="padding:.6rem 1rem .75rem 1.5rem;border-top:1px solid #cbd5e0;border-bottom:2px solid #94a3b8">
         <div style="display:flex;gap:3rem;flex-wrap:wrap;font-size:.85rem;color:#1e293b;align-items:flex-start">
@@ -2279,8 +2287,28 @@ function renderRvTable(reviewers){
 }
 
 // ══ OSCE 後台 ══
-function dashSwitchType(t){dashType=t;el('dashTypePoster').classList.toggle('active',t==='poster');el('dashTypeOsce').classList.toggle('active',t==='osce');el('dashPosterSection').style.display=t==='poster'?'':'none';el('dashOsceSection').style.display=t==='osce'?'':'none';if(t==='osce'&&!osceData)loadOsceDashboard();}
-function assignSwitchType(t){assignType=t;el('assignTypePoster').classList.toggle('active',t==='poster');el('assignTypeOsce').classList.toggle('active',t==='osce');el('assignPosterSection').style.display=t==='poster'?'':'none';el('assignOsceSection').style.display=t==='osce'?'':'none';if(t==='osce'){if(!osceData)loadOsceDashboard();else renderOsceAssignTable(osceData.cases,osceData.reviewers);}}
+function dashSwitchType(t){
+  dashType=t;
+  const bp=el('dashTypePoster'); if(bp) bp.classList.toggle('active',t==='poster');
+  const bo=el('dashTypeOsce');   if(bo) bo.classList.toggle('active',t==='osce');
+  const nbp=el('dashTypePosterTab'),nbo=el('dashTypeOsceTab');
+  if(nbp){nbp.style.background=t==='poster'?'#1e4d8c':'white';nbp.style.color=t==='poster'?'white':'#64748b';nbp.style.border=t==='poster'?'none':'1.5px solid #e2e8f0';}
+  if(nbo){nbo.style.background=t==='osce'?'#1e4d8c':'white';nbo.style.color=t==='osce'?'white':'#64748b';nbo.style.border=t==='osce'?'none':'1.5px solid #e2e8f0';}
+  el('dashPosterSection').style.display=t==='poster'?'':'none';
+  el('dashOsceSection').style.display=t==='osce'?'':'none';
+  if(t==='osce'&&!osceData)loadOsceDashboard();
+}
+function assignSwitchType(t){
+  assignType=t;
+  const bp=el('assignTypePoster'); if(bp) bp.classList.toggle('active',t==='poster');
+  const bo=el('assignTypeOsce');   if(bo) bo.classList.toggle('active',t==='osce');
+  const nbp=el('assignTypePosterTab'),nbo=el('assignTypeOsceTab');
+  if(nbp){nbp.style.background=t==='poster'?'#1e4d8c':'white';nbp.style.color=t==='poster'?'white':'#64748b';nbp.style.border=t==='poster'?'none':'1.5px solid #e2e8f0';}
+  if(nbo){nbo.style.background=t==='osce'?'#1e4d8c':'white';nbo.style.color=t==='osce'?'white':'#64748b';nbo.style.border=t==='osce'?'none':'1.5px solid #e2e8f0';}
+  el('assignPosterSection').style.display=t==='poster'?'':'none';
+  el('assignOsceSection').style.display=t==='osce'?'':'none';
+  if(t==='osce'){if(!osceData)loadOsceDashboard();else renderOsceAssignTable(osceData.cases,osceData.reviewers);}
+}
 function resultsSwitchType(t){
   resultsType=t;
   // 舊版按鈕（若存在）
@@ -2356,7 +2384,7 @@ function renderOsceResultsTable(cases){
   }
 
   const sorted=[...cases].sort((a,b)=>(rankMap[a.id]??99)-(rankMap[b.id]??99)||(b.avgTotal??-1)-(a.avgTotal??-1));
-  body.innerHTML=sorted.map(c=>`<tr data-osce-title="${esc(c.title).toLowerCase()}">
+  body.innerHTML=sorted.map(c=>`<tr data-osce-title="${esc(c.title).toLowerCase()}" data-osce-hospital="${esc(c.hospital||'').toLowerCase()}">
     <td style="text-align:center">${badge(rankMap[c.id])}</td>
     <td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td>
     <td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(c.title)}</td>
@@ -2367,7 +2395,7 @@ function renderOsceResultsTable(cases){
   </tr>`).join('')||'<tr><td colspan="7" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';
 }
 
-function filterOsceResults(){const q=(el('osceResultSearch')||{}).value?.toLowerCase()||'';document.querySelectorAll('#osceResultsBody tr[data-osce-title]').forEach(tr=>{tr.style.display=!q||tr.dataset.osceTitle.includes(q)?'':'none';});}
+function filterOsceResults(){const q=(el('osceResultSearch')||{}).value?.toLowerCase()||'';document.querySelectorAll('#osceResultsBody tr[data-osce-title]').forEach(tr=>{const ok=!q||tr.dataset.osceTitle.includes(q)||( tr.dataset.osceHospital||'').includes(q);tr.style.display=ok?'':'none';});}
 
 // ══ 詳細視窗 ══
 const OSCE_CRITERIA_LABELS=[{label:'情境設置',max:10},{label:'教學/考官指引',max:10},{label:'考生指引/SP指引',max:10},{label:'SP腳本/助教指引',max:10},{label:'評分項目與教案目標相關',max:10},{label:'評分尺標與給分定義明確',max:10},{label:'教案目標明確一致',max:10},{label:'影片畫面品質優良',max:10},{label:'影片聲音清晰且有字幕',max:10},{label:'剪輯得宜有助於教案呈現',max:10}];
@@ -2746,11 +2774,18 @@ function toggleSubRow(pid, e){
 
 // ══ 展出方式切換（含繳費檢查）══
 function toggleDisplay(pid, btn, canPhysical){
-  if(!canPhysical){ showToast('此篇會員未繳年費，不可設為實體展示','err'); return; }
   const cur=_displayMode[pid]||'eposter';
-  const next=cur==='eposter'?'physical':'eposter';
+  // 三態循環：eposter → physical（需繳費）→ rejected → eposter
+  let next;
+  if(cur==='eposter'){
+    if(!canPhysical){ next='rejected'; }  // 未繳費跳過 physical
+    else { next='physical'; }
+  } else if(cur==='physical'){
+    next='rejected';
+  } else {
+    next='eposter';
+  }
   _displayMode[pid]=next;
-  // 重新渲染以更新同投稿者警示
   if(window.dashData&&window.dashData.papers) renderResultsTable(window.dashData.papers);
 }
 
@@ -2882,7 +2917,9 @@ function sortResultsByDisplay(panel){
   function dispVal(tr){
     const pid = tr.dataset.pid;
     const m = _displayMode[pid]||'eposter';
-    return m==='physical' ? 0 : 1; // 0=實體(排前), 1=ePoster(排後)
+    if(m==='physical') return 0;   // 實體展示排最前
+    if(m==='eposter')  return 1;   // ePoster 居中
+    return 2;                       // 退稿排最後
   }
   function appendWithSub(tr, ref){
     const sub = document.getElementById('sub_'+tr.dataset.pid);
@@ -3002,7 +3039,7 @@ function exportResultsCSV(type){
         const valid = p.reviews.filter(r=>!r.rejected);
         const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
         const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        const dm=_displayMode[p.id]||'eposter'; rows.push([dm==='physical'?'實體展示':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', p.contactName||'', p.memberNames||'', p.memberConfirmed||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
+        const dm=_displayMode[p.id]||'eposter'; rows.push([dm==='physical'?'實體展示':dm==='rejected'?'退稿':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', p.contactName||'', p.memberNames||'', p.memberConfirmed||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
       });
     } else if(dashData && dashData.papers){
       let rank = 1;
@@ -3011,7 +3048,7 @@ function exportResultsCSV(type){
         const valid = p.reviews.filter(r=>!r.rejected);
         const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
         const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        const dm2=_displayMode[p.id]||'eposter'; rows.push([dm2==='physical'?'實體展示':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', p.contactName||'', p.memberNames||'', p.memberConfirmed||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
+        const dm2=_displayMode[p.id]||'eposter'; rows.push([dm2==='physical'?'實體展示':dm2==='rejected'?'退稿':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', p.contactName||'', p.memberNames||'', p.memberConfirmed||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
       });
     }
 
