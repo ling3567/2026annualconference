@@ -196,7 +196,7 @@ h1,h2,h3,h4,h5,h6{ font-weight:700; }
 .col-list{
   background:var(--white); border-right:none;
   display:flex; flex-direction:column; overflow:hidden;
-  flex:0 0 18%; min-width:150px; max-width:220px;
+  flex:0 0 200px; min-width:140px;
 }
 .col-list-head{ padding:.9rem 1rem; border-bottom:1px solid var(--border2); background:var(--bg); }
 .prog-row{ display:flex; justify-content:space-between; align-items:center; font-size:.78rem; margin-bottom:.45rem; }
@@ -233,7 +233,7 @@ h1,h2,h3,h4,h5,h6{ font-weight:700; }
 .pi-dot.r{ background:var(--red); }
 .pi-st-txt{ font-size:.72rem; color:var(--muted); }
 
-.col-content{ overflow-y:auto; background:var(--bg); padding:1.25rem 1.5rem; flex:1; min-width:0; }
+.col-content{ overflow-y:auto; background:var(--bg); padding:1.25rem 1.5rem; flex:1 1 0; min-width:0; overflow-x:hidden; }
 .content-empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--muted); text-align:center; gap:.75rem; }
 .content-empty .icon{ font-size:2.5rem; opacity:.25; }
 .content-empty h3{ font-size:1rem; color:var(--slate); }
@@ -259,7 +259,7 @@ h1,h2,h3,h4,h5,h6{ font-weight:700; }
 .btn-cloud{ padding:.42rem .9rem; background:#546070; color:white; border:none; border-radius:7px; font-size:.82rem; font-family:inherit; font-weight:500; cursor:pointer; text-decoration:none; display:inline-block; }
 .btn-cloud:hover{ opacity:.85; }
 
-.col-score{ background:white; border-left:none; display:flex; flex-direction:column; overflow:hidden; flex:0 0 32%; min-width:280px; max-width:460px; }
+.col-score{ background:white; border-left:none; display:flex; flex-direction:column; overflow:hidden; flex:0 0 380px; min-width:260px; }
 .col-score-head{ padding:.7rem 1rem; background:#546070; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; gap:.5rem; }
 .col-score-head h3{ font-size:.9rem; font-weight:700; color:white; }
 .col-score-head-note{ font-size:.7rem; color:rgba(255,255,255,.5); }
@@ -668,8 +668,8 @@ body.cat-override-on .cat-override-cell:hover{
 .abs-txt,.crit-meta,.recommend-note,.pi-ttl,.pi-st-txt{ font-weight:400; }
 
 /* ══ Responsive ══ */
-@media(max-width:1280px) and (min-width:761px){ .col-list{ flex:0 0 180px; } .col-score{ flex:0 0 30%; max-width:380px; } }
-@media(max-width:1020px) and (min-width:761px){ .col-list{ display:none; } .col-score{ flex:0 0 36%; } }
+@media(max-width:1280px) and (min-width:761px){ .col-list{ flex:0 0 180px; } .col-score{ flex:0 0 340px; min-width:240px; } }
+@media(max-width:1020px) and (min-width:761px){ .col-list{ display:none; } .col-score{ flex:0 0 320px; min-width:220px; } }
 @media(max-width:760px){
   .app-body{ display:flex; flex-direction:column; overflow:visible; height:auto; }
   #reviewerApp{ height:auto; min-height:100vh; }
@@ -2647,21 +2647,59 @@ function resetColWidths(){
   const list=document.querySelector('.col-list');
   const content=document.querySelector('.col-content');
   const score=document.querySelector('.col-score');
-  if(list){ list.style.flex='0 0 18%'; list.style.width=''; }
-  if(content){ content.style.flex='1'; content.style.width=''; }
-  if(score){ score.style.flex='0 0 32%'; score.style.width=''; }
+  if(list){ list.style.flex='0 0 200px'; list.style.width='200px'; }
+  if(content){ content.style.flex='1 1 0'; content.style.width=''; }
+  if(score){ score.style.flex='0 0 380px'; score.style.width='380px'; }
 }
 function initDraggable(){
   ['divider1','divider2'].forEach(id=>{
-    const div=el(id);if(!div)return;
-    let startX,sp,sn;
-    div.addEventListener('mousedown',e=>{
-      const prev=div.previousElementSibling,next=div.nextElementSibling;if(!prev||!next)return;
-      startX=e.clientX;sp=prev.offsetWidth;sn=next.offsetWidth;
-      div.classList.add('dragging');document.body.style.cursor='col-resize';document.body.style.userSelect='none';
-      const onMove=e2=>{const dx=e2.clientX-startX;const pm=parseInt(getComputedStyle(prev).minWidth)||100;const nm=parseInt(getComputedStyle(next).minWidth)||100;const np=Math.max(pm,Math.min(sp+dx,sp+sn-nm));const nn=sp+sn-np;prev.style.width=np+'px';prev.style.flex='0 0 '+np+'px';next.style.width=nn+'px';next.style.flex='0 0 '+nn+'px';};
-      const onUp=()=>{div.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};
-      document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);e.preventDefault();
+    const div=el(id); if(!div) return;
+    let startX, startPrevW, startNextW;
+    div.addEventListener('mousedown', e=>{
+      const prev=div.previousElementSibling;
+      const next=div.nextElementSibling;
+      if(!prev||!next) return;
+      // 中間欄（col-content）不直接拖拽，跳過
+      const isContentPrev = prev.classList.contains('col-content');
+      const isContentNext = next.classList.contains('col-content');
+      startX = e.clientX;
+      startPrevW = prev.getBoundingClientRect().width;
+      startNextW = next.getBoundingClientRect().width;
+      div.classList.add('dragging');
+      document.body.style.cursor='col-resize';
+      document.body.style.userSelect='none';
+      const onMove = e2=>{
+        const dx = e2.clientX - startX;
+        const prevMin = parseInt(getComputedStyle(prev).minWidth)||100;
+        const nextMin = parseInt(getComputedStyle(next).minWidth)||100;
+        if(isContentPrev){
+          // 拖 divider2：只改右欄（col-score），中間欄靠 flex:1 自動
+          const newNext = Math.max(nextMin, startNextW - dx);
+          next.style.flex = '0 0 '+newNext+'px';
+          next.style.width = newNext+'px';
+        } else if(isContentNext){
+          // 拖 divider1：只改左欄（col-list），中間欄靠 flex:1 自動
+          const newPrev = Math.max(prevMin, startPrevW + dx);
+          prev.style.flex = '0 0 '+newPrev+'px';
+          prev.style.width = newPrev+'px';
+        } else {
+          // 兩欄都不是 content（不應發生，保留舊邏輯）
+          const newPrev = Math.max(prevMin, Math.min(startPrevW+dx, startPrevW+startNextW-nextMin));
+          const newNext = startPrevW+startNextW-newPrev;
+          prev.style.flex='0 0 '+newPrev+'px'; prev.style.width=newPrev+'px';
+          next.style.flex='0 0 '+newNext+'px'; next.style.width=newNext+'px';
+        }
+      };
+      const onUp = ()=>{
+        div.classList.remove('dragging');
+        document.body.style.cursor='';
+        document.body.style.userSelect='';
+        document.removeEventListener('mousemove',onMove);
+        document.removeEventListener('mouseup',onUp);
+      };
+      document.addEventListener('mousemove',onMove);
+      document.addEventListener('mouseup',onUp);
+      e.preventDefault();
     });
   });
 }
