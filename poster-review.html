@@ -704,7 +704,7 @@ body.cat-override-on .cat-override-cell:hover{
         <span class="login-org-name">TSMCSD 2026 年會暨學術研討會</span>
       </div>
       <h1>競賽活動評審系統</h1>
-      <p>委員請使用個人帳號登入・管理員請使用管理帳號</p>
+      <p>本系統供評審委員進行「海報論文徵稿」及「OSCE教案影片甄選」評分使用，請以秘書處提供之帳號密碼登入</p>
     </div>
     <div class="login-card">
       <label class="fl">帳號</label>
@@ -1115,14 +1115,14 @@ const POSTER_CRITERIA = [
 ];
 const POSTER_MAX = POSTER_CRITERIA.reduce((s,c)=>s+c.max,0);
 const OSCE_CRITERIA_GROUPS = [
-  { group:'情境設置（10%）', items:[{ id:'o1', label:'情境設置（包含示範、配置器材；技能操作題包含器材並與現場一致）', max:10 }]},
+  { group:'情境設置（10%）', items:[{ id:'o1', label:'情境設置（包含告示牌、配置圖，技能操作題包含道具清單並與現場一致）', max:10 }]},
   { group:'教案指引（30%）', items:[
-    { id:'o2', label:'教學/考官指引（說明學習目標清楚，語意清晰）', max:10 },
-    { id:'o3', label:'考生指引/SP指引（足以輔助考生執行任務）', max:10 },
-    { id:'o4', label:'SP腳本/助教指引（能引導考生達到特定症狀）', max:10 }
+    { id:'o2', label:'教師/考官指引應包含學習目標，教師/考官評分說明語意清楚', max:10 },
+    { id:'o3', label:'考生指引清楚表達/足以輔助考生執行的任務', max:10 },
+    { id:'o4', label:'SP(劇本)/助教指引能引導出考生應被評估之項目', max:10 }
   ]},
   { group:'教案設計（20%）', items:[
-    { id:'o5', label:'評分項目與教案目標相關（評分尺標與教案目標相對應）', max:10 },
+    { id:'o5', label:'評分項目與教學目標能相對應', max:10 },
     { id:'o6', label:'評分尺標與給分定義明確', max:10 }
   ]},
   { group:'教案目標明確一致（10%）', items:[{ id:'o7', label:'教案內容完整、結構一致，指引目標一致', max:10 }]},
