@@ -363,7 +363,7 @@ h1,h2,h3,h4,h5,h6{ font-weight:700; }
 .adm-badge{ font-size:.8rem; color:rgba(255,255,255,.45); margin-left:.5rem; }
 .btn-adm-out{ background:none; border:1px solid rgba(255,255,255,.2); border-radius:6px; padding:.28rem .65rem; font-size:.72rem; color:rgba(255,255,255,.5); cursor:pointer; transition:all .2s; font-family:inherit; }
 .btn-adm-out:hover{ border-color:rgba(255,255,255,.5); color:white; }
-.adm-tabbar{ background:white; border-bottom:1px solid #e2e8f0; display:flex; padding:0 1.5rem; }
+.adm-tabbar{ background:white; border-bottom:1px solid #e2e8f0; display:flex; align-items:stretch; justify-content:space-between; padding:0 1.5rem; }
 .adm-tab{ padding:.9rem 1.2rem; font-size:.88rem; font-weight:500; color:#718096; cursor:pointer; border-bottom:2.5px solid transparent; transition:all .18s; white-space:nowrap; display:flex; align-items:center; gap:.4rem; }
 .adm-tab.active{ color:var(--adm-blue); border-bottom-color:var(--adm-blue); }
 .adm-tab:hover{ color:#4a5568; }
@@ -828,6 +828,15 @@ body.cat-override-on .cat-override-cell:hover{
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       委員帳號
     </div>
+    <!-- 評分結果類型切換（僅在評分結果 tab 顯示）-->
+    <div id="resultTypeInTab" style="display:none;align-items:center;gap:.35rem;padding:.4rem 0 .4rem 1rem;border-left:1px solid #e2e8f0;margin-left:.5rem">
+      <button id="resultsTypePosterTab" class="adm-btn adm-btn-sm" style="background:#1e4d8c;color:white;border:none;padding:.3rem .75rem;font-size:.78rem" onclick="resultsSwitchType('poster')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:.2rem"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>海報
+      </button>
+      <button id="resultsTypeOsceTab" class="adm-btn adm-btn-sm" style="background:white;color:#64748b;border:1.5px solid #e2e8f0;padding:.3rem .75rem;font-size:.78rem" onclick="resultsSwitchType('osce')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:.2rem"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>OSCE
+      </button>
+    </div>
   </div>
   <div class="adm-content" id="adm-tab-dashboard">
     <!-- 統計卡 -->
@@ -892,12 +901,6 @@ body.cat-override-on .cat-override-cell:hover{
   </div>
   <div class="adm-content" id="adm-tab-results" style="display:none">
 
-  <!-- 類型切換 -->
-  <div class="type-switcher" style="margin-bottom:1.25rem">
-    <button class="type-btn active" id="resultsTypePoster" onclick="resultsSwitchType('poster')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> 海報論文</button>
-    <button class="type-btn" id="resultsTypeOsce" onclick="resultsSwitchType('osce')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> OSCE 教案</button>
-  </div>
-
   <!-- 海報論文 評分結果 -->
   <div id="resultsPosterSection" style="display:block">
     <div class="sec">
@@ -940,7 +943,7 @@ body.cat-override-on .cat-override-cell:hover{
         <div id="rPanelCat">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
             <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各類論文・依推薦票數→平均總分排列・可拖動調整・或點擊欄標題重新排序</span>
-            <button class="adm-btn adm-btn-sm" style="background:#1d4ed8;color:white;border:none" onclick="saveDisplayModeToGAS()">儲存展出方式</button> <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">匯出 CSV</button>
+<div style="display:flex;gap:.4rem"><button class="adm-btn adm-btn-sm" style="background:#1d4ed8;color:white;border:none" onclick="saveDisplayModeToGAS()">儲存展出方式</button><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">匯出 CSV</button></div>
           </div>
           <div class="tbl-wrap"><table>
             <thead><tr>
@@ -1924,6 +1927,7 @@ function admSwitchTab(t){
     if(osceData) renderOsceAssignTable(osceData.cases,osceData.reviewers);
     else loadOsceDashboard();
   }
+  const rTypeBar=el('resultTypeInTab'); if(rTypeBar) rTypeBar.style.display=t==='results'?'flex':'none';
   if(t==='results'){
     // 預設顯示海報論文（重置子 section 狀態）
     const rp=el('resultsPosterSection'); if(rp) rp.style.display='block';
@@ -2276,7 +2280,20 @@ function renderRvTable(reviewers){
 // ══ OSCE 後台 ══
 function dashSwitchType(t){dashType=t;el('dashTypePoster').classList.toggle('active',t==='poster');el('dashTypeOsce').classList.toggle('active',t==='osce');el('dashPosterSection').style.display=t==='poster'?'':'none';el('dashOsceSection').style.display=t==='osce'?'':'none';if(t==='osce'&&!osceData)loadOsceDashboard();}
 function assignSwitchType(t){assignType=t;el('assignTypePoster').classList.toggle('active',t==='poster');el('assignTypeOsce').classList.toggle('active',t==='osce');el('assignPosterSection').style.display=t==='poster'?'':'none';el('assignOsceSection').style.display=t==='osce'?'':'none';if(t==='osce'){if(!osceData)loadOsceDashboard();else renderOsceAssignTable(osceData.cases,osceData.reviewers);}}
-function resultsSwitchType(t){resultsType=t;el('resultsTypePoster').classList.toggle('active',t==='poster');el('resultsTypeOsce').classList.toggle('active',t==='osce');el('resultsPosterSection').style.display=t==='poster'?'':'none';el('resultsOsceSection').style.display=t==='osce'?'':'none';if(t==='osce'){if(!osceData)loadOsceDashboard();else renderOsceResultsTable(osceData.cases);}}
+function resultsSwitchType(t){
+  resultsType=t;
+  // 舊版按鈕（若存在）
+  const bp=el('resultsTypePoster'); if(bp) bp.classList.toggle('active',t==='poster');
+  const bo=el('resultsTypeOsce');   if(bo) bo.classList.toggle('active',t==='osce');
+  // Tab 列新按鈕
+  const nbp=el('resultsTypePosterTab');
+  const nbo=el('resultsTypeOsceTab');
+  if(nbp){ nbp.style.background=t==='poster'?'#1e4d8c':'white'; nbp.style.color=t==='poster'?'white':'#64748b'; nbp.style.border=t==='poster'?'none':'1.5px solid #e2e8f0'; }
+  if(nbo){ nbo.style.background=t==='osce'?'#1e4d8c':'white'; nbo.style.color=t==='osce'?'white':'#64748b'; nbo.style.border=t==='osce'?'none':'1.5px solid #e2e8f0'; }
+  el('resultsPosterSection').style.display=t==='poster'?'':'none';
+  el('resultsOsceSection').style.display=t==='osce'?'':'none';
+  if(t==='osce'){if(!osceData)loadOsceDashboard();else renderOsceResultsTable(osceData.cases);}
+}
 
 async function loadOsceDashboard(){
   try{
@@ -2940,7 +2957,7 @@ function exportResultsCSV(type){
 
   if(type === 'poster'){
     title = 'TSMCSD2026_海報論文評分結果';
-    rows.push(['展出方式','編號','論文題目','投稿單位','類別','建議改類','平均總分','推薦票數','退稿數','分數差距']);
+    rows.push(['展出方式','編號','論文題目','投稿單位','聯絡人','學會會員','繳費狀態','類別','建議改類','平均總分','推薦票數','退稿數','分數差距']);
 
     // 優先用目前表格排列（含拖動後的順序）
     const tbody = el('resultsCatBody') || el('resultsAllBody');
@@ -2955,7 +2972,7 @@ function exportResultsCSV(type){
         const valid = p.reviews.filter(r=>!r.rejected);
         const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
         const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        const dm=_displayMode[p.id]||'eposter'; rows.push([dm==='physical'?'實體展示':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
+        const dm=_displayMode[p.id]||'eposter'; rows.push([dm==='physical'?'實體展示':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', p.contactName||'', p.memberNames||'', p.memberConfirmed||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
       });
     } else if(dashData && dashData.papers){
       let rank = 1;
@@ -2964,7 +2981,7 @@ function exportResultsCSV(type){
         const valid = p.reviews.filter(r=>!r.rejected);
         const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
         const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        const dm2=_displayMode[p.id]||'eposter'; rows.push([dm2==='physical'?'實體展示':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
+        const dm2=_displayMode[p.id]||'eposter'; rows.push([dm2==='physical'?'實體展示':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', p.contactName||'', p.memberNames||'', p.memberConfirmed||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
       });
     }
 
