@@ -1064,8 +1064,8 @@ body.cat-override-on .cat-override-cell:hover{
     <div class="modal-foot">
       <div style="font-size:.82rem;color:var(--muted)" id="ovSelectedCount">請勾選要送出的項目</div>
       <div style="display:flex;gap:.6rem">
-        <button class="btn-select-all" onclick="toggleSelectAll('poster')">海報全選</button>
-        <button class="btn-select-all" onclick="toggleSelectAll('osce')">OSCE全選</button>
+        <button class="btn-select-all" id="btnSelectAllPoster" onclick="toggleSelectAll('poster')">海報全選</button>
+        <button class="btn-select-all" id="btnSelectAllOsce" onclick="toggleSelectAll('osce')">OSCE全選</button>
         <button class="btn-bulk-submit" id="btnBulkSubmit" onclick="bulkSubmit()" disabled>送出勾選項目</button>
       </div>
     </div>
@@ -1308,17 +1308,17 @@ async function doLogin(){
       submitted=r.submitted||{};
       const ss=r.submittedScores||{};
       Object.entries(ss).forEach(([pid,sc])=>{ drafts[pid]=sc; });
-      // 從 localStorage 讀回未提交的草稿
+      // 先從 localStorage 讀回草稿（本地備份）
       try{
         const prefix='tsmcsd_draft_'+r.reviewer.username+'_';
         for(let i=0;i<localStorage.length;i++){
           const k=localStorage.key(i);
           if(k&&k.startsWith(prefix)){
             const pid=k.slice(prefix.length);
-            if(!submitted[pid]){  // 只讀未提交的
+            if(!submitted[pid]){
               try{ drafts[pid]=JSON.parse(localStorage.getItem(k)); }catch(e){}
             } else {
-              localStorage.removeItem(k);  // 已提交的清除 localStorage
+              localStorage.removeItem(k);
             }
           }
         }
@@ -1329,6 +1329,30 @@ async function doLogin(){
       el('loginScreen').style.display='none';
       el('reviewerApp').classList.add('show');
       renderList();
+      // 背景從 GAS 載入草稿（覆蓋 localStorage，確保跨裝置一致）
+      const username=r.reviewer.username;
+      Promise.all([
+        api({action:'getDraftGAS', reviewerUsername:username, paperType:'poster'}),
+        api({action:'getDraftGAS', reviewerUsername:username, paperType:'osce'})
+      ]).then(([rp,ro])=>{
+        let updated=false;
+        [rp,ro].forEach(res=>{
+          if(res&&res.success&&res.drafts){
+            res.drafts.forEach(({paperId,draftJson})=>{
+              if(submitted[paperId]) return; // 已提交不覆蓋
+              try{
+                const d=JSON.parse(draftJson);
+                drafts[paperId]=d;
+                // 同步回 localStorage
+                const key='tsmcsd_draft_'+username+'_'+paperId;
+                localStorage.setItem(key, draftJson);
+                updated=true;
+              }catch(e){}
+            });
+          }
+        });
+        if(updated){ renderList(); showToast('已從雲端還原暫存草稿','ok'); }
+      }).catch(e=>console.warn('GAS draft load failed:',e));
     } else if(r.message==='NOT_REVIEWER'){
       const ra=await api({action:'adminLogin', username:u, password:p});
       if(ra.success){
@@ -1689,11 +1713,19 @@ function saveDraft(){
     showToast('有評分項目超過滿分，請修正後再暫存','err'); return;
   }
   drafts[p.id]=d;
-  // 同步寫入 localStorage（跨登入保留）
+  // 同步寫入 localStorage（即時，作為本地備份）
   try{
     const key='tsmcsd_draft_'+reviewer.username+'_'+p.id;
     localStorage.setItem(key, JSON.stringify(d));
   }catch(e){}
+  // 背景同步至 GAS（跨裝置保留）
+  api({
+    action:'saveDraftGAS',
+    reviewerUsername:reviewer.username,
+    paperId:p.id,
+    paperType:curType,
+    draftJson:JSON.stringify(d)
+  }).catch(e=>console.warn('GAS draft sync failed:',e));
   renderList(); showToast('草稿已暫存','ok');
 }
 
@@ -1830,6 +1862,10 @@ function showOverview(){
     </div>`;
   }).join('');
   el('overviewModal').classList.add('show');
+  // 只顯示當前類型對應的全選按鈕
+  const btnP=el('btnSelectAllPoster'), btnO=el('btnSelectAllOsce');
+  if(btnP) btnP.style.display=curType==='poster'?'':'none';
+  if(btnO) btnO.style.display=curType==='osce'?'':'none';
   updateBulkBtn();
 }
 function closeOverview(){ el('overviewModal').classList.remove('show'); }
