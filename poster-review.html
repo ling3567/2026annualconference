@@ -1121,11 +1121,11 @@ const OSCE_CRITERIA_GROUPS = [
     { id:'o3', label:'考生指引清楚表達/足以輔助考生執行的任務', max:10 },
     { id:'o4', label:'SP(劇本)/助教指引能引導出考生應被評估之項目', max:10 }
   ]},
-  { group:'教案設計（20%）', items:[
+  { group:'評分設計（20%）', items:[
     { id:'o5', label:'評分項目與教學目標能相對應', max:10 },
     { id:'o6', label:'評分尺標與給分定義明確', max:10 }
   ]},
-  { group:'教案目標明確一致（10%）', items:[{ id:'o7', label:'教案內容完整、結構一致，指引目標一致', max:10 }]},
+  { group:'教學目標明確一致（10%）', items:[{ id:'o7', label:'考官、考生、SP/助教之教案內容及教材結構之完整性、指引目標一致', max:10 }]},
   { group:'影片呈現（30%）', items:[
     { id:'o8', label:'影片畫面品質優良', max:10 },
     { id:'o9', label:'影片聲音清晰，且有字幕', max:10 },
@@ -2497,7 +2497,7 @@ function toggleOsceSubRow(cid, e){
 function filterOsceResults(){const q=(el('osceResultSearch')||{}).value?.toLowerCase()||'';document.querySelectorAll('#osceResultsBody tr[data-osce-title]').forEach(tr=>{const ok=!q||tr.dataset.osceTitle.includes(q)||( tr.dataset.osceHospital||'').includes(q);tr.style.display=ok?'':'none';});}
 
 // ══ 詳細視窗 ══
-const OSCE_CRITERIA_LABELS=[{label:'情境設置',max:10},{label:'教學/考官指引',max:10},{label:'考生指引/SP指引',max:10},{label:'SP腳本/助教指引',max:10},{label:'評分項目與教案目標相關',max:10},{label:'評分尺標與給分定義明確',max:10},{label:'教案目標明確一致',max:10},{label:'影片畫面品質優良',max:10},{label:'影片聲音清晰且有字幕',max:10},{label:'剪輯得宜有助於教案呈現',max:10}];
+const OSCE_CRITERIA_LABELS=[{label:'情境設置',max:10},{label:'教學/考官指引',max:10},{label:'考生指引/SP指引',max:10},{label:'SP腳本/助教指引',max:10},{label:'評分項目與教案目標相關',max:10},{label:'評分尺標與給分定義明確',max:10},{label:'教學目標明確一致',max:10},{label:'影片畫面品質優良',max:10},{label:'影片聲音清晰且有字幕',max:10},{label:'剪輯得宜有助於教案呈現',max:10}];
 function calcFrontendSmartAvg(scores){const s=scores.filter(v=>!isNaN(v)&&v!==null);if(!s.length)return null;if(s.length<=2)return Math.round(s.reduce((a,b)=>a+b,0)/s.length*10)/10;const sorted=[...s].sort((a,b)=>a-b);let minGap=Infinity,best=[sorted[0],sorted[1]];for(let i=0;i<sorted.length-1;i++){const g=sorted[i+1]-sorted[i];if(g<minGap){minGap=g;best=[sorted[i],sorted[i+1]];}}return Math.round((best[0]+best[1])/2*10)/10;}
 
 function _detailGrid(reviews,criteriaArr){
