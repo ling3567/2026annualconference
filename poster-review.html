@@ -1438,7 +1438,7 @@ function renderPosterContent(i){
         <div class="rejected-overlay-body">${originalContent}</div>
       </div>`;
   } else if(isDone){
-    el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">已完成評分，如需修改請聯絡依玲 06-2812811-57426・<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f98d8a949a8a9dcbc9c8c1b99e94989095d79a9694">[email&#160;protected]</a></div>');
+    el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">已完成評分，如需修改請聯絡依玲 06-2812811-57426・tsmcsd2018@gmail.com</div>');
   }
   markEmptyInputs(); updatePosterTotal();
 }
@@ -1489,7 +1489,7 @@ function renderOsceContent(i){
   el('scoreArea').innerHTML=renderOsceScoreForm(p, draft, isDone);
   el('scoreActions').style.display=isDone?'none':'flex';
   if(p.driveUrl) loadDriveFiles(p.id, p.driveUrl);
-  if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">已完成評分，如需修改請聯絡依玲 06-2812811-57426・<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="99edeaf4faeafdaba9a8a1d9fef4f8f0f5b7faf6f4">[email&#160;protected]</a></div>');
+  if(isDone) el('scoreArea').insertAdjacentHTML('afterbegin','<div class="done-banner">已完成評分，如需修改請聯絡依玲 06-2812811-57426・tsmcsd2018@gmail.com</div>');
   markEmptyInputs(); updateOsceTotal();
 }
 
@@ -1569,29 +1569,30 @@ function renderPosterScoreForm(p,draft,isDone){
 // ══ 評分表單（OSCE）══
 function renderOsceScoreForm(p,draft,isDone){
   const dis=isDone?'disabled':'';
-  let html=``;
-  const groups=[
-    {label:'情境設置（10%）', items:['o1']},
-    {label:'教案指引（30%）', items:['o2','o3','o4']},
-    {label:'評分設計（20%）', items:['o5','o6']},
-    {label:'教案目標（10%）', items:['o7']},
-    {label:'影片品質（30%）', items:['o8','o9','o10']},
-  ];
-  OSCE_CRITERIA.forEach(c=>{
-    const v=draft[c.id]!==undefined?draft[c.id]:'';
-    html+=`<div class="score-item">
-      <div class="score-item-label">
-        <span class="score-item-name">${c.label}</span>
-      </div>
-      <div class="score-input-wrap" style="flex-shrink:0">
-        <input type="number" class="score-input" id="sc_${c.id}" min="0" max="${c.max}" value="${v}" placeholder="—" ${dis}
-          oninput="validateScore(this,${c.max});updateOsceTotal()">
-        <span class="score-max">/ ${c.max}</span>
-      </div>
-    </div>`;
+  let html='';
+
+  // 依大項分組渲染，使用 OSCE_CRITERIA_GROUPS
+  OSCE_CRITERIA_GROUPS.forEach(g=>{
+    // 大項標題
+    html+=`<div class="crit-group-title" style="font-size:.78rem;font-weight:700;letter-spacing:.04em;color:#3a4550;padding:.32rem .65rem;background:#dce6ec;border-radius:5px;margin-bottom:.35rem;border-left:3px solid #546070;margin-top:.65rem">${g.group}</div>`;
+    g.items.forEach(c=>{
+      const v=draft[c.id]!==undefined?draft[c.id]:'';
+      html+=`<div class="score-item">
+        <div class="score-item-label">
+          <span class="score-item-name">${c.label}</span>
+        </div>
+        <div class="score-input-wrap" style="flex-shrink:0">
+          <input type="number" class="score-input" id="sc_${c.id}" min="0" max="${c.max}" value="${v}" placeholder="—" ${dis}
+            oninput="validateScore(this,${c.max});updateOsceTotal()">
+          <span class="score-max">/ ${c.max}</span>
+        </div>
+      </div>`;
+    });
   });
+
+  // 優良加分
   const bv=draft[OSCE_BONUS.id]!==undefined?draft[OSCE_BONUS.id]:'';
-  html+=`<div class="score-item" style="background:#fffbeb;border-color:#fde68a">
+  html+=`<div class="score-item" style="background:#fffbeb;border-color:#fde68a;margin-top:.65rem">
     <div class="score-item-label"><strong>${OSCE_BONUS.label}</strong><span class="score-item-sub">最多加 ${OSCE_BONUS.max} 分</span></div>
     <div class="score-input-wrap">
       <input type="number" class="score-input" id="sc_${OSCE_BONUS.id}" min="0" max="${OSCE_BONUS.max}" value="${bv}" placeholder="—" ${dis}
@@ -1599,9 +1600,9 @@ function renderOsceScoreForm(p,draft,isDone){
       <span class="score-max">/ ${OSCE_BONUS.max}</span>
     </div>
   </div>`;
-  // OSCE 無退稿機制
+
   html+=`<div class="cmt-wrap"><label>評語（選填）</label><textarea id="cmtArea" placeholder="可填寫對本篇教案的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea></div>`;
-  html+=`<div class="cmt-wrap" id="bonusNoteWrap" style="${Number(draft[OSCE_BONUS.id])>0?'':''}"><label>${Number(draft[OSCE_BONUS.id])>0?'優良加分說明 <span style=\"color:#dc2626;font-weight:700\">*必填</span>':'優良加分說明（填加分時必填）'}</label><textarea id="bonusNote" placeholder="請說明優良表現原因…" ${dis}>${esc(draft.bonusNote||'')}</textarea></div>`;
+  html+=`<div class="cmt-wrap" id="bonusNoteWrap"><label>${Number(draft[OSCE_BONUS.id])>0?'優良加分說明 <span style="color:#dc2626;font-weight:700">*必填</span>':'優良加分說明（填加分時必填）'}</label><textarea id="bonusNote" placeholder="請說明優良表現原因…" ${dis}>${esc(draft.bonusNote||'')}</textarea></div>`;
   return html;
 }
 
