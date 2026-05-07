@@ -880,7 +880,7 @@ body.cat-override-on .cat-override-cell:hover{
           </div>
         </div>
         <div class="sec-body"><p style="font-size:.78rem;color:#718096;margin-bottom:1rem">點選「＋委員」新增評審委員，完成後按「儲存指派」。</p>
-          <div class="tbl-wrap"><table><thead><tr><th>編號</th><th>論文題目</th><th>類別</th><th>指派委員（可多位）</th></tr></thead><tbody id="assignBody"></tbody></table></div>
+          <div class="tbl-wrap"><table><thead><tr><th>編號</th><th>論文題目</th><th>類別</th><th style="max-width:160px">作者群</th><th>指派委員（可多位）</th></tr></thead><tbody id="assignBody"></tbody></table></div>
         </div>
       </div>
     </div>
@@ -894,7 +894,7 @@ body.cat-override-on .cat-override-cell:hover{
           </div>
         </div>
         <div class="sec-body"><p style="font-size:.78rem;color:#718096;margin-bottom:1rem">點選「＋委員」新增評審委員，完成後按「儲存指派」。</p>
-          <div class="tbl-wrap"><table><thead><tr><th>編號</th><th>教案主題</th><th>服務醫院</th><th>指派委員（可多位）</th></tr></thead><tbody id="osceAssignBody"></tbody></table></div>
+          <div class="tbl-wrap"><table><thead><tr><th>編號</th><th>教案主題</th><th>服務醫院</th><th style="max-width:160px">作者群</th><th>指派委員（可多位）</th></tr></thead><tbody id="osceAssignBody"></tbody></table></div>
         </div>
       </div>
     </div>
@@ -2055,20 +2055,55 @@ function renderAssignTable(papers,reviewers){
   if(!papers||!papers.length){body.innerHTML='<tr><td colspan="4" style="text-align:center;color:#718096;padding:2rem">尚無論文資料</td></tr>';return;}
   body.innerHTML=papers.map(p=>{
     const assigned=assignments[p.id]||[];
-    const options=(reviewers||[]).map(r=>`<option value="${r.username}">${r.name}(${r.username})</option>`).join('');
-    return `<tr><td><span class="chip chip-blue">${p.paperNo||'—'}</span></td>
-      <td style="max-width:280px;line-height:1.5">${esc(p.title)}</td>
+    const authorStr=p.authors||'';
+    // 判斷委員是否為作者（比對姓名）
+    const isAuthor=(r)=> authorStr && (authorStr.includes(r.name)||(r.realName&&authorStr.includes(r.realName)));
+    const options=(reviewers||[]).map(r=>{
+      const warn=isAuthor(r)?'⚠ ':'';
+      return `<option value="${r.username}" ${isAuthor(r)?'style="color:#b45309;font-weight:700"':''}>${warn}${r.name}(${r.username})</option>`;
+    }).join('');
+    return `<tr><td><span class="chip chip-blue chip-no">${p.paperNo||'—'}</span></td>
+      <td style="max-width:220px;line-height:1.5">${esc(p.title)}</td>
       <td>${normCat(p.category)||'—'}</td>
+      <td style="max-width:160px;font-size:.78rem;color:#475569;line-height:1.5">${esc(authorStr||'—')}</td>
       <td><div class="assign-wrap" id="aw_${p.id}">
-        ${assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeAssign('${p.id}','${u}')">✕</span></span>`).join('')}
+        ${assigned.map(u=>{
+          const r2=(reviewers||[]).find(x=>x.username===u);
+          const warn=r2&&isAuthor(r2)?'<span style="color:#b45309;font-size:.68rem;font-weight:700;margin-left:.2rem">⚠作者</span>':'';
+          return `<span class="assign-chip" title="${u}">${rvName(u)}${warn}<span class="rm" onclick="removeAssign('${p.id}','${u}')">✕</span></span>`;
+        }).join('')}
         <select class="assign-sel" id="asel_${p.id}" onchange="addAssign('${p.id}')"><option value="">＋ 委員</option>${options}</select>
       </div></td>
     </tr>`;
   }).join('');
 }
-function addAssign(pid){const sel=el('asel_'+pid);const u=sel.value;if(!u)return;sel.value='';if(!assignments[pid])assignments[pid]=[];if(assignments[pid].includes(u)){showToast('此委員已在列表中','err');return;}assignments[pid].push(u);refreshAssignRow(pid);}
+function addAssign(pid){
+  const sel=el('asel_'+pid);const u=sel.value;if(!u)return;sel.value='';
+  if(!assignments[pid])assignments[pid]=[];
+  if(assignments[pid].includes(u)){showToast('此委員已在列表中','err');return;}
+  // 作者警告
+  const p=dashData&&dashData.papers&&dashData.papers.find(x=>x.id===pid);
+  const r2=dashData&&dashData.reviewers&&dashData.reviewers.find(x=>x.username===u);
+  if(p&&r2&&p.authors&&p.authors.includes(r2.name)){
+    if(!confirm('⚠ 此委員（'+r2.name+'）可能為本篇作者，確定仍要指派？'))return;
+  }
+  assignments[pid].push(u);refreshAssignRow(pid);
+}
 function removeAssign(pid,u){if(!assignments[pid])return;assignments[pid]=assignments[pid].filter(x=>x!==u);refreshAssignRow(pid);}
-function refreshAssignRow(pid){const wrap=el('aw_'+pid);if(!wrap)return;const assigned=assignments[pid]||[];const sel=el('asel_'+pid);const selHTML=sel?sel.outerHTML:'';wrap.innerHTML=assigned.map(u=>`<span class="assign-chip" title="${u}">${rvName(u)}<span class="rm" onclick="removeAssign('${pid}','${u}')">✕</span></span>`).join('')+selHTML;}
+function refreshAssignRow(pid){
+  const wrap=el('aw_'+pid);if(!wrap)return;
+  const assigned=assignments[pid]||[];
+  const sel=el('asel_'+pid);const selHTML=sel?sel.outerHTML:'';
+  const p=dashData&&dashData.papers&&dashData.papers.find(x=>x.id===pid);
+  const authorStr=p?p.authors||'':'';
+  const rvrs=dashData&&dashData.reviewers||[];
+  wrap.innerHTML=assigned.map(u=>{
+    const r2=rvrs.find(x=>x.username===u);
+    const isA=r2&&authorStr&&authorStr.includes(r2.name);
+    const warn=isA?'<span style="color:#b45309;font-size:.68rem;font-weight:700;margin-left:.2rem">⚠作者</span>':'';
+    return `<span class="assign-chip" title="${u}">${rvName(u)}${warn}<span class="rm" onclick="removeAssign('${pid}','${u}')">✕</span></span>`;
+  }).join('')+selHTML;
+}
 
 async function saveAssignments(type){
   const t=type||assignType;
@@ -2443,11 +2478,57 @@ function renderOsceDashTable(cases){
 function renderOsceAssignTable(cases,reviewers){
   const body=el('osceAssignBody');if(!body)return;
   if(!cases||!cases.length){body.innerHTML='<tr><td colspan="4" style="text-align:center;color:#718096;padding:2rem">尚無教案資料</td></tr>';return;}
-  body.innerHTML=cases.map(c=>{const assigned=osceAssignments[c.id]||[];const options=(reviewers||[]).map(r=>`<option value="${r.username}">${r.name}(${r.username})</option>`).join('');return `<tr><td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td><td style="max-width:240px;line-height:1.5">${esc(c.title)}</td><td style="font-size:.82rem">${esc(c.hospital||'—')}</td><td><div class="assign-wrap" id="oaw_${c.id}">${assigned.map(u=>`<span class="assign-chip">${rvName(u)}<span class="rm" onclick="removeOsceAssign('${c.id}','${u}')">✕</span></span>`).join('')}<select class="assign-sel" id="oasel_${c.id}" onchange="addOsceAssign('${c.id}')"><option value="">＋ 委員</option>${options}</select></div></td></tr>`;}).join('');
+  body.innerHTML=cases.map(cs=>{
+    const assigned=osceAssignments[cs.id]||[];
+    const authorStr=cs.authors||'';
+    const isAuthorO=(r)=> authorStr && (authorStr.includes(r.name)||(r.realName&&authorStr.includes(r.realName)));
+    const options=(reviewers||[]).map(r=>{
+      const warn=isAuthorO(r)?'⚠ ':'';
+      return `<option value="${r.username}" ${isAuthorO(r)?'style="color:#b45309;font-weight:700"':''}>${warn}${r.name}(${r.username})</option>`;
+    }).join('');
+    return `<tr>
+      <td><span class="chip chip-blue chip-no">${esc(cs.caseNo||'—')}</span></td>
+      <td style="max-width:200px;line-height:1.5">${esc(cs.title)}</td>
+      <td style="font-size:.82rem">${esc(cs.hospital||'—')}</td>
+      <td style="max-width:160px;font-size:.78rem;color:#475569;line-height:1.5">${esc(authorStr||'—')}</td>
+      <td><div class="assign-wrap" id="oaw_${cs.id}">
+        ${assigned.map(u=>{
+          const r2=(reviewers||[]).find(x=>x.username===u);
+          const warn=r2&&isAuthorO(r2)?'<span style="color:#b45309;font-size:.68rem;font-weight:700;margin-left:.2rem">⚠作者</span>':'';
+          return `<span class="assign-chip">${rvName(u)}${warn}<span class="rm" onclick="removeOsceAssign('${cs.id}','${u}')">✕</span></span>`;
+        }).join('')}
+        <select class="assign-sel" id="oasel_${cs.id}" onchange="addOsceAssign('${cs.id}')"><option value="">＋ 委員</option>${options}</select>
+      </div></td>
+    </tr>`;
+  }).join('');
 }
-function addOsceAssign(cid){const sel=el('oasel_'+cid);const u=sel.value;if(!u)return;sel.value='';if(!osceAssignments[cid])osceAssignments[cid]=[];if(osceAssignments[cid].includes(u)){showToast('此委員已在列表中','err');return;}osceAssignments[cid].push(u);refreshOsceAssignRow(cid);}
+function addOsceAssign(cid){
+  const sel=el('oasel_'+cid);const u=sel.value;if(!u)return;sel.value='';
+  if(!osceAssignments[cid])osceAssignments[cid]=[];
+  if(osceAssignments[cid].includes(u)){showToast('此委員已在列表中','err');return;}
+  // 作者警告
+  const cs=osceData&&osceData.cases&&osceData.cases.find(x=>x.id===cid);
+  const r2=osceData&&osceData.reviewers&&osceData.reviewers.find(x=>x.username===u);
+  if(cs&&r2&&cs.authors&&cs.authors.includes(r2.name)){
+    if(!confirm('⚠ 此委員（'+r2.name+'）可能為本篇作者，確定仍要指派？'))return;
+  }
+  osceAssignments[cid].push(u);refreshOsceAssignRow(cid);
+}
 function removeOsceAssign(cid,u){if(!osceAssignments[cid])return;osceAssignments[cid]=osceAssignments[cid].filter(x=>x!==u);refreshOsceAssignRow(cid);}
-function refreshOsceAssignRow(cid){const wrap=el('oaw_'+cid);if(!wrap)return;const assigned=osceAssignments[cid]||[];const sel=el('oasel_'+cid);const sh=sel?sel.outerHTML:'';wrap.innerHTML=assigned.map(u=>`<span class="assign-chip">${rvName(u)}<span class="rm" onclick="removeOsceAssign('${cid}','${u}')">✕</span></span>`).join('')+sh;}
+function refreshOsceAssignRow(cid){
+  const wrap=el('oaw_'+cid);if(!wrap)return;
+  const assigned=osceAssignments[cid]||[];
+  const sel=el('oasel_'+cid);const sh=sel?sel.outerHTML:'';
+  const cs=osceData&&osceData.cases&&osceData.cases.find(x=>x.id===cid);
+  const authorStr=cs?cs.authors||'':'';
+  const rvrs=osceData&&osceData.reviewers||[];
+  wrap.innerHTML=assigned.map(u=>{
+    const r2=rvrs.find(x=>x.username===u);
+    const isA=r2&&authorStr&&authorStr.includes(r2.name);
+    const warn=isA?'<span style="color:#b45309;font-size:.68rem;font-weight:700;margin-left:.2rem">⚠作者</span>':'';
+    return `<span class="assign-chip">${rvName(u)}${warn}<span class="rm" onclick="removeOsceAssign('${cid}','${u}')">✕</span></span>`;
+  }).join('')+sh;
+}
 
 function renderOsceResultsTable(cases){
   const body=el('osceResultsBody');if(!body)return;
