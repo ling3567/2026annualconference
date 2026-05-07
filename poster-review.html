@@ -2802,9 +2802,12 @@ function renderAssignDetailPage(){
 
 // ══ 委員帳號管理 ══
 async function loadReviewers(){setLdr(true);try{const r=await api({action:'adminGetReviewers'});if(r.success){if(r.reviewerNamesMap)Object.assign(reviewerNamesMap,r.reviewerNamesMap);else(r.reviewers||[]).forEach(rv=>{reviewerNamesMap[rv.username]=rv.name||rv.username;});renderRvTable(r.reviewers);}else showToast('載入失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
-async function addReviewer(){const u=el('nwUser').value.trim(),pw=el('nwPw').value.trim(),n=el('nwName').value.trim();if(!u||!pw||!n){showToast('請填寫完整欄位','err');return;}setLdr(true);try{const r=await api({action:'adminAddReviewer',username:u,password:pw,name:n});if(r.success){showToast('委員已新增','ok');el('nwUser').value='';el('nwPw').value='';el('nwName').value='';loadReviewers();}else showToast(r.message||'新增失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
-async function toggleReviewer(u,enabled){setLdr(true);try{const r=await api({action:'adminUpdateReviewer',username:u,enabled:String(enabled)});if(r.success){showToast(`帳號已${enabled?'啟用':'停用'}`,'ok');loadReviewers();}else showToast('操作失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
-async function deleteReviewer(u){if(!confirm(`確定刪除委員「${u}」？`))return;setLdr(true);try{const r=await api({action:'adminDeleteReviewer',username:u});if(r.success){showToast('委員已刪除','ok');loadReviewers();}else showToast(r.message||'刪除失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
+async function addReviewer(){const u=el('nwUser').value.trim(),pw=el('nwPw').value.trim(),n=el('nwName').value.trim();if(!u||!pw||!n){showToast('請填寫完整欄位','err');return;}setLdr(true);try{const r=await api({action:'adminAddReviewer',username:u,password:pw,name:n});if(r.success){showToast('委員已新增','ok');el('nwUser').value='';el('nwPw').value='';el('nwName').value='';// 同步新增到 dashData.reviewers
+if(dashData&&dashData.reviewers) dashData.reviewers.push({username:u,name:n,enabled:true});loadReviewers();}else showToast(r.message||'新增失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
+async function toggleReviewer(u,enabled){setLdr(true);try{const r=await api({action:'adminUpdateReviewer',username:u,enabled:String(enabled)});if(r.success){showToast(`帳號已${enabled?'啟用':'停用'}`,'ok');// 同步更新 dashData.reviewers 的啟用狀態
+if(dashData&&dashData.reviewers){const rv=dashData.reviewers.find(x=>x.username===u);if(rv) rv.enabled=enabled;}loadReviewers();}else showToast('操作失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
+async function deleteReviewer(u){if(!confirm(`確定刪除委員「${u}」？此操作無法復原。`))return;setLdr(true);try{const r=await api({action:'adminDeleteReviewer',username:u});if(r.success){showToast('委員已刪除','ok');// 同步更新 dashData.reviewers，讓指派頁面下拉選單立即移除已刪除委員
+if(dashData&&dashData.reviewers) dashData.reviewers=dashData.reviewers.filter(rv=>rv.username!==u);loadReviewers();}else showToast(r.message||'刪除失敗','err');}catch{showToast('連線失敗','err');}setLdr(false);}
 function rvSwitchSub(){}
 
 // ══ Draggable ══
