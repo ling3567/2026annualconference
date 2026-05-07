@@ -1184,6 +1184,17 @@ function normCat(raw){ const m=String(raw||'').match(/^[ABC]/i); return m?m[0].t
 
 
 
+// ══ 類別說明展開/收合 ══
+function toggleCatRef(btn){
+  const panel=btn.closest('.cat-adjust-block').querySelector('.cat-ref-panel');
+  if(!panel) return;
+  const isOpen=panel.style.display!=='none';
+  panel.style.display=isOpen?'none':'block';
+  btn.textContent=isOpen?'ⓘ 類別說明':'✕ 收合說明';
+  btn.style.color=isOpen?'#64748b':'#1e4d8c';
+  btn.style.borderColor=isOpen?'#b8b0a8':'#1e4d8c';
+}
+
 function bonusInputChange(inp){
   const v=Number(inp.value);
   const noteWrap=el('bonusNoteWrap');
@@ -1563,18 +1574,52 @@ function renderPosterScoreForm(p,draft,isDone){
     </div>`;
   });
   html+=`<div class="cat-adjust-block">
-    <label>建議調整類別（如認為本篇適合其他類別，請選擇）</label>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem">
+      <label style="margin-bottom:0">建議調整類別（如認為本篇適合其他類別，請選擇）</label>
+      <button type="button" onclick="toggleCatRef(this)" style="background:none;border:1.5px solid #b8b0a8;border-radius:5px;padding:.18rem .55rem;font-size:.72rem;color:#64748b;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0">ⓘ 類別說明</button>
+    </div>
     <select class="cat-adjust-sel" id="catAdjSel" ${dis}>
       <option value="">-- 維持原類別，不調整 --</option>
       <option value="A" ${draft.catAdjust==='A'?'selected':''}>A 類｜臨床技能教育、模擬教學與跨專業學習</option>
       <option value="B" ${draft.catAdjust==='B'?'selected':''}>B 類｜評量、信任決策與能力導向醫學教育</option>
       <option value="C" ${draft.catAdjust==='C'?'selected':''}>C 類｜人文素養、醫療韌性與專業認同</option>
     </select>
+    <div class="cat-ref-panel" style="display:none;margin-top:.65rem;background:white;border:1px solid #d4cec8;border-radius:7px;padding:.75rem .9rem;font-size:.78rem;line-height:1.7;color:#334155;max-height:300px;overflow-y:auto">
+      <div style="margin-bottom:.7rem">
+        <div style="font-weight:700;color:#1e4d8c;margin-bottom:.15rem">【A 類】Clinical Skills Education, Simulation &amp; Interprofessional Learning</div>
+        <div style="color:#475569;font-weight:600;margin-bottom:.2rem">臨床技能教育、模擬教學與跨專業學習</div>
+        <div style="color:#64748b">• 臨床技能課程設計與教學模式創新（包含課程重整、EPA導入、混成或跨場域教學）</div>
+        <div style="color:#64748b">• OSCE與臨床技能評量設計</div>
+        <div style="color:#64748b">• 模擬教學與科技輔助學習（Simulation、VR/AR、Hybrid simulation）</div>
+        <div style="color:#64748b">• 人工智慧與數位科技於醫學教育之應用（AI輔助教學或評量、數位轉型實踐）</div>
+        <div style="color:#64748b">• 學習歷程資料與教育數據分析應用</div>
+        <div style="color:#64748b">• 跨專業與團隊導向學習（IP-OSCE、跨專業模擬訓練、SBAR溝通訓練、Collective competence、團隊合作文化）</div>
+      </div>
+      <div style="border-top:1px solid #e2e8f0;padding-top:.6rem;margin-bottom:.7rem">
+        <div style="font-weight:700;color:#5b21b6;margin-bottom:.15rem">【B 類】Assessment, Entrustment &amp; Competency-Based Medical Education</div>
+        <div style="color:#475569;font-weight:600;margin-bottom:.2rem">評量、信任決策與能力導向醫學教育</div>
+        <div style="color:#64748b">• OSCE評分研究</div>
+        <div style="color:#64748b">• 同理心或人文能力評量工具</div>
+        <div style="color:#64748b">• 團隊能力評量</div>
+        <div style="color:#64748b">• CBME實踐經驗</div>
+        <div style="color:#64748b">• 形成性回饋設計</div>
+        <div style="color:#64748b">• Entrustment decision-making</div>
+      </div>
+      <div style="border-top:1px solid #e2e8f0;padding-top:.6rem">
+        <div style="font-weight:700;color:#166534;margin-bottom:.15rem">【C 類】Humanism, Wellbeing &amp; Professional Identity</div>
+        <div style="color:#475569;font-weight:600;margin-bottom:.2rem">人文素養、醫療韌性與專業認同</div>
+        <div style="color:#64748b">• 敘事醫學與反思式學習</div>
+        <div style="color:#64748b">• 心理安全文化建立</div>
+        <div style="color:#64748b">• 倦怠與韌性研究</div>
+        <div style="color:#64748b">• 專業認同發展</div>
+        <div style="color:#64748b">• 同理心培育</div>
+      </div>
+    </div>
   </div>`;
   html+=`<div class="recommend-zone">
     <input type="checkbox" class="recommend-checkbox" id="recChk" ${draft.recommend?'checked':''} ${dis}>
     <label for="recChk">★ 推薦此論文</label>
-    <div class="recommend-note">勾選代表推薦此篇論文進行紙本實體張貼展示</div>
+    <div class="recommend-note">勾選代表推薦此論文進行紙本實體展示，建議以總分80分以上作為推薦參考，並非達80分即自動推薦</div>
   </div>`;
   html+=`<div class="cmt-wrap"><label>評語（選填）</label><textarea id="cmtArea" placeholder="可填寫對本篇論文的建議或意見…" ${dis}>${esc(draft.comment||'')}</textarea></div>`;
   const rejChecked=draft.rejected?'checked':'';
@@ -2626,6 +2671,9 @@ function _detailGrid(reviews,criteriaArr){
     else{criteriaArr.forEach((c,j)=>{const id=c.id||('o'+(j+1));html+=`<div style="display:flex;justify-content:space-between;padding:.22rem 0;border-bottom:1px solid #f1f5f9;font-size:.8rem"><span style="color:#4a5568;line-height:1.4">${c.label}</span><span style="font-weight:700;color:var(--adm-blue);white-space:nowrap;margin-left:.5rem">${r.scores&&r.scores[id]!==undefined?r.scores[id]:0}/${c.max}</span></div>`;});if(r.bonus!==undefined)html+=`<div style="display:flex;justify-content:space-between;padding:.22rem 0;border-bottom:1px solid #f1f5f9;font-size:.8rem"><span style="color:#92400e">優良加分</span><span style="font-weight:700;color:#92400e">${r.bonus}/10</span></div>`;
         if(r.bonus&&r.bonusNote)html+=`<div style="font-size:.78rem;color:#92400e;background:#fffbeb;padding:.3rem .5rem;border-radius:4px;margin-bottom:.2rem">說明：${esc(r.bonusNote)}</div>`;const max=criteriaArr.reduce((s,c)=>s+c.max,0)+(r.bonus!==undefined?10:0);const tc=r.total>=(r.bonus!==undefined?80:ADM_THRESHOLD)?'var(--adm-green)':'#1c1c2e';html+=`<div style="display:flex;justify-content:space-between;padding:.4rem 0 0;font-weight:700;font-size:.92rem"><span>總分</span><span style="color:${tc}">${r.total}/${max}</span></div>`;}
     if(r.comment)html+=`<div style="font-size:.75rem;color:#718096;background:#f1f5f9;padding:.4rem .6rem;border-radius:5px;margin-top:.4rem"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> ${esc(r.comment)}</div>`;
+    if((r.recommended||r.recommend)===true||(r.recommended||r.recommend)==='true')
+      html+=`<div style="margin-top:.45rem;padding:.3rem .65rem;background:#f0fdf4;border:1px solid #86efac;border-radius:5px;font-size:.78rem;font-weight:700;color:#166534">★ 推薦</div>`;
+    if(r.catAdjust)html+=`<div style="margin-top:.3rem;padding:.28rem .6rem;background:#fef9ec;border:1px solid #fde68a;border-radius:5px;font-size:.75rem;color:#78350f">建議改類：${esc(r.catAdjust)}</div>`;
     html+=`</div>`;
   });
   return html+`</div>`;
@@ -2640,6 +2688,12 @@ function showDetail(pid){
   else{
     const valid=p.reviews.filter(r=>!r.rejected);
     const avg=calcFrontendSmartAvg(valid.map(r=>r.total));
+    // 推薦委員摘要
+    const recReviewers=p.reviews.filter(r=>(r.recommended||r.recommend)===true||(r.recommended||r.recommend)==='true');
+    if(recReviewers.length){
+      const names=recReviewers.map(r=>rvName(r.reviewer)).join('、');
+      html+=`<div style="margin-bottom:.85rem;padding:.45rem .85rem;background:#f0fdf4;border:1px solid #86efac;border-radius:7px;font-size:.82rem;color:#166534;font-weight:600">★ 推薦委員：${esc(names)}</div>`;
+    }
     html+=_detailGrid(p.reviews,ADM_CRITERIA);
     if(valid.length>=2)html+=`<div style="margin-top:.85rem;padding:.65rem 1rem;background:#f0faf5;border:1px solid #bbf7d0;border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:.82rem;color:#166534;font-weight:600">智慧平均分（取最接近2位）</span><span style="font-size:1.1rem;font-weight:700;color:#166534">${avg!==null?avg+'分':'—'}</span></div>`;
   }
