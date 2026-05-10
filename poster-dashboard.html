@@ -301,7 +301,7 @@ canvas{max-height:240px;}
             <table>
               <thead><tr>
                 <th style="width:2.5rem"><input type="checkbox" id="rnChkAll" onchange="toggleRnAll(this)"></th>
-                <th>#</th><th>原始編號</th><th>新編號</th><th>修改類別</th><th>論文題目</th><th>通訊作者</th><th>狀態</th>
+                <th>#</th><th>原始編號</th><th>新編號</th><th>修改類別</th><th>論文題目</th><th>通訊作者</th><th>狀態</th><th>重新產生PDF</th>
               </tr></thead>
               <tbody id="renumberBody"></tbody>
             </table>
@@ -343,7 +343,7 @@ canvas{max-height:240px;}
       <div class="page" id="page-stats">
         <div class="chart-grid">
           <div class="chart-box"><h3>📊 投稿類別分佈</h3><canvas id="catChart"></canvas></div>
-          <div class="chart-box"><h3>👤 職類分佈（前10）</h3><canvas id="profChart"></canvas></div>
+          <div class="chart-box"><h3>👤 職類分佈（前5）</h3><canvas id="profChart"></canvas></div>
         </div>
         <!-- 職類詳細分類表格 -->
         <div class="card">
@@ -379,6 +379,21 @@ canvas{max-height:240px;}
           </div>
           <div class="table-wrap" id="crossTableWrap">
             <p style="padding:1rem;color:#aaa;font-size:0.88rem">載入資料後自動顯示。</p>
+          </div>
+        </div>
+        <!-- 類別異動紀錄 -->
+        <div class="card">
+          <div class="card-header">
+            <h2>📝 類別異動紀錄</h2>
+            <span id="catChangeCount" style="font-size:0.85rem;color:#888"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>投稿編號</th><th>論文題目</th><th>通訊作者</th><th>異動紀錄</th>
+              </tr></thead>
+              <tbody id="catChangeBody"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -904,8 +919,11 @@ function renderMemberTable() {
   document.getElementById('memberTitle').textContent = `會員繳費狀態（共 ${submissions.length} 筆）`;
   submissions.forEach((r,i) => {
     const m = r[7]||'';
-    const cls = m.includes('已繳')?'badge-paid':m.includes('未繳')?'badge-pending':'badge-none';
+    const isConfirmed = m.startsWith('✓');
+    const mDisplay = isConfirmed ? m.substring(1) : m;
+    const cls = mDisplay.includes('已繳')?'badge-paid':mDisplay.includes('未繳')?'badge-pending':'badge-none';
     const tr = document.createElement('tr');
+    if(isConfirmed) tr.style.background = '#f1f8e9';
     const note = memberNotes[i] || '';
     const corrName = memberNameFix[i] || '';
     tr.innerHTML = `<td style="white-space:nowrap"><strong>${esc(r[0]||'')}</strong></td>
@@ -913,12 +931,16 @@ function renderMemberTable() {
       <td style="white-space:nowrap">${esc(r[8]||'')}</td>
       <td style="max-width:160px;font-size:0.78rem;color:#555;word-break:break-all">${esc(r[5]||'')}</td>
       <td><strong>${esc(r[6]||'（無）')}</strong></td>
-      <td><span class="badge ${cls}" id="mbadge-${i}">${esc(m)}</span></td>
+      <td><span class="badge ${cls}" id="mbadge-${i}">${esc(mDisplay)}</span>${isConfirmed?'<span style="color:var(--success);font-size:0.75rem;font-weight:700;margin-left:4px">✓已確認</span>':''}</td>
       <td><select class="edit-select" onchange="onMemberChg(${i},this.value)">
-        <option value="會員已繳年費" ${m==='會員已繳年費'?'selected':''}>✅ 已繳費</option>
-        <option value="會員未繳年費" ${m==='會員未繳年費'?'selected':''}>⏳ 未繳費</option>
-        <option value="非會員" ${m==='非會員'?'selected':''}>❌ 非會員</option>
-      </select></td>
+        <option value="會員已繳年費" ${mDisplay==='會員已繳年費'?'selected':''}>✅ 已繳費</option>
+        <option value="會員未繳年費" ${mDisplay==='會員未繳年費'?'selected':''}>⏳ 未繳費</option>
+        <option value="非會員" ${mDisplay==='非會員'?'selected':''}>❌ 非會員</option>
+      </select>
+      <label style="display:flex;align-items:center;gap:0.3rem;font-size:0.78rem;cursor:pointer;margin-top:4px">
+        <input type="checkbox" id="mconf-${i}" ${isConfirmed?'checked':''} onchange="onConfirmChg(${i},this.checked)">
+        已確認
+      </label></td>
       <td><input type="text" class="edit-select" style="width:100px" placeholder="如有填錯請更正" value="${esc(corrName)}" oninput="memberNameFix[${i}]=this.value"></td>
       <td><input type="text" class="edit-select" style="min-width:140px" placeholder="備註（加入信件）" value="${esc(note)}" oninput="memberNotes[${i}]=this.value"></td>`;
     tbody.appendChild(tr);
@@ -929,6 +951,14 @@ function onMemberChg(i,v){
   const b=document.getElementById('mbadge-'+i);
   b.className='badge '+(v.includes('已繳')?'badge-paid':v.includes('未繳')?'badge-pending':'badge-none');
   b.textContent=v;
+}
+function onConfirmChg(i, checked) {
+  // 在狀態前加上 ✓ 標記表示已確認
+  const currentStatus = memberChanges[i] || (submissions[i][7]||'').replace(/^✓/,'');
+  memberChanges[i] = checked ? '✓' + currentStatus : currentStatus;
+  // 列底色變化
+  const tr = document.getElementById('mconf-'+i).closest('tr');
+  tr.style.background = checked ? '#f1f8e9' : '';
 }
 async function saveMemberChanges() {
   const statusKeys = Object.keys(memberChanges);
@@ -951,6 +981,47 @@ async function saveMemberChanges() {
 }
 
 // ===== RENUMBER =====
+// ===== 重新產生單筆審查用 PDF =====
+async function regenPdf(i) {
+  const r = submissions[i];
+  const id = r[0]||'';
+  if(!id){ showInfo('此筆缺少投稿編號，無法產生 PDF','error'); return; }
+  if(!confirm(`確定重新產生「${id}」的審查用 PDF？\n系統將刪除舊 PDF 並依 Sheet 最新資料重新產生。`)) return;
+
+  const statusEl = document.getElementById('rn-status-'+i);
+  statusEl.innerHTML = '<span style="color:#f57c00">⏳ 產生中...</span>';
+
+  try {
+    const body = new URLSearchParams();
+    body.append('action', 'renumberSubmission');
+    body.append('rowIndex', i + 2);
+    body.append('oldId', id);
+    body.append('newId', id); // 編號不變
+    body.append('keepOld', 'false'); // 刪除舊 PDF
+    body.append('data', JSON.stringify({
+      category:      r[2]||'',
+      paperTitle:    r[3]||'',
+      keywords:      r[4]||'',
+      authors:       r[5]||'',
+      absMotivation: r[15]||'',
+      absMethod:     r[16]||'',
+      absResult:     r[17]||'',
+      absConclusion: r[18]||'',
+      wordCount:     r[19]||'',
+      status:        r[21]||'待審查'
+    }));
+    const resp = await fetch(getUrl(), {method:'POST', body, headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    const json = await resp.json();
+    if(json.result !== 'success') throw new Error(json.message);
+    if(json.newPdfUrl) submissions[i][20] = json.newPdfUrl;
+    statusEl.innerHTML = '<span style="color:var(--success)">✅ PDF 已更新</span>';
+    showInfo(`✅「${id}」審查用 PDF 已重新產生`, 'success');
+  } catch(e) {
+    statusEl.innerHTML = '<span style="color:var(--danger)">❌ 失敗</span>';
+    showInfo(`❌ 產生失敗：${e.message}`, 'error');
+  }
+}
+
 function getAllNewIds(){ return submissions.map((_,i)=>newIds[i]!==undefined?newIds[i]:(submissions[i][0]||'')); }
 function findDups(ids){ const c={}; ids.forEach(id=>{if(id)c[id]=(c[id]||0)+1;}); return new Set(Object.keys(c).filter(k=>c[k]>1)); }
 
@@ -981,7 +1052,8 @@ function renderRenumberTable() {
       </select></td>
       <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r[3]||'')}">${esc(r[3]||'')}</td>
       <td>${esc(r[8]||'')}</td>
-      <td id="rn-status-${i}"><span style="color:#aaa">⬜ 待更新</span></td>`;
+      <td id="rn-status-${i}"><span style="color:#aaa">⬜ 待更新</span></td>
+      <td><button class="btn btn-sm" style="background:#e3f2fd;color:#1565c0;white-space:nowrap" onclick="regenPdf(${i})">🔄 重新產生</button></td>`;
     tbody.appendChild(tr);
     const chk = document.createElement('input');
     chk.type='checkbox'; chk.className='fp-chk rn-chk'; chk.dataset.i=i;
@@ -1104,8 +1176,25 @@ function renderStats(){
     if(u) hosp[u]=(hosp[u]||0)+1;
   });
   if(catChartInst) catChartInst.destroy();
-  catChartInst=new Chart(document.getElementById('catChart'),{type:'doughnut',data:{labels:['A類','B類','C類'],datasets:[{data:[cats.A,cats.B,cats.C],backgroundColor:['#1565c0','#6a1b9a','#2e7d32'],borderWidth:2}]},options:{plugins:{legend:{position:'bottom'}},responsive:true,maintainAspectRatio:true}});
-  const sp=Object.entries(prof).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  catChartInst=new Chart(document.getElementById('catChart'),{
+    type:'bar',
+    data:{
+      labels:['A類','B類','C類'],
+      datasets:[{
+        label:'篇數',
+        data:[cats.A,cats.B,cats.C],
+        backgroundColor:['#1565c0','#6a1b9a','#2e7d32'],
+        borderRadius:6
+      }]
+    },
+    options:{
+      plugins:{legend:{display:false}},
+      responsive:true,
+      maintainAspectRatio:true,
+      scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}
+    }
+  });
+  const sp=Object.entries(prof).sort((a,b)=>b[1]-a[1]).slice(0,5);
   if(profChartInst) profChartInst.destroy();
   profChartInst=new Chart(document.getElementById('profChart'),{type:'bar',data:{labels:sp.map(p=>p[0]),datasets:[{label:'篇數',data:sp.map(p=>p[1]),backgroundColor:'#1565c0',borderRadius:4}]},options:{plugins:{legend:{display:false}},responsive:true,maintainAspectRatio:true,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
   hospData=Object.entries(hosp).sort((a,b)=>b[1]-a[1]);
@@ -1133,18 +1222,28 @@ function renderStats(){
   });
 
   renderHospTable(hospData);
+  renderCatChangeLog();
 }
-function renderHospTable(data){
-  const tbody=document.getElementById('hospBody');
-  tbody.innerHTML='';
-  // 渲染表格
-  data.forEach(([u,cnt])=>{
-    const ids=submissions.filter(r=>(r[11]||'').startsWith(u)).map(r=>r[0]).join('、');
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td><strong>${esc(u)}</strong></td><td style="text-align:center;font-weight:700;color:var(--primary)">${cnt}</td><td style="font-size:0.78rem;color:#888">${esc(ids||'—')}</td>`;
+function renderCatChangeLog() {
+  const tbody = document.getElementById('catChangeBody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  // W欄 = index 22（第23欄，類別異動紀錄）
+  const changed = submissions.filter(r => r[22] && r[22].toString().trim());
+  document.getElementById('catChangeCount').textContent =
+    changed.length ? `共 ${changed.length} 篇曾調整類別` : '尚無類別異動紀錄';
+  if(!changed.length){
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:1rem">尚無類別異動紀錄</td></tr>';
+    return;
+  }
+  changed.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><strong>${esc(r[0]||'')}</strong></td>
+      <td style="max-width:200px;font-size:0.82rem">${esc(r[3]||'')}</td>
+      <td style="white-space:nowrap">${esc(r[8]||'')}</td>
+      <td style="font-size:0.82rem;color:#e65100;white-space:pre-wrap">${esc(r[22].toString())}</td>`;
     tbody.appendChild(tr);
   });
-  renderCrossTable();
 }
 
 function renderCrossTable() {
