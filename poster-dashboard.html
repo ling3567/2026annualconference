@@ -1209,9 +1209,18 @@ function renderStats(){
     profDetail[p].total++;
     if(profDetail[p][c]!==undefined) profDetail[p][c]++;
   });
+  const profOrder = ['西醫','牙醫','中醫','藥事','醫事放射','醫事檢驗','牙體技術','護理','營養','呼吸治療','聽力','物理治療','職能治療','臨床心理','諮商心理','語言治療','專科護理師'];
   const pdTbody = document.getElementById('profDetailBody');
   pdTbody.innerHTML='';
-  Object.entries(profDetail).sort((a,b)=>b[1].total-a[1].total).forEach(([p,v])=>{
+  const profEntries = Object.entries(profDetail).sort((a,b)=>{
+    const ai = profOrder.indexOf(a[0]);
+    const bi = profOrder.indexOf(b[0]);
+    if(ai === -1 && bi === -1) return b[1].total - a[1].total; // 其他職類依篇數
+    if(ai === -1) return 1;
+    if(bi === -1) return -1;
+    return ai - bi;
+  });
+  profEntries.forEach(([p,v])=>{
     const tr=document.createElement('tr');
     tr.innerHTML=`<td><strong>${esc(p)}</strong></td>
       <td style="text-align:center;font-weight:700;color:var(--primary)">${v.total}</td>
@@ -1251,7 +1260,12 @@ function renderHospTable(data){
   tbody.innerHTML='';
   // 同時更新機構下拉（若存在）
   data.forEach(([u,cnt])=>{
-    const ids=submissions.filter(r=>(r[11]||'').startsWith(u)).map(r=>r[0]).join('、');
+    const ids=submissions.filter(r=>(r[11]||'').startsWith(u)).map(r=>r[0]).sort((a,b)=>{
+      // 依類別字母→數字排序
+      const parseId = s => { const m=s.match(/^([A-C])-(\d+)$/); return m?[m[1],parseInt(m[2])]:['Z',9999]; };
+      const [ac,an]=parseId(a); const [bc,bn]=parseId(b);
+      return ac!==bc?ac.localeCompare(bc):an-bn;
+    }).join('、');
     const tr=document.createElement('tr');
     tr.innerHTML=`<td><strong>${esc(u)}</strong></td><td style="text-align:center;font-weight:700;color:var(--primary)">${cnt}</td><td style="font-size:0.78rem;color:#888">${esc(ids||'—')}</td>`;
     tbody.appendChild(tr);
@@ -1262,8 +1276,9 @@ function renderHospTable(data){
 function renderCrossTable() {
   if(!submissions.length) return;
 
-  // 收集所有機構和職類
-  const unitProfMap = {}; // unit → { prof → {total,A,B,C} }
+  const profOrder = ['西醫','牙醫','中醫','藥事','醫事放射','醫事檢驗','牙體技術','護理','營養','呼吸治療','聽力','物理治療','職能治療','臨床心理','諮商心理','語言治療','專科護理師'];
+
+  const unitProfMap = {};
   submissions.forEach(r => {
     const u = (r[11]||'').split(/[\n,，]/)[0].trim();
     const p = r[14]||'（未填）';
@@ -1275,53 +1290,58 @@ function renderCrossTable() {
     if(unitProfMap[u][p][c] !== undefined) unitProfMap[u][p][c]++;
   });
 
-  const units = Object.keys(unitProfMap).sort();
+  const units = Object.keys(unitProfMap).sort((a,b)=>{
+    const ta = Object.values(unitProfMap[a]).reduce((s,v)=>s+v.total,0);
+    const tb = Object.values(unitProfMap[b]).reduce((s,v)=>s+v.total,0);
+    return tb - ta;
+  });
 
   const wrap = document.getElementById('crossTableWrap');
   if(!units.length){ wrap.innerHTML='<p style="padding:1rem;color:#aaa">查無資料</p>'; return; }
 
-  let html = `<table style="width:100%;border-collapse:collapse;font-size:0.82rem">
+  let html = `<table style="width:100%;border-collapse:collapse;font-size:0.83rem">
     <thead><tr style="background:var(--primary);color:white">
-      <th style="padding:0.5rem 0.75rem;text-align:left;min-width:160px">機構</th>
-      <th style="padding:0.5rem 0.75rem;text-align:left;min-width:100px">職類</th>
-      <th style="padding:0.5rem 0.75rem;text-align:center">小計</th>
-      <th style="padding:0.5rem 0.75rem;text-align:center">A類</th>
-      <th style="padding:0.5rem 0.75rem;text-align:center">B類</th>
-      <th style="padding:0.5rem 0.75rem;text-align:center">C類</th>
+      <th style="padding:0.5rem 0.75rem;text-align:left">機構</th>
+      <th style="padding:0.5rem 0.75rem;text-align:left">職類</th>
+      <th style="padding:0.5rem 0.75rem;text-align:center;width:60px">小計</th>
+      <th style="padding:0.5rem 0.75rem;text-align:center;width:60px;background:#1a78d4">A類</th>
+      <th style="padding:0.5rem 0.75rem;text-align:center;width:60px;background:#7b2fbe">B類</th>
+      <th style="padding:0.5rem 0.75rem;text-align:center;width:60px;background:#3a8a4a">C類</th>
     </tr></thead><tbody>`;
 
-  units.forEach(u => {
+  units.forEach((u,ui) => {
     const profs = unitProfMap[u];
-    // 篩選職類
-    let profKeys = Object.keys(profs);
-    profKeys.sort((a,b) => profs[b].total - profs[a].total);
-    if(!profKeys.length) return;
+    const unitTotal = Object.values(profs).reduce((s,v)=>s+v.total,0);
+    const unitA = Object.values(profs).reduce((s,v)=>s+v.A,0);
+    const unitB = Object.values(profs).reduce((s,v)=>s+v.B,0);
+    const unitC = Object.values(profs).reduce((s,v)=>s+v.C,0);
 
-    // 計算機構小計
-    const unitTotal = profKeys.reduce((s,p)=>s+profs[p].total,0);
-    const unitA = profKeys.reduce((s,p)=>s+profs[p].A,0);
-    const unitB = profKeys.reduce((s,p)=>s+profs[p].B,0);
-    const unitC = profKeys.reduce((s,p)=>s+profs[p].C,0);
+    const profKeys = Object.keys(profs).sort((a,b)=>{
+      const ai=profOrder.indexOf(a); const bi=profOrder.indexOf(b);
+      if(ai===-1&&bi===-1) return profs[b].total-profs[a].total;
+      if(ai===-1) return 1; if(bi===-1) return -1;
+      return ai-bi;
+    });
+    const rowCount = profKeys.length + 1;
+    const bg = ui%2===0 ? '#ffffff' : '#f8f9fc';
 
-    // 機構首列（含 rowspan）
-    html += `<tr style="background:#e3f2fd;border-top:2px solid #1565c0">
-      <td style="padding:0.45rem 0.75rem;font-weight:700;color:var(--primary-dark)" rowspan="${profKeys.length+1}">${esc(u)}</td>
-      <td style="padding:0.45rem 0.75rem;font-style:italic;color:#555">合計</td>
-      <td style="padding:0.45rem 0.75rem;text-align:center;font-weight:700;color:var(--primary)">${unitTotal}</td>
-      <td style="padding:0.45rem 0.75rem;text-align:center;font-weight:700">${unitA||'-'}</td>
-      <td style="padding:0.45rem 0.75rem;text-align:center;font-weight:700">${unitB||'-'}</td>
-      <td style="padding:0.45rem 0.75rem;text-align:center;font-weight:700">${unitC||'-'}</td>
+    html += `<tr style="background:#dbeafe;border-top:2px solid #1565c0">
+      <td style="padding:0.5rem 0.75rem;font-weight:700;color:#0d47a1;vertical-align:middle" rowspan="${rowCount}">${u.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</td>
+      <td style="padding:0.45rem 0.75rem;color:#555;font-style:italic">合計</td>
+      <td style="text-align:center;font-weight:700;color:var(--primary);padding:0.45rem">${unitTotal}</td>
+      <td style="text-align:center;font-weight:700;color:#1565c0;padding:0.45rem">${unitA||'-'}</td>
+      <td style="text-align:center;font-weight:700;color:#6a1b9a;padding:0.45rem">${unitB||'-'}</td>
+      <td style="text-align:center;font-weight:700;color:#2e7d32;padding:0.45rem">${unitC||'-'}</td>
     </tr>`;
 
-    // 各職類列
     profKeys.forEach(p => {
       const v = profs[p];
-      html += `<tr style="border-bottom:1px solid #eee">
-        <td style="padding:0.4rem 0.75rem 0.4rem 1.5rem">${esc(p)}</td>
-        <td style="text-align:center;color:var(--primary)">${v.total}</td>
-        <td style="text-align:center">${v.A||'-'}</td>
-        <td style="text-align:center">${v.B||'-'}</td>
-        <td style="text-align:center">${v.C||'-'}</td>
+      html += `<tr style="background:${bg};border-bottom:1px solid #e8ecf0">
+        <td style="padding:0.38rem 0.75rem 0.38rem 1.5rem;color:#333">${p.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</td>
+        <td style="text-align:center;color:var(--primary);padding:0.38rem">${v.total}</td>
+        <td style="text-align:center;color:#1565c0;padding:0.38rem">${v.A||'-'}</td>
+        <td style="text-align:center;color:#6a1b9a;padding:0.38rem">${v.B||'-'}</td>
+        <td style="text-align:center;color:#2e7d32;padding:0.38rem">${v.C||'-'}</td>
       </tr>`;
     });
   });
