@@ -899,14 +899,16 @@ function getCatFullName(cat) {
 
 function buildMail(r, tmplHtml, note) {
   const noteHtml = note
-    ? `<div style="background:#fff3e0;border-left:4px solid #e65100;color:#bf360c;font-weight:bold;padding:8px 12px;margin:6px 0;border-radius:4px">${note.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`
+    ? `<div style="background:#fff3e0;border-left:4px solid #e65100;color:#bf360c;font-weight:bold;padding:8px 12px;margin:6px 0;border-radius:4px;text-align:left">${note.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`
     : '';
-  return (tmplHtml || '')
+  const body = (tmplHtml || '')
     .replace(/\{姓名\}/g, (r[8]||'').replace(/&/g,'&amp;'))
     .replace(/\{題目\}/g, (r[3]||'').replace(/&/g,'&amp;'))
     .replace(/\{類別\}/g, (getCatFullName(r[2]||'')).replace(/&/g,'&amp;'))
     .replace(/<div[^>]*>\{備註\}<\/div>/g, noteHtml)
     .replace(/\{備註\}/g, noteHtml);
+  // 包一層靠左 wrapper，確保 Gmail 不置中
+  return `<div style="text-align:left;font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif">${body}</div>`;
 }
 
 async function sendEmails() {
