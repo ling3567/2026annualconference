@@ -774,7 +774,7 @@ function plainToEditorHtml(text) {
     if (/^────/.test(line))
       return `<div style="color:#aaa;font-size:0.85em;text-align:left">${safe}</div>`;
     // 署名內容（Tel/E-mail/地址等）
-    if (/^(Tel|E-mail|710|秘書處|台灣醫事聯合)/.test(line))
+    if (/^(Tel|E-mail|710|秘書處|台灣醫事聯合|（教學大樓)/.test(line))
       return `<div style="font-size:0.85em;color:#555;text-align:left">${safe}</div>`;
     return `<div style="text-align:left">${safe}</div>`;
   }).join('');
