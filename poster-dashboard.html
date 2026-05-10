@@ -1014,14 +1014,18 @@ async function regenPdf(i) {
   statusEl.innerHTML = '<span style="color:#f57c00">⏳ 產生中...</span>';
 
   try {
+    // 從編號前綴自動判斷類別（A-105 → A），確保與編號一致
+    const catFromId = id.charAt(0).toUpperCase();
+    const category = ['A','B','C'].includes(catFromId) ? catFromId : (r[2]||'');
+
     const body = new URLSearchParams();
     body.append('action', 'renumberSubmission');
     body.append('rowIndex', i + 2);
     body.append('oldId', id);
-    body.append('newId', id); // 編號不變
-    body.append('keepOld', 'false'); // 刪除舊 PDF
+    body.append('newId', id);
+    body.append('keepOld', 'false');
     body.append('data', JSON.stringify({
-      category:      r[2]||'',
+      category:      category,
       paperTitle:    r[3]||'',
       keywords:      r[4]||'',
       authors:       r[5]||'',
@@ -1036,6 +1040,7 @@ async function regenPdf(i) {
     const json = await resp.json();
     if(json.result !== 'success') throw new Error(json.message);
     if(json.newPdfUrl) submissions[i][20] = json.newPdfUrl;
+    submissions[i][2] = category; // 同步更新記憶體中的類別
     statusEl.innerHTML = '<span style="color:var(--success)">✅ PDF 已更新</span>';
     showInfo(`✅「${id}」審查用 PDF 已重新產生`, 'success');
   } catch(e) {
