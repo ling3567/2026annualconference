@@ -908,7 +908,7 @@ body.cat-override-on .cat-override-cell:hover{
         <h3>海報論文 — 評分結果</h3>
         <div style="display:flex;align-items:center;gap:.5rem">
           <input type="text" id="resultSearch" placeholder="搜尋題目/投稿單位…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:200px;font-family:inherit" oninput="filterResults()">
-          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">資料載入</button>
+          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard(true)">資料載入</button>
         </div>
       </div>
       <div class="sec-body">
@@ -2035,10 +2035,10 @@ function admSwitchTab(t){
   }
 }
 
-async function loadDashboard(){
+async function loadDashboard(forceRefresh=false){
   setLdr(true);
   try{
-    const r=await api({action:'adminGetDashboard'});
+    const r=await api({action:'adminGetDashboard', forceRefresh: forceRefresh?'true':'false'}, 60000);
     if(!r.success){showToast('載入失敗','err');setLdr(false);return;}
     dashData=r;
     if(r.reviewerNamesMap)Object.assign(reviewerNamesMap,r.reviewerNamesMap);
@@ -2187,7 +2187,6 @@ function autoAssign(type){
 
 function renderResultsTable(papers){
   if(!papers) return;
-  console.log('[renderResultsTable] papers count:', papers.length, 'sample title:', papers[0]?.title||'(empty)');
   // 空陣列時顯示提示（通常是資料未載入）
   if(!papers.length){
     const cb=el('resultsCatBody'), ab=el('resultsAllBody');
@@ -2514,10 +2513,10 @@ function resultsSwitchType(t){
 
 async function loadOsceDashboard(){
   try{
-    const r=await api({action:'adminGetOsceDashboard'});
+    const r=await api({action:'adminGetOsceDashboard'}, 60000);
     if(!r.success){osceData={cases:[],reviewers:[],stats:{total:0,reviewed:0}};}
     else{osceData=r;(r.reviewers||[]).forEach(rv=>{if(rv.username&&rv.name)reviewerNamesMap[rv.username]=rv.name;});}
-    const ar=await api({action:'adminGetOsceAssignments'});
+    const ar=await api({action:'adminGetOsceAssignments'}, 60000);
     osceAssignments=(ar&&ar.assignments)||{};
     renderOsceDashTable(osceData.cases);
     renderOsceAssignTable(osceData.cases,osceData.reviewers);
