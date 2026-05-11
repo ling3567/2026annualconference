@@ -2187,6 +2187,7 @@ function autoAssign(type){
 
 function renderResultsTable(papers){
   if(!papers) return;
+  console.log('[renderResultsTable] papers count:', papers.length, 'sample title:', papers[0]?.title||'(empty)');
   // 空陣列時顯示提示（通常是資料未載入）
   if(!papers.length){
     const cb=el('resultsCatBody'), ab=el('resultsAllBody');
@@ -3195,9 +3196,10 @@ async function loadCatOverrides(){
     const r=await api({action:'getCatOverride'});
     if(r&&r.success&&r.data&&r.data.length){
       r.data.forEach(({pid,cat})=>{ if(pid&&cat) _catOverrides[pid]=cat; });
-      // _catOverrides 已填好，loadDashboard 之後的 renderResultsTable 會自動套用
+      // 只在有覆蓋資料時才重新渲染
       if(Object.keys(_catOverrides).length>0){
-        console.log('類別覆蓋已載入:', Object.keys(_catOverrides).length, '筆');
+        console.log('類別覆蓋已載入：',Object.keys(_catOverrides).length,'筆');
+        if(window.dashData&&window.dashData.papers) renderResultsTable(window.dashData.papers);
       }
     }
   }catch(e){ console.warn('loadCatOverrides failed',e); }
