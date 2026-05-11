@@ -2038,6 +2038,7 @@ function admSwitchTab(t){
 async function loadDashboard(forceRefresh=false){
   setLdr(true);
   try{
+    if(forceRefresh){ try{ await api({action:'clearCache'}); }catch(e){} }
     const r=await api({action:'adminGetDashboard', forceRefresh: forceRefresh?'true':'false'}, 60000);
     if(!r.success){showToast('載入失敗','err');setLdr(false);return;}
     dashData=r;
@@ -2187,11 +2188,6 @@ function autoAssign(type){
 
 function renderResultsTable(papers){
   if(!papers) return;
-  // 診斷：輸出前5筆的關鍵欄位
-  if(papers.length>0){
-    console.log('[renderResultsTable] count='+papers.length);
-    papers.slice(0,3).forEach(p=>console.log('  paper:', p.id, '| title='+p.title+'| cat='+p.category+'| reviews='+p.reviews?.length));
-  }
   // 空陣列時顯示提示（通常是資料未載入）
   if(!papers.length){
     const cb=el('resultsCatBody'), ab=el('resultsAllBody');
