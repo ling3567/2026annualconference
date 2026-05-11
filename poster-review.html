@@ -2038,7 +2038,7 @@ function admSwitchTab(t){
 async function loadDashboard(forceRefresh=false){
   setLdr(true);
   try{
-    if(forceRefresh){ try{ await api({action:'clearCache'}); }catch(e){} }
+    if(forceRefresh){ try{ const cr=await api({action:'clearCache'}); console.log('clearCache response:', JSON.stringify(cr)); if(cr&&cr.headers) console.log('Sheet headers:', cr.headers.join(' | ')); }catch(e){ console.warn('clearCache failed',e); } }
     const r=await api({action:'adminGetDashboard', forceRefresh: forceRefresh?'true':'false'}, 60000);
     if(!r.success){showToast('載入失敗','err');setLdr(false);return;}
     dashData=r;
