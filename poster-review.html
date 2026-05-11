@@ -2206,8 +2206,11 @@ function renderResultsTable(papers){
     // 套用管理員覆蓋（只影響渲染用的 p.category，origCategory 不動）
     if(_catOverrides[p.id]) p.category = _catOverrides[p.id];
     // 前端重算 avgTotal（使用並列取高組的智慧平均，確保與詳細視窗一致）
-    const validScores=p.reviews.filter(r=>!r.rejected).map(r=>r.total).filter(v=>v!==null&&!isNaN(v));
-    p.avgTotal = validScores.length>=1 ? calcFrontendSmartAvg(validScores) : null;
+    try{
+      if(!Array.isArray(p.reviews)) p.reviews=[];
+      const validScores=p.reviews.filter(r=>!r.rejected).map(r=>Number(r.total)).filter(v=>!isNaN(v));
+      p.avgTotal = validScores.length>=1 ? calcFrontendSmartAvg(validScores) : null;
+    }catch(e){ console.warn('avgTotal recalc error for',p.id,e); }
   });
 
   function isFullyRejected(p){ return p.reviews.length>0 && p.reviews.filter(r=>!r.rejected).length===0; }
