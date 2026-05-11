@@ -3195,10 +3195,9 @@ async function loadCatOverrides(){
     const r=await api({action:'getCatOverride'});
     if(r&&r.success&&r.data&&r.data.length){
       r.data.forEach(({pid,cat})=>{ if(pid&&cat) _catOverrides[pid]=cat; });
-      // 只在有覆蓋資料時才重新渲染
       if(Object.keys(_catOverrides).length>0){
         console.log('類別覆蓋已載入：',Object.keys(_catOverrides).length,'筆');
-        if(window.dashData&&window.dashData.papers) renderResultsTable(window.dashData.papers);
+        // 不在此處觸發 renderResultsTable，由 loadDashboard 統一控制渲染時機
       }
     }
   }catch(e){ console.warn('loadCatOverrides failed',e); }
