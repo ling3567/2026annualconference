@@ -2340,7 +2340,10 @@ function renderResultsTable(papers){
       <td>${gapCell(p)}</td>
       <td>${recCell}</td>
       <td>${rejCell}</td>
-      <td onclick="event.stopPropagation()"><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button></td>
+      <td onclick="event.stopPropagation()" style="white-space:nowrap">
+        ${p.absPdfUrl?`<button class="adm-btn adm-btn-outline adm-btn-sm" style="margin-right:.3rem" onclick="window.open('${p.absPdfUrl}','_blank')">全文</button>`:''}
+        <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button>
+      </td>
     </tr>${subRow}`;
   }
 
@@ -2715,7 +2718,8 @@ function showDetail(pid){
   if(!dashData)return;
   const p=dashData.papers.find(x=>x.id===pid);if(!p)return;
   el('detailTitle').textContent=(p.paperNo||'—')+' 評分詳細';
-  let html=`<div style="margin-bottom:1rem"><div style="font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#718096;margin-bottom:.3rem">論文題目</div><div style="font-size:.9rem;color:#1c1c2e;line-height:1.65;font-weight:500">${esc(p.title)}</div></div>`;
+  let html=`<div style="margin-bottom:.6rem"><div style="font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#718096;margin-bottom:.3rem">論文題目</div><div style="font-size:.9rem;color:#1c1c2e;line-height:1.65;font-weight:500">${esc(p.title)}</div></div>`;
+  if(p.absPdfUrl) html+=`<div style="margin-bottom:1rem"><a href="${p.absPdfUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;color:#1e4d8c;font-weight:600;text-decoration:none;background:#eff6ff;border:1px solid #bfdbfe;padding:.3rem .75rem;border-radius:6px"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>開啟全文 PDF</a></div>`;
   if(!p.reviews.length){html+='<p style="color:#718096;font-size:.85rem;text-align:center;padding:1.5rem">尚無評分記錄</p>';}
   else{
     const valid=p.reviews.filter(r=>!r.rejected);
