@@ -2668,6 +2668,8 @@ function renderOsceResultsTable(cases){
     </tr>${subRow}`;
   });
   body.innerHTML=html||'<tr><td colspan="8" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';
+  // 確保所有子列預設收合
+  body.querySelectorAll('tr[id^="oscsub_"]').forEach(sub=>{ sub.style.display='none'; });
 }
 
 
@@ -3135,8 +3137,9 @@ function sortResultsByScore(panel) {
 function collapseAllSubRows(panel){
   const tbodyId = panel==='cat' ? 'resultsCatBody' : panel==='all' ? 'resultsAllBody' : 'osceResultsBody';
   const tbody = el(tbodyId); if(!tbody) return;
+  const prefix = panel==='osce' ? 'oscsub_' : 'sub_';
   let count=0;
-  tbody.querySelectorAll('tr[id^="sub_"]').forEach(sub=>{
+  tbody.querySelectorAll('tr[id^="'+prefix+'"]').forEach(sub=>{
     if(sub.style.display!=='none'&&sub.style.display!==''){
       sub.style.display='none'; count++;
     }
