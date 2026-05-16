@@ -982,6 +982,7 @@ body.cat-override-on .cat-override-cell:hover{
       <div class="sec-head"><h3>OSCE 教案 — 評分結果</h3>
         <div style="display:flex;align-items:center;gap:.5rem">
           <input type="text" id="osceResultSearch" placeholder="搜尋教案/投稿單位…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:200px;font-family:inherit" oninput="filterOsceResults()">
+          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('osce')">匯出 CSV</button>
           <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadOsceDashboard()">重新整理</button>
         </div>
       </div>
@@ -3417,7 +3418,7 @@ function exportResultsCSV(type){
 
   if(type === 'poster'){
     title = 'TSMCSD2026_海報論文評分結果';
-    rows.push(['展出方式','編號','論文題目','投稿單位','聯絡人','學會會員','繳費狀態','類別','建議改類','平均總分','推薦票數','退稿數','分數差距']);
+    rows.push(['展出方式','編號','論文題目','投稿單位','聯絡人','聯絡Email','學會會員','繳費狀態','類別','建議改類','平均總分','推薦票數','退稿數','分數差距']);
 
     // 優先用目前表格排列（含拖動後的順序）
     const tbody = el('resultsCatBody') || el('resultsAllBody');
@@ -3432,7 +3433,7 @@ function exportResultsCSV(type){
         const valid = p.reviews.filter(r=>!r.rejected);
         const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
         const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        const dm=_displayMode[p.id]||'eposter'; rows.push([dm==='physical'?'實體展示':dm==='rejected'?'退稿':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', p.contactName||'', p.memberNames||'', p.memberConfirmed||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
+        const dm=_displayMode[p.id]||'eposter'; rows.push([dm==='physical'?'實體展示':dm==='rejected'?'退稿':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', p.contactName||'', p.contactEmail||'', p.memberNames||'', p.memberConfirmed||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
       });
     } else if(dashData && dashData.papers){
       let rank = 1;
@@ -3441,19 +3442,21 @@ function exportResultsCSV(type){
         const valid = p.reviews.filter(r=>!r.rejected);
         const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
         const catAdj = [...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>r.catAdjust))].join('/');
-        const dm2=_displayMode[p.id]||'eposter'; rows.push([dm2==='physical'?'實體展示':dm2==='rejected'?'退稿':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', p.contactName||'', p.memberNames||'', p.memberConfirmed||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
+        const dm2=_displayMode[p.id]||'eposter'; rows.push([dm2==='physical'?'實體展示':dm2==='rejected'?'退稿':'ePoster', p.paperNo||'', p.title||'', p.contactUnit||'', p.contactName||'', p.contactEmail||'', p.memberNames||'', p.memberConfirmed||'', normCat(p.category)||'', catAdj, p.avgTotal!==null?p.avgTotal:'', p.reviews.filter(r=>r.recommended||r.recommend).length, rc, gap]);
       });
     }
 
   } else {
     title = 'TSMCSD2026_OSCE教案評分結果';
-    rows.push(['名次','編號','教案主題','服務醫院','平均總分','分數差距']);
+    rows.push(['名次','編號','教案主題','服務醫院','聯絡人','聯絡Email','繳費狀態','平均總分','分數差距','退稿數']);
     const cases = osceData&&osceData.cases ? [...osceData.cases].sort((a,b)=>(b.avgTotal??-1)-(a.avgTotal??-1)) : [];
     let rank = 1;
-    cases.forEach(c=>{
-      const valid = c.reviews;
-      const gap = valid.length>=2 ? Math.max(...valid.map(r=>r.total))-Math.min(...valid.map(r=>r.total)) : '';
-      rows.push([rank++, c.caseNo||'', c.title||'', c.hospital||'', c.avgTotal!==null?c.avgTotal:'', gap]);
+    cases.forEach(cs=>{
+      const validR = cs.reviews||[];
+      const nonRej = validR.filter(r=>!r.rejected);
+      const gap = nonRej.length>=2 ? Math.max(...nonRej.map(r=>r.total))-Math.min(...nonRej.map(r=>r.total)) : '';
+      const rc = validR.filter(r=>r.rejected).length;
+      rows.push([rank++, cs.caseNo||'', cs.title||'', cs.hospital||'', cs.contactName||'', cs.contactEmail||'', cs.memberConfirmed||'', cs.avgTotal!==null?cs.avgTotal:'', gap, rc]);
     });
   }
 
