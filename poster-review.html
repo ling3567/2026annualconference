@@ -2340,9 +2340,11 @@ function renderResultsTable(papers){
       <td>${gapCell(p)}</td>
       <td>${recCell}</td>
       <td>${rejCell}</td>
-      <td onclick="event.stopPropagation()" style="white-space:nowrap">
-        ${p.absPdfUrl?`<button class="adm-btn adm-btn-outline adm-btn-sm" style="margin-right:.3rem" onclick="window.open('${p.absPdfUrl}','_blank')">全文</button>`:''}
-        <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button>
+      <td onclick="event.stopPropagation()" style="text-align:center">
+        <div style="display:flex;flex-direction:column;gap:.3rem;align-items:center">
+          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button>
+          ${p.absPdfUrl?`<button class="adm-btn adm-btn-outline adm-btn-sm" onclick="window.open('${p.absPdfUrl}','_blank')">全文</button>`:''}
+        </div>
       </td>
     </tr>${subRow}`;
   }
