@@ -2243,10 +2243,10 @@ function renderResultsTable(papers){
   function gapCell(p){
     const valid=p.reviews.filter(r=>!r.rejected);
     if(valid.length>=2){
-      const sc=valid.map(r=>r.total).sort((a,b)=>a-b);
-      const g=sc[sc.length-1]-sc[0];
+      const scores=valid.map(r=>Number(r.total)).filter(v=>!isNaN(v));
+      const g=calcSmartGap(scores);
+      if(g===null) return '—';
       if(g<=10) return `<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;
-      // 差距>10：不論有幾位評審都顯示紅色，直到差距≤10才解除
       return `<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700;white-space:nowrap">&#9651; ${g}分</span>`;
     }
     if(valid.length===1)return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
@@ -2624,10 +2624,10 @@ function renderOsceResultsTable(cases){
   function osceGap(c){
     const valid=c.reviews.filter(r=>!r.rejected);
     if(valid.length>=2){
-      const sc=valid.map(r=>r.total).sort((a,b)=>a-b);
-      const g=sc[sc.length-1]-sc[0];
+      const scores=valid.map(r=>Number(r.total)).filter(v=>!isNaN(v));
+      const g=calcSmartGap(scores);
+      if(g===null) return '—';
       if(g<=10) return `<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;
-      // 差距>10：不論有幾位評審都顯示紅色警示，直到差距≤10才解除
       return `<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700;white-space:nowrap">&#9651; ${g}分</span>`;
     }
     if(valid.length===1)return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
@@ -2696,6 +2696,24 @@ function filterOsceResults(){const q=(el('osceResultSearch')||{}).value?.toLower
 
 // ══ 詳細視窗 ══
 const OSCE_CRITERIA_LABELS=[{label:'情境設置',max:10},{label:'教學/考官指引',max:10},{label:'考生指引/SP指引',max:10},{label:'SP腳本/助教指引',max:10},{label:'評分項目與教案目標相關',max:10},{label:'評分尺標與給分定義明確',max:10},{label:'教學目標明確一致',max:10},{label:'影片畫面品質優良',max:10},{label:'影片聲音清晰且有字幕',max:10},{label:'剪輯得宜有助於教案呈現',max:10}];
+
+// ══ 智慧差距：取最接近兩位的差距（與智慧平均選取邏輯一致）══
+function calcSmartGap(scores){
+  const s=scores.filter(v=>!isNaN(Number(v))&&v!==null&&v!==undefined).map(Number);
+  if(s.length<2) return null;
+  if(s.length===2) return Math.abs(s[1]-s[0]);
+  const sorted=[...s].sort((a,b)=>a-b);
+  let minGap=Infinity,best=[sorted[0],sorted[1]];
+  for(let i=0;i<sorted.length-1;i++){
+    const g=sorted[i+1]-sorted[i];
+    if(g<minGap){minGap=g;best=[sorted[i],sorted[i+1]];}
+    else if(g===minGap&&sorted[i]+sorted[i+1]>best[0]+best[1]){
+      best=[sorted[i],sorted[i+1]];
+    }
+  }
+  return best[1]-best[0];
+}
+
 function calcFrontendSmartAvg(scores){
   const s=scores.filter(v=>!isNaN(v)&&v!==null);
   if(!s.length)return null;
