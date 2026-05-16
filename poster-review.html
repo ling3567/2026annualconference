@@ -982,6 +982,7 @@ body.cat-override-on .cat-override-cell:hover{
       <div class="sec-head"><h3>OSCE 教案 — 評分結果</h3>
         <div style="display:flex;align-items:center;gap:.5rem">
           <input type="text" id="osceResultSearch" placeholder="搜尋教案/投稿單位…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:200px;font-family:inherit" oninput="filterOsceResults()">
+          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="collapseAllSubRows('osce')">縮合全部</button>
           <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('osce')">匯出 CSV</button>
           <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadOsceDashboard()">重新整理</button>
         </div>
@@ -3132,7 +3133,7 @@ function sortResultsByScore(panel) {
 
 // ══ 縮合所有子列 ══
 function collapseAllSubRows(panel){
-  const tbodyId = panel==='cat' ? 'resultsCatBody' : 'resultsAllBody';
+  const tbodyId = panel==='cat' ? 'resultsCatBody' : panel==='all' ? 'resultsAllBody' : 'osceResultsBody';
   const tbody = el(tbodyId); if(!tbody) return;
   let count=0;
   tbody.querySelectorAll('tr[id^="sub_"]').forEach(sub=>{
