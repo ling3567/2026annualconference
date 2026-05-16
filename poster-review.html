@@ -2246,12 +2246,8 @@ function renderResultsTable(papers){
       const sc=valid.map(r=>r.total).sort((a,b)=>a-b);
       const g=sc[sc.length-1]-sc[0];
       if(g<=10) return `<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;
-      const hasThird=valid.length>=3;
-      if(hasThird){
-        return `<span style="background:#ecfdf5;border:1px solid #6ee7b7;color:#065f46;padding:.18rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700;white-space:nowrap">&#9711; ${g}分</span>`;
-      } else {
-        return `<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700;white-space:nowrap">&#9651; ${g}分</span>`;
-      }
+      // 差距>10：不論有幾位評審都顯示紅色，直到差距≤10才解除
+      return `<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700;white-space:nowrap">&#9651; ${g}分</span>`;
     }
     if(valid.length===1)return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
     return '—';
@@ -2603,6 +2599,14 @@ function renderOsceResultsTable(cases){
   const body=el('osceResultsBody');if(!body)return;
   if(!cases||!cases.length){body.innerHTML='<tr><td colspan="8" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';return;}
 
+  // 前端重算 avgTotal（確保與詳細視窗一致）
+  cases.forEach(cs=>{
+    try{
+      const vs=cs.reviews.filter(r=>!r.rejected).map(r=>Number(r.total)).filter(v=>!isNaN(v));
+      cs.avgTotal=vs.length>=1?calcFrontendSmartAvg(vs):null;
+    }catch(e){}
+  });
+
   // 名次（全部教案一起排，avgTotal 有值才計入）
   const rankable=cases.filter(c=>c.avgTotal!==null);
   const rankMap={};let rk=1,pv=null;
@@ -2623,12 +2627,8 @@ function renderOsceResultsTable(cases){
       const sc=valid.map(r=>r.total).sort((a,b)=>a-b);
       const g=sc[sc.length-1]-sc[0];
       if(g<=10) return `<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;
-      const hasThird=valid.length>=3;
-      if(hasThird){
-        return `<span style="background:#ecfdf5;border:1px solid #6ee7b7;color:#065f46;padding:.18rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700;white-space:nowrap">&#9711; ${g}分</span>`;
-      } else {
-        return `<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700;white-space:nowrap">&#9651; ${g}分</span>`;
-      }
+      // 差距>10：不論有幾位評審都顯示紅色警示，直到差距≤10才解除
+      return `<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700;white-space:nowrap">&#9651; ${g}分</span>`;
     }
     if(valid.length===1)return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
     return '—';
