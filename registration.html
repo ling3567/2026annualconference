@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 台灣醫事聯合臨床技能發展學會 會員大會暨學術研討會 | 報名</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --deep-blue: #1a3a5c;
+  --medium-blue: #2c5f8a;
+  --mist-blue: #6a9ec0;
+  --light-blue: #a8cfea;
+  --pale-blue: #d6e9f5;
+  --ice-blue: #eaf3fa;
+  --teal-blue: #3a7ca5;
+  --warm-gold: #d4a843;
+  --light-gold: #f0d68a;
+  --pale-gold: #fdf5e0;
+  --cream: #faf6ee;
+  --warm-yellow: #f5e6b8;
+  --coral: #e07855;
+  --white: #ffffff;
+  --text-dark: #1a2a3a;
+  --text-body: #2c3e50;
+  --text-muted: #6b7c8d;
+  --card-shadow: 0 4px 20px rgba(26,58,92,0.1);
+  --card-radius: 16px;
+  --btn-radius: 28px;
+  --font-main: 'Noto Sans TC', 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-main);
+  color: var(--text-body);
+  background: var(--ice-blue);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== HEADER / NAV ========== */
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(26,58,92,0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  transition: background 0.3s;
+}
+.header-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.6rem 1.5rem;
+}
+.header-logo {
+  display: flex; align-items: center; gap: 0.6rem;
+  color: var(--white); font-weight: 700; font-size: 0.95rem;
+  text-decoration: none;
+}
+.header-logo .logo-circle {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--warm-gold), var(--light-gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; color: var(--deep-blue); font-weight: 900;
+}
+.nav-toggle { display: none; background: none; border: none; color: var(--white); font-size: 1.5rem; cursor: pointer; }
+.main-nav { display: flex; gap: 0; }
+.main-nav a {
+  color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.85rem;
+  padding: 0.5rem 0.8rem; border-radius: 8px; transition: all 0.2s; font-weight: 500;
+}
+.main-nav a:hover { color: var(--light-gold); background: rgba(255,255,255,0.08); }
+
+/* ========== HERO ========== */
+.hero {
+  position: relative; overflow: hidden;
+  background: linear-gradient(170deg, #0f2a47 0%, #1a3f66 25%, #2d6a9f 50%, #5a9bc7 70%, #8ec2e0 85%, #c4dfe6 95%, #f5e6c8 100%);
+  padding: 9rem 1.5rem 4rem;
+  text-align: center;
+  min-height: 600px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.hero::before {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
+  background: linear-gradient(transparent, var(--ice-blue));
+  z-index: 2;
+}
+/* Sun glow */
+.hero::after {
+  content: ''; position: absolute; top: 15%; right: 10%;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(244,215,130,0.35) 0%, rgba(244,215,130,0.1) 40%, transparent 70%);
+  z-index: 0;
+}
+/* Decorative elements */
+.hero-decor-bridge {
+  position: absolute; bottom: 100px; left: 0; right: 0; height: 80px; z-index: 1;
+  opacity: 0.15;
+}
+.hero-decor-bridge svg { width: 100%; height: 100%; }
+.hero-particles {
+  position: absolute; inset: 0; z-index: 0; overflow: hidden;
+}
+.hero-particles span {
+  position: absolute; display: block; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  animation: float-up linear infinite;
+}
+@keyframes float-up {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+.hero-content { position: relative; z-index: 3; max-width: 800px; }
+.hero-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: var(--light-gold);
+  padding: 0.4rem 1.2rem; border-radius: 50px;
+  font-size: 0.85rem; font-weight: 500;
+  margin-bottom: 1.2rem; letter-spacing: 0.1em;
+}
+.hero-org {
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem); color: rgba(255,255,255,0.9);
+  font-weight: 500; margin-bottom: 1.2rem;
+  letter-spacing: 0.12em;
+}
+.hero-theme {
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 900; line-height: 1.35;
+  color: var(--white);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.2);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+.hero-theme .highlight {
+  background: linear-gradient(135deg, var(--light-gold), #f5d98a, var(--coral));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-theme-sub {
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  color: rgba(255,255,255,0.9);
+  font-weight: 500; margin-bottom: 2rem;
+  letter-spacing: 0.15em;
+}
+
+/* Submission links */
+.hero-links {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem;
+  margin-bottom: 1.8rem;
+}
+.hero-link-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.55rem 1.3rem; border-radius: 50px;
+  font-size: 0.9rem; font-weight: 600;
+  text-decoration: none; transition: all 0.3s;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  color: var(--white); background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(4px);
+}
+.hero-link-btn:hover {
+  background: rgba(255,255,255,0.2);
+  border-color: var(--light-gold);
+  color: var(--light-gold);
+  transform: translateY(-2px);
+}
+.hero-meta {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.hero-meta-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  color: rgba(255,255,255,0.9); font-size: 0.95rem;
+}
+.hero-meta-item .icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: linear-gradient(135deg, var(--warm-gold), var(--coral));
+  color: var(--white); font-size: 1.1rem; font-weight: 700;
+  padding: 0.9rem 2.5rem; border-radius: var(--btn-radius);
+  text-decoration: none; box-shadow: 0 4px 20px rgba(212,168,67,0.4);
+  transition: all 0.3s; border: none; cursor: pointer;
+  font-family: var(--font-main);
+}
+.hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(212,168,67,0.5); }
+
+/* ========== COUNTDOWN ========== */
+.countdown-section {
+  background: var(--deep-blue);
+  color: var(--white);
+  padding: 1.5rem;
+  text-align: center;
+}
+.countdown-label { font-size: 0.9rem; color: var(--light-gold); margin-bottom: 0.8rem; letter-spacing: 0.2em; }
+.countdown-boxes { display: flex; justify-content: center; gap: 1rem; }
+.countdown-box {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px; padding: 0.6rem 1rem; min-width: 72px;
+}
+.countdown-box .num { font-size: 2rem; font-weight: 900; line-height: 1; color: var(--light-gold); }
+.countdown-box .unit { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 0.2rem; }
+
+/* ========== SECTION COMMON ========== */
+.section { padding: 4rem 1.5rem; max-width: 1000px; margin: 0 auto; }
+.section-label {
+  text-align: center; font-size: 0.8rem; letter-spacing: 0.25em;
+  color: var(--mist-blue); text-transform: uppercase; margin-bottom: 0.3rem;
+  font-weight: 500;
+}
+.section-title {
+  text-align: center; font-size: 1.8rem; font-weight: 900;
+  color: var(--deep-blue); margin-bottom: 0.5rem;
+}
+.section-divider {
+  width: 60px; height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--warm-gold), var(--coral));
+  margin: 0.8rem auto 2.5rem;
+}
+
+/* ========== ABOUT ========== */
+.about-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem;
+  margin-bottom: 2.5rem;
+}
+.about-card {
+  background: var(--white); border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow); padding: 1.5rem; text-align: center;
+  transition: transform 0.2s;
+}
+.about-card:hover { transform: translateY(-3px); }
+.about-card .card-icon {
+  width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 0.8rem;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+}
+.about-card .card-icon.date { background: linear-gradient(135deg, var(--pale-blue), var(--light-blue)); }
+.about-card .card-icon.place { background: linear-gradient(135deg, var(--pale-gold), var(--warm-yellow)); }
+.about-card .card-icon.target { background: linear-gradient(135deg, #fde0d3, #f5c0a8); }
+.about-card h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+.about-card p { font-size: 0.95rem; font-weight: 600; color: var(--text-dark); }
+.about-card .sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+.about-desc {
+  background: var(--white); border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow); padding: 2rem;
+  border-left: 4px solid var(--warm-gold);
+  font-size: 0.95rem; line-height: 1.9; color: var(--text-body);
+}
+
+/* ========== AGENDA ========== */
+.agenda-table-wrap {
+  background: var(--white); border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow); overflow: hidden;
+}
+.agenda-table { width: 100%; border-collapse: collapse; }
+.agenda-table th {
+  background: var(--deep-blue); color: var(--white);
+  padding: 0.9rem 1rem; font-size: 0.85rem; font-weight: 600;
+  text-align: left;
+}
+.agenda-table td {
+  padding: 0.8rem 1rem; font-size: 0.9rem;
+  border-bottom: 1px solid rgba(26,58,92,0.06);
+  vertical-align: top;
+}
+.agenda-table tr:last-child td { border-bottom: none; }
+.agenda-table tr:hover { background: rgba(168,207,234,0.08); }
+.agenda-table .time-cell {
+  white-space: nowrap; font-weight: 600; color: var(--medium-blue);
+  width: 120px;
+}
+.agenda-table .break-row { background: var(--pale-gold); }
+.agenda-table .break-row td { color: var(--text-muted); font-style: italic; }
+.agenda-table .topic-title { font-weight: 600; color: var(--text-dark); }
+.agenda-table .speaker-info { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem; }
+.agenda-table .chair-info { font-size: 0.82rem; color: var(--text-muted); }
+
+/* ========== REG INFO ========== */
+.reg-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.reg-info-card {
+  background: var(--white); border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow); padding: 1.8rem;
+}
+.reg-info-card h3 {
+  font-size: 1rem; font-weight: 700; color: var(--deep-blue);
+  border-left: 4px solid var(--warm-gold); padding-left: 0.8rem;
+  margin-bottom: 1rem;
+}
+.reg-info-card ul { list-style: none; }
+.reg-info-card li {
+  padding: 0.5rem 0; font-size: 0.9rem;
+  border-bottom: 1px solid rgba(26,58,92,0.05);
+  display: flex; align-items: flex-start; gap: 0.5rem;
+}
+.reg-info-card li:last-child { border-bottom: none; }
+.reg-info-card li .bullet {
+  flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--mist-blue); margin-top: 0.55rem;
+}
+.reg-deadline {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: linear-gradient(135deg, var(--coral), var(--warm-gold));
+  color: var(--white); padding: 0.6rem 1.2rem; border-radius: 12px;
+  font-weight: 700; font-size: 0.95rem; margin-top: 0.8rem;
+}
+
+/* ========== SUBMISSIONS ========== */
+.submission-card {
+  background: var(--white); border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow); padding: 2rem; text-align: center;
+  text-decoration: none; color: var(--text-body);
+  transition: all 0.3s; display: block;
+  border: 2px solid transparent;
+}
+.submission-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(26,58,92,0.15);
+  border-color: var(--mist-blue);
+}
+.submission-icon { margin-bottom: 1rem; }
+.submission-card h3 {
+  font-size: 1.15rem; font-weight: 700; color: var(--deep-blue);
+  margin-bottom: 0.6rem;
+}
+.submission-card p {
+  font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;
+  margin-bottom: 1rem;
+}
+.submission-link-text {
+  display: inline-block; font-size: 0.9rem; font-weight: 600;
+  color: var(--teal-blue); transition: color 0.2s;
+}
+.submission-card:hover .submission-link-text { color: var(--deep-blue); }
+
+/* ========== REGISTRATION FORM ========== */
+.form-section {
+  background: linear-gradient(180deg, var(--ice-blue) 0%, var(--pale-blue) 100%);
+  padding: 4rem 1.5rem;
+}
+.form-container {
+  max-width: 720px; margin: 0 auto;
+  background: var(--white); border-radius: var(--card-radius);
+  box-shadow: 0 8px 40px rgba(26,58,92,0.12);
+  padding: 2.5rem;
+}
+.form-container h2 {
+  text-align: center; font-size: 1.6rem; color: var(--deep-blue);
+  margin-bottom: 0.3rem;
+}
+.form-container .form-sub {
+  text-align: center; color: var(--text-muted); font-size: 0.9rem;
+  margin-bottom: 2rem;
+}
+.form-group { margin-bottom: 1.3rem; }
+.form-label {
+  display: block; font-size: 0.9rem; font-weight: 600;
+  color: var(--text-dark); margin-bottom: 0.4rem;
+}
+.form-label .required { color: var(--coral); margin-left: 2px; }
+.form-hint { font-size: 0.78rem; color: var(--text-muted); font-weight: 400; margin-left: 0.3rem; }
+.form-input, .form-select {
+  width: 100%; padding: 0.75rem 1rem;
+  border: 1.5px solid rgba(106,158,192,0.3);
+  border-radius: 10px; font-size: 0.95rem;
+  font-family: var(--font-main);
+  color: var(--text-body);
+  background: var(--white);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none; appearance: none;
+}
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--teal-blue);
+  box-shadow: 0 0 0 3px rgba(58,124,165,0.12);
+}
+.form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7c8d' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+/* Radio group */
+.radio-group { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 0.3rem; }
+.radio-option {
+  position: relative; cursor: pointer;
+}
+.radio-option input { position: absolute; opacity: 0; pointer-events: none; }
+.radio-option .radio-label {
+  display: inline-block; padding: 0.55rem 1.2rem;
+  border: 1.5px solid rgba(106,158,192,0.3);
+  border-radius: 10px; font-size: 0.9rem; color: var(--text-body);
+  transition: all 0.2s; background: var(--white);
+}
+.radio-option input:checked + .radio-label {
+  border-color: var(--teal-blue);
+  background: rgba(58,124,165,0.06);
+  color: var(--teal-blue);
+  font-weight: 600;
+}
+.radio-option .radio-label:hover { border-color: var(--mist-blue); }
+
+/* Meal conditional */
+.meal-group { display: none; margin-top: 0.8rem; }
+.meal-group.show { display: block; }
+
+/* Other input for 職類 */
+.other-input-wrap { display: none; margin-top: 0.5rem; }
+.other-input-wrap.show { display: block; }
+
+.form-submit {
+  display: block; width: 100%; margin-top: 2rem;
+  padding: 1rem; border: none; border-radius: var(--btn-radius);
+  background: linear-gradient(135deg, var(--deep-blue), var(--teal-blue));
+  color: var(--white); font-size: 1.1rem; font-weight: 700;
+  cursor: pointer; font-family: var(--font-main);
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(26,58,92,0.25);
+}
+.form-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26,58,92,0.35); }
+.form-submit:active { transform: translateY(0); }
+
+.form-note {
+  text-align: center; font-size: 0.82rem; color: var(--text-muted);
+  margin-top: 1rem; line-height: 1.6;
+}
+
+/* Success message */
+.form-success {
+  display: none; text-align: center; padding: 2rem 1rem;
+}
+.form-success .check-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: linear-gradient(135deg, #43a047, #66bb6a);
+  margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; color: white;
+}
+.form-success h3 { color: var(--deep-blue); margin-bottom: 0.5rem; font-size: 1.3rem; }
+.form-success p { color: var(--text-muted); font-size: 0.95rem; }
+
+/* ========== TRANSPORT ========== */
+.transport-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+.transport-card {
+  background: var(--white); border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow); padding: 1.5rem; text-align: center;
+}
+.transport-card .t-icon {
+  font-size: 2rem; margin-bottom: 0.5rem;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--mist-blue);
+}
+.transport-card .t-icon svg { width: 36px; height: 36px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Inline SVG icon system */
+.ico { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }
+.ico svg {
+  width: 1em; height: 1em; fill: none;
+  stroke: currentColor; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.transport-card h3 { font-size: 0.95rem; color: var(--deep-blue); margin-bottom: 0.5rem; }
+.transport-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+.map-wrap {
+  border-radius: var(--card-radius); overflow: hidden;
+  box-shadow: var(--card-shadow); height: 300px;
+}
+.map-wrap iframe { width: 100%; height: 100%; border: none; }
+
+/* ========== CONTACT / FOOTER ========== */
+.contact-section {
+  background: var(--deep-blue);
+  color: var(--white); padding: 3rem 1.5rem; text-align: center;
+}
+.contact-section .section-title { color: var(--white); }
+.contact-grid {
+  max-width: 800px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+  text-align: left;
+}
+.contact-block h3 {
+  font-size: 0.85rem; color: var(--light-gold);
+  letter-spacing: 0.15em; margin-bottom: 0.8rem;
+}
+.contact-block p, .contact-block a {
+  font-size: 0.9rem; color: rgba(255,255,255,0.8);
+  text-decoration: none; line-height: 1.8;
+}
+.contact-block a:hover { color: var(--light-gold); }
+
+.site-footer {
+  background: #0f2235;
+  color: rgba(255,255,255,0.4);
+  text-align: center; padding: 1.2rem; font-size: 0.78rem;
+}
+
+/* ========== MOBILE ========== */
+@media (max-width: 768px) {
+  .main-nav { 
+    display: none; flex-direction: column;
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: rgba(26,58,92,0.98); padding: 1rem;
+  }
+  .main-nav.open { display: flex; }
+  .nav-toggle { display: block; }
+  .about-grid { grid-template-columns: 1fr; }
+  .reg-info-grid { grid-template-columns: 1fr; }
+  .transport-grid { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; text-align: center; }
+  .form-row { grid-template-columns: 1fr; }
+  .hero { padding: 7rem 1rem 3rem; min-height: 500px; }
+  .hero-meta { flex-direction: column; align-items: center; }
+  .agenda-table-wrap { overflow-x: auto; }
+  .agenda-table { min-width: 680px; }
+  .countdown-boxes { gap: 0.6rem; }
+  .countdown-box .num { font-size: 1.5rem; }
+  .form-container { padding: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="#" class="header-logo">
+      <div class="logo-circle">TSMCSD</div>
+      <span>台灣醫事聯合臨床技能發展學會</span>
+    </a>
+    <button class="nav-toggle" onclick="document.querySelector('.main-nav').classList.toggle('open')" aria-label="選單"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <nav class="main-nav">
+      <a href="#about">活動資訊</a>
+      <a href="#agenda">活動議程</a>
+      <a href="#submissions">投稿專區</a>
+      <a href="#reg-info">報名資訊</a>
+      <a href="#register">立即報名</a>
+      <a href="#transport">交通資訊</a>
+      <a href="#contact">聯絡資訊</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-particles" id="particles"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="ico" style="font-size:1.1em;margin-right:0.3em"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>2026年8月15日（六）</div>
+    <p class="hero-org">2026 會員大會暨學術研討會</p>
+    <h1 class="hero-theme">在高壓醫療中成為<br>不被<span class="highlight">壓垮</span>的教育者<br>重塑教師韌性，邁向醫學教育未來</h1>
+    <div class="hero-links">
+      <a href="https://sub.chimei.org.tw/TSMCSD/index.php/news/359-2026" target="_blank" class="hero-link-btn">
+        <span class="ico" style="font-size:1.1em"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+        海報論文徵稿
+      </a>
+      <a href="https://sub.chimei.org.tw/TSMCSD/index.php/news/358-2026-osce" target="_blank" class="hero-link-btn">
+        <span class="ico" style="font-size:1.1em"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+        OSCE教案甄選
+      </a>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div>2026年8月15日（六）08:00 – 15:30</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.75-7-11a7 7 0 1 1 14 0c0 5.25-7 11-7 11z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div>奇美醫院 第五醫療大樓 5F 國際會議廳</div>
+      </div>
+    </div>
+    <a href="#register" class="hero-cta"><span class="ico" style="font-size:1.2em;margin-right:0.3em"><svg viewBox="0 0 24 24"><path d="M17 3l4 4L7 21H3v-4L17 3z"/></svg></span>立即報名</a>
+  </div>
+</section>
+
+<!-- ===== COUNTDOWN ===== -->
+<section class="countdown-section">
+  <p class="countdown-label">距離活動</p>
+  <div class="countdown-boxes">
+    <div class="countdown-box"><div class="num" id="cd-days">--</div><div class="unit">天</div></div>
+    <div class="countdown-box"><div class="num" id="cd-hours">--</div><div class="unit">時</div></div>
+    <div class="countdown-box"><div class="num" id="cd-mins">--</div><div class="unit">分</div></div>
+    <div class="countdown-box"><div class="num" id="cd-secs">--</div><div class="unit">秒</div></div>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section class="section" id="about">
+  <p class="section-label">ABOUT THE EVENT</p>
+  <h2 class="section-title">活動資訊</h2>
+  <div class="section-divider"></div>
+
+  <div class="about-grid">
+    <div class="about-card">
+      <div class="card-icon date"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--mist-blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <h3>日期</h3>
+      <p>115年8月15日（星期六）</p>
+      <p class="sub">08:00 – 15:30</p>
+    </div>
+    <div class="about-card">
+      <div class="card-icon place"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--warm-gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.75-7-11a7 7 0 1 1 14 0c0 5.25-7 11-7 11z"/><circle cx="12" cy="10" r="3"/></svg></div>
+      <h3>地點</h3>
+      <p>奇美醫院</p>
+      <p class="sub">第五醫療大樓 5F 國際會議廳</p>
+    </div>
+    <div class="about-card">
+      <div class="card-icon target"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--coral)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <h3>對象</h3>
+      <p>醫療相關人員</p>
+      <p class="sub">臨床教師、醫事人員</p>
+    </div>
+  </div>
+
+  <div class="about-desc">
+    <p>在高壓醫療環境中，臨床教育者如何維持教學熱情，不被職場壓力壓垮？</p>
+    <br>
+    <p>本次年會以<strong>「不被壓垮的教育者——重塑教師韌性，邁向醫學教育未來」</strong>為主題，從心理韌性的日常練習出發，結合能力導向的教學設計、AI 輔助教案製作、OSCE 與 EPA/CCC 的連結應用，以及如何系統性支持臨床教師的學術發展，提供全方位的學習與交流平台。</p>
+    <br>
+    <p>年會同時舉辦<strong>海報論文暨 OSCE 教案競賽</strong>，歡迎投稿分享您的教學成果。讓我們一起從高壓臨床現場走向醫學教育的未來——不是獨自承受，而是在制度支持與共同學習中持續前進。</p>
+  </div>
+</section>
+
+<!-- ===== AGENDA ===== -->
+<section class="section" id="agenda" style="background: var(--white); max-width: 100%; padding-left: 0; padding-right: 0;">
+  <div style="max-width: 1000px; margin: 0 auto; padding: 0 1.5rem;">
+    <p class="section-label">SCHEDULE</p>
+    <h2 class="section-title">活動議程</h2>
+    <div class="section-divider"></div>
+
+    <div class="agenda-table-wrap">
+      <table class="agenda-table">
+        <thead>
+          <tr>
+            <th>時間</th>
+            <th>議程主題</th>
+            <th>講師</th>
+            <th>座長</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="time-cell">08:00 – 08:30</td>
+            <td><span class="topic-title">報到</span></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="time-cell">08:30 – 08:40</td>
+            <td><span class="topic-title">開幕致詞</span></td>
+            <td><div class="speaker-info">蘇慧真 理事長</div></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="time-cell">08:40 – 09:20</td>
+            <td>
+              <span class="topic-title">當壓力成為日常：<br>醫療現場的心理韌性練習</span>
+            </td>
+            <td>
+              <div class="speaker-info">蘇益賢 臨床心理師<br>初色心理治療所<br>榮譽副所長</div>
+            </td>
+            <td>
+              <div class="chair-info">蘇慧真 理事長 /<br>奇美醫院藥劑部部長兼教學部代理部長</div>
+            </td>
+          </tr>
+          <tr class="break-row">
+            <td class="time-cell">09:20 – 09:40</td>
+            <td colspan="3"><span class="ico" style="color:var(--warm-gold);font-size:1.1em;margin-right:0.3em"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></span>茶敘與交流</td>
+          </tr>
+          <tr>
+            <td class="time-cell">09:40 – 10:20</td>
+            <td>
+              <span class="topic-title">能力導向醫學教育中的教學設計：<br>從課程架構到臨床實踐</span>
+            </td>
+            <td>
+              <div class="speaker-info">陳志弘 主任<br>高長教師培育中心</div>
+            </td>
+            <td>
+              <div class="chair-info">楊浚銘 常務理事 /<br>奇美醫院神經內科主任</div>
+            </td>
+          </tr>
+          <tr>
+            <td class="time-cell">10:20 – 11:00</td>
+            <td>
+              <span class="topic-title">事半功倍的教學：<br>AI工具在教案製作的應用</span>
+            </td>
+            <td>
+              <div class="speaker-info">邱俊文 副部主任<br>彰化基督教醫院<br>急診暨重症醫學部</div>
+            </td>
+            <td>
+              <div class="chair-info">江惠英 常務理事 /<br>奇美醫院護理部副部長</div>
+            </td>
+          </tr>
+          <tr>
+            <td class="time-cell">11:00 – 12:00</td>
+            <td><span class="topic-title">第五屆第1次會員大會暨第五屆理監事選舉</span></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr class="break-row">
+            <td class="time-cell">12:00 – 13:30</td>
+            <td colspan="3"><span class="ico" style="color:var(--warm-gold);font-size:1.1em;margin-right:0.3em"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="12" y1="9" x2="12" y2="21"/></svg></span>午餐休息（會員備有午餐餐盒）/ 12:30–13:30 入選海報論文觀賞及評選</td>
+          </tr>
+          <tr>
+            <td class="time-cell">13:30 – 14:10</td>
+            <td>
+              <span class="topic-title">從評量到信賴：OSCE、EPA與CCC連結<br>臨床能力培育與總結性能力評定</span>
+            </td>
+            <td>
+              <div class="speaker-info">張雅惠 主任<br>馬偕紀念醫院<br>藥劑部臨床藥學科</div>
+            </td>
+            <td>
+              <div class="chair-info">鄭奕帝 理事 /<br>中國醫藥大學附設醫院藥劑部主任</div>
+            </td>
+          </tr>
+          <tr class="break-row">
+            <td class="time-cell">14:10 – 14:30</td>
+            <td colspan="3"><span class="ico" style="color:var(--warm-gold);font-size:1.1em;margin-right:0.3em"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></span>茶敘與交流</td>
+          </tr>
+          <tr>
+            <td class="time-cell">14:30 – 15:10</td>
+            <td>
+              <span class="topic-title">在高壓醫療環境中，<br>如何系統性支持臨床教師的學術發展</span>
+            </td>
+            <td>
+              <div class="speaker-info">張玉喆 教授<br>長庚醫學教育研究中心<br>副主任</div>
+            </td>
+            <td>
+              <div class="chair-info">郭進榮 名譽理事長 /<br>奇美醫院<br>教師培育中心主任</div>
+            </td>
+          </tr>
+          <tr>
+            <td class="time-cell">15:10 – 15:20</td>
+            <td><span class="topic-title">海報論文暨OSCE教案競賽頒獎</span></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="time-cell">15:20 – 15:30</td>
+            <td><span class="topic-title">閉幕致詞</span></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SUBMISSIONS ===== -->
+<section class="section" id="submissions">
+  <p class="section-label">CALL FOR SUBMISSIONS</p>
+  <h2 class="section-title">投稿專區</h2>
+  <div class="section-divider"></div>
+
+  <div class="reg-info-grid">
+    <a href="https://sub.chimei.org.tw/TSMCSD/index.php/news/359-2026" target="_blank" class="submission-card">
+      <div class="submission-icon">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--mist-blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <line x1="10" y1="9" x2="8" y2="9"/>
+        </svg>
+      </div>
+      <h3>海報論文徵稿</h3>
+      <p>歡迎投稿海報論文，分享您的教學研究與臨床教育成果。</p>
+      <span class="submission-link-text">前往徵稿頁面 →</span>
+    </a>
+    <a href="https://sub.chimei.org.tw/TSMCSD/index.php/news/358-2026-osce" target="_blank" class="submission-card">
+      <div class="submission-icon">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--mist-blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </div>
+      <h3>OSCE教案甄選</h3>
+      <p>徵求優秀 OSCE 教學案例，展現您的教案設計與評量創意。</p>
+      <span class="submission-link-text">前往甄選頁面 →</span>
+    </a>
+  </div>
+</section>
+
+<!-- ===== REG INFO ===== -->
+<section class="section" id="reg-info">
+  <p class="section-label">REGISTRATION</p>
+  <h2 class="section-title">報名資訊</h2>
+  <div class="section-divider"></div>
+
+  <div class="reg-info-grid">
+    <div class="reg-info-card">
+      <h3>學分申請</h3>
+      <ul>
+        <li><span class="bullet"></span><span>衛生福利部各醫事人員繼續教育積分申請中</span></li>
+      </ul>
+      <h3 style="margin-top:1.5rem;">報名截止</h3>
+      <div class="reg-deadline"><span class="ico" style="font-size:1.1em;margin-right:0.3em"><svg viewBox="0 0 24 24" stroke="currentColor"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h-6v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/><line x1="8" y1="2" x2="16" y2="2"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></span>請於 8/5（三）前完成報名</div>
+    </div>
+    <div class="reg-info-card">
+      <h3>注意事項</h3>
+      <ul>
+        <li><span class="bullet"></span><span>交通停車請自理，並請自行攜帶環保杯。</span></li>
+        <li><span class="bullet"></span><span>本會會員備有午餐餐盒，報名時請選擇葷素。</span></li>
+        <li><span class="bullet"></span><span>本活動若因不可抗力之因素，保有修改、取消及延期之權利，並以 E-mail 通知。</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== REGISTRATION FORM ===== -->
+<section class="form-section" id="register">
+  <div style="max-width: 1000px; margin: 0 auto;">
+    <p class="section-label">REGISTRATION</p>
+    <h2 class="section-title" style="margin-bottom: 0.3rem;">立即報名</h2>
+    <p style="text-align:center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">
+      報名截止：115年8月5日（三），請把握時間！
+    </p>
+
+    <div class="form-container">
+      <div id="form-area">
+        <div class="form-group">
+          <label class="form-label">姓名 <span class="required">*</span></label>
+          <input type="text" class="form-input" id="f-name" placeholder="請輸入姓名" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">身分證字號 <span class="required">*</span>
+            <span class="form-hint">學分登錄用；若無需學分請填「無需學分」</span>
+          </label>
+          <input type="text" class="form-input" id="f-id" placeholder="請輸入身分證字號或填寫「無需學分」">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">服務單位 <span class="required">*</span></label>
+            <input type="text" class="form-input" id="f-org" placeholder="如：奇美醫院">
+          </div>
+          <div class="form-group">
+            <label class="form-label">部門 <span class="required">*</span></label>
+            <input type="text" class="form-input" id="f-dept" placeholder="如：營養科">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">職稱 <span class="required">*</span></label>
+            <input type="text" class="form-input" id="f-title" placeholder="請輸入職稱">
+          </div>
+          <div class="form-group">
+            <label class="form-label">聯絡電話／手機 <span class="required">*</span></label>
+            <input type="tel" class="form-input" id="f-phone" placeholder="請輸入電話或手機號碼">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email <span class="required">*</span></label>
+          <input type="email" class="form-input" id="f-email" placeholder="example@mail.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">職類 <span class="required">*</span></label>
+          <select class="form-select" id="f-profession" onchange="handleProfession()">
+            <option value="">── 請選擇職類 ──</option>
+            <option value="西醫">西醫</option>
+            <option value="牙醫">牙醫</option>
+            <option value="中醫">中醫</option>
+            <option value="藥事">藥事</option>
+            <option value="醫事放射">醫事放射</option>
+            <option value="醫事檢驗">醫事檢驗</option>
+            <option value="牙體技術">牙體技術</option>
+            <option value="護理">護理</option>
+            <option value="營養">營養</option>
+            <option value="呼吸治療">呼吸治療</option>
+            <option value="聽力">聽力</option>
+            <option value="物理治療">物理治療</option>
+            <option value="職能治療">職能治療</option>
+            <option value="諮商心理">諮商心理</option>
+            <option value="語言治療">語言治療</option>
+            <option value="專科護理師">專科護理師</option>
+            <option value="驗光師">驗光師</option>
+            <option value="其他">其他</option>
+          </select>
+          <div class="other-input-wrap" id="other-profession-wrap">
+            <input type="text" class="form-input" id="f-profession-other" placeholder="請輸入職類" style="margin-top: 0.5rem;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">是否為本會會員 <span class="required">*</span></label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="membership" value="本會個人會員" onchange="handleMembership()">
+              <span class="radio-label">本會個人會員</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="membership" value="非會員" onchange="handleMembership()">
+              <span class="radio-label">非會員</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="meal-group" id="meal-group">
+          <div class="form-group">
+            <label class="form-label">午餐餐點選擇 <span class="required">*</span>
+              <span class="form-hint">（會員專屬午餐餐盒）</span>
+            </label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" name="meal" value="葷">
+                <span class="radio-label"><span class="ico" style="font-size:1.1em;margin-right:0.3em;color:var(--coral)"><svg viewBox="0 0 24 24"><rect x="1" y="6" width="22" height="12" rx="3"/><line x1="6" y1="10" x2="6" y2="14"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="10" x2="14" y2="14"/></svg></span>葷食</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="meal" value="素">
+                <span class="radio-label"><span class="ico" style="font-size:1.1em;margin-right:0.3em;color:var(--teal-blue)"><svg viewBox="0 0 24 24"><path d="M7 20.5C7 12 12 7 20 5c-3 4-4 8-4 12"/><path d="M7 20.5c0-5 3-10 8-13"/><path d="M7 20.5S3 17 3 13c0-3 2.5-5 5-5 1.5 3 0 7-1 12.5z"/></svg></span>素食</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <p class="form-note">
+          報名送出後，主辦單位將進行資格確認，並以 Email 通知報名結果，請留意信件通知。
+        </p>
+
+        <button class="form-submit" onclick="submitForm()">提交報名</button>
+      </div>
+
+      <div class="form-success" id="form-success">
+        <div class="check-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <h3>報名資料已送出！</h3>
+        <p>感謝您報名「2026 台灣醫事聯合臨床技能發展學會 會員大會暨學術研討會」。<br>主辦單位將進行資格確認，並以 Email 通知報名結果，請留意信件通知。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TRANSPORT ===== -->
+<section class="section" id="transport">
+  <p class="section-label">TRANSPORTATION</p>
+  <h2 class="section-title">交通資訊</h2>
+  <div class="section-divider"></div>
+
+  <p style="text-align:center; color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
+    會場停車空間有限，<strong>建議多加搭乘大眾運輸工具</strong>
+    ｜<a href="http://www.chimei.org.tw/newindex/map/cmh_map_1.html" target="_blank" style="color: var(--teal-blue);">奇美醫院交通路線圖</a>
+  </p>
+
+  <div class="transport-grid">
+    <div class="transport-card">
+      <div class="t-icon"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="16" rx="2"/><line x1="4" y1="11" x2="20" y2="11"/><line x1="12" y1="3" x2="12" y2="11"/><circle cx="8" cy="15" r="1"/><circle cx="16" cy="15" r="1"/><path d="M6 19l-2 3"/><path d="M18 19l2 3"/></svg></div>
+      <h3>臺 鐵</h3>
+      <p>搭乘火車至<strong>大橋火車站</strong>，再步行至奇美醫院。</p>
+    </div>
+    <div class="transport-card">
+      <div class="t-icon"><svg viewBox="0 0 24 24"><path d="M4 11V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5"/><path d="M3 11h18l-1 8H4l-1-8z"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/><path d="M9 4l-2-2"/><path d="M15 4l2-2"/><line x1="12" y1="4" x2="12" y2="11"/></svg></div>
+      <h3>高 鐵</h3>
+      <p>搭乘高鐵至<strong>台南站</strong>，轉乘 <strong>H62 高鐵快捷公車（奇美線）</strong>至奇美醫院。</p>
+    </div>
+    <div class="transport-card">
+      <div class="t-icon"><svg viewBox="0 0 24 24"><path d="M5 17h14v-5H5v5z"/><path d="M19 12l-2-5H7L5 12"/><circle cx="7.5" cy="17" r="1.5"/><circle cx="16.5" cy="17" r="1.5"/><line x1="5" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="19" y2="12"/><path d="M5 17v2h3v-2"/><path d="M16 17v2h3v-2"/></svg></div>
+      <h3>高速公路</h3>
+      <p>永康交流道下往台南市區 → 台1省道 → 中正南路 → 中華路 → 奇美醫院</p>
+    </div>
+  </div>
+
+  <div class="map-wrap">
+    <iframe src="https://www.google.com/maps?q=奇美醫院+台南市永康區中華路901號&output=embed" allowfullscreen loading="lazy"></iframe>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section class="contact-section" id="contact">
+  <p class="section-label" style="color: var(--light-gold);">ORGANIZER & CONTACT</p>
+  <h2 class="section-title" style="color: var(--white);">聯絡資訊</h2>
+  <div class="section-divider" style="margin-bottom: 2rem;"></div>
+
+  <div class="contact-grid">
+    <div class="contact-block">
+      <h3>主辦單位</h3>
+      <p>台灣醫事聯合臨床技能發展學會</p>
+      <p>奇美醫療財團法人奇美醫院</p>
+    </div>
+    <div class="contact-block">
+      <h3>聯絡窗口</h3>
+      <p>楊依玲 小姐</p>
+      <p><span class="ico" style="font-size:1em;margin-right:0.3em"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span><a href="tel:+886-6-2812811,57426">06-2812811 #57426</a></p>
+      <p><span class="ico" style="font-size:1em;margin-right:0.3em"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg></span><a href="mailto:tsmcsd2018@gmail.com">tsmcsd2018@gmail.com</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  2026 台灣醫事聯合臨床技能發展學會 會員大會暨學術研討會 ｜ 115年8月15日（週六）· 奇美醫院 第五醫療大樓 5F 國際會議廳<br>
+  © 2026 台灣醫事聯合臨床技能發展學會 · All rights reserved.
+</footer>
+
+<script>
+// Countdown
+function updateCountdown() {
+  const target = new Date('2026-08-15T08:00:00+08:00');
+  const now = new Date();
+  const diff = target - now;
+  if (diff <= 0) {
+    document.getElementById('cd-days').textContent = '0';
+    document.getElementById('cd-hours').textContent = '0';
+    document.getElementById('cd-mins').textContent = '0';
+    document.getElementById('cd-secs').textContent = '0';
+    return;
+  }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cd-days').textContent = d;
+  document.getElementById('cd-hours').textContent = h;
+  document.getElementById('cd-mins').textContent = m;
+  document.getElementById('cd-secs').textContent = s;
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// Particles
+(function() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 20; i++) {
+    const span = document.createElement('span');
+    const size = Math.random() * 6 + 2;
+    span.style.width = size + 'px';
+    span.style.height = size + 'px';
+    span.style.left = Math.random() * 100 + '%';
+    span.style.animationDuration = (Math.random() * 15 + 10) + 's';
+    span.style.animationDelay = (Math.random() * 10) + 's';
+    container.appendChild(span);
+  }
+})();
+
+// Profession other
+function handleProfession() {
+  const v = document.getElementById('f-profession').value;
+  document.getElementById('other-profession-wrap').classList.toggle('show', v === '其他');
+}
+
+// Membership → meal
+function handleMembership() {
+  const checked = document.querySelector('input[name="membership"]:checked');
+  const show = checked && checked.value === '本會個人會員';
+  document.getElementById('meal-group').classList.toggle('show', show);
+}
+
+// ====== Google Apps Script Web App URL ======
+// 部署 Apps Script 後，將下方 URL 替換為您的 Web App URL
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMyXiyOTd6yYJYUVKPB32aBTj-B3sYq3uNiZJurxCoLv9DxLlMrWkKp0iGYu8-vfCyiw/exec';
+
+// Simple form validation & submit to Google Sheet
+function submitForm() {
+  const fields = [
+    { id: 'f-name', label: '姓名' },
+    { id: 'f-id', label: '身分證字號' },
+    { id: 'f-org', label: '服務單位' },
+    { id: 'f-dept', label: '部門' },
+    { id: 'f-title', label: '職稱' },
+    { id: 'f-phone', label: '聯絡電話/手機' },
+    { id: 'f-email', label: 'Email' },
+  ];
+  for (const f of fields) {
+    if (!document.getElementById(f.id).value.trim()) {
+      alert('請填寫「' + f.label + '」欄位');
+      document.getElementById(f.id).focus();
+      return;
+    }
+  }
+  if (!document.getElementById('f-profession').value) {
+    alert('請選擇「職類」');
+    return;
+  }
+  if (document.getElementById('f-profession').value === '其他' && !document.getElementById('f-profession-other').value.trim()) {
+    alert('請填寫您的職類');
+    document.getElementById('f-profession-other').focus();
+    return;
+  }
+  const membership = document.querySelector('input[name="membership"]:checked');
+  if (!membership) {
+    alert('請選擇「是否為本會會員」');
+    return;
+  }
+  if (membership.value === '本會個人會員') {
+    const meal = document.querySelector('input[name="meal"]:checked');
+    if (!meal) {
+      alert('請選擇「午餐餐點」');
+      return;
+    }
+  }
+
+  // Gather form data
+  const profession = document.getElementById('f-profession').value === '其他'
+    ? document.getElementById('f-profession-other').value.trim()
+    : document.getElementById('f-profession').value;
+  const mealEl = document.querySelector('input[name="meal"]:checked');
+
+  const formData = {
+    timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
+    name: document.getElementById('f-name').value.trim(),
+    idNumber: document.getElementById('f-id').value.trim(),
+    organization: document.getElementById('f-org').value.trim(),
+    department: document.getElementById('f-dept').value.trim(),
+    jobTitle: document.getElementById('f-title').value.trim(),
+    phone: document.getElementById('f-phone').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    profession: profession,
+    membership: membership.value,
+    meal: (membership.value === '本會個人會員' && mealEl) ? mealEl.value : ''
+  };
+
+  // Disable button & show loading
+  const btn = document.querySelector('.form-submit');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '報名資料送出中...';
+  btn.style.opacity = '0.7';
+
+  // POST to Google Apps Script
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData)
+  })
+  .then(() => {
+    // no-cors always resolves as opaque, treat as success
+    document.getElementById('form-area').style.display = 'none';
+    document.getElementById('form-success').style.display = 'block';
+    document.getElementById('form-success').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  })
+  .catch(err => {
+    console.error('提交失敗:', err);
+    alert('報名資料送出失敗，請稍後再試或聯繫主辦單位。');
+    btn.disabled = false;
+    btn.textContent = originalText;
+    btn.style.opacity = '1';
+  });
+}
+
+// Close mobile nav on link click
+document.querySelectorAll('.main-nav a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.querySelector('.main-nav').classList.remove('open');
+  });
+});
+
+// Header scroll effect
+window.addEventListener('scroll', () => {
+  const header = document.querySelector('.site-header');
+  if (window.scrollY > 50) {
+    header.style.background = 'rgba(26,58,92,0.98)';
+  } else {
+    header.style.background = 'rgba(26,58,92,0.95)';
+  }
+});
+</script>
+
+</body>
+</html>
