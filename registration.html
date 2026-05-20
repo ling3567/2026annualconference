@@ -446,6 +446,33 @@ body {
 .other-input-wrap { display: none; margin-top: 0.5rem; }
 .other-input-wrap.show { display: block; }
 
+/* Member status indicator */
+.member-status {
+  margin-top: 0.5rem; padding: 0.6rem 0.9rem;
+  border-radius: 8px; font-size: 0.84rem; line-height: 1.6;
+  display: none;
+}
+.member-status.show { display: block; }
+.member-status.status-member {
+  background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;
+}
+.member-status.status-nonmember {
+  background: #fff3e0; color: #6d4c00; border: 1px solid #ffe0b2;
+}
+.member-status.status-manual {
+  background: #f5f5f5; color: var(--text-muted); border: 1px solid #e0e0e0;
+}
+.member-status.status-checking {
+  background: #f5f5f5; color: var(--text-muted); border: 1px solid #e0e0e0;
+}
+.member-manual-hint {
+  margin-top: 0.5rem; font-size: 0.78rem; color: var(--text-muted); line-height: 1.5;
+}
+/* Locked membership radios */
+.membership-locked .radio-option input { pointer-events: none; }
+.membership-locked .radio-label { opacity: 0.7; cursor: default; }
+.membership-locked .radio-option input:checked + .radio-label { opacity: 1; }
+
 .form-submit {
   display: block; width: 100%; margin-top: 2rem;
   padding: 1rem; border: none; border-radius: var(--btn-radius);
@@ -908,7 +935,8 @@ body {
           <label class="form-label">身分證字號 <span class="required">*</span>
             <span class="form-hint">學分登錄用；若無需學分請填「無需學分」</span>
           </label>
-          <input type="text" class="form-input" id="f-id" placeholder="請輸入身分證字號或填寫「無需學分」">
+          <input type="text" class="form-input" id="f-id" placeholder="請輸入身分證字號或填寫「無需學分」" onblur="checkMembership()">
+          <div class="member-status" id="member-status"></div>
         </div>
 
         <div class="form-row">
@@ -966,9 +994,9 @@ body {
           </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="membership-group">
           <label class="form-label">是否為本會會員 <span class="required">*</span></label>
-          <div class="radio-group">
+          <div class="radio-group" id="membership-radios">
             <label class="radio-option">
               <input type="radio" name="membership" value="本會個人會員" onchange="handleMembership()">
               <span class="radio-label">本會個人會員</span>
@@ -978,6 +1006,10 @@ body {
               <span class="radio-label">非會員</span>
             </label>
           </div>
+          <p class="member-manual-hint" id="member-manual-hint" style="display:none;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            未提供身分證字號，請自行選擇會員身分。會員午餐資格將於活動前依身分證字號進行核實。
+          </p>
         </div>
 
         <div class="meal-group" id="meal-group">
@@ -1123,6 +1155,75 @@ function handleMembership() {
   document.getElementById('meal-group').classList.toggle('show', show);
 }
 
+// Auto-check membership from 會員名冊
+let membershipLocked = false;
+
+function checkMembership() {
+  const idVal = document.getElementById('f-id').value.trim();
+  const statusEl = document.getElementById('member-status');
+  const radiosEl = document.getElementById('membership-radios');
+  const hintEl = document.getElementById('member-manual-hint');
+  const radios = document.querySelectorAll('input[name="membership"]');
+
+  // Reset
+  statusEl.className = 'member-status';
+  statusEl.style.display = 'none';
+  hintEl.style.display = 'none';
+  radiosEl.classList.remove('membership-locked');
+  membershipLocked = false;
+  radios.forEach(r => r.disabled = false);
+
+  // 情境3: no valid ID
+  if (!idVal || idVal === '無需學分') {
+    hintEl.style.display = 'block';
+    return;
+  }
+
+  // Show checking status
+  statusEl.textContent = '比對中...';
+  statusEl.className = 'member-status show status-checking';
+  statusEl.style.display = 'block';
+
+  // Call Apps Script to check
+  const url = APPS_SCRIPT_URL + '?action=checkMember&id=' + encodeURIComponent(idVal);
+  fetch(url)
+    .then(res => res.text())
+    .then(text => {
+      let result;
+      try { result = JSON.parse(text); } catch(e) { result = { isMember: false }; }
+
+      if (result.isMember) {
+        // 情境1: 確認為會員
+        statusEl.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#2e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:4px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>已確認為本會會員';
+        statusEl.className = 'member-status show status-member';
+
+        // Auto-select and lock
+        radios[0].checked = true; // 本會個人會員
+        radios[1].checked = false;
+        radios.forEach(r => r.disabled = true);
+        radiosEl.classList.add('membership-locked');
+        membershipLocked = true;
+        handleMembership();
+      } else {
+        // 情境2: 查無會員
+        statusEl.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#e65100" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+          + '目前系統尚未比對到您的會員資料。若您為本會會員，請與秘書處聯繫（06-2812811 #57426），我們將協助確認，謝謝。';
+        statusEl.className = 'member-status show status-nonmember';
+
+        // Auto-select 非會員 but don't lock (let them contact and re-verify)
+        radios[0].checked = false;
+        radios[1].checked = true; // 非會員
+        handleMembership();
+      }
+    })
+    .catch(err => {
+      console.error('會員查詢失敗:', err);
+      // Fallback to manual
+      statusEl.style.display = 'none';
+      hintEl.style.display = 'block';
+    });
+}
+
 // ====== Google Apps Script Web App URL ======
 // 部署 Apps Script 後，將下方 URL 替換為您的 Web App URL
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMyXiyOTd6yYJYUVKPB32aBTj-B3sYq3uNiZJurxCoLv9DxLlMrWkKp0iGYu8-vfCyiw/exec';
@@ -1154,12 +1255,19 @@ function submitForm() {
     document.getElementById('f-profession-other').focus();
     return;
   }
-  const membership = document.querySelector('input[name="membership"]:checked');
-  if (!membership) {
-    alert('請選擇「是否為本會會員」');
-    return;
+  // Get membership value (handle locked/disabled radios)
+  let membershipValue = '';
+  if (membershipLocked) {
+    membershipValue = '本會個人會員';
+  } else {
+    const membershipEl = document.querySelector('input[name="membership"]:checked');
+    if (!membershipEl) {
+      alert('請選擇「是否為本會會員」');
+      return;
+    }
+    membershipValue = membershipEl.value;
   }
-  if (membership.value === '本會個人會員') {
+  if (membershipValue === '本會個人會員') {
     const meal = document.querySelector('input[name="meal"]:checked');
     if (!meal) {
       alert('請選擇「午餐餐點」');
@@ -1183,8 +1291,8 @@ function submitForm() {
     phone: document.getElementById('f-phone').value.trim(),
     email: document.getElementById('f-email').value.trim(),
     profession: profession,
-    membership: membership.value,
-    meal: (membership.value === '本會個人會員' && mealEl) ? mealEl.value : ''
+    membership: membershipValue,
+    meal: (membershipValue === '本會個人會員' && mealEl) ? mealEl.value : ''
   };
 
   // Disable button & show loading
