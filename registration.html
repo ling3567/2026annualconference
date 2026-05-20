@@ -1006,10 +1006,6 @@ body {
               <span class="radio-label">非會員</span>
             </label>
           </div>
-          <p class="member-manual-hint" id="member-manual-hint" style="display:none;">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            未提供身分證字號，請自行選擇會員身分。會員午餐資格將於活動前依身分證字號進行核實。
-          </p>
         </div>
 
         <div class="meal-group" id="meal-group">
@@ -1162,20 +1158,17 @@ function checkMembership() {
   const idVal = document.getElementById('f-id').value.trim();
   const statusEl = document.getElementById('member-status');
   const radiosEl = document.getElementById('membership-radios');
-  const hintEl = document.getElementById('member-manual-hint');
   const radios = document.querySelectorAll('input[name="membership"]');
 
   // Reset
   statusEl.className = 'member-status';
   statusEl.style.display = 'none';
-  hintEl.style.display = 'none';
   radiosEl.classList.remove('membership-locked');
   membershipLocked = false;
   radios.forEach(r => r.disabled = false);
 
-  // 情境3: no valid ID
+  // 情境3: no valid ID → manual selection
   if (!idVal || idVal === '無需學分') {
-    hintEl.style.display = 'block';
     return;
   }
 
@@ -1218,9 +1211,7 @@ function checkMembership() {
     })
     .catch(err => {
       console.error('會員查詢失敗:', err);
-      // Fallback to manual
       statusEl.style.display = 'none';
-      hintEl.style.display = 'block';
     });
 }
 
