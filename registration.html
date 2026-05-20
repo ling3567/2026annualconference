@@ -114,16 +114,6 @@ body {
   100% { transform: translateY(-10vh) scale(1); opacity: 0; }
 }
 .hero-content { position: relative; z-index: 3; max-width: 800px; }
-.hero-badge {
-  display: inline-block;
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255,255,255,0.25);
-  color: var(--light-gold);
-  padding: 0.4rem 1.2rem; border-radius: 50px;
-  font-size: 0.85rem; font-weight: 500;
-  margin-bottom: 1.2rem; letter-spacing: 0.1em;
-}
 .hero-org {
   font-size: clamp(1.1rem, 2.5vw, 1.4rem); color: rgba(255,255,255,0.9);
   font-weight: 500; margin-bottom: 1.2rem;
@@ -194,22 +184,22 @@ body {
 }
 .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(212,168,67,0.5); }
 
-/* ========== COUNTDOWN ========== */
-.countdown-section {
-  background: var(--nav-blue);
-  color: var(--white);
-  padding: 1.5rem;
-  text-align: center;
+/* ========== COUNTDOWN (subtle inline) ========== */
+.countdown-inline {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.3rem; margin-bottom: 2rem;
+  color: var(--text-muted); font-size: 0.85rem;
 }
-.countdown-label { font-size: 0.9rem; color: var(--light-gold); margin-bottom: 0.8rem; letter-spacing: 0.2em; }
-.countdown-boxes { display: flex; justify-content: center; gap: 1rem; }
-.countdown-box {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 12px; padding: 0.6rem 1rem; min-width: 72px;
+.countdown-inline-label {
+  margin-right: 0.3rem; letter-spacing: 0.05em;
 }
-.countdown-box .num { font-size: 2rem; font-weight: 900; line-height: 1; color: var(--light-gold); }
-.countdown-box .unit { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 0.2rem; }
+.countdown-inline-num {
+  font-weight: 700; color: var(--nav-blue);
+  font-size: 1.05rem; min-width: 1.4em; text-align: center;
+}
+.countdown-inline-unit {
+  font-size: 0.78rem; color: var(--text-muted); margin-right: 0.2rem;
+}
 
 /* ========== SECTION COMMON ========== */
 .section { padding: 4rem 1.5rem; max-width: 1000px; margin: 0 auto; }
@@ -250,6 +240,16 @@ body {
 .about-card h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem; }
 .about-card p { font-size: 0.95rem; font-weight: 600; color: var(--text-dark); }
 .about-card .sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+.add-cal-btn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  margin-top: 0.6rem; padding: 0.3rem 0.8rem;
+  border-radius: 6px; font-size: 0.75rem; font-weight: 500;
+  color: var(--nav-blue); background: var(--pale-blue);
+  text-decoration: none; transition: all 0.2s; cursor: pointer;
+  border: none; font-family: var(--font-main);
+}
+.add-cal-btn:hover { background: var(--light-blue); color: var(--deep-blue); }
+.add-cal-btn svg { stroke: currentColor; }
 
 .about-desc {
   background: var(--white); border-radius: var(--card-radius);
@@ -529,11 +529,43 @@ body {
   .form-row { grid-template-columns: 1fr; }
   .hero { padding: 7rem 1rem 3rem; min-height: 500px; }
   .hero-meta { flex-direction: column; align-items: center; }
-  .agenda-table-wrap { overflow-x: auto; }
-  .agenda-table { min-width: 680px; }
-  .countdown-boxes { gap: 0.6rem; }
-  .countdown-box .num { font-size: 1.5rem; }
   .form-container { padding: 1.5rem; }
+
+  /* Agenda: card layout on mobile */
+  .agenda-table-wrap { overflow: visible; }
+  .agenda-table { min-width: 0; }
+  .agenda-table thead { display: none; }
+  .agenda-table tbody { display: flex; flex-direction: column; gap: 0.6rem; }
+  .agenda-table tr {
+    display: flex; flex-direction: column;
+    background: var(--white); border-radius: 12px;
+    padding: 1rem; border-left: 3px solid var(--nav-blue);
+    box-shadow: 0 1px 6px rgba(26,93,153,0.06);
+  }
+  .agenda-table tr:hover { background: var(--white); }
+  .agenda-table tr.break-row {
+    border-left-color: var(--warm-gold);
+    background: var(--pale-gold);
+    padding: 0.8rem 1rem;
+  }
+  .agenda-table td {
+    padding: 0; border-bottom: none;
+  }
+  .agenda-table .time-cell {
+    width: auto; font-size: 0.8rem; color: var(--nav-blue);
+    margin-bottom: 0.3rem;
+  }
+  .agenda-table .topic-title { font-size: 0.95rem; }
+  .agenda-table .speaker-info,
+  .agenda-table .chair-info {
+    font-size: 0.8rem; margin-top: 0.3rem; color: var(--text-muted);
+  }
+  /* Hide empty cells on mobile */
+  .agenda-table td:empty { display: none; }
+  /* Break row: show only the content cell */
+  .agenda-table tr.break-row td[colspan] {
+    font-style: normal; color: var(--text-body); font-size: 0.88rem;
+  }
 }
 </style>
 </head>
@@ -561,46 +593,33 @@ body {
 <section class="hero">
   <div class="hero-particles" id="particles"></div>
   <div class="hero-content">
-    <div class="hero-badge"><span class="ico" style="font-size:1.1em;margin-right:0.3em"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>2026年8月15日（六）</div>
-    <p class="hero-org">台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會</p>
-    <h1 class="hero-theme">在高壓醫療中成為<br>不被<span class="highlight">壓垮</span>的教育者<br>重塑教師韌性，邁向醫學教育未來</h1>
-    <div class="hero-links">
-      <a href="https://sub.chimei.org.tw/TSMCSD/index.php/news/359-2026" target="_blank" class="hero-link-btn">
-        <span class="ico" style="font-size:1.1em"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
-        海報論文徵稿
-      </a>
-      <a href="https://sub.chimei.org.tw/TSMCSD/index.php/news/358-2026-osce" target="_blank" class="hero-link-btn">
-        <span class="ico" style="font-size:1.1em"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
-        OSCE教案甄選
-      </a>
-    </div>
+    <p class="hero-org">2026年會員大會暨學術研討會</p>
+    <h1 class="hero-theme">在高壓醫療中成為<br>不被<span class="highlight">壓垮</span>的教育者<br>重塑教師韌性，邁向醫學教育的未來</h1>
     <div class="hero-meta">
       <div class="hero-meta-item">
         <div class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-        <div>2026年8月15日（六）08:00 – 15:30</div>
+        <div>2026年8月15日（六）</div>
       </div>
       <div class="hero-meta-item">
         <div class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.75-7-11a7 7 0 1 1 14 0c0 5.25-7 11-7 11z"/><circle cx="12" cy="10" r="3"/></svg></div>
-        <div>奇美醫院 第五醫療大樓 5F 國際會議廳</div>
+        <div>奇美醫院國際會議廳</div>
       </div>
     </div>
     <a href="#register" class="hero-cta"><span class="ico" style="font-size:1.2em;margin-right:0.3em"><svg viewBox="0 0 24 24"><path d="M17 3l4 4L7 21H3v-4L17 3z"/></svg></span>立即報名</a>
   </div>
 </section>
 
-<!-- ===== COUNTDOWN ===== -->
-<section class="countdown-section">
-  <p class="countdown-label">距離活動</p>
-  <div class="countdown-boxes">
-    <div class="countdown-box"><div class="num" id="cd-days">--</div><div class="unit">天</div></div>
-    <div class="countdown-box"><div class="num" id="cd-hours">--</div><div class="unit">時</div></div>
-    <div class="countdown-box"><div class="num" id="cd-mins">--</div><div class="unit">分</div></div>
-    <div class="countdown-box"><div class="num" id="cd-secs">--</div><div class="unit">秒</div></div>
-  </div>
-</section>
-
 <!-- ===== ABOUT ===== -->
 <section class="section" id="about">
+  <!-- Subtle countdown -->
+  <div class="countdown-inline">
+    <span class="countdown-inline-label">距離活動還有</span>
+    <span class="countdown-inline-num" id="cd-days">--</span><span class="countdown-inline-unit">天</span>
+    <span class="countdown-inline-num" id="cd-hours">--</span><span class="countdown-inline-unit">時</span>
+    <span class="countdown-inline-num" id="cd-mins">--</span><span class="countdown-inline-unit">分</span>
+    <span class="countdown-inline-num" id="cd-secs">--</span><span class="countdown-inline-unit">秒</span>
+  </div>
+
   <p class="section-label">ABOUT THE EVENT</p>
   <h2 class="section-title">活動資訊</h2>
   <div class="section-divider"></div>
@@ -609,8 +628,12 @@ body {
     <div class="about-card">
       <div class="card-icon date"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--mist-blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
       <h3>日期</h3>
-      <p>115年8月15日（星期六）</p>
+      <p>2026年8月15日（星期六）</p>
       <p class="sub">08:00 – 15:30</p>
+      <a href="#" class="add-cal-btn" onclick="addToCalendar(event)">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        加入行事曆
+      </a>
     </div>
     <div class="about-card">
       <div class="card-icon place"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--warm-gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.75-7-11a7 7 0 1 1 14 0c0 5.25-7 11-7 11z"/><circle cx="12" cy="10" r="3"/></svg></div>
@@ -621,8 +644,8 @@ body {
     <div class="about-card">
       <div class="card-icon target"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--coral)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
       <h3>對象</h3>
-      <p>醫療相關人員</p>
-      <p class="sub">臨床教師、醫事人員</p>
+      <p>對醫學教育有興趣者</p>
+      <p class="sub">臨床教師、醫事人員及相關領域人員</p>
     </div>
   </div>
 
@@ -647,7 +670,7 @@ body {
         <thead>
           <tr>
             <th>時間</th>
-            <th>議程主題</th>
+            <th>主題</th>
             <th>講師</th>
             <th>座長</th>
           </tr>
@@ -662,7 +685,7 @@ body {
           <tr>
             <td class="time-cell">08:30 – 08:40</td>
             <td><span class="topic-title">開幕致詞</span></td>
-            <td><div class="speaker-info">蘇慧真 理事長</div></td>
+            <td></td>
             <td></td>
           </tr>
           <tr>
@@ -671,10 +694,10 @@ body {
               <span class="topic-title">當壓力成為日常：<br>醫療現場的心理韌性練習</span>
             </td>
             <td>
-              <div class="speaker-info">蘇益賢 臨床心理師<br>初色心理治療所<br>榮譽副所長</div>
+              <div class="speaker-info">蘇益賢 臨床心理師<br>初色心理治療所</div>
             </td>
             <td>
-              <div class="chair-info">蘇慧真 理事長 /<br>奇美醫院藥劑部部長兼教學部代理部長</div>
+              <div class="chair-info">蘇慧真 理事長 /<br>奇美醫院藥劑部部長兼代理教學部部長</div>
             </td>
           </tr>
           <tr class="break-row">
@@ -687,7 +710,7 @@ body {
               <span class="topic-title">能力導向醫學教育中的教學設計：<br>從課程架構到臨床實踐</span>
             </td>
             <td>
-              <div class="speaker-info">陳志弘 主任<br>高長教師培育中心</div>
+              <div class="speaker-info">陳志弘 主任<br>高雄長庚紀念醫院教師培育中心</div>
             </td>
             <td>
               <div class="chair-info">楊浚銘 常務理事 /<br>奇美醫院神經內科主任</div>
@@ -838,7 +861,7 @@ body {
         <div class="reg-notice-contact">
           <h4>
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            報名疑問聯繫
+            聯絡窗口
           </h4>
           <p class="contact-name">楊依玲 小姐</p>
           <p class="contact-detail">
@@ -851,7 +874,7 @@ body {
           </p>
           <div class="contact-orgs">
             <span>主辦｜台灣醫事聯合臨床技能發展學會</span>
-            <span>共辦｜奇美醫療財團法人奇美醫院</span>
+            <span>主辦｜奇美醫療財團法人奇美醫院</span>
           </div>
         </div>
 
@@ -995,7 +1018,7 @@ body {
     <div class="transport-card">
       <div class="t-icon"><svg viewBox="0 0 24 24"><path d="M4 11V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5"/><path d="M3 11h18l-1 8H4l-1-8z"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/><path d="M9 4l-2-2"/><path d="M15 4l2-2"/><line x1="12" y1="4" x2="12" y2="11"/></svg></div>
       <h3>高 鐵</h3>
-      <p>搭乘高鐵至<strong>台南站</strong>，轉乘 <strong>H62 高鐵快捷公車（奇美線）</strong>至奇美醫院。</p>
+      <p>搭乘高鐵至<strong>台南站</strong>，<br>1. 轉乘台鐵（沙崙站→大橋站），<br>　　再步行至奇美醫院<br>2. 轉乘 <strong>H62 高鐵快捷公車<br>　　（奇美線）</strong>至奇美醫院</p>
     </div>
     <div class="transport-card">
       <div class="t-icon"><svg viewBox="0 0 24 24"><path d="M5 17h14v-5H5v5z"/><path d="M19 12l-2-5H7L5 12"/><circle cx="7.5" cy="17" r="1.5"/><circle cx="16.5" cy="17" r="1.5"/><line x1="5" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="19" y2="12"/><path d="M5 17v2h3v-2"/><path d="M16 17v2h3v-2"/></svg></div>
@@ -1039,6 +1062,33 @@ function updateCountdown() {
 }
 updateCountdown();
 setInterval(updateCountdown, 1000);
+
+// Add to Calendar (generates .ics file download)
+function addToCalendar(e) {
+  e.preventDefault();
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//TSMCSD//2026 Annual Conference//ZH',
+    'BEGIN:VEVENT',
+    'DTSTART:20260815T080000',
+    'DTEND:20260815T153000',
+    'SUMMARY:台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會',
+    'DESCRIPTION:在高壓醫療中成為不被壓垮的教育者——重塑教師韌性，邁向醫學教育的未來',
+    'LOCATION:奇美醫院 第五醫療大樓 5F 國際會議廳（台南市永康區中華路901號）',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'TSMCSD-2026-Annual-Conference.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 // Particles
 (function() {
