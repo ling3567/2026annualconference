@@ -564,6 +564,14 @@ body {
   .agenda-table .chair-info {
     font-size: 0.8rem; margin-top: 0.3rem; color: var(--text-muted);
   }
+  .agenda-table .speaker-info::before {
+    content: '講師｜';
+    font-weight: 600; color: var(--nav-blue); font-size: 0.75rem;
+  }
+  .agenda-table .chair-info::before {
+    content: '座長｜';
+    font-weight: 600; color: var(--warm-gold); font-size: 0.75rem;
+  }
   /* Hide empty cells on mobile */
   .agenda-table td:empty { display: none; }
   /* Break row: show only the content cell */
@@ -985,6 +993,10 @@ body {
               <label class="radio-option">
                 <input type="radio" name="meal" value="素">
                 <span class="radio-label"><span class="ico" style="font-size:1.1em;margin-right:0.3em;color:var(--teal-blue)"><svg viewBox="0 0 24 24"><path d="M7 20.5C7 12 12 7 20 5c-3 4-4 8-4 12"/><path d="M7 20.5c0-5 3-10 8-13"/><path d="M7 20.5S3 17 3 13c0-3 2.5-5 5-5 1.5 3 0 7-1 12.5z"/></svg></span>素食</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="meal" value="不用餐">
+                <span class="radio-label"><span class="ico" style="font-size:1.1em;margin-right:0.3em;color:var(--text-muted)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></span>不用餐</span>
               </label>
             </div>
           </div>
