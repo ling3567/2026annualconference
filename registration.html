@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026 台灣醫事聯合臨床技能發展學會 會員大會暨學術研討會 | 報名</title>
+<title>台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會 | 報名</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
   --deep-blue: #1a3a5c;
-  --medium-blue: #2c5f8a;
+  --nav-blue: #1A5D99;
+  --medium-blue: #2c6fA0;
   --mist-blue: #6a9ec0;
   --light-blue: #a8cfea;
   --pale-blue: #d6e9f5;
@@ -25,7 +26,7 @@
   --text-dark: #1a2a3a;
   --text-body: #2c3e50;
   --text-muted: #6b7c8d;
-  --card-shadow: 0 4px 20px rgba(26,58,92,0.1);
+  --card-shadow: 0 4px 20px rgba(26,93,153,0.08);
   --card-radius: 16px;
   --btn-radius: 28px;
   --font-main: 'Noto Sans TC', 'Microsoft JhengHei', '微軟正黑體', sans-serif;
@@ -43,9 +44,9 @@ body {
 /* ========== HEADER / NAV ========== */
 .site-header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-  background: rgba(26,58,92,0.95);
+  background: rgba(26,93,153,0.95);
   backdrop-filter: blur(10px);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 12px rgba(26,93,153,0.2);
   transition: background 0.3s;
 }
 .header-inner {
@@ -58,11 +59,10 @@ body {
   color: var(--white); font-weight: 700; font-size: 0.95rem;
   text-decoration: none;
 }
-.header-logo .logo-circle {
+.header-logo .logo-img {
   width: 36px; height: 36px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--warm-gold), var(--light-gold));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.7rem; color: var(--deep-blue); font-weight: 900;
+  object-fit: contain; background: rgba(255,255,255,0.95);
+  padding: 2px;
 }
 .nav-toggle { display: none; background: none; border: none; color: var(--white); font-size: 1.5rem; cursor: pointer; }
 .main-nav { display: flex; gap: 0; }
@@ -196,7 +196,7 @@ body {
 
 /* ========== COUNTDOWN ========== */
 .countdown-section {
-  background: var(--deep-blue);
+  background: var(--nav-blue);
   color: var(--white);
   padding: 1.5rem;
   text-align: center;
@@ -265,7 +265,7 @@ body {
 }
 .agenda-table { width: 100%; border-collapse: collapse; }
 .agenda-table th {
-  background: var(--deep-blue); color: var(--white);
+  background: var(--nav-blue); color: var(--white);
   padding: 0.9rem 1rem; font-size: 0.85rem; font-weight: 600;
   text-align: left;
 }
@@ -277,7 +277,7 @@ body {
 .agenda-table tr:last-child td { border-bottom: none; }
 .agenda-table tr:hover { background: rgba(168,207,234,0.08); }
 .agenda-table .time-cell {
-  white-space: nowrap; font-weight: 600; color: var(--medium-blue);
+  white-space: nowrap; font-weight: 600; color: var(--nav-blue);
   width: 120px;
 }
 .agenda-table .break-row { background: var(--pale-gold); }
@@ -286,36 +286,62 @@ body {
 .agenda-table .speaker-info { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem; }
 .agenda-table .chair-info { font-size: 0.82rem; color: var(--text-muted); }
 
-/* ========== REG INFO ========== */
-.reg-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-.reg-info-card {
+/* ========== REG NOTICE (consolidated) ========== */
+.reg-notice-card {
   background: var(--white); border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow); padding: 1.8rem;
+  box-shadow: var(--card-shadow); overflow: hidden;
 }
-.reg-info-card h3 {
-  font-size: 1rem; font-weight: 700; color: var(--deep-blue);
-  border-left: 4px solid var(--warm-gold); padding-left: 0.8rem;
-  margin-bottom: 1rem;
+.reg-notice-grid {
+  display: grid; grid-template-columns: 1fr 280px;
 }
-.reg-info-card ul { list-style: none; }
-.reg-info-card li {
-  padding: 0.5rem 0; font-size: 0.9rem;
-  border-bottom: 1px solid rgba(26,58,92,0.05);
-  display: flex; align-items: flex-start; gap: 0.5rem;
-}
-.reg-info-card li:last-child { border-bottom: none; }
-.reg-info-card li .bullet {
-  flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--mist-blue); margin-top: 0.55rem;
-}
-.reg-deadline {
+.reg-notice-main { padding: 1.8rem 2rem; }
+.reg-notice-deadline {
   display: inline-flex; align-items: center; gap: 0.5rem;
-  background: linear-gradient(135deg, var(--coral), var(--warm-gold));
-  color: var(--white); padding: 0.6rem 1.2rem; border-radius: 12px;
-  font-weight: 700; font-size: 0.95rem; margin-top: 0.8rem;
+  background: linear-gradient(135deg, var(--pale-gold), var(--warm-yellow));
+  color: var(--deep-blue); padding: 0.6rem 1.2rem; border-radius: 10px;
+  font-size: 0.9rem; margin-bottom: 1.2rem;
+}
+.reg-notice-deadline svg { flex-shrink: 0; stroke: var(--deep-blue); }
+.reg-notice-items { display: flex; flex-direction: column; gap: 0.7rem; }
+.reg-notice-item {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  font-size: 0.9rem; color: var(--text-body); line-height: 1.6;
+}
+.reg-notice-item svg { flex-shrink: 0; margin-top: 0.15rem; }
+
+.reg-notice-contact {
+  background: var(--ice-blue); padding: 1.8rem 1.5rem;
+  border-left: 1px solid var(--pale-blue);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.reg-notice-contact h4 {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.85rem; color: var(--nav-blue); font-weight: 600;
+  margin-bottom: 0.8rem; letter-spacing: 0.05em;
+}
+.reg-notice-contact h4 svg { stroke: var(--nav-blue); }
+.contact-name {
+  font-size: 0.95rem; font-weight: 600; color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+.contact-detail {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.85rem; margin-bottom: 0.3rem;
+}
+.contact-detail svg { flex-shrink: 0; stroke: var(--mist-blue); }
+.contact-detail a { color: var(--text-body); text-decoration: none; }
+.contact-detail a:hover { color: var(--nav-blue); }
+.contact-orgs {
+  margin-top: 1rem; padding-top: 0.8rem;
+  border-top: 1px solid var(--pale-blue);
+  display: flex; flex-direction: column; gap: 0.2rem;
+}
+.contact-orgs span {
+  font-size: 0.78rem; color: var(--text-muted); line-height: 1.5;
 }
 
 /* ========== SUBMISSIONS ========== */
+.submission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 .submission-card {
   background: var(--white); border-radius: var(--card-radius);
   box-shadow: var(--card-shadow); padding: 2rem; text-align: center;
@@ -325,7 +351,7 @@ body {
 }
 .submission-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(26,58,92,0.15);
+  box-shadow: 0 8px 30px rgba(26,93,153,0.15);
   border-color: var(--mist-blue);
 }
 .submission-icon { margin-bottom: 1rem; }
@@ -351,7 +377,7 @@ body {
 .form-container {
   max-width: 720px; margin: 0 auto;
   background: var(--white); border-radius: var(--card-radius);
-  box-shadow: 0 8px 40px rgba(26,58,92,0.12);
+  box-shadow: 0 8px 40px rgba(26,93,153,0.12);
   padding: 2.5rem;
 }
 .form-container h2 {
@@ -423,13 +449,13 @@ body {
 .form-submit {
   display: block; width: 100%; margin-top: 2rem;
   padding: 1rem; border: none; border-radius: var(--btn-radius);
-  background: linear-gradient(135deg, var(--deep-blue), var(--teal-blue));
+  background: linear-gradient(135deg, var(--nav-blue), var(--teal-blue));
   color: var(--white); font-size: 1.1rem; font-weight: 700;
   cursor: pointer; font-family: var(--font-main);
   transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(26,58,92,0.25);
+  box-shadow: 0 4px 15px rgba(26,93,153,0.25);
 }
-.form-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26,58,92,0.35); }
+.form-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26,93,153,0.35); }
 .form-submit:active { transform: translateY(0); }
 
 .form-note {
@@ -478,29 +504,10 @@ body {
 }
 .map-wrap iframe { width: 100%; height: 100%; border: none; }
 
-/* ========== CONTACT / FOOTER ========== */
-.contact-section {
-  background: var(--deep-blue);
-  color: var(--white); padding: 3rem 1.5rem; text-align: center;
-}
-.contact-section .section-title { color: var(--white); }
-.contact-grid {
-  max-width: 800px; margin: 0 auto;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
-  text-align: left;
-}
-.contact-block h3 {
-  font-size: 0.85rem; color: var(--light-gold);
-  letter-spacing: 0.15em; margin-bottom: 0.8rem;
-}
-.contact-block p, .contact-block a {
-  font-size: 0.9rem; color: rgba(255,255,255,0.8);
-  text-decoration: none; line-height: 1.8;
-}
-.contact-block a:hover { color: var(--light-gold); }
+/* ========== FOOTER ========== */
 
 .site-footer {
-  background: #0f2235;
+  background: #0e3460;
   color: rgba(255,255,255,0.4);
   text-align: center; padding: 1.2rem; font-size: 0.78rem;
 }
@@ -510,14 +517,15 @@ body {
   .main-nav { 
     display: none; flex-direction: column;
     position: absolute; top: 100%; left: 0; right: 0;
-    background: rgba(26,58,92,0.98); padding: 1rem;
+    background: rgba(26,93,153,0.98); padding: 1rem;
   }
   .main-nav.open { display: flex; }
   .nav-toggle { display: block; }
   .about-grid { grid-template-columns: 1fr; }
-  .reg-info-grid { grid-template-columns: 1fr; }
+  .submission-grid { grid-template-columns: 1fr; }
+  .reg-notice-grid { grid-template-columns: 1fr; }
+  .reg-notice-contact { border-left: none; border-top: 1px solid var(--pale-blue); }
   .transport-grid { grid-template-columns: 1fr; }
-  .contact-grid { grid-template-columns: 1fr; text-align: center; }
   .form-row { grid-template-columns: 1fr; }
   .hero { padding: 7rem 1rem 3rem; min-height: 500px; }
   .hero-meta { flex-direction: column; align-items: center; }
@@ -535,7 +543,7 @@ body {
 <header class="site-header">
   <div class="header-inner">
     <a href="#" class="header-logo">
-      <div class="logo-circle">TSMCSD</div>
+      <img src="https://raw.githubusercontent.com/ling3567/2026annualconference/main/images/TSMCSD-logo.png" alt="TSMCSD" class="logo-img">
       <span>台灣醫事聯合臨床技能發展學會</span>
     </a>
     <button class="nav-toggle" onclick="document.querySelector('.main-nav').classList.toggle('open')" aria-label="選單"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
@@ -543,10 +551,8 @@ body {
       <a href="#about">活動資訊</a>
       <a href="#agenda">活動議程</a>
       <a href="#submissions">投稿專區</a>
-      <a href="#reg-info">報名資訊</a>
-      <a href="#register">立即報名</a>
+      <a href="#register">報名專區</a>
       <a href="#transport">交通資訊</a>
-      <a href="#contact">聯絡資訊</a>
     </nav>
   </div>
 </header>
@@ -556,7 +562,7 @@ body {
   <div class="hero-particles" id="particles"></div>
   <div class="hero-content">
     <div class="hero-badge"><span class="ico" style="font-size:1.1em;margin-right:0.3em"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>2026年8月15日（六）</div>
-    <p class="hero-org">2026 會員大會暨學術研討會</p>
+    <p class="hero-org">台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會</p>
     <h1 class="hero-theme">在高壓醫療中成為<br>不被<span class="highlight">壓垮</span>的教育者<br>重塑教師韌性，邁向醫學教育未來</h1>
     <div class="hero-links">
       <a href="https://sub.chimei.org.tw/TSMCSD/index.php/news/359-2026" target="_blank" class="hero-link-btn">
@@ -761,7 +767,7 @@ body {
   <h2 class="section-title">投稿專區</h2>
   <div class="section-divider"></div>
 
-  <div class="reg-info-grid">
+  <div class="submission-grid">
     <a href="https://sub.chimei.org.tw/TSMCSD/index.php/news/359-2026" target="_blank" class="submission-card">
       <div class="submission-icon">
         <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--mist-blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -790,43 +796,74 @@ body {
   </div>
 </section>
 
-<!-- ===== REG INFO ===== -->
-<section class="section" id="reg-info">
-  <p class="section-label">REGISTRATION</p>
-  <h2 class="section-title">報名資訊</h2>
-  <div class="section-divider"></div>
-
-  <div class="reg-info-grid">
-    <div class="reg-info-card">
-      <h3>學分申請</h3>
-      <ul>
-        <li><span class="bullet"></span><span>衛生福利部各醫事人員繼續教育積分申請中</span></li>
-      </ul>
-      <h3 style="margin-top:1.5rem;">報名截止</h3>
-      <div class="reg-deadline"><span class="ico" style="font-size:1.1em;margin-right:0.3em"><svg viewBox="0 0 24 24" stroke="currentColor"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h-6v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/><line x1="8" y1="2" x2="16" y2="2"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></span>請於 8/5（三）前完成報名</div>
-    </div>
-    <div class="reg-info-card">
-      <h3>注意事項</h3>
-      <ul>
-        <li><span class="bullet"></span><span>交通停車請自理，並請自行攜帶環保杯。</span></li>
-        <li><span class="bullet"></span><span>本會會員備有午餐餐盒，報名時請選擇葷素。</span></li>
-        <li><span class="bullet"></span><span>本活動若因不可抗力之因素，保有修改、取消及延期之權利，並以 E-mail 通知。</span></li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- ===== REGISTRATION FORM ===== -->
+<!-- ===== REGISTRATION: 報名專區（整合報名須知 + 表單 + 聯絡） ===== -->
 <section class="form-section" id="register">
   <div style="max-width: 1000px; margin: 0 auto;">
     <p class="section-label">REGISTRATION</p>
-    <h2 class="section-title" style="margin-bottom: 0.3rem;">立即報名</h2>
-    <p style="text-align:center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">
-      報名截止：115年8月5日（三），請把握時間！
-    </p>
+    <h2 class="section-title" style="margin-bottom: 0.3rem;">報名專區</h2>
+    <div class="section-divider"></div>
 
-    <div class="form-container">
+    <!-- 報名須知卡片 -->
+    <div class="reg-notice-card">
+      <div class="reg-notice-grid">
+
+        <!-- 左欄：截止日 + 學分 + 注意事項 -->
+        <div class="reg-notice-main">
+          <div class="reg-notice-deadline">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>報名截止：<strong>115年8月5日（三）</strong></span>
+          </div>
+
+          <div class="reg-notice-items">
+            <div class="reg-notice-item">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--nav-blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>
+              <span>衛生福利部各醫事人員繼續教育積分申請中</span>
+            </div>
+            <div class="reg-notice-item">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--nav-blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="12" y1="9" x2="12" y2="21"/></svg>
+              <span>本會會員備有午餐餐盒，報名時請選擇葷素</span>
+            </div>
+            <div class="reg-notice-item">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--nav-blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>交通停車請自理，並請自行攜帶環保杯</span>
+            </div>
+            <div class="reg-notice-item">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--nav-blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>本活動若因不可抗力因素，保有修改、取消及延期之權利，並以 E-mail 通知</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右欄：聯絡窗口 -->
+        <div class="reg-notice-contact">
+          <h4>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            報名疑問聯繫
+          </h4>
+          <p class="contact-name">楊依玲 小姐</p>
+          <p class="contact-detail">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <a href="tel:+886-6-2812811,57426">06-2812811 #57426</a>
+          </p>
+          <p class="contact-detail">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>
+            <a href="mailto:tsmcsd2018@gmail.com">tsmcsd2018@gmail.com</a>
+          </p>
+          <div class="contact-orgs">
+            <span>主辦｜台灣醫事聯合臨床技能發展學會</span>
+            <span>共辦｜奇美醫療財團法人奇美醫院</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 報名表單 -->
+    <div class="form-container" style="margin-top: 2rem;">
       <div id="form-area">
+        <h3 style="text-align:center; font-size:1.2rem; color:var(--deep-blue); margin-bottom: 0.3rem;">填寫報名資料</h3>
+        <p style="text-align:center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.8rem;">標示 <span style="color:var(--coral);">*</span> 為必填欄位</p>
+
         <div class="form-group">
           <label class="form-label">姓名 <span class="required">*</span></label>
           <input type="text" class="form-input" id="f-name" placeholder="請輸入姓名" required>
@@ -926,10 +963,6 @@ body {
           </div>
         </div>
 
-        <p class="form-note">
-          報名送出後，主辦單位將進行資格確認，並以 Email 通知報名結果，請留意信件通知。
-        </p>
-
         <button class="form-submit" onclick="submitForm()">提交報名</button>
       </div>
 
@@ -976,31 +1009,10 @@ body {
   </div>
 </section>
 
-<!-- ===== CONTACT ===== -->
-<section class="contact-section" id="contact">
-  <p class="section-label" style="color: var(--light-gold);">ORGANIZER & CONTACT</p>
-  <h2 class="section-title" style="color: var(--white);">聯絡資訊</h2>
-  <div class="section-divider" style="margin-bottom: 2rem;"></div>
-
-  <div class="contact-grid">
-    <div class="contact-block">
-      <h3>主辦單位</h3>
-      <p>台灣醫事聯合臨床技能發展學會</p>
-      <p>奇美醫療財團法人奇美醫院</p>
-    </div>
-    <div class="contact-block">
-      <h3>聯絡窗口</h3>
-      <p>楊依玲 小姐</p>
-      <p><span class="ico" style="font-size:1em;margin-right:0.3em"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span><a href="tel:+886-6-2812811,57426">06-2812811 #57426</a></p>
-      <p><span class="ico" style="font-size:1em;margin-right:0.3em"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg></span><a href="mailto:tsmcsd2018@gmail.com">tsmcsd2018@gmail.com</a></p>
-    </div>
-  </div>
-</section>
-
 <!-- ===== FOOTER ===== -->
 <footer class="site-footer">
-  2026 台灣醫事聯合臨床技能發展學會 會員大會暨學術研討會 ｜ 115年8月15日（週六）· 奇美醫院 第五醫療大樓 5F 國際會議廳<br>
-  © 2026 台灣醫事聯合臨床技能發展學會 · All rights reserved.
+  2026年會員大會暨學術研討會<br>
+  © 台灣醫事聯合臨床技能發展學會 · All rights reserved.
 </footer>
 
 <script>
@@ -1171,9 +1183,9 @@ document.querySelectorAll('.main-nav a').forEach(a => {
 window.addEventListener('scroll', () => {
   const header = document.querySelector('.site-header');
   if (window.scrollY > 50) {
-    header.style.background = 'rgba(26,58,92,0.98)';
+    header.style.background = 'rgba(26,93,153,0.98)';
   } else {
-    header.style.background = 'rgba(26,58,92,0.95)';
+    header.style.background = 'rgba(26,93,153,0.95)';
   }
 });
 </script>
