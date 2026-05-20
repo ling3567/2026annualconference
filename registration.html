@@ -375,7 +375,7 @@ body {
   padding: 4rem 1.5rem;
 }
 .form-container {
-  max-width: 720px; margin: 0 auto;
+  max-width: 100%; margin: 0 auto;
   background: var(--white); border-radius: var(--card-radius);
   box-shadow: 0 8px 40px rgba(26,93,153,0.12);
   padding: 2.5rem;
@@ -498,6 +498,10 @@ body {
 }
 .transport-card h3 { font-size: 0.95rem; color: var(--deep-blue); margin-bottom: 0.5rem; }
 .transport-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+.transport-card .transport-options {
+  font-size: 0.82rem; color: var(--text-muted); line-height: 1.6;
+  margin-top: 0.3rem; padding-left: 0.2rem;
+}
 .map-wrap {
   border-radius: var(--card-radius); overflow: hidden;
   box-shadow: var(--card-shadow); height: 300px;
@@ -722,7 +726,7 @@ body {
               <span class="topic-title">事半功倍的教學：<br>AI工具在教案製作的應用</span>
             </td>
             <td>
-              <div class="speaker-info">邱俊文 副部主任<br>彰化基督教醫院<br>急診暨重症醫學部</div>
+              <div class="speaker-info">邱俊文 副部主任<br>彰化基督教醫院急診暨重症醫學部</div>
             </td>
             <td>
               <div class="chair-info">江惠英 常務理事 /<br>奇美醫院護理部副部長</div>
@@ -744,7 +748,7 @@ body {
               <span class="topic-title">從評量到信賴：OSCE、EPA與CCC連結<br>臨床能力培育與總結性能力評定</span>
             </td>
             <td>
-              <div class="speaker-info">張雅惠 主任<br>馬偕紀念醫院<br>藥劑部臨床藥學科</div>
+              <div class="speaker-info">張雅惠 主任<br>馬偕紀念醫院藥劑部臨床藥學科</div>
             </td>
             <td>
               <div class="chair-info">鄭奕帝 理事 /<br>中國醫藥大學附設醫院藥劑部主任</div>
@@ -760,10 +764,10 @@ body {
               <span class="topic-title">在高壓醫療環境中，<br>如何系統性支持臨床教師的學術發展</span>
             </td>
             <td>
-              <div class="speaker-info">張玉喆 教授<br>長庚醫學教育研究中心<br>副主任</div>
+              <div class="speaker-info">張玉喆 教授<br>長庚醫學教育研究中心副主任</div>
             </td>
             <td>
-              <div class="chair-info">郭進榮 名譽理事長 /<br>奇美醫院<br>教師培育中心主任</div>
+              <div class="chair-info">郭進榮 名譽理事長 /<br>奇美醫院教師培育中心主任</div>
             </td>
           </tr>
           <tr>
@@ -1012,18 +1016,20 @@ body {
   <div class="transport-grid">
     <div class="transport-card">
       <div class="t-icon"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="16" rx="2"/><line x1="4" y1="11" x2="20" y2="11"/><line x1="12" y1="3" x2="12" y2="11"/><circle cx="8" cy="15" r="1"/><circle cx="16" cy="15" r="1"/><path d="M6 19l-2 3"/><path d="M18 19l2 3"/></svg></div>
-      <h3>臺 鐵</h3>
-      <p>搭乘火車至<strong>大橋火車站</strong>，再步行至奇美醫院。</p>
+      <h3>臺鐵</h3>
+      <p>搭乘火車至<strong>大橋站</strong>，<br>步行約 10 分鐘至奇美醫院</p>
     </div>
     <div class="transport-card">
       <div class="t-icon"><svg viewBox="0 0 24 24"><path d="M4 11V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5"/><path d="M3 11h18l-1 8H4l-1-8z"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/><path d="M9 4l-2-2"/><path d="M15 4l2-2"/><line x1="12" y1="4" x2="12" y2="11"/></svg></div>
-      <h3>高 鐵</h3>
-      <p>搭乘高鐵至<strong>台南站</strong>，<br>1. 轉乘台鐵（沙崙站→大橋站），<br>　　再步行至奇美醫院<br>2. 轉乘 <strong>H62 高鐵快捷公車<br>　　（奇美線）</strong>至奇美醫院</p>
+      <h3>高鐵</h3>
+      <p>搭乘高鐵至<strong>台南站</strong>，再：</p>
+      <p class="transport-options">1. 轉乘台鐵（沙崙站→大橋站），<br>步行至奇美醫院</p>
+      <p class="transport-options">2. 轉乘 <strong>H62 高鐵快捷公車（奇美線）</strong>至奇美醫院</p>
     </div>
     <div class="transport-card">
       <div class="t-icon"><svg viewBox="0 0 24 24"><path d="M5 17h14v-5H5v5z"/><path d="M19 12l-2-5H7L5 12"/><circle cx="7.5" cy="17" r="1.5"/><circle cx="16.5" cy="17" r="1.5"/><line x1="5" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="19" y2="12"/><path d="M5 17v2h3v-2"/><path d="M16 17v2h3v-2"/></svg></div>
-      <h3>高速公路</h3>
-      <p>永康交流道下往台南市區 → 台1省道 → 中正南路 → 中華路 → 奇美醫院</p>
+      <h3>自行開車</h3>
+      <p>永康交流道下 → 台1省道 →<br>中正南路 → 中華路 → 奇美醫院</p>
     </div>
   </div>
 
@@ -1063,31 +1069,18 @@ function updateCountdown() {
 updateCountdown();
 setInterval(updateCountdown, 1000);
 
-// Add to Calendar (generates .ics file download)
+// Add to Calendar (opens Google Calendar directly)
 function addToCalendar(e) {
   e.preventDefault();
-  const icsContent = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//TSMCSD//2026 Annual Conference//ZH',
-    'BEGIN:VEVENT',
-    'DTSTART:20260815T080000',
-    'DTEND:20260815T153000',
-    'SUMMARY:台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會',
-    'DESCRIPTION:在高壓醫療中成為不被壓垮的教育者——重塑教師韌性，邁向醫學教育的未來',
-    'LOCATION:奇美醫院 第五醫療大樓 5F 國際會議廳（台南市永康區中華路901號）',
-    'END:VEVENT',
-    'END:VCALENDAR'
-  ].join('\r\n');
-  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'TSMCSD-2026-Annual-Conference.ics';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: '台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會',
+    dates: '20260815T000000Z/20260815T073000Z',  // UTC: 08:00-15:30 TWN
+    details: '在高壓醫療中成為不被壓垮的教育者——重塑教師韌性，邁向醫學教育的未來\n\n報名網頁：' + window.location.href,
+    location: '奇美醫院 第五醫療大樓 5F 國際會議廳（台南市永康區中華路901號）',
+    ctz: 'Asia/Taipei'
+  });
+  window.open('https://calendar.google.com/calendar/render?' + params.toString(), '_blank');
 }
 
 // Particles
