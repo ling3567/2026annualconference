@@ -282,8 +282,10 @@ br.mobile-break { display: none; }
   white-space: nowrap; font-weight: 600; color: var(--nav-blue);
   width: 120px;
 }
-.agenda-table .break-row { background: var(--pale-gold); }
+.agenda-table .break-row { background: transparent; }
 .agenda-table .break-row td { color: var(--text-muted); font-style: italic; }
+.agenda-table .lecture-row { background: rgba(214,233,245,0.35); }
+.agenda-table .lecture-row:hover { background: rgba(214,233,245,0.5); }
 .agenda-table .topic-title { font-weight: 600; color: var(--text-dark); }
 .agenda-table .speaker-info { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem; }
 .agenda-table .chair-info { font-size: 0.82rem; color: var(--text-muted); }
@@ -588,9 +590,14 @@ br.mobile-break { display: none; }
   }
   .agenda-table tr:hover { background: var(--white); }
   .agenda-table tr.break-row {
-    border-left-color: var(--warm-gold);
-    background: var(--pale-gold);
-    padding: 0.8rem 1rem;
+    border-left-color: transparent;
+    background: transparent;
+    padding: 0.6rem 1rem;
+    box-shadow: none;
+  }
+  .agenda-table tr.lecture-row {
+    background: rgba(214,233,245,0.3);
+    border-left-color: var(--nav-blue);
   }
   .agenda-table td {
     padding: 0; border-bottom: none;
@@ -742,7 +749,7 @@ br.mobile-break { display: none; }
             <td></td>
             <td></td>
           </tr>
-          <tr>
+          <tr class="lecture-row">
             <td class="time-cell">08:40 – 09:20</td>
             <td>
               <span class="topic-title">當壓力成為日常：<br>醫療現場的心理韌性練習</span>
@@ -758,7 +765,7 @@ br.mobile-break { display: none; }
             <td class="time-cell">09:20 – 09:40</td>
             <td colspan="3"><span class="ico" style="color:var(--warm-gold);font-size:1.1em;margin-right:0.3em"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></span>茶敘與交流</td>
           </tr>
-          <tr>
+          <tr class="lecture-row">
             <td class="time-cell">09:40 – 10:20</td>
             <td>
               <span class="topic-title">能力導向醫學教育中的教學設計：<br>從課程架構到臨床實踐</span>
@@ -770,7 +777,7 @@ br.mobile-break { display: none; }
               <div class="chair-info">楊浚銘 常務理事 /<br>奇美醫院神經內科主任</div>
             </td>
           </tr>
-          <tr>
+          <tr class="lecture-row">
             <td class="time-cell">10:20 – 11:00</td>
             <td>
               <span class="topic-title">事半功倍的教學：<br>AI工具在教案製作的應用</span>
@@ -792,7 +799,7 @@ br.mobile-break { display: none; }
             <td class="time-cell">12:00 – 13:30</td>
             <td colspan="3"><span class="ico" style="color:var(--warm-gold);font-size:1.1em;margin-right:0.3em"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="12" y1="9" x2="12" y2="21"/></svg></span>午餐休息（會員備有午餐餐盒）/ 12:30–13:30 入選海報論文觀賞及評選</td>
           </tr>
-          <tr>
+          <tr class="lecture-row">
             <td class="time-cell">13:30 – 14:10</td>
             <td>
               <span class="topic-title">從評量到信賴：OSCE、EPA與CCC連結<br>臨床能力培育與總結性能力評定</span>
@@ -808,7 +815,7 @@ br.mobile-break { display: none; }
             <td class="time-cell">14:10 – 14:30</td>
             <td colspan="3"><span class="ico" style="color:var(--warm-gold);font-size:1.1em;margin-right:0.3em"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></span>茶敘與交流</td>
           </tr>
-          <tr>
+          <tr class="lecture-row">
             <td class="time-cell">14:30 – 15:10</td>
             <td>
               <span class="topic-title">在高壓醫療環境中，<br>如何系統性支持臨床教師的學術發展</span>
