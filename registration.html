@@ -130,7 +130,6 @@ body {
 .hero-theme .highlight {
   color: var(--white);
 }
-br.mobile-break { display: none; }
 .hero-theme-sub {
   font-size: clamp(1.2rem, 3vw, 1.6rem);
   color: rgba(255,255,255,0.9);
@@ -567,7 +566,6 @@ br.mobile-break { display: none; }
   .form-row { grid-template-columns: 1fr; }
   .hero { padding: 7rem 1rem 3rem; min-height: 500px; }
   .hero-theme { font-size: clamp(1.4rem, 5.5vw, 2rem); }
-  .hero-theme br.mobile-break { display: block; }
   .hero-meta {
     flex-direction: column; align-items: center; gap: 0.6rem;
   }
@@ -631,12 +629,12 @@ br.mobile-break { display: none; }
 }
 </style>
 </head>
-<body>
+<body id="top">
 
 <!-- ===== HEADER ===== -->
 <header class="site-header">
   <div class="header-inner">
-    <a href="#" class="header-logo">
+    <a href="#top" class="header-logo">
       <img src="https://raw.githubusercontent.com/ling3567/2026annualconference/main/images/TSMCSD-logo.png" alt="TSMCSD" class="logo-img">
       <span>台灣醫事聯合臨床技能發展學會</span>
     </a>
@@ -656,7 +654,7 @@ br.mobile-break { display: none; }
   <div class="hero-particles" id="particles"></div>
   <div class="hero-content">
     <p class="hero-org">2026年會員大會暨學術研討會</p>
-    <h1 class="hero-theme">在高壓醫療中成為<br>不被<span class="highlight">壓垮</span>的教育者<br>重塑教師韌性<br class="mobile-break">邁向醫學教育的未來</h1>
+    <h1 class="hero-theme">在高壓醫療中成為<br>不被<span class="highlight">壓垮</span>的教育者<br>重塑教師韌性<br>邁向醫學教育的未來</h1>
     <div class="hero-meta">
       <div class="hero-meta-inner">
         <div class="hero-meta-item">
@@ -1008,6 +1006,7 @@ br.mobile-break { display: none; }
             <option value="聽力">聽力</option>
             <option value="物理治療">物理治療</option>
             <option value="職能治療">職能治療</option>
+            <option value="臨床心理">臨床心理</option>
             <option value="諮商心理">諮商心理</option>
             <option value="語言治療">語言治療</option>
             <option value="專科護理師">專科護理師</option>
