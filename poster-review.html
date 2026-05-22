@@ -853,7 +853,7 @@ body.cat-override-on .cat-override-cell:hover{
     <!-- 海報論文進度 -->
     <div id="dashPosterSection">
       <div class="sec">
-        <div class="sec-head"><h3>海報論文評審進度</h3><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">重新整理</button></div>
+        <div class="sec-head"><h3>海報論文評審進度</h3><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadDashboard()">資料載入</button></div>
         <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
           <th>編號</th><th>論文題目</th><th>類別</th><th>指派委員</th><th>已評/應評</th><th>平均分</th><th>推薦</th>
         </tr></thead><tbody id="dashBody"></tbody></table></div></div>
@@ -862,7 +862,7 @@ body.cat-override-on .cat-override-cell:hover{
     <!-- OSCE 進度 -->
     <div id="dashOsceSection" style="display:none">
       <div class="sec">
-        <div class="sec-head"><h3>OSCE 教案評審進度</h3><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadOsceDashboard()">重新整理</button></div>
+        <div class="sec-head"><h3>OSCE 教案評審進度</h3><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadOsceDashboard()">資料載入</button></div>
         <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
           <th>編號</th><th>教案主題</th><th>服務醫院</th><th>指派委員</th><th>已評/應評</th><th>平均分</th>
         </tr></thead><tbody id="osceDashBody"></tbody></table></div></div>
@@ -984,7 +984,7 @@ body.cat-override-on .cat-override-cell:hover{
           <input type="text" id="osceResultSearch" placeholder="搜尋教案/投稿單位…" style="padding:.4rem .7rem;border:1px solid #e2e8f0;border-radius:7px;font-size:.8rem;width:200px;font-family:inherit" oninput="filterOsceResults()">
           <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="collapseAllSubRows('osce')">縮合全部</button>
           <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('osce')">匯出 CSV</button>
-          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadOsceDashboard()">重新整理</button>
+          <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="loadOsceDashboard()">資料載入</button>
         </div>
       </div>
       <div class="sec-body"><div class="tbl-wrap"><table><thead><tr>
