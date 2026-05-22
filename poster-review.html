@@ -2083,6 +2083,14 @@ function renderStats(s){
 function renderDashTable(papers){
   const body=el('dashBody'); if(!body)return;
   if(!papers||!papers.length){body.innerHTML='<tr><td colspan="7" style="text-align:center;color:#718096;padding:2rem">尚無海報論文資料</td></tr>';return;}
+  // 前端重算 avgTotal（確保與評分結果頁一致）
+  papers.forEach(p=>{
+    try{
+      if(!Array.isArray(p.reviews)) p.reviews=[];
+      const vs=p.reviews.filter(r=>!r.rejected).map(r=>Number(r.total)).filter(v=>!isNaN(v));
+      p.avgTotal=vs.length>=1?calcFrontendSmartAvg(vs):null;
+    }catch(e){}
+  });
   body.innerHTML=papers.map(p=>{
     const assigned=assignments[p.id]||[];
     const done=p.reviews.length,total=assigned.length||0,pct=total?Math.round(done/total*100):0;
@@ -2537,6 +2545,14 @@ async function loadOsceDashboard(){
 function renderOsceDashTable(cases){
   const body=el('osceDashBody');if(!body)return;
   if(!cases||!cases.length){body.innerHTML='<tr><td colspan="6" style="text-align:center;color:#718096;padding:2rem">尚無 OSCE 教案資料</td></tr>';return;}
+  // 前端重算 avgTotal
+  cases.forEach(c=>{
+    try{
+      if(!Array.isArray(c.reviews)) c.reviews=[];
+      const vs=c.reviews.filter(r=>!r.rejected).map(r=>Number(r.total)).filter(v=>!isNaN(v));
+      c.avgTotal=vs.length>=1?calcFrontendSmartAvg(vs):null;
+    }catch(e){}
+  });
   body.innerHTML=cases.map(c=>{const assigned=osceAssignments[c.id]||[];const done=c.reviews.length,total=assigned.length||0,pct=total?Math.round(done/total*100):0,fc=done===0?'none':done>=total?'done':'part';return `<tr><td><span class="chip chip-blue">${esc(c.caseNo||'—')}</span></td><td style="max-width:260px;line-height:1.5">${esc(c.title)}</td><td style="font-size:.82rem">${esc(c.hospital||'—')}</td><td style="font-size:.85rem;color:#334155">${assigned.map(u=>rvName(u)).join('、')||'—'}</td><td><div class="sc-prog"><span>${done}/${total}</span><div class="sc-bar"><div class="sc-fill ${fc}" style="width:${pct}%"></div></div></div></td><td style="font-weight:600">${c.avgTotal!==null?c.avgTotal:'—'}</td></tr>`;}).join('');
 }
 
