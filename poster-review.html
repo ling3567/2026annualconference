@@ -2087,7 +2087,9 @@ function renderDashTable(papers){
   papers.forEach(p=>{
     try{
       if(!Array.isArray(p.reviews)) p.reviews=[];
-      const vs=p.reviews.filter(r=>!r.rejected).map(r=>Number(r.total)).filter(v=>!isNaN(v));
+      const vs=p.reviews
+        .filter(r=>!(r.rejected===true||r.rejected==='true'||r.rejected==='TRUE'||r.rejected==='1'))
+        .map(r=>Number(r.total)).filter(v=>!isNaN(v)&&v>0);
       p.avgTotal=vs.length>=1?calcFrontendSmartAvg(vs):null;
     }catch(e){}
   });
@@ -2549,7 +2551,9 @@ function renderOsceDashTable(cases){
   cases.forEach(c=>{
     try{
       if(!Array.isArray(c.reviews)) c.reviews=[];
-      const vs=c.reviews.filter(r=>!r.rejected).map(r=>Number(r.total)).filter(v=>!isNaN(v));
+      const vs=c.reviews
+        .filter(r=>!(r.rejected===true||r.rejected==='true'||r.rejected==='TRUE'||r.rejected==='1'))
+        .map(r=>Number(r.total)).filter(v=>!isNaN(v)&&v>0);
       c.avgTotal=vs.length>=1?calcFrontendSmartAvg(vs):null;
     }catch(e){}
   });
@@ -2618,7 +2622,7 @@ function renderOsceResultsTable(cases){
   // 前端重算 avgTotal（確保與詳細視窗一致）
   cases.forEach(cs=>{
     try{
-      const vs=cs.reviews.filter(r=>!r.rejected).map(r=>Number(r.total)).filter(v=>!isNaN(v));
+      const vs=cs.reviews.filter(r=>!(r.rejected===true||r.rejected==='true'||r.rejected==='TRUE'||r.rejected==='1')).map(r=>Number(r.total)).filter(v=>!isNaN(v)&&v>0);
       cs.avgTotal=vs.length>=1?calcFrontendSmartAvg(vs):null;
     }catch(e){}
   });
