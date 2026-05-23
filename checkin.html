@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026年會報到系統 — TSMCSD</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & VARIABLES ===== */
+:root {
+  --primary: #1A5D99;
+  --primary-dark: #134a7a;
+  --primary-light: #e8f0f8;
+  --accent: #d4a843;
+  --accent-light: #fdf6e3;
+  --success: #2e7d32;
+  --success-bg: #e8f5e9;
+  --warning: #e65100;
+  --warning-bg: #fff3e0;
+  --danger: #c62828;
+  --danger-bg: #ffebee;
+  --info: #0277bd;
+  --info-bg: #e1f5fe;
+  --bg: #f4f6f9;
+  --card: #ffffff;
+  --text: #1a2a3a;
+  --text-muted: #607d8b;
+  --border: #dce3ea;
+  --shadow: 0 2px 12px rgba(26,93,153,0.08);
+  --shadow-lg: 0 8px 32px rgba(26,93,153,0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  --transition: 0.2s ease;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+.app-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  padding: 0.8rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.app-header h1 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.stat-chip {
+  background: rgba(255,255,255,0.18);
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+}
+.stat-chip strong { font-weight: 700; }
+.btn-refresh {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background var(--transition);
+}
+.btn-refresh:hover { background: rgba(255,255,255,0.35); }
+
+/* ===== MAIN LAYOUT ===== */
+.main-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+}
+
+/* ===== SEARCH BAR ===== */
+.search-section {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 1.25rem;
+  position: sticky;
+  top: 52px;
+  z-index: 50;
+}
+.search-input-wrap {
+  position: relative;
+}
+.search-input-wrap .search-icon {
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+  opacity: 0.5;
+}
+#searchInput {
+  width: 100%;
+  padding: 0.75rem 0.8rem 0.75rem 2.5rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 1.05rem;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color var(--transition);
+}
+#searchInput:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(26,93,153,0.1);
+}
+#searchInput::placeholder { color: #b0bec5; }
+.search-results-hint {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 0.6rem;
+}
+
+/* ===== RESULT CARDS ===== */
+.result-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.person-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  overflow: hidden;
+  transition: all var(--transition);
+  box-shadow: var(--shadow);
+}
+.person-card:hover { box-shadow: var(--shadow-lg); }
+.person-card.checked-in {
+  border-color: var(--success);
+  background: linear-gradient(135deg, #f1f8f2 0%, var(--card) 100%);
+}
+
+.person-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  user-select: none;
+}
+.person-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+.person-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+.avatar-member { background: var(--primary); }
+.avatar-nonmember { background: #78909c; }
+.person-name-block { min-width: 0; }
+.person-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.person-org {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.person-badges {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.badge-member { background: var(--primary-light); color: var(--primary); }
+.badge-nonmember { background: #eceff1; color: #607d8b; }
+.badge-paid { background: var(--success-bg); color: var(--success); }
+.badge-unpaid { background: var(--warning-bg); color: var(--warning); }
+.badge-poster { background: #f3e5f5; color: #7b1fa2; }
+.badge-checkedin { background: var(--success-bg); color: var(--success); }
+
+/* ===== EXPANDED DETAIL ===== */
+.person-detail {
+  display: none;
+  border-top: 1px solid var(--border);
+  padding: 1.25rem;
+  background: #fafbfc;
+}
+.person-card.expanded .person-detail { display: block; }
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem 1.5rem;
+  margin-bottom: 1rem;
+}
+.detail-item { font-size: 0.85rem; }
+.detail-label {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-bottom: 0.1rem;
+}
+.detail-value { font-weight: 500; }
+
+/* ===== TODO CARDS ===== */
+.todo-section { margin-top: 1rem; }
+.todo-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.todo-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.todo-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.todo-card .todo-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+.todo-card.todo-success { background: var(--success-bg); color: #1b5e20; }
+.todo-card.todo-warning { background: var(--warning-bg); color: #bf360c; }
+.todo-card.todo-info { background: var(--info-bg); color: #01579b; }
+.todo-card.todo-accent { background: #f3e5f5; color: #4a148c; }
+.todo-card.todo-default { background: var(--primary-light); color: var(--primary-dark); }
+
+/* ===== CHECKIN BUTTON ===== */
+.checkin-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.btn-checkin {
+  background: var(--success);
+  color: white;
+  border: none;
+  padding: 0.65rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.btn-checkin:hover { background: #1b5e20; transform: translateY(-1px); }
+.btn-checkin:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-checkin.already-done { background: #b0bec5; cursor: default; }
+.btn-undo {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+  padding: 0.65rem 1.2rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-undo:hover { border-color: var(--danger); color: var(--danger); }
+
+/* ===== EMPTY / ERROR STATE ===== */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+.empty-state .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.empty-state p { font-size: 0.92rem; }
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.7rem 1.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.btn-primary:hover { background: var(--primary-dark); }
+
+/* ===== LOG ===== */
+.log-section { margin-top: 1.5rem; }
+.log-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+.log-list { display: flex; flex-direction: column; gap: 0.3rem; }
+.log-item {
+  font-size: 0.82rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.log-item .log-name { font-weight: 600; }
+.log-item .log-time { color: var(--text-muted); font-size: 0.78rem; }
+
+/* ===== LOADING ===== */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.85);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
+}
+.loading-overlay.show { display: flex; }
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #263238;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 500;
+  z-index: 300;
+  opacity: 0;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===== DATA UPDATE BANNER ===== */
+.update-banner {
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1rem;
+  font-size: 0.82rem;
+  color: #5d4037;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.update-banner button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  white-space: nowrap;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .app-header { padding: 0.6rem 0.8rem; }
+  .app-header h1 { font-size: 0.92rem; }
+  .stat-chip { font-size: 0.73rem; padding: 0.2rem 0.5rem; }
+  .search-section { padding: 1rem; top: 46px; }
+  #searchInput { font-size: 0.95rem; padding: 0.65rem 0.8rem 0.65rem 2.2rem; }
+  .person-header { padding: 0.8rem 1rem; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .main-content { padding: 1rem 0.5rem 3rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <h1>📋 2026年會報到系統</h1>
+  <div class="header-right">
+    <span class="stat-chip">報名 <strong id="statTotal">-</strong></span>
+    <span class="stat-chip">已報到 <strong id="statChecked">-</strong></span>
+    <span class="stat-chip">報到率 <strong id="statRate">-</strong></span>
+    <button class="btn-refresh" onclick="refreshData()" title="重新載入最新資料">🔄 重新整理</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main-content">
+  <!-- UPDATE BANNER (hidden by default) -->
+  <div class="update-banner" id="updateBanner" style="display:none;">
+    <span>📢 <span id="updateMsg"></span></span>
+    <button onclick="refreshData()">🔄 更新</button>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-section">
+    <div class="search-input-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="輸入姓名搜尋報到…" autocomplete="off" autofocus>
+    </div>
+    <div class="search-results-hint" id="searchHint">載入報名資料中…</div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="result-list" id="resultList"></div>
+
+  <!-- EMPTY -->
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="icon">🔍</div>
+    <p>找不到符合的報名人員</p>
+  </div>
+
+  <!-- LOG -->
+  <div class="log-section" id="logSection" style="display:none;">
+    <div class="log-title">📝 最近報到紀錄</div>
+    <div class="log-list" id="logList"></div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay show" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div style="font-size:0.9rem;color:var(--text-muted);">載入報名資料中…</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+//  ⚠️ 管理者設定：部署前請修改此 URL
+// ============================================================
+const CONFIG = {
+  // 報到系統 Apps Script 的 Web App URL
+  API_URL: 'https://script.google.com/macros/s/AKfycbzuUFvNb6xlXSkZuLVGmDMhOxQfXHQDFzYVymg2jgTByy028Me4WgKELudNjt7TmGoYiA/exec'
+};
+// ============================================================
+
+// ===== STATE =====
+let registrations = [];
+let posterWinners = [];     // [{name, boothNumber}]
+let creditProfessions = []; // [string]
+let checkinLog = [];
+let lastLoadTime = null;
+
+// ===== INIT =====
+(function boot() {
+  // Restore local checkin log
+  const log = sessionStorage.getItem('checkin_log');
+  if (log) {
+    try { checkinLog = JSON.parse(log); } catch(e) {}
+  }
+  loadData();
+})();
+
+// ===== DATA LOADING =====
+function loadData() {
+  showLoading(true);
+
+  if (CONFIG.API_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
+    showLoading(false);
+    showError('尚未設定 Apps Script URL', '請在 HTML 檔案中將 CONFIG.API_URL 改為實際的 Web App URL');
+    return;
+  }
+
+  fetch(CONFIG.API_URL + '?action=checkin_list', { redirect: 'follow' })
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(data => {
+      if (data.status === 'error') throw new Error(data.message);
+
+      registrations = data.registrations || [];
+      posterWinners = data.posterWinners || [];
+      creditProfessions = data.creditProfessions || [];
+
+      // Merge server checkin status + local log
+      checkinLog.forEach(log => {
+        const p = registrations.find(r => r.name === log.name && r.idNumber === log.idNumber);
+        if (p && !p.checkedIn) p.checkedIn = true;
+      });
+
+      lastLoadTime = new Date();
+      showLoading(false);
+      updateStats();
+      renderLog();
+      document.getElementById('searchHint').textContent = '請輸入報名人員姓名進行搜尋';
+
+      // Refresh existing search
+      const q = document.getElementById('searchInput').value.trim();
+      if (q) {
+        const results = registrations.filter(r => r.name && r.name.includes(q));
+        renderResults(results, q);
+      }
+
+      showToast(`✅ 資料已載入（${registrations.length} 位報名）`);
+    })
+    .catch(err => {
+      console.error('載入失敗:', err);
+      showLoading(false);
+
+      if (registrations.length > 0) {
+        // 有舊資料，顯示 banner 提示
+        showUpdateBanner('資料更新失敗：' + err.message + '，目前顯示上次載入的資料');
+      } else {
+        showError('無法載入報名資料', err.message);
+      }
+    });
+}
+
+function refreshData() {
+  document.getElementById('updateBanner').style.display = 'none';
+  loadData();
+}
+
+function showError(title, detail) {
+  document.getElementById('resultList').innerHTML = `
+    <div style="text-align:center;padding:3rem 1rem;">
+      <div style="font-size:2.5rem;margin-bottom:0.5rem;">⚠️</div>
+      <div style="font-size:1.05rem;font-weight:700;margin-bottom:0.5rem;">${title}</div>
+      <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.25rem;word-break:break-all;">${detail || ''}</div>
+      <button class="btn-primary" onclick="refreshData()">🔄 重新連線</button>
+    </div>
+  `;
+  document.getElementById('searchHint').textContent = '';
+}
+
+function showUpdateBanner(msg) {
+  document.getElementById('updateMsg').textContent = msg;
+  document.getElementById('updateBanner').style.display = 'flex';
+}
+
+// ===== SEARCH =====
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.trim();
+  if (q.length === 0) {
+    document.getElementById('resultList').innerHTML = '';
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('searchHint').textContent = '請輸入報名人員姓名進行搜尋';
+    return;
+  }
+  const results = registrations.filter(r => r.name && r.name.includes(q));
+  renderResults(results, q);
+});
+
+// ===== RENDER =====
+function renderResults(results, query) {
+  const container = document.getElementById('resultList');
+  const empty = document.getElementById('emptyState');
+  const hint = document.getElementById('searchHint');
+
+  if (results.length === 0) {
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    hint.textContent = `搜尋「${query}」— 找不到符合的報名人員`;
+    return;
+  }
+
+  empty.style.display = 'none';
+  hint.textContent = `搜尋「${query}」— 找到 ${results.length} 位`;
+
+  container.innerHTML = results.map((r, idx) => {
+    const isMember = r.membership === '本會個人會員';
+    const isPaid = r.feeStatus === '已繳';
+    const posterInfo = posterWinners.find(w => r.name && r.name === w.name);
+    const isPoster = !!posterInfo;
+    const needsCredit = creditProfessions.some(p => r.profession === p);
+    const isChecked = r.checkedIn;
+
+    // Badges
+    let badges = '';
+    if (isMember) {
+      badges += `<span class="badge badge-member">會員</span>`;
+      badges += isPaid
+        ? `<span class="badge badge-paid">已繳費</span>`
+        : `<span class="badge badge-unpaid">未繳費</span>`;
+    } else {
+      badges += `<span class="badge badge-nonmember">非會員</span>`;
+    }
+    if (isPoster) badges += `<span class="badge badge-poster">🏆 海報得獎</span>`;
+    if (isChecked) badges += `<span class="badge badge-checkedin">✓ 已報到</span>`;
+
+    // Todo items
+    let todos = '';
+
+    // 1. ID badge
+    todos += `<div class="todo-card todo-default"><span class="todo-icon">🪪</span><span>發放<strong>識別證</strong></span></div>`;
+
+    // 2. Member handling
+    if (isMember && isPaid) {
+      todos += `<div class="todo-card todo-success"><span class="todo-icon">🎁</span><span>發放<strong>會員禮品</strong></span></div>`;
+      if (r.meal && r.meal !== '不用餐') {
+        todos += `<div class="todo-card todo-success"><span class="todo-icon">🍽️</span><span>發放<strong>午餐餐券</strong>（${esc(r.meal)}）</span></div>`;
+      }
+    } else if (isMember && !isPaid) {
+      todos += `<div class="todo-card todo-warning"><span class="todo-icon">💰</span><span><strong>詢問是否現場繳費</strong>（會費尚未繳納，繳費後可領取會員禮品及午餐餐券）</span></div>`;
+    } else {
+      todos += `<div class="todo-card todo-info"><span class="todo-icon">👋</span><span><strong>指引入場</strong>（非會員）</span></div>`;
+    }
+
+    // 3. Poster award
+    if (isPoster) {
+      const booth = posterInfo.boothNumber ? `，張貼編號：<strong>${esc(posterInfo.boothNumber)}</strong>` : '';
+      todos += `<div class="todo-card todo-accent"><span class="todo-icon">📌</span><span><strong>指引海報張貼位置</strong>（優秀海報得獎者${booth}）</span></div>`;
+    }
+
+    // 4. Credit sign-in
+    if (needsCredit) {
+      todos += `<div class="todo-card todo-info"><span class="todo-icon">📝</span><span><strong>引導至紙本學分簽到處</strong>（職類：${esc(r.profession)}）</span></div>`;
+    }
+
+    // Detail grid
+    const details = `
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">服務單位</div><div class="detail-value">${esc(r.org || '—')}</div></div>
+        <div class="detail-item"><div class="detail-label">部門</div><div class="detail-value">${esc(r.dept || '—')}</div></div>
+        <div class="detail-item"><div class="detail-label">職稱</div><div class="detail-value">${esc(r.title || '—')}</div></div>
+        <div class="detail-item"><div class="detail-label">職類</div><div class="detail-value">${esc(r.profession || '—')}</div></div>
+        <div class="detail-item"><div class="detail-label">聯絡電話</div><div class="detail-value">${esc(r.phone || '—')}</div></div>
+        <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${esc(r.email || '—')}</div></div>
+        <div class="detail-item"><div class="detail-label">會員身分</div><div class="detail-value">${isMember ? '本會個人會員' : '非會員'}</div></div>
+        <div class="detail-item"><div class="detail-label">會費狀態</div><div class="detail-value">${isMember ? (isPaid ? '✅ 已繳' : '⚠️ 未繳') : '—'}</div></div>
+      </div>
+    `;
+
+    const checkinBtn = isChecked
+      ? `<button class="btn-checkin already-done" disabled>✓ 已完成報到</button>
+         <button class="btn-undo" onclick="undoCheckin(${idx}, event)">撤銷報到</button>`
+      : `<button class="btn-checkin" onclick="doCheckin(${idx}, event)">✔ 確認報到</button>`;
+
+    return `
+      <div class="person-card ${isChecked ? 'checked-in' : ''}" onclick="toggleCard(this, event)">
+        <div class="person-header">
+          <div class="person-info">
+            <div class="person-avatar ${isMember ? 'avatar-member' : 'avatar-nonmember'}">${(r.name || '?')[0]}</div>
+            <div class="person-name-block">
+              <div class="person-name">${esc(r.name)}</div>
+              <div class="person-org">${esc(r.org || '')} ${esc(r.dept || '')}</div>
+            </div>
+          </div>
+          <div class="person-badges">${badges}</div>
+        </div>
+        <div class="person-detail">
+          ${details}
+          <div class="todo-section">
+            <div class="todo-title">📋 報到處理事項</div>
+            <div class="todo-list">${todos}</div>
+          </div>
+          <div class="checkin-actions">${checkinBtn}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== TOGGLE =====
+function toggleCard(el, e) {
+  if (e.target.closest('button')) return;
+  el.classList.toggle('expanded');
+}
+
+// ===== CHECKIN =====
+function doCheckin(idx, e) {
+  e.stopPropagation();
+  const q = document.getElementById('searchInput').value.trim();
+  const results = registrations.filter(r => r.name && r.name.includes(q));
+  const person = results[idx];
+  if (!person || person.checkedIn) return;
+
+  person.checkedIn = true;
+  const now = new Date();
+  const entry = {
+    name: person.name,
+    idNumber: person.idNumber,
+    time: now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }),
+    timestamp: now.toISOString()
+  };
+  checkinLog.unshift(entry);
+  sessionStorage.setItem('checkin_log', JSON.stringify(checkinLog));
+
+  renderResults(results, q);
+  updateStats();
+  renderLog();
+  showToast(`✅ ${person.name} 報到完成`);
+
+  // POST to server
+  fetch(CONFIG.API_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'checkin', name: person.name, idNumber: person.idNumber, time: now.toISOString() })
+  }).catch(err => console.warn('報到通知失敗', err));
+}
+
+function undoCheckin(idx, e) {
+  e.stopPropagation();
+  const q = document.getElementById('searchInput').value.trim();
+  const results = registrations.filter(r => r.name && r.name.includes(q));
+  const person = results[idx];
+  if (!person) return;
+
+  person.checkedIn = false;
+  checkinLog = checkinLog.filter(l => !(l.name === person.name && l.idNumber === person.idNumber));
+  sessionStorage.setItem('checkin_log', JSON.stringify(checkinLog));
+
+  renderResults(results, q);
+  updateStats();
+  renderLog();
+  showToast(`↩ ${person.name} 已撤銷報到`);
+
+  fetch(CONFIG.API_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'undo_checkin', name: person.name, idNumber: person.idNumber })
+  }).catch(err => console.warn('撤銷通知失敗', err));
+}
+
+// ===== STATS =====
+function updateStats() {
+  const total = registrations.length;
+  const checked = registrations.filter(r => r.checkedIn).length;
+  const rate = total > 0 ? Math.round(checked / total * 100) : 0;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statChecked').textContent = checked;
+  document.getElementById('statRate').textContent = rate + '%';
+}
+
+// ===== LOG =====
+function renderLog() {
+  const section = document.getElementById('logSection');
+  const list = document.getElementById('logList');
+  if (checkinLog.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = checkinLog.slice(0, 20).map(l => `
+    <div class="log-item">
+      <span class="log-name">✅ ${esc(l.name)}</span>
+      <span class="log-time">${l.time}</span>
+    </div>
+  `).join('');
+}
+
+// ===== HELPERS =====
+function esc(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+function showLoading(show) {
+  document.getElementById('loadingOverlay').classList.toggle('show', show);
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
