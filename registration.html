@@ -1262,6 +1262,14 @@ function submitForm() {
       return;
     }
   }
+  // Email 格式驗證
+  const emailVal = document.getElementById('f-email').value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(emailVal)) {
+    alert('請輸入正確的 Email 格式（例如：name@example.com）');
+    document.getElementById('f-email').focus();
+    return;
+  }
   if (!document.getElementById('f-profession').value) {
     alert('請選擇「職類」');
     return;
