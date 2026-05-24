@@ -4,34 +4,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2026年會報到系統 — TSMCSD</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ===== RESET & VARIABLES ===== */
 :root {
-  --primary: #1A5D99;
-  --primary-dark: #134a7a;
-  --primary-light: #e8f0f8;
-  --accent: #d4a843;
-  --accent-light: #fdf6e3;
-  --success: #2e7d32;
-  --success-bg: #e8f5e9;
-  --warning: #e65100;
-  --warning-bg: #fff3e0;
-  --danger: #c62828;
-  --danger-bg: #ffebee;
-  --info: #0277bd;
-  --info-bg: #e1f5fe;
-  --bg: #f4f6f9;
+  --primary: #2c5f8a;
+  --primary-dark: #1e4468;
+  --primary-light: #eaf1f7;
+  --primary-muted: #8aafcb;
+  --success: #3a7d5c;
+  --success-bg: #edf6f1;
+  --warning: #b86e1a;
+  --warning-bg: #fdf3e6;
+  --info: #2c5f8a;
+  --info-bg: #eaf1f7;
+  --accent: #6b4c9a;
+  --accent-bg: #f0ecf5;
+  --bg: #f5f7fa;
   --card: #ffffff;
-  --text: #1a2a3a;
-  --text-muted: #607d8b;
-  --border: #dce3ea;
-  --shadow: 0 2px 12px rgba(26,93,153,0.08);
-  --shadow-lg: 0 8px 32px rgba(26,93,153,0.12);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --font: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
-  --transition: 0.2s ease;
+  --text: #1d2939;
+  --text-secondary: #4a5568;
+  --text-muted: #8896a6;
+  --border: #e2e8f0;
+  --border-light: #eef2f7;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 20px rgba(0,0,0,0.08);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-lg: 14px;
+  --font: 'Noto Sans TC', -apple-system, 'Segoe UI', sans-serif;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -42,408 +44,572 @@ body {
   min-height: 100vh;
 }
 
+/* ===== SVG ICON SYSTEM (monoline, single color) ===== */
+.icon-svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.icon-svg.sm { width: 15px; height: 15px; }
+.icon-svg.lg { width: 22px; height: 22px; }
+.icon-svg.xl { width: 28px; height: 28px; }
+
 /* ===== HEADER ===== */
 .app-header {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: white;
-  padding: 0.8rem 1.25rem;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1.5rem;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.5rem;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: var(--shadow-sm);
 }
-.app-header h1 {
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+.header-left {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.6rem;
 }
+.header-left h1 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.header-left .header-icon { color: var(--primary); }
 .header-right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: 1rem;
 }
-.stat-chip {
-  background: rgba(255,255,255,0.18);
-  padding: 0.25rem 0.65rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  backdrop-filter: blur(4px);
-  white-space: nowrap;
+.stat-group {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
 }
-.stat-chip strong { font-weight: 700; }
-.btn-refresh {
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.3);
-  color: white;
-  padding: 0.3rem 0.7rem;
-  border-radius: 6px;
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
   font-size: 0.78rem;
-  font-weight: 500;
+  color: var(--text-secondary);
+}
+.stat-item strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.stat-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+}
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--primary-light);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
   cursor: pointer;
   font-family: var(--font);
-  transition: background var(--transition);
+  transition: all 0.15s ease;
 }
-.btn-refresh:hover { background: rgba(255,255,255,0.35); }
+.btn-refresh:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
-/* ===== MAIN LAYOUT ===== */
-.main-content {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 1.25rem 1rem 3rem;
+/* ===== THREE-COLUMN LAYOUT ===== */
+.main-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 1.4fr;
+  gap: 1px;
+  height: calc(100vh - 56px);
+  background: var(--border);
 }
 
-/* ===== SEARCH BAR ===== */
-.search-section {
+.panel {
   background: var(--card);
-  border-radius: var(--radius);
-  padding: 1.25rem 1.5rem;
-  box-shadow: var(--shadow);
-  margin-bottom: 1.25rem;
-  position: sticky;
-  top: 52px;
-  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
-.search-input-wrap {
+
+.panel-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.panel-header h2 {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.panel-header .panel-icon { color: var(--primary-muted); }
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+}
+
+/* ===== LEFT PANEL: SEARCH ===== */
+.search-box {
   position: relative;
+  margin-bottom: 1rem;
 }
-.search-input-wrap .search-icon {
+.search-box .search-icon-wrap {
   position: absolute;
-  left: 0.8rem;
+  left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1.1rem;
-  opacity: 0.5;
+  color: var(--text-muted);
 }
 #searchInput {
   width: 100%;
-  padding: 0.75rem 0.8rem 0.75rem 2.5rem;
-  border: 2px solid var(--border);
+  padding: 0.65rem 0.75rem 0.65rem 2.4rem;
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   font-family: var(--font);
   outline: none;
-  transition: border-color var(--transition);
+  transition: border-color 0.15s;
+  background: var(--bg);
 }
 #searchInput:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(26,93,153,0.1);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(44,95,138,0.08);
 }
-#searchInput::placeholder { color: #b0bec5; }
-.search-results-hint {
-  font-size: 0.82rem;
+#searchInput::placeholder { color: var(--text-muted); }
+.search-hint {
+  font-size: 0.75rem;
   color: var(--text-muted);
-  margin-top: 0.6rem;
+  margin-bottom: 0.75rem;
 }
 
-/* ===== RESULT CARDS ===== */
-.result-list { display: flex; flex-direction: column; gap: 0.75rem; }
-
-.person-card {
-  background: var(--card);
-  border-radius: var(--radius);
-  border: 1.5px solid var(--border);
-  overflow: hidden;
-  transition: all var(--transition);
-  box-shadow: var(--shadow);
-}
-.person-card:hover { box-shadow: var(--shadow-lg); }
-.person-card.checked-in {
-  border-color: var(--success);
-  background: linear-gradient(135deg, #f1f8f2 0%, var(--card) 100%);
-}
-
-.person-header {
+/* Search result list items */
+.search-list { display: flex; flex-direction: column; gap: 2px; }
+.search-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.25rem;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  user-select: none;
+  transition: background 0.12s;
+  border: 1.5px solid transparent;
 }
-.person-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
-  min-width: 0;
+.search-item:hover { background: var(--bg); }
+.search-item.active {
+  background: var(--primary-light);
+  border-color: var(--primary-muted);
 }
-.person-avatar {
-  width: 42px;
-  height: 42px;
+.search-item.is-checked .search-item-avatar {
+  background: var(--success);
+}
+.search-item-avatar {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
+  background: var(--primary);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  color: white;
   flex-shrink: 0;
 }
-.avatar-member { background: var(--primary); }
-.avatar-nonmember { background: #78909c; }
-.person-name-block { min-width: 0; }
-.person-name {
-  font-size: 1.05rem;
-  font-weight: 700;
+.search-item-avatar.nonmember { background: var(--text-muted); }
+.search-item-info { min-width: 0; flex: 1; }
+.search-item-name {
+  font-size: 0.88rem;
+  font-weight: 600;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.person-org {
-  font-size: 0.8rem;
+.search-item-org {
+  font-size: 0.72rem;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.person-badges {
-  display: flex;
-  gap: 0.4rem;
+.search-item-check {
+  color: var(--success);
   flex-shrink: 0;
-  flex-wrap: wrap;
-  justify-content: flex-end;
 }
-.badge {
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 0.2rem 0.55rem;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-.badge-member { background: var(--primary-light); color: var(--primary); }
-.badge-nonmember { background: #eceff1; color: #607d8b; }
-.badge-paid { background: var(--success-bg); color: var(--success); }
-.badge-unpaid { background: var(--warning-bg); color: var(--warning); }
-.badge-poster { background: #f3e5f5; color: #7b1fa2; }
-.badge-checkedin { background: var(--success-bg); color: var(--success); }
 
-/* ===== EXPANDED DETAIL ===== */
-.person-detail {
-  display: none;
-  border-top: 1px solid var(--border);
-  padding: 1.25rem;
-  background: #fafbfc;
-}
-.person-card.expanded .person-detail { display: block; }
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem 1.5rem;
-  margin-bottom: 1rem;
-}
-.detail-item { font-size: 0.85rem; }
-.detail-label {
+/* ===== CENTER PANEL: PERSON DETAIL ===== */
+.detail-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
   color: var(--text-muted);
-  font-size: 0.75rem;
-  margin-bottom: 0.1rem;
+  gap: 0.6rem;
+  text-align: center;
+  padding: 2rem;
 }
-.detail-value { font-weight: 500; }
+.detail-empty p { font-size: 0.85rem; }
 
-/* ===== TODO CARDS ===== */
-.todo-section { margin-top: 1rem; }
-.todo-title {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 0.6rem;
+.person-profile {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+}
+.person-profile.visible { display: flex; }
+
+.profile-top {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
 }
-.todo-list { display: flex; flex-direction: column; gap: 0.5rem; }
-.todo-card {
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
   display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  padding: 0.7rem 0.9rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.88rem;
-  line-height: 1.5;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
-.todo-card .todo-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
-.todo-card.todo-success { background: var(--success-bg); color: #1b5e20; }
-.todo-card.todo-warning { background: var(--warning-bg); color: #bf360c; }
-.todo-card.todo-info { background: var(--info-bg); color: #01579b; }
-.todo-card.todo-accent { background: #f3e5f5; color: #4a148c; }
-.todo-card.todo-default { background: var(--primary-light); color: var(--primary-dark); }
-
-/* ===== CHECKIN BUTTON ===== */
-.checkin-actions {
-  margin-top: 1rem;
+.profile-avatar.nonmember { background: var(--text-muted); }
+.profile-avatar.checked { background: var(--success); }
+.profile-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.profile-badges {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
   flex-wrap: wrap;
 }
+.badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.badge-member { background: var(--primary-light); color: var(--primary); }
+.badge-nonmember { background: #f1f3f5; color: var(--text-muted); }
+.badge-paid { background: var(--success-bg); color: var(--success); }
+.badge-unpaid { background: var(--warning-bg); color: var(--warning); }
+.badge-poster { background: var(--accent-bg); color: var(--accent); }
+.badge-checkedin { background: var(--success-bg); color: var(--success); }
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+.info-item {}
+.info-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.info-value {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* ===== RIGHT PANEL: ACTIONS ===== */
+.action-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  gap: 0.6rem;
+  text-align: center;
+  padding: 2rem;
+}
+.action-empty p { font-size: 0.85rem; }
+
+.action-content {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+}
+.action-content.visible { display: flex; }
+
+.action-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow-y: auto;
+}
+
+.action-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid;
+  line-height: 1.5;
+}
+.action-card .action-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.action-card .action-text {
+  font-size: 0.85rem;
+  flex: 1;
+}
+.action-card .action-text strong { font-weight: 700; }
+.action-card .action-text .action-sub {
+  font-size: 0.78rem;
+  opacity: 0.8;
+  margin-top: 0.15rem;
+}
+
+.action-card.act-default {
+  background: var(--primary-light); border-color: #d0dfed;
+}
+.action-card.act-default .action-icon-wrap { background: rgba(44,95,138,0.12); color: var(--primary); }
+
+.action-card.act-success {
+  background: var(--success-bg); border-color: #c7e2d3;
+}
+.action-card.act-success .action-icon-wrap { background: rgba(58,125,92,0.12); color: var(--success); }
+
+.action-card.act-warning {
+  background: var(--warning-bg); border-color: #f0dbb8;
+}
+.action-card.act-warning .action-icon-wrap { background: rgba(184,110,26,0.12); color: var(--warning); }
+
+.action-card.act-info {
+  background: var(--info-bg); border-color: #d0dfed;
+}
+.action-card.act-info .action-icon-wrap { background: rgba(44,95,138,0.12); color: var(--info); }
+
+.action-card.act-accent {
+  background: var(--accent-bg); border-color: #d5cce6;
+}
+.action-card.act-accent .action-icon-wrap { background: rgba(107,76,154,0.12); color: var(--accent); }
+
+/* Checkin button area */
+.checkin-bar {
+  border-top: 1px solid var(--border-light);
+  padding: 1rem 0 0;
+  margin-top: 1rem;
+  flex-shrink: 0;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
 .btn-checkin {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   background: var(--success);
   color: white;
   border: none;
-  padding: 0.65rem 1.5rem;
-  border-radius: var(--radius-sm);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
   font-size: 0.95rem;
   font-weight: 700;
   font-family: var(--font);
   cursor: pointer;
-  transition: all var(--transition);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  transition: all 0.15s;
 }
-.btn-checkin:hover { background: #1b5e20; transform: translateY(-1px); }
-.btn-checkin:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.btn-checkin.already-done { background: #b0bec5; cursor: default; }
+.btn-checkin:hover { background: #2d6349; transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn-checkin:active { transform: translateY(0); }
+.btn-checkin:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-checkin.already-done {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1.5px solid #c7e2d3;
+  cursor: default;
+}
+.btn-checkin.already-done:hover { transform: none; box-shadow: none; }
 .btn-undo {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
   background: transparent;
   color: var(--text-muted);
   border: 1.5px solid var(--border);
-  padding: 0.65rem 1.2rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.85rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
   font-weight: 500;
   font-family: var(--font);
   cursor: pointer;
-  transition: all var(--transition);
+  transition: all 0.15s;
+  white-space: nowrap;
 }
-.btn-undo:hover { border-color: var(--danger); color: var(--danger); }
+.btn-undo:hover { border-color: #c53030; color: #c53030; }
 
-/* ===== EMPTY / ERROR STATE ===== */
-.empty-state {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: var(--text-muted);
+/* ===== LOG (bottom of right panel) ===== */
+.log-section {
+  border-top: 1px solid var(--border-light);
+  padding-top: 0.75rem;
+  margin-top: auto;
+  flex-shrink: 0;
 }
-.empty-state .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-.empty-state p { font-size: 0.92rem; }
-.btn-primary {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 0.7rem 1.8rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.95rem;
-  font-weight: 600;
-  font-family: var(--font);
-  cursor: pointer;
-  transition: all var(--transition);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.btn-primary:hover { background: var(--primary-dark); }
-
-/* ===== LOG ===== */
-.log-section { margin-top: 1.5rem; }
 .log-title {
-  font-size: 0.9rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--text-muted);
-  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
-.log-list { display: flex; flex-direction: column; gap: 0.3rem; }
+.log-list { display: flex; flex-direction: column; gap: 2px; max-height: 120px; overflow-y: auto; }
 .log-item {
-  font-size: 0.82rem;
-  padding: 0.4rem 0.75rem;
-  background: var(--card);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  font-size: 0.75rem;
+  padding: 0.3rem 0.5rem;
+  background: var(--bg);
+  border-radius: 4px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.log-item .log-name { font-weight: 600; }
-.log-item .log-time { color: var(--text-muted); font-size: 0.78rem; }
+.log-item .log-name { font-weight: 600; color: var(--text); }
+.log-item .log-time { color: var(--text-muted); }
 
 /* ===== LOADING ===== */
 .loading-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.88);
   z-index: 200;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 .loading-overlay.show { display: flex; }
 .spinner {
-  width: 40px; height: 40px;
-  border: 3px solid var(--border);
+  width: 32px; height: 32px;
+  border: 2.5px solid var(--border);
   border-top-color: var(--primary);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 0.82rem; color: var(--text-muted); }
 
 /* ===== TOAST ===== */
 .toast {
   position: fixed;
-  bottom: 2rem;
+  bottom: 1.5rem;
   left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: #263238;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--text);
   color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
   font-weight: 500;
   z-index: 300;
   opacity: 0;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ===== DATA UPDATE BANNER ===== */
-.update-banner {
-  background: var(--accent-light);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-sm);
-  padding: 0.6rem 1rem;
-  font-size: 0.82rem;
-  color: #5d4037;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-.update-banner button {
-  background: var(--accent);
-  color: white;
-  border: none;
-  padding: 0.3rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--font);
-  white-space: nowrap;
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .main-layout {
+    grid-template-columns: 220px 1fr 1.2fr;
+  }
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 600px) {
-  .app-header { padding: 0.6rem 0.8rem; }
-  .app-header h1 { font-size: 0.92rem; }
-  .stat-chip { font-size: 0.73rem; padding: 0.2rem 0.5rem; }
-  .search-section { padding: 1rem; top: 46px; }
-  #searchInput { font-size: 0.95rem; padding: 0.65rem 0.8rem 0.65rem 2.2rem; }
-  .person-header { padding: 0.8rem 1rem; }
-  .detail-grid { grid-template-columns: 1fr; }
-  .main-content { padding: 1rem 0.5rem 3rem; }
+@media (max-width: 768px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* Mobile: search panel becomes top bar */
+  .panel-search {
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-search .panel-body {
+    padding: 0.75rem 1rem;
+    max-height: none;
+  }
+  .search-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .search-item {
+    padding: 0.4rem 0.6rem;
+  }
+
+  /* Mobile: center + right stack vertically */
+  .panel-detail, .panel-action {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat-group .stat-divider { display: none; }
+  .stat-group { gap: 0.4rem; }
+  .stat-item { font-size: 0.72rem; }
+  .stat-item strong { font-size: 0.8rem; }
+
+  .header-left h1 { font-size: 0.88rem; }
+  .app-header { padding: 0 0.75rem; height: 48px; }
+}
+
+@media (max-width: 480px) {
+  .stat-group { display: none; }
+  .app-header { height: 44px; }
+  .info-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -451,52 +617,102 @@ body {
 
 <!-- HEADER -->
 <header class="app-header">
-  <h1>📋 2026年會報到系統</h1>
+  <div class="header-left">
+    <svg class="icon-svg lg header-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10h8M8 14h5"/></svg>
+    <h1>2026年會報到系統</h1>
+  </div>
   <div class="header-right">
-    <span class="stat-chip">報名 <strong id="statTotal">-</strong></span>
-    <span class="stat-chip">已報到 <strong id="statChecked">-</strong></span>
-    <span class="stat-chip">報到率 <strong id="statRate">-</strong></span>
-    <button class="btn-refresh" onclick="refreshData()" title="重新載入最新資料">🔄 重新整理</button>
+    <div class="stat-group">
+      <div class="stat-item">報名 <strong id="statTotal">-</strong></div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">已報到 <strong id="statChecked">-</strong></div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">報到率 <strong id="statRate">-</strong></div>
+    </div>
+    <button class="btn-refresh" onclick="refreshData()">
+      <svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+      重新整理
+    </button>
   </div>
 </header>
 
-<!-- MAIN -->
-<div class="main-content">
-  <!-- UPDATE BANNER (hidden by default) -->
-  <div class="update-banner" id="updateBanner" style="display:none;">
-    <span>📢 <span id="updateMsg"></span></span>
-    <button onclick="refreshData()">🔄 更新</button>
-  </div>
+<!-- THREE-COLUMN LAYOUT -->
+<div class="main-layout">
 
-  <!-- SEARCH -->
-  <div class="search-section">
-    <div class="search-input-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="輸入姓名搜尋報到…" autocomplete="off" autofocus>
+  <!-- LEFT: SEARCH -->
+  <div class="panel panel-search">
+    <div class="panel-header">
+      <svg class="icon-svg sm panel-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+      <h2>搜尋報名人員</h2>
     </div>
-    <div class="search-results-hint" id="searchHint">載入報名資料中…</div>
+    <div class="panel-body">
+      <div class="search-box">
+        <div class="search-icon-wrap">
+          <svg class="icon-svg sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+        <input type="text" id="searchInput" placeholder="輸入姓名…" autocomplete="off" autofocus>
+      </div>
+      <div class="search-hint" id="searchHint">載入中…</div>
+      <div class="search-list" id="searchList"></div>
+    </div>
   </div>
 
-  <!-- RESULTS -->
-  <div class="result-list" id="resultList"></div>
-
-  <!-- EMPTY -->
-  <div class="empty-state" id="emptyState" style="display:none;">
-    <div class="icon">🔍</div>
-    <p>找不到符合的報名人員</p>
+  <!-- CENTER: PERSON INFO -->
+  <div class="panel panel-detail">
+    <div class="panel-header">
+      <svg class="icon-svg sm panel-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+      <h2>學員資料</h2>
+    </div>
+    <div class="panel-body">
+      <div class="detail-empty" id="detailEmpty">
+        <svg class="icon-svg xl" viewBox="0 0 24 24" style="opacity:0.3;"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+        <p>從左側搜尋選取人員</p>
+      </div>
+      <div class="person-profile" id="personProfile">
+        <div class="profile-top">
+          <div class="profile-avatar" id="profileAvatar"></div>
+          <div>
+            <div class="profile-name" id="profileName"></div>
+            <div class="profile-badges" id="profileBadges"></div>
+          </div>
+        </div>
+        <div class="info-grid" id="infoGrid"></div>
+      </div>
+    </div>
   </div>
 
-  <!-- LOG -->
-  <div class="log-section" id="logSection" style="display:none;">
-    <div class="log-title">📝 最近報到紀錄</div>
-    <div class="log-list" id="logList"></div>
+  <!-- RIGHT: ACTIONS -->
+  <div class="panel panel-action">
+    <div class="panel-header">
+      <svg class="icon-svg sm panel-icon" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      <h2>報到處理事項</h2>
+    </div>
+    <div class="panel-body" style="display:flex;flex-direction:column;">
+      <div class="action-empty" id="actionEmpty">
+        <svg class="icon-svg xl" viewBox="0 0 24 24" style="opacity:0.3;"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
+        <p>選取人員後顯示處理事項</p>
+      </div>
+      <div class="action-content" id="actionContent">
+        <div class="action-list" id="actionList"></div>
+        <div class="checkin-bar" id="checkinBar"></div>
+        <!-- Log -->
+        <div class="log-section" id="logSection" style="display:none;">
+          <div class="log-title">
+            <svg class="icon-svg sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            最近報到紀錄
+          </div>
+          <div class="log-list" id="logList"></div>
+        </div>
+      </div>
+    </div>
   </div>
+
 </div>
 
 <!-- LOADING -->
 <div class="loading-overlay show" id="loadingOverlay">
   <div class="spinner"></div>
-  <div style="font-size:0.9rem;color:var(--text-muted);">載入報名資料中…</div>
+  <div class="loading-text">載入報名資料中…</div>
 </div>
 
 <!-- TOAST -->
@@ -504,28 +720,37 @@ body {
 
 <script>
 // ============================================================
-//  ⚠️ 管理者設定：部署前請修改此 URL
+//  CONFIG
 // ============================================================
 const CONFIG = {
-  // 報到系統 Apps Script 的 Web App URL
   API_URL: 'https://script.google.com/macros/s/AKfycbzuUFvNb6xlXSkZuLVGmDMhOxQfXHQDFzYVymg2jgTByy028Me4WgKELudNjt7TmGoYiA/exec'
 };
-// ============================================================
+
+// ===== SVG ICON TEMPLATES (monoline) =====
+const ICONS = {
+  badge:    '<svg class="icon-svg" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M2 10h20"/><circle cx="8" cy="15" r="2"/><path d="M14 14h4M14 17h3"/></svg>',
+  gift:     '<svg class="icon-svg" viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="11" rx="2"/><path d="M12 10v11"/><path d="M3 14h18"/><path d="M7.5 10C6 10 5 8.5 5 7.5S6 5 7.5 5c1.1 0 3 1.5 4.5 5"/><path d="M16.5 10c1.5 0 2.5-1.5 2.5-2.5S18 5 16.5 5c-1.1 0-3 1.5-4.5 5"/></svg>',
+  meal:     '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 2v7a5 5 0 0 0 5 5v8"/><path d="M3 9h4"/><path d="M21 15c0-4.5-2-9-6-9v18"/></svg>',
+  dollar:   '<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v12"/><path d="M16 9.5c0-1.38-1.79-2.5-4-2.5s-4 1.12-4 2.5 1.79 2.5 4 2.5 4 1.12 4 2.5-1.79 2.5-4 2.5-4-1.12-4-2.5"/></svg>',
+  wave:     '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-9.6-4.8"/><path d="M4 13a8 8 0 0 0 16 0"/><path d="M12 2v1M12 21v1M4.22 4.22l.7.7M18.36 18.36l.7.7M1 12h1M21 12h1M4.22 19.78l.7-.7M18.36 5.64l.7-.7"/></svg>',
+  pin:      '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+  pencil:   '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
+  check:    '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>',
+  checked:  '<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
+  undo:     '<svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>',
+};
 
 // ===== STATE =====
 let registrations = [];
-let posterWinners = [];     // [{name, boothNumber}]
-let creditProfessions = []; // [string]
+let posterWinners = [];
+let creditProfessions = [];
 let checkinLog = [];
-let lastLoadTime = null;
+let selectedIndex = -1; // index in registrations array
 
 // ===== INIT =====
 (function boot() {
-  // Restore local checkin log
-  const log = sessionStorage.getItem('checkin_log');
-  if (log) {
-    try { checkinLog = JSON.parse(log); } catch(e) {}
-  }
+  const log = sessionStorage.getItem('checkin_log_v2');
+  if (log) try { checkinLog = JSON.parse(log); } catch(e) {}
   loadData();
 })();
 
@@ -533,262 +758,238 @@ let lastLoadTime = null;
 function loadData() {
   showLoading(true);
 
-  if (CONFIG.API_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
-    showLoading(false);
-    showError('尚未設定 Apps Script URL', '請在 HTML 檔案中將 CONFIG.API_URL 改為實際的 Web App URL');
-    return;
-  }
-
   fetch(CONFIG.API_URL + '?action=checkin_list', { redirect: 'follow' })
-    .then(r => {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(data => {
       if (data.status === 'error') throw new Error(data.message);
-
       registrations = data.registrations || [];
       posterWinners = data.posterWinners || [];
       creditProfessions = data.creditProfessions || [];
 
-      // Merge server checkin status + local log
+      // Merge local log
       checkinLog.forEach(log => {
         const p = registrations.find(r => r.name === log.name && r.idNumber === log.idNumber);
         if (p && !p.checkedIn) p.checkedIn = true;
       });
 
-      lastLoadTime = new Date();
       showLoading(false);
       updateStats();
       renderLog();
-      document.getElementById('searchHint').textContent = '請輸入報名人員姓名進行搜尋';
+      document.getElementById('searchHint').textContent = `共 ${registrations.length} 位報名`;
 
-      // Refresh existing search
+      // Refresh search if query exists
       const q = document.getElementById('searchInput').value.trim();
-      if (q) {
-        const results = registrations.filter(r => r.name && r.name.includes(q));
-        renderResults(results, q);
-      }
+      if (q) doSearch(q);
+      if (selectedIndex >= 0) selectPerson(selectedIndex);
 
-      showToast(`✅ 資料已載入（${registrations.length} 位報名）`);
+      showToast(`資料已載入（${registrations.length} 位）`);
     })
     .catch(err => {
-      console.error('載入失敗:', err);
+      console.error(err);
       showLoading(false);
-
-      if (registrations.length > 0) {
-        // 有舊資料，顯示 banner 提示
-        showUpdateBanner('資料更新失敗：' + err.message + '，目前顯示上次載入的資料');
-      } else {
-        showError('無法載入報名資料', err.message);
-      }
+      document.getElementById('searchHint').textContent = '載入失敗：' + err.message;
+      showToast('載入失敗');
     });
 }
 
-function refreshData() {
-  document.getElementById('updateBanner').style.display = 'none';
-  loadData();
-}
-
-function showError(title, detail) {
-  document.getElementById('resultList').innerHTML = `
-    <div style="text-align:center;padding:3rem 1rem;">
-      <div style="font-size:2.5rem;margin-bottom:0.5rem;">⚠️</div>
-      <div style="font-size:1.05rem;font-weight:700;margin-bottom:0.5rem;">${title}</div>
-      <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.25rem;word-break:break-all;">${detail || ''}</div>
-      <button class="btn-primary" onclick="refreshData()">🔄 重新連線</button>
-    </div>
-  `;
-  document.getElementById('searchHint').textContent = '';
-}
-
-function showUpdateBanner(msg) {
-  document.getElementById('updateMsg').textContent = msg;
-  document.getElementById('updateBanner').style.display = 'flex';
-}
+function refreshData() { loadData(); }
 
 // ===== SEARCH =====
 document.getElementById('searchInput').addEventListener('input', function() {
-  const q = this.value.trim();
-  if (q.length === 0) {
-    document.getElementById('resultList').innerHTML = '';
-    document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('searchHint').textContent = '請輸入報名人員姓名進行搜尋';
-    return;
-  }
-  const results = registrations.filter(r => r.name && r.name.includes(q));
-  renderResults(results, q);
+  doSearch(this.value.trim());
 });
 
-// ===== RENDER =====
-function renderResults(results, query) {
-  const container = document.getElementById('resultList');
-  const empty = document.getElementById('emptyState');
-  const hint = document.getElementById('searchHint');
-
-  if (results.length === 0) {
-    container.innerHTML = '';
-    empty.style.display = 'block';
-    hint.textContent = `搜尋「${query}」— 找不到符合的報名人員`;
+function doSearch(q) {
+  const list = document.getElementById('searchList');
+  if (!q) {
+    list.innerHTML = '';
+    document.getElementById('searchHint').textContent = `共 ${registrations.length} 位報名`;
     return;
   }
 
-  empty.style.display = 'none';
-  hint.textContent = `搜尋「${query}」— 找到 ${results.length} 位`;
+  const results = [];
+  registrations.forEach((r, i) => { if (r.name && r.name.includes(q)) results.push({ ...r, _idx: i }); });
 
-  container.innerHTML = results.map((r, idx) => {
+  document.getElementById('searchHint').textContent = results.length
+    ? `找到 ${results.length} 位`
+    : `「${q}」— 查無此人`;
+
+  list.innerHTML = results.map(r => {
     const isMember = r.membership === '本會個人會員';
-    const isPaid = r.feeStatus === '已繳';
-    const posterInfo = posterWinners.find(w => r.name && r.name === w.name);
-    const isPoster = !!posterInfo;
-    const needsCredit = creditProfessions.some(p => r.profession === p);
-    const isChecked = r.checkedIn;
-
-    // Badges
-    let badges = '';
-    if (isMember) {
-      badges += `<span class="badge badge-member">會員</span>`;
-      badges += isPaid
-        ? `<span class="badge badge-paid">已繳費</span>`
-        : `<span class="badge badge-unpaid">未繳費</span>`;
-    } else {
-      badges += `<span class="badge badge-nonmember">非會員</span>`;
-    }
-    if (isPoster) badges += `<span class="badge badge-poster">🏆 海報得獎</span>`;
-    if (isChecked) badges += `<span class="badge badge-checkedin">✓ 已報到</span>`;
-
-    // Todo items
-    let todos = '';
-
-    // 1. ID badge
-    todos += `<div class="todo-card todo-default"><span class="todo-icon">🪪</span><span>發放<strong>識別證</strong></span></div>`;
-
-    // 2. Member handling
-    if (isMember && isPaid) {
-      todos += `<div class="todo-card todo-success"><span class="todo-icon">🎁</span><span>發放<strong>會員禮品</strong></span></div>`;
-      if (r.meal && r.meal !== '不用餐') {
-        todos += `<div class="todo-card todo-success"><span class="todo-icon">🍽️</span><span>發放<strong>午餐餐券</strong>（${esc(r.meal)}）</span></div>`;
-      }
-    } else if (isMember && !isPaid) {
-      todos += `<div class="todo-card todo-warning"><span class="todo-icon">💰</span><span><strong>詢問是否現場繳費</strong>（會費尚未繳納，繳費後可領取會員禮品及午餐餐券）</span></div>`;
-    } else {
-      todos += `<div class="todo-card todo-info"><span class="todo-icon">👋</span><span><strong>指引入場</strong>（非會員）</span></div>`;
-    }
-
-    // 3. Poster award
-    if (isPoster) {
-      const booth = posterInfo.boothNumber ? `，張貼編號：<strong>${esc(posterInfo.boothNumber)}</strong>` : '';
-      todos += `<div class="todo-card todo-accent"><span class="todo-icon">📌</span><span><strong>指引海報張貼位置</strong>（優秀海報得獎者${booth}）</span></div>`;
-    }
-
-    // 4. Credit sign-in
-    if (needsCredit) {
-      todos += `<div class="todo-card todo-info"><span class="todo-icon">📝</span><span><strong>引導至紙本學分簽到處</strong>（職類：${esc(r.profession)}）</span></div>`;
-    }
-
-    // Detail grid
-    const details = `
-      <div class="detail-grid">
-        <div class="detail-item"><div class="detail-label">服務單位</div><div class="detail-value">${esc(r.org || '—')}</div></div>
-        <div class="detail-item"><div class="detail-label">部門</div><div class="detail-value">${esc(r.dept || '—')}</div></div>
-        <div class="detail-item"><div class="detail-label">職稱</div><div class="detail-value">${esc(r.title || '—')}</div></div>
-        <div class="detail-item"><div class="detail-label">職類</div><div class="detail-value">${esc(r.profession || '—')}</div></div>
-        <div class="detail-item"><div class="detail-label">聯絡電話</div><div class="detail-value">${esc(r.phone || '—')}</div></div>
-        <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${esc(r.email || '—')}</div></div>
-        <div class="detail-item"><div class="detail-label">會員身分</div><div class="detail-value">${isMember ? '本會個人會員' : '非會員'}</div></div>
-        <div class="detail-item"><div class="detail-label">會費狀態</div><div class="detail-value">${isMember ? (isPaid ? '✅ 已繳' : '⚠️ 未繳') : '—'}</div></div>
-      </div>
-    `;
-
-    const checkinBtn = isChecked
-      ? `<button class="btn-checkin already-done" disabled>✓ 已完成報到</button>
-         <button class="btn-undo" onclick="undoCheckin(${idx}, event)">撤銷報到</button>`
-      : `<button class="btn-checkin" onclick="doCheckin(${idx}, event)">✔ 確認報到</button>`;
-
+    const isActive = r._idx === selectedIndex;
     return `
-      <div class="person-card ${isChecked ? 'checked-in' : ''}" onclick="toggleCard(this, event)">
-        <div class="person-header">
-          <div class="person-info">
-            <div class="person-avatar ${isMember ? 'avatar-member' : 'avatar-nonmember'}">${(r.name || '?')[0]}</div>
-            <div class="person-name-block">
-              <div class="person-name">${esc(r.name)}</div>
-              <div class="person-org">${esc(r.org || '')} ${esc(r.dept || '')}</div>
-            </div>
-          </div>
-          <div class="person-badges">${badges}</div>
+      <div class="search-item ${isActive ? 'active' : ''} ${r.checkedIn ? 'is-checked' : ''}"
+           onclick="selectPerson(${r._idx})">
+        <div class="search-item-avatar ${isMember ? '' : 'nonmember'}">${r.name[0]}</div>
+        <div class="search-item-info">
+          <div class="search-item-name">${esc(r.name)}</div>
+          <div class="search-item-org">${esc(r.org || '')}</div>
         </div>
-        <div class="person-detail">
-          ${details}
-          <div class="todo-section">
-            <div class="todo-title">📋 報到處理事項</div>
-            <div class="todo-list">${todos}</div>
-          </div>
-          <div class="checkin-actions">${checkinBtn}</div>
-        </div>
+        ${r.checkedIn ? '<div class="search-item-check">' + ICONS.checked + '</div>' : ''}
       </div>
     `;
   }).join('');
 }
 
-// ===== TOGGLE =====
-function toggleCard(el, e) {
-  if (e.target.closest('button')) return;
-  el.classList.toggle('expanded');
+// ===== SELECT PERSON =====
+function selectPerson(idx) {
+  selectedIndex = idx;
+  const r = registrations[idx];
+  if (!r) return;
+
+  const isMember = r.membership === '本會個人會員';
+  const isPaid = r.feeStatus === '已繳';
+  const posterInfo = posterWinners.find(w => w.name === r.name);
+  const isPoster = !!posterInfo;
+  const needsCredit = creditProfessions.includes(r.profession);
+
+  // ---- Center panel: person info ----
+  document.getElementById('detailEmpty').style.display = 'none';
+  const profile = document.getElementById('personProfile');
+  profile.classList.add('visible');
+
+  const avatar = document.getElementById('profileAvatar');
+  avatar.textContent = r.name[0];
+  avatar.className = 'profile-avatar' + (!isMember ? ' nonmember' : '') + (r.checkedIn ? ' checked' : '');
+
+  document.getElementById('profileName').textContent = r.name;
+
+  // Badges
+  let badges = '';
+  if (isMember) {
+    badges += `<span class="badge badge-member">會員</span>`;
+    badges += isPaid ? `<span class="badge badge-paid">已繳費</span>` : `<span class="badge badge-unpaid">未繳費</span>`;
+  } else {
+    badges += `<span class="badge badge-nonmember">非會員</span>`;
+  }
+  if (isPoster) badges += `<span class="badge badge-poster">海報得獎</span>`;
+  if (r.checkedIn) badges += `<span class="badge badge-checkedin">已報到</span>`;
+  document.getElementById('profileBadges').innerHTML = badges;
+
+  // Info grid
+  const fields = [
+    ['服務單位', r.org], ['部門', r.dept],
+    ['職稱', r.title], ['職類', r.profession],
+    ['聯絡電話', r.phone], ['Email', r.email],
+    ['會員身分', isMember ? '本會個人會員' : '非會員'],
+    ['會費狀態', isMember ? (isPaid ? '已繳' : '未繳') : '—'],
+  ];
+  document.getElementById('infoGrid').innerHTML = fields.map(([label, val]) => `
+    <div class="info-item">
+      <div class="info-label">${label}</div>
+      <div class="info-value">${esc(val || '—')}</div>
+    </div>
+  `).join('');
+
+  // ---- Right panel: actions ----
+  document.getElementById('actionEmpty').style.display = 'none';
+  const actionContent = document.getElementById('actionContent');
+  actionContent.classList.add('visible');
+
+  let actions = '';
+
+  // 1. Badge
+  actions += actionCard('act-default', ICONS.badge, '發放識別證', '');
+
+  // 2. Member logic
+  if (isMember && isPaid) {
+    actions += actionCard('act-success', ICONS.gift, '發放會員禮品', '');
+    if (r.meal && r.meal !== '不用餐') {
+      actions += actionCard('act-success', ICONS.meal, '發放午餐餐券', r.meal);
+    }
+  } else if (isMember && !isPaid) {
+    actions += actionCard('act-warning', ICONS.dollar, '詢問是否現場繳費', '會費尚未繳納，繳費後可領取會員禮品及午餐餐券');
+  } else {
+    actions += actionCard('act-info', ICONS.wave, '指引入場', '非會員');
+  }
+
+  // 3. Poster
+  if (isPoster) {
+    const booth = posterInfo.boothNumber ? `張貼編號：${esc(posterInfo.boothNumber)}` : '';
+    actions += actionCard('act-accent', ICONS.pin, '指引海報張貼位置', '優秀海報得獎者' + (booth ? '，' + booth : ''));
+  }
+
+  // 4. Credit
+  if (needsCredit) {
+    actions += actionCard('act-info', ICONS.pencil, '引導至紙本學分簽到處', '職類：' + esc(r.profession));
+  }
+
+  document.getElementById('actionList').innerHTML = actions;
+
+  // Checkin button
+  if (r.checkedIn) {
+    document.getElementById('checkinBar').innerHTML = `
+      <button class="btn-checkin already-done" disabled>${ICONS.checked} 已完成報到</button>
+      <button class="btn-undo" onclick="undoCheckin(${idx})">${ICONS.undo} 撤銷</button>
+    `;
+  } else {
+    document.getElementById('checkinBar').innerHTML = `
+      <button class="btn-checkin" onclick="doCheckin(${idx})">${ICONS.check} 確認報到</button>
+    `;
+  }
+
+  // Refresh search list highlight
+  const q = document.getElementById('searchInput').value.trim();
+  if (q) doSearch(q);
+
+  renderLog();
+}
+
+function actionCard(cls, icon, title, sub) {
+  return `
+    <div class="action-card ${cls}">
+      <div class="action-icon-wrap">${icon}</div>
+      <div class="action-text">
+        <strong>${title}</strong>
+        ${sub ? '<div class="action-sub">' + sub + '</div>' : ''}
+      </div>
+    </div>
+  `;
 }
 
 // ===== CHECKIN =====
-function doCheckin(idx, e) {
-  e.stopPropagation();
-  const q = document.getElementById('searchInput').value.trim();
-  const results = registrations.filter(r => r.name && r.name.includes(q));
-  const person = results[idx];
+function doCheckin(idx) {
+  const person = registrations[idx];
   if (!person || person.checkedIn) return;
 
   person.checkedIn = true;
   const now = new Date();
-  const entry = {
+  checkinLog.unshift({
     name: person.name,
     idNumber: person.idNumber,
     time: now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }),
     timestamp: now.toISOString()
-  };
-  checkinLog.unshift(entry);
-  sessionStorage.setItem('checkin_log', JSON.stringify(checkinLog));
+  });
+  sessionStorage.setItem('checkin_log_v2', JSON.stringify(checkinLog));
 
-  renderResults(results, q);
+  selectPerson(idx);
   updateStats();
-  renderLog();
-  showToast(`✅ ${person.name} 報到完成`);
+  showToast(`${person.name} 報到完成`);
 
-  // POST to server
   fetch(CONFIG.API_URL, {
     method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'checkin', name: person.name, idNumber: person.idNumber, time: now.toISOString() })
-  }).catch(err => console.warn('報到通知失敗', err));
+  }).catch(e => console.warn('通知失敗', e));
 }
 
-function undoCheckin(idx, e) {
-  e.stopPropagation();
-  const q = document.getElementById('searchInput').value.trim();
-  const results = registrations.filter(r => r.name && r.name.includes(q));
-  const person = results[idx];
+function undoCheckin(idx) {
+  const person = registrations[idx];
   if (!person) return;
 
   person.checkedIn = false;
   checkinLog = checkinLog.filter(l => !(l.name === person.name && l.idNumber === person.idNumber));
-  sessionStorage.setItem('checkin_log', JSON.stringify(checkinLog));
+  sessionStorage.setItem('checkin_log_v2', JSON.stringify(checkinLog));
 
-  renderResults(results, q);
+  selectPerson(idx);
   updateStats();
-  renderLog();
-  showToast(`↩ ${person.name} 已撤銷報到`);
+  showToast(`${person.name} 已撤銷報到`);
 
   fetch(CONFIG.API_URL, {
     method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'undo_checkin', name: person.name, idNumber: person.idNumber })
-  }).catch(err => console.warn('撤銷通知失敗', err));
+  }).catch(e => console.warn('通知失敗', e));
 }
 
 // ===== STATS =====
@@ -807,9 +1008,9 @@ function renderLog() {
   const list = document.getElementById('logList');
   if (checkinLog.length === 0) { section.style.display = 'none'; return; }
   section.style.display = 'block';
-  list.innerHTML = checkinLog.slice(0, 20).map(l => `
+  list.innerHTML = checkinLog.slice(0, 10).map(l => `
     <div class="log-item">
-      <span class="log-name">✅ ${esc(l.name)}</span>
+      <span class="log-name">${esc(l.name)}</span>
       <span class="log-time">${l.time}</span>
     </div>
   `).join('');
@@ -829,7 +1030,7 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(() => t.classList.remove('show'), 2200);
 }
 </script>
 </body>
