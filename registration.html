@@ -286,8 +286,11 @@ body {
 .agenda-table .lecture-row { background: rgba(214,233,245,0.35); }
 .agenda-table .lecture-row:hover { background: rgba(214,233,245,0.5); }
 .agenda-table .topic-title { font-weight: 600; color: var(--text-dark); }
-.agenda-table .speaker-info { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem; }
-.agenda-table .chair-info { font-size: 0.82rem; color: var(--text-muted); }
+.agenda-table .speaker-info,
+.agenda-table .chair-info {
+  font-size: 0.82rem; color: var(--text-muted);
+  margin-top: 0.2rem; line-height: 1.6;
+}
 
 /* ========== REG NOTICE (consolidated) ========== */
 .reg-notice-card {
@@ -610,7 +613,7 @@ body {
   .agenda-table .topic-title { font-size: 0.95rem; }
   .agenda-table .speaker-info,
   .agenda-table .chair-info {
-    font-size: 0.8rem; margin-top: 0.3rem; color: var(--text-muted);
+    font-size: 0.8rem; margin-top: 0.3rem; color: var(--text-muted); line-height: 1.6;
   }
   .agenda-table .speaker-info::before {
     content: '講師｜';
