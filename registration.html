@@ -1102,8 +1102,13 @@ body {
   </div>
 
   <div class="map-wrap">
-    <iframe src="https://www.google.com/maps?q=奇美醫院+台南市永康區中華路901號&output=embed" allowfullscreen loading="lazy"></iframe>
+    <iframe src="https://maps.google.com/maps?q=23.0285,120.2965&z=16&output=embed" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="border:0;"></iframe>
   </div>
+  <p style="text-align:center; margin-top: 0.8rem;">
+    <a href="https://maps.google.com/maps?q=奇美醫院+台南市永康區中華路901號" target="_blank" style="color: var(--nav-blue); font-size: 0.85rem; text-decoration: none;">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M12 21s-7-5.75-7-11a7 7 0 1 1 14 0c0 5.25-7 11-7 11z"/><circle cx="12" cy="10" r="3"/></svg>在 Google Maps 中開啟
+    </a>
+  </p>
 </section>
 
 <!-- ===== FOOTER ===== -->
@@ -1113,6 +1118,14 @@ body {
 </footer>
 
 <script>
+// 頁面載入時回到頂部
+if (window.location.hash) {
+  history.replaceState(null, '', window.location.pathname);
+}
+window.addEventListener('load', function() {
+  setTimeout(function() { window.scrollTo(0, 0); }, 0);
+});
+
 // Countdown
 function updateCountdown() {
   const target = new Date('2026-08-15T08:00:00+08:00');
