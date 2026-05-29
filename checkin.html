@@ -46,7 +46,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 /* ===== HEADER — dark editorial ===== */
 .app-header{background:var(--primary);border-bottom:none;padding:0 1.5rem;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 12px rgba(0,0,0,0.12)}
 .header-left{display:flex;align-items:center;gap:0.6rem}
-.header-brand{font-size:.6rem;font-weight:700;letter-spacing:.12em;color:var(--terra);background:rgba(255,255,255,.92);padding:.25rem .5rem;border-radius:4px;line-height:1}
+.header-logo-wrap{width:34px;height:34px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 0 1px rgba(255,255,255,.2)}
+.header-logo{width:26px;height:26px;object-fit:contain}
 .header-left h1{font-size:.95rem;font-weight:700;color:#f0ece7;letter-spacing:.06em}
 .header-right{display:flex;align-items:center;gap:0.6rem}
 .stat-group{display:flex;gap:0.6rem;align-items:center}
@@ -221,7 +222,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   /* Header */
   .app-header{padding:0 .6rem;height:auto;min-height:48px;flex-wrap:wrap;gap:.3rem;padding-top:.4rem;padding-bottom:.4rem}
   .header-left h1{font-size:.82rem}
-  .header-brand{font-size:.55rem;padding:.2rem .4rem}
+  .header-logo-wrap{width:28px;height:28px}
+  .header-logo{width:22px;height:22px}
   .header-right{width:100%;justify-content:space-between}
   .stat-group{gap:.3rem}
   .stat-group .stat-divider{display:none}
@@ -295,7 +297,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 <!-- HEADER -->
 <header class="app-header">
   <div class="header-left">
-    <span class="header-brand">TSMCSD</span>
+    <div class="header-logo-wrap">
+      <img class="header-logo" src="https://raw.githubusercontent.com/ling3567/2026annualconference/main/images/TSMCSD-logo.png" alt="TSMCSD">
+    </div>
     <h1>2026年會報到系統</h1>
   </div>
   <div class="header-right">
@@ -409,6 +413,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 
   <!-- 身分群組 -->
   <div class="stat-section" id="sectionGroups">
+    <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:.75rem;flex-wrap:wrap">
+      <label style="font-size:.78rem;font-weight:600;color:var(--text-muted)">選擇群組：</label>
+      <select id="groupSelect" onchange="renderGroupStats()" style="padding:.4rem .7rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;font-family:var(--font);background:var(--card);color:var(--text);outline:none;cursor:pointer;min-width:160px">
+        <option value="__all__">全部群組</option>
+      </select>
+    </div>
     <div id="statsGroups"></div>
   </div>
 
@@ -418,9 +428,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
       <label style="font-size:.78rem;font-weight:600;color:var(--text-muted)">依欄位分組：</label>
       <select id="fieldSelect" onchange="renderFieldStats()" style="padding:.4rem .7rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;font-family:var(--font);background:var(--card);color:var(--text);outline:none;cursor:pointer;min-width:140px">
         <option value="org">服務單位</option>
-        <option value="dept">部門</option>
         <option value="profession">職類</option>
-        <option value="title">職稱</option>
       </select>
       <div class="search-box" style="flex:1;min-width:160px;margin:0">
         <div class="search-icon-wrap"><svg class="icon-svg sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg></div>
@@ -745,17 +753,19 @@ function renderStats(){
   const mealOther = checkedIn.length - mealMeat - mealVeg - mealNone;
 
   // 禮品已發放：已繳費會員（含現場繳費）且已報到
-  const giftCount = checkedIn.filter(r=>{
+  const giftCheckedIn = checkedIn.filter(r=>{
     const mem=r.membership==='本會個人會員';
     const paid=r.feeStatus==='已繳'||r.onsitePaid;
     return mem&&paid;
-  }).length;
+  });
+  const giftCount = giftCheckedIn.length;
+  const onsiteCount = giftCheckedIn.filter(r=>r.onsitePaid).length;
 
   document.getElementById('statsOverall').innerHTML=`
     ${soCard('全體報名',''+t,''+c,pctOf(c,t),'var(--terra)')}
     ${soCard('會員',''+memAll.length,''+memCk,pctOf(memCk,memAll.length),'var(--primary)')}
     ${soCard('非會員',''+nonAll.length,''+nonCk,pctOf(nonCk,nonAll.length),'var(--text-muted)')}
-    ${soCardGift('禮品已發放', giftCount)}
+    ${soCardGift('禮品已發放', giftCount, onsiteCount)}
     ${soCardMeal('已報到餐點統計', mealMeat, mealVeg, mealNone, mealOther)}
   `;
 
@@ -772,14 +782,28 @@ function switchStatTab(tab, btn) {
   if(tab==='fields') renderFieldStats();
 }
 
-// ===== 身分群組統計 =====
+// ===== 身分群組統計（下拉選擇）=====
 function renderGroupStats(){
   const container=document.getElementById('statsGroups');
+  const select=document.getElementById('groupSelect');
+
   if(groups.length===0){
+    select.innerHTML='<option value="__all__">（尚無群組資料）</option>';
     container.innerHTML='<div style="text-align:center;color:var(--text-muted);padding:2rem;font-size:.85rem;">尚無身分群組資料。<br>請在試算表「身分群組」工作表新增群組。</div>';
     return;
   }
-  container.innerHTML=groups.map(g=>{
+
+  // 更新下拉選項（保留目前選擇）
+  const curVal=select.value;
+  const opts=['<option value="__all__">全部群組</option>'];
+  groups.forEach(g=>opts.push(`<option value="${esc(g.groupName)}">${esc(g.groupName)}</option>`));
+  select.innerHTML=opts.join('');
+  if([...select.options].some(o=>o.value===curVal)) select.value=curVal;
+
+  const selected=select.value;
+  const showGroups=selected==='__all__'?groups:groups.filter(g=>g.groupName===selected);
+
+  container.innerHTML=showGroups.map(g=>{
     const members=g.members.map(name=>{
       const person=registrations.find(r=>r.name===name);
       return {name, checked:person?person.checkedIn:false, found:!!person};
@@ -791,13 +815,15 @@ function renderGroupStats(){
 }
 
 // ===== 報名資料分析（依欄位分組）=====
+// 職類排序：依報名表單選單順序
+const PROFESSION_ORDER = ['醫師','牙醫師','中醫師','藥師','藥事','護理師','護理','物理治療師','物理治療','職能治療師','職能治療','呼吸治療師','呼吸治療','醫事放射師','醫事放射','醫事檢驗師','醫事檢驗','營養師','營養','語言治療師','語言治療','臨床心理師','臨床心理','諮商心理師','聽力師','社工師','社工','其他'];
+
 function renderFieldStats() {
   const field = document.getElementById('fieldSelect').value;
   const q = (document.getElementById('fieldSearchInput')?.value||'').trim();
   const container = document.getElementById('statsFields');
   const hint = document.getElementById('fieldSearchHint');
 
-  // 依選定欄位分組
   const fieldMap = {};
   registrations.forEach(r => {
     const val = r[field] || '（未填）';
@@ -805,10 +831,25 @@ function renderFieldStats() {
     fieldMap[val].push(r);
   });
 
-  let keys = Object.keys(fieldMap).sort((a, b) => strokeCollator.compare(a, b));
+  let keys = Object.keys(fieldMap);
+
+  // 排序：職類依報名順序，其他依筆畫
+  if (field === 'profession') {
+    keys.sort((a, b) => {
+      const ia = PROFESSION_ORDER.indexOf(a);
+      const ib = PROFESSION_ORDER.indexOf(b);
+      if (ia >= 0 && ib >= 0) return ia - ib;
+      if (ia >= 0) return -1;
+      if (ib >= 0) return 1;
+      return strokeCollator.compare(a, b);
+    });
+  } else {
+    keys.sort((a, b) => strokeCollator.compare(a, b));
+  }
+
   if (q) keys = keys.filter(k => k.includes(q));
 
-  const fieldLabels = {org:'服務單位',dept:'部門',profession:'職類',title:'職稱'};
+  const fieldLabels = {org:'服務單位',profession:'職類'};
   const label = fieldLabels[field]||field;
 
   if (hint) hint.textContent = q
@@ -863,11 +904,12 @@ function soCard(label,total,checked,rate,color){
   </div>`;
 }
 
-function soCardGift(label, count) {
+function soCardGift(label, count, onsiteCount) {
   return `<div class="so-card">
     <div class="so-label">${label}</div>
     <div class="so-val">${count} <span style="font-size:.82rem;font-weight:500;color:var(--text-muted)">份</span></div>
     <div style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">已繳費會員（含現場繳費）且已報到</div>
+    ${onsiteCount>0?`<div style="font-size:.76rem;font-weight:600;color:var(--warning);margin-top:.25rem">其中現場繳費 ${onsiteCount} 人</div>`:''}
   </div>`;
 }
 
