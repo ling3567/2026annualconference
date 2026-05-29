@@ -208,27 +208,85 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--primary);color:#f0ece7;padding:.55rem 1.1rem;border-radius:var(--radius);font-size:.8rem;font-weight:500;z-index:300;opacity:0;transition:all .25s;white-space:nowrap;box-shadow:0 4px 16px rgba(28,25,23,.2);letter-spacing:.02em}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* Responsive */
-@media(max-width:1024px){.main-layout{grid-template-columns:200px 1fr 1.1fr}}
-@media(max-width:768px){
-  .main-layout{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:auto;min-height:calc(100vh - 54px)}
-  .panel-search .panel-body{padding:.6rem .8rem;max-height:none}
-  .search-list{flex-direction:row;flex-wrap:wrap;gap:3px}
-  .search-item{padding:.35rem .5rem}
-  .stat-group .stat-divider{display:none}
-  .stat-group{gap:.3rem}
-  .stat-item{font-size:.7rem}
-  .stat-item strong{font-size:.78rem}
-  .header-left h1{font-size:.82rem}
-  .app-header{padding:0 .6rem;height:48px}
-  .header-brand{font-size:.55rem;padding:.2rem .4rem}
-  .stats-page{padding:1rem}
+/* ===== RESPONSIVE ===== */
+
+/* Tablet landscape */
+@media(max-width:1024px){
+  .main-layout{grid-template-columns:200px 1fr 1.1fr}
+  .stats-overall{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
 }
+
+/* Tablet portrait / small laptop */
+@media(max-width:768px){
+  /* Header */
+  .app-header{padding:0 .6rem;height:auto;min-height:48px;flex-wrap:wrap;gap:.3rem;padding-top:.4rem;padding-bottom:.4rem}
+  .header-left h1{font-size:.82rem}
+  .header-brand{font-size:.55rem;padding:.2rem .4rem}
+  .header-right{width:100%;justify-content:space-between}
+  .stat-group{gap:.3rem}
+  .stat-group .stat-divider{display:none}
+  .stat-item{font-size:.68rem}
+  .stat-item strong{font-size:.76rem}
+  .header-btn{font-size:.7rem;padding:.25rem .5rem}
+
+  /* Three-column → stacked */
+  .main-layout{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;height:auto;min-height:calc(100vh - 80px)}
+  .panel{border-bottom:1px solid var(--border)}
+  .panel-search{max-height:220px}
+  .panel-search .panel-body{padding:.6rem .8rem}
+  .search-list{flex-direction:row;flex-wrap:wrap;gap:3px}
+  .search-item{padding:.35rem .5rem;flex:0 0 auto}
+
+  /* Stats page */
+  .stats-page{padding:1rem}
+  .stats-overall{grid-template-columns:repeat(2,1fr);gap:.5rem}
+  .so-card{padding:.75rem .85rem}
+  .stats-tabs{flex-direction:row}
+  .sg-member-list{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+}
+
+/* Mobile */
 @media(max-width:480px){
+  /* Header: hide stats, minimal buttons */
   .stat-group{display:none}
-  .app-header{height:44px}
+  .app-header{min-height:44px}
+  .header-right{justify-content:flex-end;gap:.35rem}
+  .header-btn svg{display:none}
+  .header-btn{font-size:.68rem;padding:.25rem .45rem}
+
+  /* Panels */
+  .panel-search{max-height:180px}
+  .panel-header{padding:.6rem .8rem}
+  .panel-header h2{font-size:.68rem}
+  .panel-body{padding:.6rem .8rem}
+
+  /* Info & cards */
   .info-grid{grid-template-columns:1fr}
+  .profile-top{gap:.6rem}
+  .profile-avatar{width:36px;height:36px;font-size:.9rem}
+  .profile-name{font-size:1rem}
+  .action-card{padding:.6rem .7rem;gap:.5rem}
+  .action-card .ai-wrap{width:26px;height:26px;border-radius:5px}
+  .action-card .at{font-size:.8rem}
+  .btn-checkin{font-size:.85rem;padding:.6rem 1rem}
+  .btn-onsite{font-size:.72rem;padding:.3rem .55rem}
+
+  /* Stats page */
+  .stats-page{padding:.75rem}
+  .stats-overall{grid-template-columns:1fr;gap:.4rem}
+  .so-card .so-val{font-size:1.2rem}
+  .stats-tabs .stats-tab{font-size:.74rem;padding:.45rem .5rem}
+  #fieldSelect{font-size:.8rem;min-width:100px}
   .sg-member-list{grid-template-columns:1fr}
+  .sg-header h3{font-size:.82rem}
+  .sg-header .sg-stat{font-size:.72rem}
+
+  /* Log */
+  .log-list{max-height:80px}
+  .log-item{font-size:.7rem}
+
+  /* Toast */
+  .toast{font-size:.75rem;padding:.45rem .85rem}
 }
 </style>
 </head>
@@ -337,15 +395,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   </div>
   <div class="stats-overall" id="statsOverall"></div>
 
-  <!-- Tab switch: 身分群組 / 服務單位 -->
+  <!-- Tab switch: 身分群組 / 報名資料分析 -->
   <div class="stats-tabs">
     <button class="stats-tab active" onclick="switchStatTab('groups',this)">
       <svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       身分群組
     </button>
-    <button class="stats-tab" onclick="switchStatTab('orgs',this)">
+    <button class="stats-tab" onclick="switchStatTab('fields',this)">
       <svg class="icon-svg sm" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"/></svg>
-      服務單位
+      報名資料分析
     </button>
   </div>
 
@@ -354,16 +412,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     <div id="statsGroups"></div>
   </div>
 
-  <!-- 服務單位 -->
-  <div class="stat-section" id="sectionOrgs" style="display:none">
-    <div class="org-search-box">
-      <div class="search-box" style="margin-bottom:.75rem">
+  <!-- 報名資料分析 -->
+  <div class="stat-section" id="sectionFields" style="display:none">
+    <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:.75rem;flex-wrap:wrap">
+      <label style="font-size:.78rem;font-weight:600;color:var(--text-muted)">依欄位分組：</label>
+      <select id="fieldSelect" onchange="renderFieldStats()" style="padding:.4rem .7rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;font-family:var(--font);background:var(--card);color:var(--text);outline:none;cursor:pointer;min-width:140px">
+        <option value="org">服務單位</option>
+        <option value="dept">部門</option>
+        <option value="profession">職類</option>
+        <option value="title">職稱</option>
+      </select>
+      <div class="search-box" style="flex:1;min-width:160px;margin:0">
         <div class="search-icon-wrap"><svg class="icon-svg sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg></div>
-        <input type="text" id="orgSearchInput" placeholder="搜尋服務單位…" autocomplete="off" style="width:100%;padding:.55rem .7rem .55rem 2.2rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;font-family:var(--font);outline:none;background:var(--bg)">
+        <input type="text" id="fieldSearchInput" placeholder="搜尋…" autocomplete="off" oninput="renderFieldStats()" style="width:100%;padding:.45rem .7rem .45rem 2.2rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;font-family:var(--font);outline:none;background:var(--bg)">
       </div>
-      <div class="search-hint" id="orgSearchHint"></div>
     </div>
-    <div id="statsOrgs"></div>
+    <div class="search-hint" id="fieldSearchHint" style="margin-bottom:.5rem"></div>
+    <div id="statsFields"></div>
   </div>
 </div>
 </div>
@@ -679,15 +744,23 @@ function renderStats(){
   const mealNone = checkedIn.filter(r=>getMeal(r)==='不用餐').length;
   const mealOther = checkedIn.length - mealMeat - mealVeg - mealNone;
 
+  // 禮品已發放：已繳費會員（含現場繳費）且已報到
+  const giftCount = checkedIn.filter(r=>{
+    const mem=r.membership==='本會個人會員';
+    const paid=r.feeStatus==='已繳'||r.onsitePaid;
+    return mem&&paid;
+  }).length;
+
   document.getElementById('statsOverall').innerHTML=`
     ${soCard('全體報名',''+t,''+c,pctOf(c,t),'var(--terra)')}
     ${soCard('會員',''+memAll.length,''+memCk,pctOf(memCk,memAll.length),'var(--primary)')}
     ${soCard('非會員',''+nonAll.length,''+nonCk,pctOf(nonCk,nonAll.length),'var(--text-muted)')}
+    ${soCardGift('禮品已發放', giftCount)}
     ${soCardMeal('已報到餐點統計', mealMeat, mealVeg, mealNone, mealOther)}
   `;
 
   renderGroupStats();
-  renderOrgStats(document.getElementById('orgSearchInput')?.value?.trim()||'');
+  if(document.getElementById('sectionFields').style.display!=='none') renderFieldStats();
 }
 
 // ===== Tab Switch =====
@@ -695,8 +768,8 @@ function switchStatTab(tab, btn) {
   document.querySelectorAll('.stats-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('sectionGroups').style.display = tab==='groups'?'block':'none';
-  document.getElementById('sectionOrgs').style.display = tab==='orgs'?'block':'none';
-  if(tab==='orgs') renderOrgStats('');
+  document.getElementById('sectionFields').style.display = tab==='fields'?'block':'none';
+  if(tab==='fields') renderFieldStats();
 }
 
 // ===== 身分群組統計 =====
@@ -717,43 +790,42 @@ function renderGroupStats(){
   }).join('');
 }
 
-// ===== 服務單位統計 =====
-document.addEventListener('DOMContentLoaded',()=>{
-  const inp=document.getElementById('orgSearchInput');
-  if(inp) inp.addEventListener('input',()=>renderOrgStats(inp.value.trim()));
-});
+// ===== 報名資料分析（依欄位分組）=====
+function renderFieldStats() {
+  const field = document.getElementById('fieldSelect').value;
+  const q = (document.getElementById('fieldSearchInput')?.value||'').trim();
+  const container = document.getElementById('statsFields');
+  const hint = document.getElementById('fieldSearchHint');
 
-function renderOrgStats(q) {
-  const container=document.getElementById('statsOrgs');
-  const hint=document.getElementById('orgSearchHint');
-
-  // 依服務單位分組
-  const orgMap={};
-  registrations.forEach(r=>{
-    const org=r.org||'（未填）';
-    if(!orgMap[org]) orgMap[org]=[];
-    orgMap[org].push(r);
+  // 依選定欄位分組
+  const fieldMap = {};
+  registrations.forEach(r => {
+    const val = r[field] || '（未填）';
+    if (!fieldMap[val]) fieldMap[val] = [];
+    fieldMap[val].push(r);
   });
 
-  // 篩選
-  let orgNames=Object.keys(orgMap).sort((a,b)=>strokeCollator.compare(a,b));
-  if(q) orgNames=orgNames.filter(name=>name.includes(q));
+  let keys = Object.keys(fieldMap).sort((a, b) => strokeCollator.compare(a, b));
+  if (q) keys = keys.filter(k => k.includes(q));
 
-  if(hint) hint.textContent=q
-    ? `找到 ${orgNames.length} 個單位`
-    : `共 ${Object.keys(orgMap).length} 個服務單位`;
+  const fieldLabels = {org:'服務單位',dept:'部門',profession:'職類',title:'職稱'};
+  const label = fieldLabels[field]||field;
 
-  if(orgNames.length===0){
-    container.innerHTML='<div style="text-align:center;color:var(--text-muted);padding:2rem;font-size:.85rem;">查無符合的服務單位</div>';
+  if (hint) hint.textContent = q
+    ? `找到 ${keys.length} 個${label}`
+    : `共 ${Object.keys(fieldMap).length} 個${label}`;
+
+  if (keys.length === 0) {
+    container.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:2rem;font-size:.85rem;">查無符合的${label}</div>`;
     return;
   }
 
-  container.innerHTML=orgNames.map(org=>{
-    const people=orgMap[org];
-    const members=people.map(r=>({name:r.name, checked:r.checkedIn, found:true}));
-    const ckCount=members.filter(m=>m.checked).length;
-    const rate=members.length>0?Math.round(ckCount/members.length*100):0;
-    return renderStatGroup(org, members, ckCount, rate);
+  container.innerHTML = keys.map(key => {
+    const people = fieldMap[key];
+    const members = people.map(r => ({name: r.name, checked: r.checkedIn, found: true}));
+    const ckCount = members.filter(m => m.checked).length;
+    const rate = members.length > 0 ? Math.round(ckCount / members.length * 100) : 0;
+    return renderStatGroup(key, members, ckCount, rate);
   }).join('');
 }
 
@@ -791,6 +863,14 @@ function soCard(label,total,checked,rate,color){
   </div>`;
 }
 
+function soCardGift(label, count) {
+  return `<div class="so-card">
+    <div class="so-label">${label}</div>
+    <div class="so-val">${count} <span style="font-size:.82rem;font-weight:500;color:var(--text-muted)">份</span></div>
+    <div style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">已繳費會員（含現場繳費）且已報到</div>
+  </div>`;
+}
+
 function soCardMeal(label, meat, veg, none, other) {
   const total = meat + veg + none + other;
   return `<div class="so-card">
@@ -810,7 +890,7 @@ function soCardMeal(label, meat, veg, none, other) {
       </div>
       ${other>0?`<div style="display:flex;align-items:center;gap:.3rem">
         <div style="width:10px;height:10px;border-radius:2px;background:var(--border)"></div>
-        <span style="font-size:.82rem;font-weight:600">其他 ${other}</span>
+        <span style="font-size:.82rem;font-weight:600;color:var(--text-muted)">無用餐資格 ${other}</span>
       </div>`:''}
     </div>
     <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:.4rem;background:var(--border-light)">
