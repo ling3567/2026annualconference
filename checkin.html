@@ -153,7 +153,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .log-item .lt{color:var(--text-muted)}
 
 /* ===== STATS PAGE ===== */
-.stats-page{display:flex;flex-direction:column;height:calc(100vh - 54px);overflow-y:auto;padding:1.5rem;max-width:960px;margin:0 auto;width:100%}
+.stats-page{display:flex;flex-direction:column;height:calc(100vh - 54px);overflow-y:auto;padding:1.5rem 2.5rem;width:100%}
 .stats-page .stats-header{margin-bottom:1.25rem}
 .stats-page .stats-header h2{font-size:1.15rem;font-weight:700;color:var(--text);letter-spacing:.02em}
 .stats-page .stats-header p{font-size:.82rem;color:var(--text-muted);margin-top:.2rem}
@@ -485,6 +485,7 @@ function selectPerson(idx){
   const r=registrations[idx];if(!r)return;
   const isMem=r.membership==='本會個人會員';
   const isPaid=r.feeStatus==='已繳';
+  const isConfirmedNoPay=r.feeStatus==='確認不繳';
   // 海報論文：一人可有多筆（EP + 實體）
   const posters=posterPresenters.filter(w=>w.name===r.name);
   const hasPoster=posters.length>0;
@@ -500,13 +501,19 @@ function selectPerson(idx){
   document.getElementById('profileName').textContent=r.name;
 
   let badges='';
-  if(isMem){badges+=`<span class="badge badge-member">會員</span>`;badges+=isPaid?`<span class="badge badge-paid">已繳費</span>`:`<span class="badge badge-unpaid">未繳費</span>`}
+  if(isMem){
+    badges+=`<span class="badge badge-member">會員</span>`;
+    if(isPaid) badges+=`<span class="badge badge-paid">已繳費</span>`;
+    else if(isConfirmedNoPay) badges+=`<span class="badge badge-nonmember">確認不繳</span>`;
+    else badges+=`<span class="badge badge-unpaid">未繳費</span>`;
+  }
   else badges+=`<span class="badge badge-nonmember">非會員</span>`;
   if(hasPoster) badges+=`<span class="badge badge-poster">海報發表</span>`;
   if(r.checkedIn) badges+=`<span class="badge badge-checkedin">已報到</span>`;
   document.getElementById('profileBadges').innerHTML=badges;
 
-  const fields=[['服務單位',r.org],['部門',r.dept],['職稱',r.title],['職類',r.profession],['聯絡電話',r.phone],['Email',r.email],['會員身分',isMem?'本會個人會員':'非會員'],['會費狀態',isMem?(isPaid?'已繳':'未繳'):'—']];
+  const feeDisplay=isMem?(isPaid?'已繳':(isConfirmedNoPay?'確認不繳':'未繳')):'—';
+  const fields=[['服務單位',r.org],['部門',r.dept],['職稱',r.title],['職類',r.profession],['聯絡電話',r.phone],['Email',r.email],['會員身分',isMem?'本會個人會員':'非會員'],['會費狀態',feeDisplay]];
   document.getElementById('infoGrid').innerHTML=fields.map(([l,v])=>`<div><div class="info-label">${l}</div><div class="info-value">${esc(v||'—')}</div></div>`).join('');
 
   // Right
@@ -524,8 +531,14 @@ function selectPerson(idx){
     } else {
       acts+=ac('act-success',I.gift,'發放會員禮品','此會員不用餐，無需發放餐券');
     }
+  } else if(isMem&&isConfirmedNoPay){
+    acts+=ac('act-muted',I.gift,'會員（確認不繳費）','無禮品及餐券');
   } else if(isMem&&!isPaid){
     acts+=ac('act-warning',I.dollar,'詢問是否現場繳費','會費尚未繳納，繳費後可領取會員禮品及午餐餐券');
+  }
+  // 非會員有用餐需求（特殊身分）
+  if(!isMem && r.meal && r.meal!=='不用餐'){
+    acts+=ac('act-success',I.meal,'發放午餐餐券（'+esc(r.meal)+'）','非會員，具特殊身分用餐資格');
   }
   if(hasPoster){
     posters.forEach(p=>{
