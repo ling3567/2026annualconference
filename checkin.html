@@ -144,6 +144,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .btn-undo{display:flex;align-items:center;gap:.25rem;background:transparent;color:var(--text-muted);border:1.5px solid var(--border);padding:.6rem .8rem;border-radius:var(--radius);font-size:.78rem;font-weight:500;font-family:var(--font);cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn-undo:hover{border-color:var(--terra);color:var(--terra)}
 
+/* Onsite pay buttons */
+.btn-onsite{background:var(--terra);color:#fff;border:none;padding:.35rem .7rem;border-radius:var(--radius-sm);font-size:.76rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .15s}
+.btn-onsite:hover{background:#a84a30;transform:translateY(-1px)}
+.btn-onsite.btn-onsite-alt{background:transparent;color:var(--text-muted);border:1.5px solid var(--border)}
+.btn-onsite.btn-onsite-alt:hover{border-color:var(--text-secondary);color:var(--text-secondary)}
+
 /* Log */
 .log-section{border-top:1px solid var(--border-light);padding-top:.65rem;margin-top:auto;flex-shrink:0}
 .log-title{font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.35rem;display:flex;align-items:center;gap:.3rem}
@@ -396,6 +402,7 @@ let creditProfessions = [];
 let badgeMap = {};
 let groups = [];
 let checkinLog = [];
+let onsitePayMap = {}; // name|idNumber → {meal, time}
 let selectedIndex = -1;
 let currentPage = 'checkin';
 
@@ -429,6 +436,20 @@ function loadData(){
       creditProfessions=d.creditProfessions||[];
       badgeMap=d.badgeMap||{};
       groups=d.groups||[];
+
+      // 現場繳費紀錄：合併到報名資料
+      onsitePayMap={};
+      (d.onsitePayments||[]).forEach(op=>{
+        onsitePayMap[op.name+'|'+op.idNumber]=op;
+      });
+      registrations.forEach(r=>{
+        const op=onsitePayMap[r.name+'|'+r.idNumber];
+        if(op){
+          r.onsitePaid=true;
+          r.onsiteMeal=op.meal;
+        }
+      });
+
       checkinLog.forEach(l=>{
         const p=registrations.find(r=>r.name===l.name&&r.idNumber===l.idNumber);
         if(p&&!p.checkedIn)p.checkedIn=true;
@@ -484,8 +505,9 @@ function selectPerson(idx){
   selectedIndex=idx;
   const r=registrations[idx];if(!r)return;
   const isMem=r.membership==='本會個人會員';
-  const isPaid=r.feeStatus==='已繳';
+  const isPaid=r.feeStatus==='已繳' || r.onsitePaid;
   const isConfirmedNoPay=r.feeStatus==='確認不繳';
+  const isOnsitePaid=!!r.onsitePaid;
   // 海報論文：一人可有多筆（EP + 實體）
   const posters=posterPresenters.filter(w=>w.name===r.name);
   const hasPoster=posters.length>0;
@@ -503,16 +525,20 @@ function selectPerson(idx){
   let badges='';
   if(isMem){
     badges+=`<span class="badge badge-member">會員</span>`;
-    if(isPaid) badges+=`<span class="badge badge-paid">已繳費</span>`;
-    else if(isConfirmedNoPay) badges+=`<span class="badge badge-nonmember">確認不繳</span>`;
-    else badges+=`<span class="badge badge-unpaid">未繳費</span>`;
+    if(isPaid){
+      badges+=`<span class="badge badge-paid">${isOnsitePaid?'現場繳費':'已繳費'}</span>`;
+    } else if(isConfirmedNoPay){
+      badges+=`<span class="badge badge-nonmember">確認不繳</span>`;
+    } else {
+      badges+=`<span class="badge badge-unpaid">未繳費</span>`;
+    }
   }
   else badges+=`<span class="badge badge-nonmember">非會員</span>`;
   if(hasPoster) badges+=`<span class="badge badge-poster">海報發表</span>`;
   if(r.checkedIn) badges+=`<span class="badge badge-checkedin">已報到</span>`;
   document.getElementById('profileBadges').innerHTML=badges;
 
-  const feeDisplay=isMem?(isPaid?'已繳':(isConfirmedNoPay?'確認不繳':'未繳')):'—';
+  const feeDisplay=isMem?(isPaid?(isOnsitePaid?'現場繳費':'已繳'):(isConfirmedNoPay?'確認不繳':'未繳')):'—';
   const fields=[['服務單位',r.org],['部門',r.dept],['職稱',r.title],['職類',r.profession],['聯絡電話',r.phone],['Email',r.email],['會員身分',isMem?'本會個人會員':'非會員'],['會費狀態',feeDisplay]];
   document.getElementById('infoGrid').innerHTML=fields.map(([l,v])=>`<div><div class="info-label">${l}</div><div class="info-value">${esc(v||'—')}</div></div>`).join('');
 
@@ -525,20 +551,37 @@ function selectPerson(idx){
   const badgeLabel = badgeNo ? `發放識別證<div class="as">編號：${esc(badgeNo)}</div>` : '發放識別證';
   acts+=`<div class="action-card act-default"><div class="ai-wrap">${I.badge}</div><div class="at"><strong>發放識別證</strong>${badgeNo?'<div class="as">編號：'+esc(badgeNo)+'</div>':''}</div></div>`;
 
+  // 餐點：已繳費用午餐資格欄，現場繳費用選擇的餐點
+  const eMeal = isOnsitePaid
+    ? (r.onsiteMeal || '')
+    : ((r.mealEligibility && r.mealEligibility !== '無') ? r.mealEligibility : '');
+
   if(isMem&&isPaid){
-    if(r.meal&&r.meal!=='不用餐'){
-      acts+=ac('act-success',I.gift,'發放會員禮品＋午餐餐券（'+esc(r.meal)+'）','');
+    if(eMeal && eMeal!=='不用餐'){
+      acts+=ac('act-success',I.gift,'發放會員禮品＋午餐餐券（'+esc(eMeal)+'）', isOnsitePaid?'現場繳費':'');
     } else {
-      acts+=ac('act-success',I.gift,'發放會員禮品','此會員不用餐，無需發放餐券');
+      acts+=ac('act-success',I.gift,'發放會員禮品', isOnsitePaid?'現場繳費，不用餐':'此會員不用餐，無需發放餐券');
     }
   } else if(isMem&&isConfirmedNoPay){
     acts+=ac('act-muted',I.gift,'會員（確認不繳費）','無禮品及餐券');
   } else if(isMem&&!isPaid){
-    acts+=ac('act-warning',I.dollar,'詢問是否現場繳費','會費尚未繳納，繳費後可領取會員禮品及午餐餐券');
+    // 未繳費：顯示詢問 + 現場繳費按鈕
+    acts+=`<div class="action-card act-warning">
+      <div class="ai-wrap">${I.dollar}</div>
+      <div class="at" style="flex:1">
+        <strong>詢問是否現場繳費</strong>
+        <div class="as">會費尚未繳納，繳費後可領取會員禮品及午餐餐券</div>
+        <div style="display:flex;gap:.4rem;margin-top:.5rem;flex-wrap:wrap">
+          <button class="btn-onsite" onclick="onsitePay(${idx},'葷',event)">現場繳費（葷）</button>
+          <button class="btn-onsite" onclick="onsitePay(${idx},'素',event)">現場繳費（素）</button>
+          <button class="btn-onsite btn-onsite-alt" onclick="onsitePay(${idx},'不用餐',event)">繳費不用餐</button>
+        </div>
+      </div>
+    </div>`;
   }
   // 非會員有用餐需求（特殊身分）
-  if(!isMem && r.meal && r.meal!=='不用餐'){
-    acts+=ac('act-success',I.meal,'發放午餐餐券（'+esc(r.meal)+'）','非會員，具特殊身分用餐資格');
+  if(!isMem && eMeal && eMeal!=='不用餐'){
+    acts+=ac('act-success',I.meal,'發放午餐餐券（'+esc(eMeal)+'）','非會員，具特殊身分用餐資格');
   }
   if(hasPoster){
     posters.forEach(p=>{
@@ -586,6 +629,23 @@ function undoCheckin(idx){
   fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'undo_checkin',name:p.name,idNumber:p.idNumber})}).catch(()=>{});
 }
 
+// Onsite payment
+function onsitePay(idx, meal, e) {
+  if(e) e.stopPropagation();
+  const p=registrations[idx];if(!p)return;
+
+  p.onsitePaid=true;
+  p.onsiteMeal=meal;
+  onsitePayMap[p.name+'|'+p.idNumber]={name:p.name,idNumber:p.idNumber,meal:meal};
+
+  selectPerson(idx);
+  updateStats();
+  if(currentPage==='stats') renderStats();
+  showToast(`${p.name} 現場繳費完成（${meal}）`);
+
+  fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'onsite_pay',name:p.name,idNumber:p.idNumber,meal:meal,time:new Date().toISOString()})}).catch(()=>{});
+}
+
 // Stats
 function updateStats(){
   const t=registrations.length;
@@ -607,11 +667,16 @@ function renderStats(){
   const pct=n=>t>0?Math.round(n/t*100):0;
   const pctOf=(n,d)=>d>0?Math.round(n/d*100):0;
 
-  // Overall cards
+  // Overall cards — 餐點：午餐資格 + 現場繳費選擇
   const checkedIn = registrations.filter(r=>r.checkedIn);
-  const mealMeat = checkedIn.filter(r=>r.meal==='葷').length;
-  const mealVeg = checkedIn.filter(r=>r.meal==='素').length;
-  const mealNone = checkedIn.filter(r=>r.meal==='不用餐').length;
+  const getMeal = r => {
+    if(r.onsitePaid) return r.onsiteMeal||'';
+    const me=r.mealEligibility;
+    return (me && me!=='無') ? me : '';
+  };
+  const mealMeat = checkedIn.filter(r=>getMeal(r)==='葷').length;
+  const mealVeg = checkedIn.filter(r=>getMeal(r)==='素').length;
+  const mealNone = checkedIn.filter(r=>getMeal(r)==='不用餐').length;
   const mealOther = checkedIn.length - mealMeat - mealVeg - mealNone;
 
   document.getElementById('statsOverall').innerHTML=`
