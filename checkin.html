@@ -131,6 +131,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .action-card.act-info .ai-wrap{background:rgba(74,109,140,.1);color:var(--info)}
 .action-card.act-accent{background:var(--accent-bg);border-color:#d9cbd2}
 .action-card.act-accent .ai-wrap{background:rgba(140,92,110,.1);color:var(--accent)}
+.action-card.act-muted{background:#f5f4f3;border-color:#e6e4e1;opacity:.7}
+.action-card.act-muted .ai-wrap{background:rgba(0,0,0,.04);color:var(--text-muted)}
+.action-card.act-muted .at{color:var(--text-muted)}
 
 .checkin-bar{border-top:1px solid var(--border-light);padding:.85rem 0 0;margin-top:.85rem;flex-shrink:0;display:flex;gap:.5rem;align-items:center;width:100%}
 .btn-checkin{flex:1;display:flex;align-items:center;justify-content:center;gap:.4rem;background:var(--terra);color:#fff;border:none;padding:.7rem 1.2rem;border-radius:var(--radius);font-size:.92rem;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .15s;letter-spacing:.02em}
@@ -164,6 +167,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .so-card .so-bar-fill{height:100%;border-radius:3px;transition:width .3s}
 
 /* Group sections */
+.stats-tabs{display:flex;gap:4px;margin-bottom:1rem;background:var(--border-light);padding:3px;border-radius:var(--radius)}
+.stats-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:.3rem;background:transparent;border:none;padding:.55rem .75rem;border-radius:calc(var(--radius) - 2px);font-size:.8rem;font-weight:600;font-family:var(--font);color:var(--text-muted);cursor:pointer;transition:all .15s;letter-spacing:.02em}
+.stats-tab:hover{color:var(--text)}
+.stats-tab.active{background:var(--card);color:var(--text);box-shadow:var(--shadow-sm)}
+.stat-section{}
+.org-search-box{margin-bottom:.75rem}
 .stats-group{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.75rem;overflow:hidden}
 .sg-header{padding:.85rem 1.15rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;transition:background .12s}
 .sg-header:hover{background:var(--bg)}
@@ -318,10 +327,38 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 <div class="stats-page">
   <div class="stats-header">
     <h2>報到統計</h2>
-    <p>各身分群組的報到狀況一覽（資料來源：報到系統 Google Sheet「身分群組」工作表）</p>
+    <p>即時報到狀況一覽</p>
   </div>
   <div class="stats-overall" id="statsOverall"></div>
-  <div id="statsGroups"></div>
+
+  <!-- Tab switch: 身分群組 / 服務單位 -->
+  <div class="stats-tabs">
+    <button class="stats-tab active" onclick="switchStatTab('groups',this)">
+      <svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      身分群組
+    </button>
+    <button class="stats-tab" onclick="switchStatTab('orgs',this)">
+      <svg class="icon-svg sm" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"/></svg>
+      服務單位
+    </button>
+  </div>
+
+  <!-- 身分群組 -->
+  <div class="stat-section" id="sectionGroups">
+    <div id="statsGroups"></div>
+  </div>
+
+  <!-- 服務單位 -->
+  <div class="stat-section" id="sectionOrgs" style="display:none">
+    <div class="org-search-box">
+      <div class="search-box" style="margin-bottom:.75rem">
+        <div class="search-icon-wrap"><svg class="icon-svg sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg></div>
+        <input type="text" id="orgSearchInput" placeholder="搜尋服務單位…" autocomplete="off" style="width:100%;padding:.55rem .7rem .55rem 2.2rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;font-family:var(--font);outline:none;background:var(--bg)">
+      </div>
+      <div class="search-hint" id="orgSearchHint"></div>
+    </div>
+    <div id="statsOrgs"></div>
+  </div>
 </div>
 </div>
 
@@ -482,21 +519,20 @@ function selectPerson(idx){
   acts+=`<div class="action-card act-default"><div class="ai-wrap">${I.badge}</div><div class="at"><strong>發放識別證</strong>${badgeNo?'<div class="as">編號：'+esc(badgeNo)+'</div>':''}</div></div>`;
 
   if(isMem&&isPaid){
-    const mealText = (r.meal&&r.meal!=='不用餐') ? '＋午餐餐券（'+esc(r.meal)+'）' : '';
-    acts+=ac('act-success',I.gift,'發放會員禮品'+mealText,'');
+    if(r.meal&&r.meal!=='不用餐'){
+      acts+=ac('act-success',I.gift,'發放會員禮品＋午餐餐券（'+esc(r.meal)+'）','');
+    } else {
+      acts+=ac('act-success',I.gift,'發放會員禮品','此會員不用餐，無需發放餐券');
+    }
   } else if(isMem&&!isPaid){
     acts+=ac('act-warning',I.dollar,'詢問是否現場繳費','會費尚未繳納，繳費後可領取會員禮品及午餐餐券');
-  } else {
-    acts+=ac('act-info',I.wave,'指引入場','非會員');
   }
   if(hasPoster){
     posters.forEach(p=>{
       const num=p.posterNumber;
       if(num.startsWith('EP')){
-        // E-Poster：僅顯示編號
-        acts+=ac('act-accent',I.monitor,'E-Poster','海報編號：'+esc(num));
+        acts+=ac('act-muted',I.monitor,'E-Poster','海報編號：'+esc(num));
       } else {
-        // 實體海報：引導至張貼位置
         acts+=ac('act-accent',I.pin,'實體海報 — 請引導至張貼位置','海報編號：'+esc(num));
       }
     });
@@ -559,7 +595,6 @@ function renderStats(){
   const pctOf=(n,d)=>d>0?Math.round(n/d*100):0;
 
   // Overall cards
-  // Meal breakdown for checked-in people
   const checkedIn = registrations.filter(r=>r.checkedIn);
   const mealMeat = checkedIn.filter(r=>r.meal==='葷').length;
   const mealVeg = checkedIn.filter(r=>r.meal==='素').length;
@@ -573,43 +608,100 @@ function renderStats(){
     ${soCardMeal('已報到餐點統計', mealMeat, mealVeg, mealNone, mealOther)}
   `;
 
-  // Group sections
+  renderGroupStats();
+  renderOrgStats(document.getElementById('orgSearchInput')?.value?.trim()||'');
+}
+
+// ===== Tab Switch =====
+function switchStatTab(tab, btn) {
+  document.querySelectorAll('.stats-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('sectionGroups').style.display = tab==='groups'?'block':'none';
+  document.getElementById('sectionOrgs').style.display = tab==='orgs'?'block':'none';
+  if(tab==='orgs') renderOrgStats('');
+}
+
+// ===== 身分群組統計 =====
+function renderGroupStats(){
   const container=document.getElementById('statsGroups');
   if(groups.length===0){
     container.innerHTML='<div style="text-align:center;color:var(--text-muted);padding:2rem;font-size:.85rem;">尚無身分群組資料。<br>請在試算表「身分群組」工作表新增群組。</div>';
     return;
   }
-
-  container.innerHTML=groups.map((g,gi)=>{
+  container.innerHTML=groups.map(g=>{
     const members=g.members.map(name=>{
       const person=registrations.find(r=>r.name===name);
       return {name, checked:person?person.checkedIn:false, found:!!person};
     });
     const ckCount=members.filter(m=>m.checked).length;
     const rate=members.length>0?Math.round(ckCount/members.length*100):0;
-
-    return `<div class="stats-group" onclick="this.classList.toggle('expanded')">
-      <div class="sg-header">
-        <h3>
-          <svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          ${esc(g.groupName)}
-        </h3>
-        <div class="sg-stat">
-          <span>${ckCount} / ${members.length}</span>
-          <span class="sg-rate">${rate}%</span>
-        </div>
-      </div>
-      <div class="sg-body">
-        <div class="sg-member-list">
-          ${members.map(m=>`<div class="sg-member ${m.checked?'checked':'unchecked'}">
-            <div class="sg-dot"></div>
-            <span class="sg-mname">${esc(m.name)}</span>
-            ${!m.found?'<span style="font-size:.7rem;color:var(--warning)">(未報名)</span>':''}
-          </div>`).join('')}
-        </div>
-      </div>
-    </div>`;
+    return renderStatGroup(g.groupName, members, ckCount, rate);
   }).join('');
+}
+
+// ===== 服務單位統計 =====
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=document.getElementById('orgSearchInput');
+  if(inp) inp.addEventListener('input',()=>renderOrgStats(inp.value.trim()));
+});
+
+function renderOrgStats(q) {
+  const container=document.getElementById('statsOrgs');
+  const hint=document.getElementById('orgSearchHint');
+
+  // 依服務單位分組
+  const orgMap={};
+  registrations.forEach(r=>{
+    const org=r.org||'（未填）';
+    if(!orgMap[org]) orgMap[org]=[];
+    orgMap[org].push(r);
+  });
+
+  // 篩選
+  let orgNames=Object.keys(orgMap).sort((a,b)=>strokeCollator.compare(a,b));
+  if(q) orgNames=orgNames.filter(name=>name.includes(q));
+
+  if(hint) hint.textContent=q
+    ? `找到 ${orgNames.length} 個單位`
+    : `共 ${Object.keys(orgMap).length} 個服務單位`;
+
+  if(orgNames.length===0){
+    container.innerHTML='<div style="text-align:center;color:var(--text-muted);padding:2rem;font-size:.85rem;">查無符合的服務單位</div>';
+    return;
+  }
+
+  container.innerHTML=orgNames.map(org=>{
+    const people=orgMap[org];
+    const members=people.map(r=>({name:r.name, checked:r.checkedIn, found:true}));
+    const ckCount=members.filter(m=>m.checked).length;
+    const rate=members.length>0?Math.round(ckCount/members.length*100):0;
+    return renderStatGroup(org, members, ckCount, rate);
+  }).join('');
+}
+
+// ===== 共用：統計群組卡片 =====
+function renderStatGroup(title, members, ckCount, rate) {
+  return `<div class="stats-group" onclick="this.classList.toggle('expanded')">
+    <div class="sg-header">
+      <h3>
+        <svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        ${esc(title)}
+      </h3>
+      <div class="sg-stat">
+        <span>${ckCount} / ${members.length}</span>
+        <span class="sg-rate">${rate}%</span>
+      </div>
+    </div>
+    <div class="sg-body">
+      <div class="sg-member-list">
+        ${members.map(m=>`<div class="sg-member ${m.checked?'checked':'unchecked'}">
+          <div class="sg-dot"></div>
+          <span class="sg-mname">${esc(m.name)}</span>
+          ${!m.found?'<span style="font-size:.7rem;color:var(--warning)">(未報名)</span>':''}
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
 }
 
 function soCard(label,total,checked,rate,color){
