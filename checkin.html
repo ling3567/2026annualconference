@@ -78,7 +78,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 #searchInput{width:100%;padding:.6rem .7rem .6rem 2.2rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.88rem;font-family:var(--font);outline:none;transition:all .15s;background:var(--bg)}
 #searchInput:focus{border-color:var(--terra);background:#fff;box-shadow:0 0 0 3px rgba(196,90,60,.08)}
 #searchInput::placeholder{color:var(--text-muted)}
-.search-hint{font-size:.72rem;color:var(--text-muted);margin-bottom:.6rem;letter-spacing:.01em}
+.search-hint{font-size:.72rem;color:var(--text-muted);margin-bottom:.4rem;letter-spacing:.01em}
+.group-chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:.6rem}
+.group-chip{font-size:.7rem;font-weight:600;padding:.22rem .5rem;border-radius:20px;border:1.5px solid var(--border);background:var(--card);color:var(--text-secondary);cursor:pointer;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.group-chip:hover{border-color:var(--terra);color:var(--terra)}
+.group-chip.active{background:var(--terra);border-color:var(--terra);color:#fff}
 .search-list{display:flex;flex-direction:column;gap:2px}
 .search-item{display:flex;align-items:center;gap:.55rem;padding:.5rem .65rem;border-radius:var(--radius-sm);cursor:pointer;transition:all .12s;border:1.5px solid transparent}
 .search-item:hover{background:var(--bg)}
@@ -340,6 +344,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
         <input type="text" id="searchInput" placeholder="姓名或服務單位…" autocomplete="off" autofocus>
       </div>
       <div class="search-hint" id="searchHint">載入中…</div>
+      <div class="group-chips" id="groupChips"></div>
       <div class="search-list" id="searchList"></div>
     </div>
   </div>
@@ -477,6 +482,7 @@ let groups = [];
 let checkinLog = [];
 let onsitePayMap = {}; // name|idNumber → {meal, time}
 let selectedIndex = -1;
+let activeGroupFilter = null; // currently selected group chip
 let currentPage = 'checkin';
 
 // Boot
@@ -530,6 +536,7 @@ function loadData(){
       showLoading(false);
       updateStats();
       renderLog();
+      renderGroupChips();
       document.getElementById('searchHint').textContent=`共 ${registrations.length} 位報名`;
       const q=document.getElementById('searchInput').value.trim();
       if(q) doSearch(q);
@@ -547,9 +554,63 @@ function refreshData(){loadData()}
 
 // Search (name OR org), name matches sorted by stroke count
 const strokeCollator = new Intl.Collator('zh-Hant-TW-u-co-stroke');
-document.getElementById('searchInput').addEventListener('input',function(){doSearch(this.value.trim())});
+document.getElementById('searchInput').addEventListener('input',function(){
+  // 輸入文字時清除群組篩選
+  if(this.value.trim() && activeGroupFilter){
+    activeGroupFilter=null;
+    renderGroupChips();
+  }
+  doSearch(this.value.trim());
+});
+
+// 群組快篩標籤
+function renderGroupChips(){
+  const container=document.getElementById('groupChips');
+  if(!groups.length){container.innerHTML='';return}
+  container.innerHTML=groups.map(g=>
+    `<button class="group-chip ${activeGroupFilter===g.groupName?'active':''}" onclick="toggleGroupFilter('${esc(g.groupName)}')">${esc(g.groupName)}</button>`
+  ).join('');
+}
+
+function toggleGroupFilter(groupName){
+  if(activeGroupFilter===groupName){
+    // 取消篩選
+    activeGroupFilter=null;
+    renderGroupChips();
+    document.getElementById('searchList').innerHTML='';
+    document.getElementById('searchHint').textContent=`共 ${registrations.length} 位報名`;
+    document.getElementById('searchInput').value='';
+    document.getElementById('searchInput').focus();
+    return;
+  }
+  activeGroupFilter=groupName;
+  document.getElementById('searchInput').value='';
+  renderGroupChips();
+  doSearch('');
+}
+
 function doSearch(q){
   const list=document.getElementById('searchList');
+
+  // 群組篩選模式
+  if(activeGroupFilter){
+    const group=groups.find(g=>g.groupName===activeGroupFilter);
+    if(!group){list.innerHTML='';return}
+    let results=[];
+    group.members.forEach(name=>{
+      registrations.forEach((r,i)=>{
+        if(r.name===name) results.push({...r,_idx:i});
+      });
+    });
+    // 文字二次篩選
+    if(q) results=results.filter(r=>r.name.includes(q)||r.org&&r.org.includes(q));
+    results.sort((a,b)=>strokeCollator.compare(a.name,b.name));
+    document.getElementById('searchHint').textContent=`${activeGroupFilter}：${results.length} 位`;
+    renderSearchList(results);
+    return;
+  }
+
+  // 一般搜尋模式
   if(!q){list.innerHTML='';document.getElementById('searchHint').textContent=`共 ${registrations.length} 位報名`;return}
   const nameHits=[];
   const orgHits=[];
@@ -557,13 +618,15 @@ function doSearch(q){
     if(r.name&&r.name.includes(q)) nameHits.push({...r,_idx:i});
     else if(r.org&&r.org.includes(q)) orgHits.push({...r,_idx:i});
   });
-  // 姓名結果依筆畫排序
   nameHits.sort((a,b)=>strokeCollator.compare(a.name,b.name));
-  // 服務單位結果也依姓名筆畫排序
   orgHits.sort((a,b)=>strokeCollator.compare(a.name,b.name));
   const results=[...nameHits,...orgHits];
   document.getElementById('searchHint').textContent=results.length?`找到 ${results.length} 位`:`「${q}」— 查無此人`;
-  list.innerHTML=results.map(r=>{
+  renderSearchList(results);
+}
+
+function renderSearchList(results){
+  document.getElementById('searchList').innerHTML=results.map(r=>{
     const isMem=r.membership==='本會個人會員';
     return `<div class="search-item ${r._idx===selectedIndex?'active':''} ${r.checkedIn?'is-checked':''}" onclick="selectPerson(${r._idx})">
       <div class="si-avatar ${isMem?'':'nm'}">${r.name[0]}</div>
