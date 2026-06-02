@@ -982,31 +982,26 @@ function soCardGift(label, count, onsiteCount) {
 }
 
 function soCardMeal(label, meat, veg, none, other) {
-  const total = meat + veg + none + other;
   return `<div class="so-card">
     <div class="so-label">${label}</div>
-    <div style="display:flex;gap:.75rem;margin-top:.35rem;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:.3rem">
-        <div style="width:10px;height:10px;border-radius:2px;background:#c45a3c"></div>
-        <span style="font-size:.82rem;font-weight:600">葷 ${meat}</span>
+    <div style="margin-top:.4rem;display:flex;flex-direction:column;gap:.3rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:.85rem">
+        <span style="display:flex;align-items:center;gap:.3rem"><span style="width:10px;height:10px;border-radius:2px;background:#c45a3c;display:inline-block"></span> 葷</span>
+        <strong>${meat} 份</strong>
       </div>
-      <div style="display:flex;align-items:center;gap:.3rem">
-        <div style="width:10px;height:10px;border-radius:2px;background:#5a7d5c"></div>
-        <span style="font-size:.82rem;font-weight:600">素 ${veg}</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:.85rem">
+        <span style="display:flex;align-items:center;gap:.3rem"><span style="width:10px;height:10px;border-radius:2px;background:#5a7d5c;display:inline-block"></span> 素</span>
+        <strong>${veg} 份</strong>
       </div>
-      <div style="display:flex;align-items:center;gap:.3rem">
-        <div style="width:10px;height:10px;border-radius:2px;background:var(--text-muted)"></div>
-        <span style="font-size:.82rem;font-weight:600">不用餐 ${none}</span>
+      <div style="height:1px;background:var(--border-light);margin:.15rem 0"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:var(--text-secondary)">
+        <span>會員不用餐</span><span>${none} 人</span>
       </div>
-      ${other>0?`<div style="display:flex;align-items:center;gap:.3rem">
-        <div style="width:10px;height:10px;border-radius:2px;background:var(--border)"></div>
-        <span style="font-size:.82rem;font-weight:600;color:var(--text-muted)">無用餐資格 ${other}</span>
-      </div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:.82rem;color:var(--text-muted)">
+        <span>無用餐資格 <span style="font-size:.68rem">（未繳費會員或非會員）</span></span><span>${other} 人</span>
+      </div>
     </div>
-    <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:.4rem;background:var(--border-light)">
-      ${total>0?`<div style="width:${meat/total*100}%;background:#c45a3c"></div><div style="width:${veg/total*100}%;background:#5a7d5c"></div><div style="width:${none/total*100}%;background:var(--text-muted)"></div>`:''}
-    </div>
-    <div style="font-size:.72rem;color:var(--text-muted);margin-top:.2rem;letter-spacing:.01em">需備便當：${meat+veg} 份（葷 ${meat} + 素 ${veg}）</div>
+    <div style="margin-top:.5rem;padding-top:.4rem;border-top:1px solid var(--border-light);font-size:.78rem;font-weight:700;color:var(--terra)">需備便當：${meat+veg} 份（葷 ${meat} + 素 ${veg}）</div>
   </div>`;
 }
 
