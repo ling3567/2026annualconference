@@ -88,8 +88,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .search-item:hover{background:var(--bg)}
 .search-item.active{background:var(--primary-light);border-color:var(--border)}
 .search-item.is-checked .si-avatar{background:var(--success)}
-.si-avatar{width:30px;height:30px;border-radius:50%;background:var(--primary);color:#f0ece7;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
-.si-avatar.nm{background:var(--text-muted)}
+.si-avatar{width:30px;height:30px;border-radius:50%;background:#2c5f8a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+.si-avatar.nm{background:#c49a6c}
 .si-info{min-width:0;flex:1}
 .si-name{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .si-org{font-size:.7rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -101,8 +101,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .person-profile{display:none;flex-direction:column;height:100%}
 .person-profile.visible{display:flex}
 .profile-top{display:flex;align-items:center;gap:.85rem;margin-bottom:1.1rem}
-.profile-avatar{width:44px;height:44px;border-radius:50%;background:var(--primary);color:#f0ece7;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;flex-shrink:0}
-.profile-avatar.nm{background:var(--text-muted)}
+.profile-avatar{width:44px;height:44px;border-radius:50%;background:#2c5f8a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;flex-shrink:0}
+.profile-avatar.nm{background:#c49a6c}
 .profile-avatar.ck{background:var(--success)}
 .profile-name{font-size:1.15rem;font-weight:700;letter-spacing:.02em}
 .profile-badges{display:flex;gap:.3rem;margin-top:.25rem;flex-wrap:wrap}
@@ -139,6 +139,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .action-card.act-muted{background:#f5f4f3;border-color:#e6e4e1;opacity:.7}
 .action-card.act-muted .ai-wrap{background:rgba(0,0,0,.04);color:var(--text-muted)}
 .action-card.act-muted .at{color:var(--text-muted)}
+.action-card.act-special{background:#fff4ec;border-color:#e8a06c;border-width:2px}
+.action-card.act-special .ai-wrap{background:#f4dcc8;color:#b5622a}
+.action-card.act-special .at{color:#8c4517}
+.action-card.act-special .at strong{color:#b5622a}
+.action-card.act-special .as{color:#a0632e}
 
 .checkin-bar{border-top:1px solid var(--border-light);padding:.85rem 0 0;margin-top:.85rem;flex-shrink:0;display:flex;gap:.5rem;align-items:center;width:100%}
 .btn-checkin{flex:1;display:flex;align-items:center;justify-content:center;gap:.4rem;background:var(--terra);color:#fff;border:none;padding:.7rem 1.2rem;border-radius:var(--radius);font-size:.92rem;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .15s;letter-spacing:.02em}
@@ -696,10 +701,10 @@ function selectPerson(idx){
     if(eMeal && eMeal!=='不用餐'){
       acts+=ac('act-success',I.gift,'發放會員禮品＋午餐餐券（'+esc(eMeal)+'）', isOnsitePaid?'現場繳費':'');
     } else {
-      acts+=ac('act-success',I.gift,'發放會員禮品', isOnsitePaid?'現場繳費，不用餐':'此會員不用餐，無需發放餐券');
+      acts+=ac('act-special',I.gift,'⚠ 發放會員禮品（不用餐）', isOnsitePaid?'現場繳費，無需發放餐券':'此會員不用餐，無需發放餐券');
     }
   } else if(isMem&&isConfirmedNoPay){
-    acts+=ac('act-muted',I.gift,'會員（確認不繳費）','無禮品及餐券');
+    acts+=ac('act-special',I.gift,'⚠ 會員（確認不繳費）','無禮品及餐券');
   } else if(isMem&&!isPaid){
     // 未繳費：顯示詢問 + 現場繳費按鈕
     acts+=`<div class="action-card act-warning">
@@ -715,9 +720,9 @@ function selectPerson(idx){
       </div>
     </div>`;
   }
-  // 非會員有用餐需求（特殊身分）
+  // 非會員有用餐需求（特殊身分）→ 顯眼提示
   if(!isMem && eMeal && eMeal!=='不用餐'){
-    acts+=ac('act-success',I.meal,'發放午餐餐券（'+esc(eMeal)+'）','非會員，具特殊身分用餐資格');
+    acts+=ac('act-special',I.meal,'⚠ 發放午餐餐券（'+esc(eMeal)+'）','非會員，具特殊身分用餐資格');
   }
   if(hasPoster){
     posters.forEach(p=>{
