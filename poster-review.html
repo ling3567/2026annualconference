@@ -2209,7 +2209,7 @@ function renderResultsTable(papers){
   // 空陣列時顯示提示（通常是資料未載入）
   if(!papers.length){
     const cb=el('resultsCatBody'), ab=el('resultsAllBody');
-    const emptyMsg='<tr><td colspan="10" style="text-align:center;color:#718096;padding:2.5rem;font-size:.85rem">尚無資料，請點「資料載入」重新整理</td></tr>';
+    const emptyMsg='<tr><td colspan="11" style="text-align:center;color:#718096;padding:2.5rem;font-size:.85rem">尚無資料，請點「資料載入」重新整理</td></tr>';
     if(cb) cb.innerHTML=emptyMsg;
     if(ab) ab.innerHTML=emptyMsg;
     return;
@@ -2268,7 +2268,7 @@ function renderResultsTable(papers){
     if(valid.length===1)return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
     return '—';
   }
-  function sepRow(label){return `<tr><td colspan="10" style="background:#f8fafc;font-size:.78rem;font-weight:700;color:#3a4550;padding:.4rem .9rem;border-top:2px solid #dce6ec;letter-spacing:.03em">${label}</td></tr>`;}
+  function sepRow(label){return `<tr><td colspan="11" style="background:#f8fafc;font-size:.78rem;font-weight:700;color:#3a4550;padding:.4rem .9rem;border-top:2px solid #dce6ec;letter-spacing:.03em">${label}</td></tr>`;}
 
   // ── 有效論文列 ──
   function row(p,rb){
@@ -2320,7 +2320,7 @@ function renderResultsTable(papers){
     const otherPapers=(window.dashData?.papers||[]).filter(x=>x.id!==p.id&&x.contactName===contactName&&contactName);
     const otherStr=otherPapers.length?otherPapers.map(x=>{const m=_displayMode[x.id]||'eposter';return `${x.paperNo||x.id}（${m==='physical'?'<span style="color:#1d4ed8;font-weight:600">實體</span>':m==='rejected'?'<span style="color:#b91c1c;font-weight:600">退稿</span>':'ePoster'}）`;}).join('、'):'無';
     const subRow=`<tr id="sub_${p.id}" style="display:none;background:#f0f4f8">
-      <td colspan="10" style="padding:.6rem 1rem .75rem 1.5rem;border-top:1px solid #cbd5e0;border-bottom:2px solid #94a3b8">
+      <td colspan="11" style="padding:.6rem 1rem .75rem 1.5rem;border-top:1px solid #cbd5e0;border-bottom:2px solid #94a3b8">
         <div style="display:flex;gap:3rem;flex-wrap:wrap;font-size:.85rem;color:#1e293b;align-items:flex-start">
           <div>
             <div style="font-size:.7rem;font-weight:700;color:#475569;letter-spacing:.06em;margin-bottom:.25rem">聯絡人</div>
@@ -2393,7 +2393,7 @@ function renderResultsTable(papers){
       catPapers.forEach(p=>{ html+=row(p,badge(catRankMap[p.id])); });
       catNoScore.forEach(p=>{ html+=row(p,badge(undefined)); });
       if(catRej.length){
-        html+=`<tr><td colspan="10" style="background:#fff0f0;font-size:.72rem;font-weight:600;color:#dc2626;padding:.3rem .9rem;border-top:1px dashed #fca5a5">退稿論文（不列入排名）</td></tr>`;
+        html+=`<tr><td colspan="11" style="background:#fff0f0;font-size:.72rem;font-weight:600;color:#dc2626;padding:.3rem .9rem;border-top:1px dashed #fca5a5">退稿論文（不列入排名）</td></tr>`;
         catRej.forEach(p=>{ html+=rejRow(p); });
       }
     });
@@ -2408,7 +2408,7 @@ function renderResultsTable(papers){
     sortedRankable.forEach(p=>{ html+=row(p,badge(allRankMap[p.id])); });
     noScore.forEach(p=>{ html+=row(p,badge(undefined)); });
     if(rejected.length){
-      html+=`<tr><td colspan="10" style="background:#fff0f0;font-size:.72rem;font-weight:600;color:#dc2626;padding:.4rem .9rem;border-top:2px dashed #fca5a5">退稿論文（不列入排名，共 ${rejected.length} 篇）</td></tr>`;
+      html+=`<tr><td colspan="11" style="background:#fff0f0;font-size:.72rem;font-weight:600;color:#dc2626;padding:.4rem .9rem;border-top:2px dashed #fca5a5">退稿論文（不列入排名，共 ${rejected.length} 篇）</td></tr>`;
       rejected.forEach(p=>{ html+=rejRow(p); });
     }
     allBody.innerHTML=html;
@@ -2625,7 +2625,7 @@ function refreshOsceAssignRow(cid){
 
 function renderOsceResultsTable(cases){
   const body=el('osceResultsBody');if(!body)return;
-  if(!cases||!cases.length){body.innerHTML='<tr><td colspan="8" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';return;}
+  if(!cases||!cases.length){body.innerHTML='<tr><td colspan="9" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';return;}
 
   // 前端重算 avgTotal（確保與詳細視窗一致）
   cases.forEach(cs=>{
@@ -2675,7 +2675,7 @@ function renderOsceResultsTable(cases){
   sorted.forEach(c=>{
     const confirmed=c.memberConfirmed||'';
     const subRow=`<tr id="oscsub_${c.id}" style="display:none;background:#f0f4f8">
-      <td colspan="8" style="padding:.6rem 1rem .75rem 1.5rem;border-top:1px solid #cbd5e0;border-bottom:2px solid #94a3b8">
+      <td colspan="9" style="padding:.6rem 1rem .75rem 1.5rem;border-top:1px solid #cbd5e0;border-bottom:2px solid #94a3b8">
         <div style="display:flex;gap:3rem;flex-wrap:wrap;font-size:.85rem;color:#1e293b">
           <div>
             <div style="font-size:.7rem;font-weight:700;color:#475569;letter-spacing:.06em;margin-bottom:.25rem">聯絡人</div>
@@ -2706,7 +2706,7 @@ function renderOsceResultsTable(cases){
       <td onclick="event.stopPropagation()"><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showOsceDetail('${c.id}')">詳細</button></td>
     </tr>${subRow}`;
   });
-  body.innerHTML=html||'<tr><td colspan="8" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';
+  body.innerHTML=html||'<tr><td colspan="9" style="text-align:center;color:#718096;padding:2rem">尚無評分記錄</td></tr>';
   // 確保所有子列預設收合
   body.querySelectorAll('tr[id^="oscsub_"]').forEach(sub=>{ sub.style.display='none'; });
 }
