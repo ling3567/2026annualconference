@@ -1396,7 +1396,7 @@ input.error, select.error, textarea.error {
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdppunk_BTiZN2ShWpJilr5FGnCrN4BB6QPD_miImF5pObEZxe3wSAQaj5VuWbnF3m/exec';
 
 // ===== 截止日期控制（台灣時間 2026/6/15 23:59）=====
-const DEADLINE = new Date('2026-06-16T14:00:00+08:00');
+const DEADLINE = new Date('2026-06-16T05:00:00+08:00');
 (function checkDeadline() {
   if (new Date() > DEADLINE) {
     document.getElementById('closedOverlay').classList.add('show');
