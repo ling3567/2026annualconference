@@ -2066,7 +2066,7 @@ async function loadDashboard(forceRefresh=false){
     try{ await loadCatOverrides(); }catch(lcErr){ console.warn('loadCatOverrides skip:',lcErr); }
     try{ renderResultsTable(r.papers); }catch(rtErr){ console.error('renderResultsTable:',rtErr); }
     renderRvTable(r.reviewers);
-    loadOsceDashboard();
+    loadOsceDashboard(forceRefresh);
   }catch(e){showToast('連線失敗：'+( e&&e.message?e.message:String(e)),'err');console.error(e);}
   setLdr(false);
 }
@@ -2521,7 +2521,7 @@ function assignSwitchType(t){
   if(nbo){nbo.style.background=t==='osce'?'#1e4d8c':'white';nbo.style.color=t==='osce'?'white':'#64748b';nbo.style.border=t==='osce'?'none':'1.5px solid #e2e8f0';}
   el('assignPosterSection').style.display=t==='poster'?'':'none';
   el('assignOsceSection').style.display=t==='osce'?'':'none';
-  if(t==='osce'){console.log('assignSwitchType osce: osceData=',osceData,'cases=',osceData&&osceData.cases);if(!osceData)loadOsceDashboard();else renderOsceAssignTable(osceData.cases,osceData.reviewers);}
+  if(t==='osce'){if(!osceData)loadOsceDashboard();else renderOsceAssignTable(osceData.cases,osceData.reviewers);}
 }
 function resultsSwitchType(t){
   resultsType=t;
@@ -2538,9 +2538,9 @@ function resultsSwitchType(t){
   if(t==='osce'){if(!osceData)loadOsceDashboard();else renderOsceResultsTable(osceData.cases);}
 }
 
-async function loadOsceDashboard(){
+async function loadOsceDashboard(forceRefresh=false){
   try{
-    const r=await api({action:'adminGetOsceDashboard'}, 60000);
+    const r=await api({action:'adminGetOsceDashboard', forceRefresh: forceRefresh?'true':'false'}, 60000);
     if(!r.success){osceData={cases:[],reviewers:[],stats:{total:0,reviewed:0}};}
     else{osceData=r;(r.reviewers||[]).forEach(rv=>{if(rv.username&&rv.name)reviewerNamesMap[rv.username]=rv.name;});}
     const ar=await api({action:'adminGetOsceAssignments'}, 60000);
@@ -2702,8 +2702,8 @@ function renderOsceResultsTable(cases){
       <td style="text-align:center">${badge(rankMap[c.id])}</td>
       <td><span class="chip chip-blue chip-no">${esc(c.caseNo||'—')}</span></td>
       <td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(c.title)}</td>
-      <td style="font-size:.82rem">${esc(cs.hospital||'—')}</td>
-      <td style="font-size:.78rem;color:#64748b">${esc(cs.staffType||'—')}</td>
+      <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
+      <td style="font-size:.78rem;color:#64748b">${esc(c.staffType||'—')}</td>
       <td style="text-align:center">${osceMemberBadge(confirmed)}</td>
       <td style="font-weight:700;font-size:1rem">${c.avgTotal!==null?c.avgTotal+'分':'—'}</td>
       <td>${osceGap(c)}</td>
