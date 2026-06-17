@@ -2017,8 +2017,13 @@ function admSwitchTab(t){
     else renderOpinionsPage(opinType||'poster');
   }
   if(t==='assign'){
-    if(osceData) renderOsceAssignTable(osceData.cases,osceData.reviewers);
-    else loadOsceDashboard();
+    // 確保顯示正確的 section
+    const ap=el('assignPosterSection'); if(ap) ap.style.display=assignType==='poster'?'':'none';
+    const ao=el('assignOsceSection');   if(ao) ao.style.display=assignType==='osce'?'':'none';
+    if(assignType==='osce'){
+      if(osceData) renderOsceAssignTable(osceData.cases,osceData.reviewers);
+      else loadOsceDashboard();
+    }
   }
   const rTypeBar=el('resultTypeInTab'); if(rTypeBar) rTypeBar.style.display=t==='results'?'flex':'none';
   const dTypeBar=el('dashTypeInTab');   if(dTypeBar) dTypeBar.style.display=t==='dashboard'?'flex':'none';
@@ -2066,7 +2071,7 @@ async function loadDashboard(forceRefresh=false){
   setLdr(false);
 }
 
-function renderStats(s){
+function renderStats(s, osceS_param){
   // Apps Script 欄位：totalPapers, reviewedPapers, recommended, activeReviewers
   // OSCE stats 欄位：total, reviewed
   const total    = s ? (s.total    || s.totalPapers    || 0) : 0;
@@ -2074,7 +2079,7 @@ function renderStats(s){
   const recommended = s ? (s.recommended || 0) : 0;
   const active   = s ? (s.activeReviewers || 0) : 0;
   const pct = total ? Math.round(reviewed/total*100) : 0;
-  const osceS = osceData && osceData.stats;
+  const osceS = osceS_param !== undefined ? osceS_param : (osceData && osceData.stats);
   const osceTotal    = osceS ? (osceS.total    || osceS.totalCases    || 0) : null;
   const osceReviewed = osceS ? (osceS.reviewed || osceS.reviewedCases || 0) : null;
   el('statsRow').innerHTML=`
@@ -2544,8 +2549,7 @@ async function loadOsceDashboard(){
     renderOsceAssignTable(osceData.cases,osceData.reviewers);
     renderOsceResultsTable(osceData.cases);
     if(dashData){
-      renderStats(dashData.stats);
-      // 同步更新指派頁和結果頁的 OSCE section（若已在對應分頁）
+      renderStats(dashData.stats, osceData.stats);
       if(assignType==='osce') renderOsceAssignTable(osceData.cases,osceData.reviewers);
       if(resultsType==='osce') renderOsceResultsTable(osceData.cases);
     }
