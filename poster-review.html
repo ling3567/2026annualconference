@@ -2521,7 +2521,7 @@ function assignSwitchType(t){
   if(nbo){nbo.style.background=t==='osce'?'#1e4d8c':'white';nbo.style.color=t==='osce'?'white':'#64748b';nbo.style.border=t==='osce'?'none':'1.5px solid #e2e8f0';}
   el('assignPosterSection').style.display=t==='poster'?'':'none';
   el('assignOsceSection').style.display=t==='osce'?'':'none';
-  if(t==='osce'){if(!osceData)loadOsceDashboard();else renderOsceAssignTable(osceData.cases,osceData.reviewers);}
+  if(t==='osce'){console.log('assignSwitchType osce: osceData=',osceData,'cases=',osceData&&osceData.cases);if(!osceData)loadOsceDashboard();else renderOsceAssignTable(osceData.cases,osceData.reviewers);}
 }
 function resultsSwitchType(t){
   resultsType=t;
