@@ -3030,11 +3030,21 @@ function renderOpinionsPage(t){
   const body=el('opinionsBody'); if(!body) return;
   opinType=t||opinType;
 
+  function sortByNo(a, b){
+    const parse = no => {
+      const m = String(no||'').match(/^([A-Za-z第]+[-\s]?)(\d+)/);
+      if(!m) return [no||'', 0];
+      return [m[1].toUpperCase(), parseInt(m[2])];
+    };
+    const [aL, aN] = parse(a.paperNo||a.caseNo);
+    const [bL, bN] = parse(b.paperNo||b.caseNo);
+    return aL!==bL ? aL.localeCompare(bL) : aN-bN;
+  }
+
   if(opinType==='poster'){
     if(!dashData||!dashData.papers){ body.innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">請先載入總覽統計資料</p>'; return; }
     const papers=dashData.papers;
-    // 只顯示有意見的論文
-    const withOpinions=papers.filter(p=>p.reviews.some(r=>r.catAdjust||r.comment||r.rejectReason));
+    const withOpinions=[...papers.filter(p=>p.reviews.some(r=>r.catAdjust||r.comment||r.rejectReason))].sort(sortByNo);
     if(!withOpinions.length){ body.innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">尚無評審意見</p>'; return; }
     let html='';
     withOpinions.forEach(p=>{
@@ -3054,19 +3064,18 @@ function renderOpinionsPage(t){
           const catFull={A:'A 類｜臨床技能教育、模擬教學與跨專業學習',B:'B 類｜評量、信任決策與能力導向醫學教育',C:'C 類｜人文素養、醫療韌性與專業認同'};
           html+=`<div style="font-size:.82rem;margin-bottom:.25rem"><span style="background:#fef3c7;color:#92400e;padding:.1rem .4rem;border-radius:4px;font-size:.7rem;font-weight:700;margin-right:.4rem">建議改類</span>${esc(catFull[r.catAdjust]||r.catAdjust)}</div>`;
         }
-        if(r.comment)   html+=`<div style="font-size:.82rem;color:#334155;margin-bottom:.2rem"><span style="color:#64748b;font-size:.75rem"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> </span>${esc(r.comment)}</div>`;
+        if(r.comment) html+=`<div style="font-size:.82rem;color:#334155;line-height:1.75;margin-bottom:.2rem"><span style="color:#64748b;font-size:.75rem">💬 </span>${formatComment(r.comment)}</div>`;
         if(r.rejectReason) html+=`<div style="font-size:.82rem;color:#dc2626"><span style="font-size:.75rem">⚠ 退稿原因：</span>${esc(r.rejectReason)}</div>`;
-        html+=`</div>`;
+        html+='</div>';
       });
-      html+=`</div>`;
+      html+='</div>';
     });
     body.innerHTML=html;
 
   } else {
-    // OSCE
     if(!osceData||!osceData.cases){ body.innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">請先載入 OSCE 資料</p>'; return; }
     const cases=osceData.cases;
-    const withOpinions=cases.filter(c=>c.reviews.some(r=>r.comment||r.rejectReason));
+    const withOpinions=[...cases.filter(c=>c.reviews.some(r=>r.comment||r.rejectReason))].sort(sortByNo);
     if(!withOpinions.length){ body.innerHTML='<p style="color:#718096;font-size:.85rem;text-align:center;padding:2rem">尚無評審意見</p>'; return; }
     let html='';
     withOpinions.forEach(c=>{
@@ -3082,34 +3091,15 @@ function renderOpinionsPage(t){
         if(!hasOpinion) return;
         html+=`<div style="margin-left:.5rem;margin-bottom:.5rem;padding:.6rem .8rem;background:#fffbeb;border-left:3px solid ${r.rejected?'#fca5a5':'#fde68a'};border-radius:0 6px 6px 0">
           <div style="font-size:.78rem;font-weight:600;color:#3b82f6;margin-bottom:.35rem">評審 ${i+1}・${rvName(r.reviewer)}</div>`;
-        if(r.comment)      html+=`<div style="font-size:.82rem;color:#334155;margin-bottom:.2rem"><span style="color:#64748b;font-size:.75rem"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> </span>${esc(r.comment)}</div>`;
+        if(r.comment) html+=`<div style="font-size:.82rem;color:#334155;line-height:1.75;margin-bottom:.2rem"><span style="color:#64748b;font-size:.75rem">💬 </span>${formatComment(r.comment)}</div>`;
         if(r.rejectReason) html+=`<div style="font-size:.82rem;color:#dc2626"><span style="font-size:.75rem">⚠ 退稿原因：</span>${esc(r.rejectReason)}</div>`;
-        html+=`</div>`;
+        html+='</div>';
       });
-      html+=`</div>`;
+      html+='</div>';
     });
     body.innerHTML=html;
   }
 }
-// ══ 頁面載入時自我檢查 ══
-(function checkHealth(){
-  // 函式用 typeof window[n]
-  const fns=['doLogin','renderList','renderPosterContent','renderOsceContent',
-    'renderPosterScoreForm','renderOsceScoreForm','loadDashboard','loadOsceDashboard',
-    'renderDashTable','renderAssignTable','renderResultsTable','renderRvTable',
-    'renderOsceDashTable','renderOsceAssignTable','renderOsceResultsTable',
-    'showDetail','showOsceDetail','rvName','saveDraft','submitScore'];
-  const missingFns=fns.filter(n=>typeof window[n]==='undefined');
-  // const 常數用 try/catch
-  const consts=['CRITERIA','OSCE_CRITERIA','ADM_CRITERIA','POSTER_CRITERIA','OSCE_ALL_CRITERIA'];
-  const missingConsts=consts.filter(n=>{try{return eval('typeof '+n)==='undefined';}catch{return true;}});
-  const all=[...missingFns,...missingConsts];
-  if(all.length) console.warn('⚠️ 缺少:', all.join(', '));
-  else console.log('✅ 所有必要函式/常數均已載入');
-})();
-
-// ══ 拖動排序 ══
-let _dragSrcRow=null;
 function dragStart(e){
   _dragSrcRow=e.currentTarget;
   e.dataTransfer.effectAllowed='move';
