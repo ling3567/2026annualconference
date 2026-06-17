@@ -1296,8 +1296,11 @@ function renderDriveFileList(container, caseId, files) {
       <span style="flex:1;font-size:.82rem;color:#1c1c2e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(f.name)}">${esc(f.name)}</span>
       <span style="font-size:.7rem;color:var(--muted);white-space:nowrap;flex-shrink:0">${fileSize(f.size)}</span>
       ${canPreview
-        ? `<button onclick="previewDriveFile('${caseId}','${f.previewUrl}','${esc(f.name)}')"
-            style="flex-shrink:0;padding:.2rem .55rem;font-size:.72rem;border:1px solid var(--border);border-radius:5px;background:white;color:#546070;cursor:pointer;font-family:inherit;white-space:nowrap">預覽</button>`
+        ? f.type === 'video'
+          ? `<a href="https://drive.google.com/file/d/${f.id}/view" target="_blank"
+              style="flex-shrink:0;padding:.2rem .55rem;font-size:.72rem;border:1px solid #3b82f6;border-radius:5px;background:#eff6ff;color:#1d4ed8;cursor:pointer;text-decoration:none;white-space:nowrap">▶ 開啟影片</a>`
+          : `<button onclick="previewDriveFile('${caseId}','${f.previewUrl}','${esc(f.name)}')"
+              style="flex-shrink:0;padding:.2rem .55rem;font-size:.72rem;border:1px solid var(--border);border-radius:5px;background:white;color:#546070;cursor:pointer;font-family:inherit;white-space:nowrap">預覽</button>`
         : `<a href="https://drive.google.com/file/d/${f.id}/view" target="_blank"
             style="flex-shrink:0;padding:.2rem .55rem;font-size:.72rem;border:1px solid var(--border);border-radius:5px;background:white;color:#546070;cursor:pointer;text-decoration:none;white-space:nowrap">開啟</a>`
       }
