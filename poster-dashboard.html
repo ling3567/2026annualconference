@@ -544,9 +544,9 @@ canvas{max-height:240px;}
         <span style="font-size:0.85rem;font-weight:700;color:#333">選擇範本：</span>
         <button class="btn btn-sm btn-primary" onclick="loadAcceptTemplate('eposter')">📧 E-Poster</button>
         <button class="btn btn-sm" style="background:#2e7d32;color:white" onclick="loadAcceptTemplate('physical')">📧 實體張貼</button>
-        <button class="btn btn-sm" style="background:#6a1b9a;color:white" onclick="loadAcceptTemplate('excellent')">📧 優秀海報</button>
-        <button class="btn btn-sm" style="background:#e65100;color:white" onclick="loadAcceptTemplate('eposter_excellent')">📧 優秀＋E-Poster</button>
-        <button class="btn btn-sm" style="background:#0d47a1;color:white" onclick="loadAcceptTemplate('physical_excellent')">📧 優秀＋實體</button>
+        <button class="btn btn-sm" style="background:#6a1b9a;color:white" onclick="loadAcceptTemplate('excellent')">📧 優秀海報（口頭報告段落）</button>
+        <button class="btn btn-sm" style="background:#e65100;color:white" onclick="loadAcceptTemplate('eposter,excellent')">📧 優秀＋E-Poster</button>
+        <button class="btn btn-sm" style="background:#0d47a1;color:white" onclick="loadAcceptTemplate('physical,excellent')">📧 優秀＋實體</button>
       </div>
       <div style="margin-bottom:0.6rem">
         <label style="font-size:0.85rem;font-weight:700;color:#333;display:block;margin-bottom:0.4rem"><span style="display:inline-flex;align-items:center;gap:0.4rem"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> 信件內容（可直接編輯樣式）</span></label>
@@ -572,8 +572,7 @@ canvas{max-height:240px;}
           <span style="width:1px;height:20px;background:#ccc;margin:0 0.2rem"></span>
           <span style="font-size:0.75rem;color:#888">可用變數：</span>
           <code style="font-size:0.75rem;background:#e3f2fd;padding:0.1rem 0.3rem;border-radius:3px;cursor:pointer" onclick="insertVarA('{姓名}')">{姓名}</code>
-          <code style="font-size:0.75rem;background:#e3f2fd;padding:0.1rem 0.3rem;border-radius:3px;cursor:pointer" onclick="insertVarA('{編號}')">{編號}</code>
-          <code style="font-size:0.75rem;background:#e3f2fd;padding:0.1rem 0.3rem;border-radius:3px;cursor:pointer" onclick="insertVarA('{題目}')">{題目}</code>
+          <code style="font-size:0.75rem;background:#e3f2fd;padding:0.1rem 0.3rem;border-radius:3px;cursor:pointer" onclick="insertVarA('{海報清單}')">{海報清單}</code>
         </div>
         <div id="acceptEditor" contenteditable="true"
           style="min-height:280px;max-height:380px;overflow-y:auto;padding:0.9rem 1rem;border:1.5px solid #ccc;border-top:none;border-radius:0 0 8px 8px;font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;font-size:14px;line-height:1.9;outline:none;background:white"
@@ -1140,102 +1139,52 @@ async function saveAcceptTypeChanges() {
 function selectAccept(v){ document.querySelectorAll('.accept-chk').forEach(c=>c.checked=v); }
 
 // ===== 錄取通知範本 =====
-const ACCEPT_TEMPLATES = {
-  eposter: `親愛的 {姓名} 先生／小姐 您好：
+// =====================================================
+// 範本系統（模組化）：共用開頭/結尾 + 各類型內容區塊
+// 同一作者若有多篇／多類型，會自動把對應區塊組合進同一封信
+// 可用變數：{姓名}　{海報清單}（多筆海報編號+題目列表）
+// =====================================================
+const ACCEPT_HEADER = `親愛的 {姓名} 先生／小姐 您好：
 
 台灣醫事聯合臨床技能發展學會「2026年會員大會暨學術研討會」海報論文徵稿已完成收稿及審查作業。
 
-恭喜您！您的海報論文已通過本會審查，並將以 E-Poster（電子看板）形式展示。
+恭喜您！您的海報論文已通過本會審查，錄取資訊如下：
 
-‼️ 請務必依錄取之發表形式與附件《海報論文發表格式》製作海報，以確保發表品質。
+{海報清單}
 
-■ 發表日期：114年9月20日（星期六）08:00–16:00
+‼️ 請務必依錄取之發表形式及海報製作規格完成海報製作，並於大會當日依規定時間完成張貼，以確保發表品質。
+
+■ 發表日期：115年8月15日（星期六）08:30–15:30　（8:00開始報到）
 ■ 發表地點：奇美醫院第五醫療大樓 5 樓國際會議廳（台南市永康區中華路901號）
+`;
 
+const ACCEPT_BLOCK_PHYSICAL = `
+■ 海報實體張貼注意事項：
+ - 張貼時間：08:00–09:10
+ - 移除時間：14:30–15:30（逾時將由本會統一移除，恕不負保管責任）
+ - 尺寸規格：直式，寬 90 cm × 高 120 cm
+ - 張貼位置：請依海報編號於指定展示板張貼（現場備有文具用品）
+ - 海報內容：包含論文題目、作者(含服務單位)、研究動機、研究方法、研究結果、結論、關鍵字等，排版樣式可自行創意編排。
+`;
+
+const ACCEPT_BLOCK_EPOSTER = `
 ■ E-Poster 上傳說明：
- - 上傳期限：114年9月10日（星期三）前
- - 上傳連結：https://forms.gle/Bz4hMzLz2LfT5PVLA
+ - 上傳期限：115年8月5日（星期三）前
+ - 上傳連結：https://forms.gle/tpbZmZaJ15R9MevVA
  - 檔案規格：
    1. 直式，寬 38.1 cm × 高 64.73 cm，解析度 300 dpi
    2. 格式：限 JPG 檔，單頁，檔案大小不得超過 10MB
    3. 海報右上方請標示海報編號
-   4. 如錄取多篇，請逐篇分開上傳，勿合併檔案。
+   4. 海報內容：包含論文題目、作者(含服務單位)、研究動機、研究方法、研究結果、結論、關鍵字等，排版樣式可自行創意編排。
+   5. 如錄取多篇，請逐篇分開上傳，勿合併檔案。
+`;
 
-■ 研討會報名：敬邀報名參加當日研討會！
- - 報名連結：https://forms.gle/sRtRcDvcdYFwMEiE7
- - 報名截止日：9月10日（星期三）
-
-■ 附件：
- - 海報論文發表格式
- - E-Poster 錄取名單
-
-若有任何問題，歡迎與秘書處聯繫，謝謝。
-
-────────────────────────
-台灣醫事聯合臨床技能發展學會
-秘書處　楊依玲
-Tel：06-2812811 轉 57426
-E-mail：tsmcsd2018@gmail.com
-710402 台南市永康區中華路 901 號
-（教學大樓 3F 教學部）
-────────────────────────`,
-
-  physical: `親愛的 {姓名} 先生／小姐 您好：
-
-台灣醫事聯合臨床技能發展學會「2026年會員大會暨學術研討會」海報論文徵稿已完成收稿及審查作業。
-
-恭喜您！您的海報論文已通過本會審查，並將以實體張貼形式展示。
-
-‼️ 請務必依錄取之發表形式與附件《海報論文發表格式》製作海報，以確保發表品質。
-
-■ 發表日期：114年9月20日（星期六）08:00–16:00
-■ 發表地點：奇美醫院第五醫療大樓 5 樓國際會議廳（台南市永康區中華路901號）
-
-■ 海報張貼注意事項：
- - 張貼時間：08:00–09:10
- - 移除時間：15:00–16:00（逾時將由本會統一移除，不負保管責任）
- - 尺寸建議：寬 90 cm × 高 120 cm
- - 張貼位置：請依海報編號於現場展示板尋找對應位置（現場備有黏貼用品）
-
-■ 研討會報名：敬邀報名參加當日研討會！
- - 報名連結：https://forms.gle/sRtRcDvcdYFwMEiE7
- - 報名截止日：9月10日（星期三）
-
-■ 附件：
- - 海報論文發表格式
- - 實體張貼錄取名單
-
-若有任何問題，歡迎與秘書處聯繫，謝謝。
-
-────────────────────────
-台灣醫事聯合臨床技能發展學會
-秘書處　楊依玲
-Tel：06-2812811 轉 57426
-E-mail：tsmcsd2018@gmail.com
-710402 台南市永康區中華路 901 號
-（教學大樓 3F 教學部）
-────────────────────────`,
-
-  excellent: `親愛的 {姓名} 先生／小姐 您好：
-
-台灣醫事聯合臨床技能發展學會「2025年會員大會暨學術研討會」海報論文徵稿已完成收稿及審查作業。
-
-恭喜您！您的海報論文入圍「優秀海報」候選，將以實體張貼展示，並邀請至現場進行口頭報告。
-
-‼️ 請務必依錄取之發表形式與附件《海報論文發表格式》製作海報，以確保發表品質。
-
-■ 發表日期：114年9月20日（星期六）08:00–16:00
-■ 發表地點：奇美醫院第五醫療大樓 5 樓國際會議廳（台南市永康區中華路901號）
-
-■ 優秀海報實體張貼注意事項：
- - 張貼時間：08:00–09:10
- - 移除時間：15:00–16:00（逾時將由本會統一移除，不負保管責任）
- - 尺寸建議：寬 90 cm × 高 120 cm
- - 張貼位置：請依海報編號於現場展示板尋找對應位置（現場備有黏貼用品）
+const ACCEPT_BLOCK_EXCELLENT = `
+■ 優秀海報評選說明：您獲邀進入「優秀海報」評選，並於大會當日進行現場口頭報告，請參閱以下說明：
 
 ■ 現場口頭報告：
- - 報告時間：11:00–12:00
- - 報告地點：張貼海報展區（個人海報前）
+ - 口頭時間：12:30–13:30
+ - 口頭地點：張貼海報展區（個人海報前）
  - 發表方式：
    ① 口頭報告 3 分鐘（簡要說明論文內容）
    ② 提問回覆 2 分鐘（回答審查委員提問）
@@ -1243,16 +1192,14 @@ E-mail：tsmcsd2018@gmail.com
  - 口頭報告須由通訊作者陪同入列候審。
  - 報告流程：工作人員將於約 2、3 分鐘前提醒，請報告者準備上臺報告。
  - 未依規定執行口頭報告者，將視同放棄優秀海報評選資格。
+`;
 
+const ACCEPT_FOOTER = `
 ■ 研討會報名：敬邀報名參加當日研討會！
- - 報名連結：https://forms.gle/sRtRcDvcdYFwMEiE7
- - 報名截止日：9月10日（星期三）
+ - 報名連結：https://ling3567.github.io/2026annualconference/registration
+ - 報名截止日：8月5日（星期三），額滿將提前截止
 
-■ 附件：
- - 海報論文發表格式
- - 實體張貼暨優秀海報錄取名單
-
-若有任何問題，歡迎與秘書處聯繫，謝謝。
+若有任何問題，歡迎與秘書處聯絡，謝謝。
 
 ────────────────────────
 台灣醫事聯合臨床技能發展學會
@@ -1261,24 +1208,52 @@ Tel：06-2812811 轉 57426
 E-mail：tsmcsd2018@gmail.com
 710402 台南市永康區中華路 901 號
 （教學大樓 3F 教學部）
-────────────────────────`
-};
-// 合併版本（優秀海報＋另一展示形式），先以優秀海報內容為主體
-ACCEPT_TEMPLATES.eposter_excellent = ACCEPT_TEMPLATES.excellent.replace('並以實體張貼展示，並邀請至現場進行口頭報告。', '同時將以 E-Poster（電子看板）展示，並邀請至現場進行口頭報告。')
-  .replace(/■ 優秀海報實體張貼注意事項：[\s\S]*?■ 現場口頭報告：/, `■ E-Poster 上傳說明：
- - 上傳期限：114年9月10日（星期三）前
- - 上傳連結：https://forms.gle/Bz4hMzLz2LfT5PVLA
- - 檔案規格：直式，寬 38.1 cm × 高 64.73 cm，解析度 300 dpi，限 JPG 檔，單頁，檔案大小不得超過 10MB，海報右上方請標示海報編號
+────────────────────────`;
 
-■ 現場口頭報告：`);
-ACCEPT_TEMPLATES.physical_excellent = ACCEPT_TEMPLATES.excellent;
+// 依錄取類型集合（去重後的 mode 陣列）組裝完整範本文字
+// modes 範例：['eposter'] / ['physical','excellent'] / ['eposter','excellent']
+function assembleAcceptTemplate(modes) {
+  let body = ACCEPT_HEADER;
+  if (modes.includes('physical')) body += ACCEPT_BLOCK_PHYSICAL;
+  if (modes.includes('eposter'))  body += ACCEPT_BLOCK_EPOSTER;
+  if (modes.includes('excellent')) body += ACCEPT_BLOCK_EXCELLENT;
+  body += ACCEPT_FOOTER;
+  return body;
+}
 
 function loadAcceptTemplate(type) {
-  const tmpl = ACCEPT_TEMPLATES[type] || ACCEPT_TEMPLATES.eposter;
+  const modes = type.split(',').map(s=>s.trim()).filter(Boolean);
+  const tmpl = assembleAcceptTemplate(modes);
   const editor = document.getElementById('acceptEditor');
   editor.innerHTML = plainToEditorHtml(tmpl);
   syncAcceptTemplate();
   refreshAcceptPreview();
+}
+
+// ===== 依通訊作者 Email 分組（同一 Email 視為同一人，多篇合併成一封信）=====
+function groupAcceptByEmail(rowIdxList) {
+  const groups = {}; // email -> {name, email, rows:[i,...], modes:Set}
+  rowIdxList.forEach(i => {
+    const r = submissions[i];
+    const email = (r[9]||'').trim().toLowerCase();
+    if(!email) return; // 沒有 Email 的略過（無法發信）
+    const typeVal = acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || '';
+    const modes = typeVal.split(',').map(s=>s.trim()).filter(Boolean);
+    if(!groups[email]) groups[email] = { name: r[8]||'', email: r[9]||'', rows: [], modes: new Set() };
+    groups[email].rows.push(i);
+    modes.forEach(m => groups[email].modes.add(m));
+  });
+  return Object.values(groups);
+}
+
+// 組成單一作者的「海報清單」文字（多篇列出多筆）
+function buildPosterListText(group) {
+  return group.rows.map(i => {
+    const r = submissions[i];
+    const typeVal = acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || '';
+    const label = getAcceptTypeLabel(typeVal);
+    return ` - 海報編號：${r[0]||''}　｜　論文題目：${r[3]||''}　｜　錄取形式：${label}`;
+  }).join('\n');
 }
 
 function openAcceptPreview() {
@@ -1290,12 +1265,17 @@ function openAcceptPreview() {
     showInfo(`⚠️ ${noType.length} 筆尚未指定錄取類型（${noType.slice(0,5).map(i=>submissions[i][0]).join('、')}${noType.length>5?'...':''}），請先在表格中指定`, 'warning');
     return;
   }
-  document.getElementById('acceptCount').textContent = sel.length;
-  // 依第一筆的類型自動載入對應範本
-  const firstType = acceptTypeChanges[sel[0]] || submissions[sel[0]][ACCEPT_TYPE_IDX] || 'eposter';
-  const tmplKey = getAcceptTemplateKey(firstType);
+  const noEmail = sel.filter(i => !(submissions[i][9]||'').trim());
+  if(noEmail.length){
+    showInfo(`⚠️ ${noEmail.length} 筆沒有 Email，將無法發信（${noEmail.slice(0,5).map(i=>submissions[i][0]).join('、')}${noEmail.length>5?'...':''}）`, 'warning');
+  }
+
+  const groups = groupAcceptByEmail(sel);
+  document.getElementById('acceptCount').textContent = `${groups.length} 人（共 ${sel.length} 篇）`;
+  // 依第一組的類型組合自動載入對應範本（之後可手動編輯套用到所有人）
+  const firstModes = Array.from(groups[0]?.modes || ['eposter']);
   const editor = document.getElementById('acceptEditor');
-  editor.innerHTML = plainToEditorHtml(ACCEPT_TEMPLATES[tmplKey] || ACCEPT_TEMPLATES.eposter);
+  editor.innerHTML = plainToEditorHtml(assembleAcceptTemplate(firstModes));
   syncAcceptTemplate();
   refreshAcceptPreview();
   document.getElementById('acceptModal').classList.add('show');
@@ -1310,52 +1290,57 @@ function refreshAcceptPreview() {
     list.innerHTML='<p style="color:#aaa;font-size:0.85rem;padding:0.5rem">請先點選上方範本按鈕。</p>';
     return;
   }
-  sel.forEach(i => {
-    const r = submissions[i];
-    const typeVal = acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || '';
+  const groups = groupAcceptByEmail(sel);
+  groups.forEach(group => {
+    const posterList = buildPosterListText(group);
     const html = tmplHtml
-      .replace(/\{姓名\}/g, esc(r[8]||''))
-      .replace(/\{編號\}/g, esc(r[0]||''))
-      .replace(/\{題目\}/g, esc(r[3]||''));
+      .replace(/\{姓名\}/g, esc(group.name))
+      .replace(/\{海報清單\}/g, esc(posterList).replace(/\n/g,'<br>'));
+    const modesLabel = getAcceptTypeLabel(Array.from(group.modes).join(','));
     const div = document.createElement('div');
     div.style.cssText = 'margin-bottom:1rem;border:1px solid #ddd;border-radius:8px;overflow:hidden';
-    div.innerHTML = `<div style="background:#f3e5f5;padding:0.45rem 0.75rem;font-size:0.78rem;color:var(--purple);font-weight:700">${esc(r[8]||'')} &lt;${esc(r[9]||'')}&gt; ｜ ${esc(getAcceptTypeLabel(typeVal))}</div>
-      <div style="padding:1rem;font-family:'Noto Sans TC',sans-serif;font-size:14px;line-height:1.8">${html}</div>`;
+    div.innerHTML = `<div style="background:#f3e5f5;padding:0.45rem 0.75rem;font-size:0.78rem;color:var(--purple);font-weight:700">${esc(group.name)} &lt;${esc(group.email)}&gt; ｜ ${esc(modesLabel)} ｜ 共 ${group.rows.length} 篇</div>
+      <div style="padding:1rem;font-family:'Noto Sans TC',sans-serif;font-size:14px;line-height:1.8;white-space:pre-wrap">${html}</div>`;
     list.appendChild(div);
   });
 }
 
-function buildAcceptMail(r, tmplHtml) {
+function buildAcceptMail(group, tmplHtml) {
+  const posterList = buildPosterListText(group);
+  const esc2 = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const body = (tmplHtml || '')
-    .replace(/\{姓名\}/g, (r[8]||'').replace(/&/g,'&amp;'))
-    .replace(/\{編號\}/g, (r[0]||'').replace(/&/g,'&amp;'))
-    .replace(/\{題目\}/g, (r[3]||'').replace(/&/g,'&amp;'));
-  return `<div style="text-align:left;font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif">${body}</div>`;
+    .replace(/\{姓名\}/g, esc2(group.name))
+    .replace(/\{海報清單\}/g, esc2(posterList).replace(/\n/g,'<br>'));
+  return `<div style="text-align:left;font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;white-space:pre-wrap">${body}</div>`;
 }
 
 async function sendAcceptEmails() {
   const sel = Array.from(document.querySelectorAll('.accept-chk:checked')).map(c=>parseInt(c.dataset.i));
   const tmplHtml = document.getElementById('acceptTemplate').value;
+  const groups = groupAcceptByEmail(sel);
   closeModal('acceptModal');
-  await runProgress(sel, async (i) => {
-    const r = submissions[i];
-    const typeVal = acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || '';
-    const htmlBody = buildAcceptMail(r, tmplHtml);
-    const body = new URLSearchParams();
-    body.append('action','sendAcceptEmail');
-    body.append('rowIndex', i+2);
-    body.append('data', JSON.stringify({
-      submissionId:r[0], title:r[3],
-      contactName:r[8], contactEmail:r[9],
-      acceptType: typeVal,
-      htmlBody: htmlBody
-    }));
-    const resp = await fetch(getUrl(),{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
-    const json = await resp.json();
-    if(json.result!=='success') throw new Error(json.message);
-    submissions[i][ACCEPT_STATUS_IDX] = '錄取信已發送';
-    if(typeVal) submissions[i][ACCEPT_TYPE_IDX] = typeVal;
-  }, r => `發送：${submissions[r][8]||''}`, () => { renderAcceptTable(); });
+  await runProgress(groups, async (group) => {
+    const htmlBody = buildAcceptMail(group, tmplHtml);
+    const modesStr = Array.from(group.modes).join(',');
+    // 同一作者底下每一筆投稿都各自記錄狀態，但只送一次信（用第一筆 row 當代表呼叫，後端仍逐列更新）
+    for (const i of group.rows) {
+      const r = submissions[i];
+      const body = new URLSearchParams();
+      body.append('action','sendAcceptEmail');
+      body.append('rowIndex', i+2);
+      body.append('data', JSON.stringify({
+        submissionId:r[0], title:r[3],
+        contactName:group.name, contactEmail:group.email,
+        acceptType: acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || '',
+        htmlBody: htmlBody,
+        skipSend: group.rows.indexOf(i) !== 0 // 同一人只在第一筆真正寄信，其餘僅更新狀態
+      }));
+      const resp = await fetch(getUrl(),{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+      const json = await resp.json();
+      if(json.result!=='success') throw new Error(json.message);
+      submissions[i][ACCEPT_STATUS_IDX] = '錄取信已發送';
+    }
+  }, group => `發送：${group.name}（${group.rows.length}篇）`, () => { renderAcceptTable(); });
 }
 
 // ===== 錄取通知編輯器工具列（獨立函式，避免共用同一編輯器狀態）=====
