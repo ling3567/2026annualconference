@@ -183,6 +183,7 @@ canvas{max-height:240px;}
     <div class="nav-item active" onclick="gotoPage('page-overview',this)"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>投稿總覽</div>
     <div class="nav-item" onclick="gotoPage('page-mail',this)"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg></span>確認信管理</div>
     <div class="nav-item" onclick="gotoPage('page-member',this)"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></span>會員繳費狀態</div>
+    <div class="nav-item" onclick="gotoPage('page-accept',this)"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19 12c0 5-7 10-7 10S5 17 5 12a7 7 0 0 1 14 0z"/></svg></span>錄取通知</div>
     <div class="sidebar-section">編號管理</div>
     <div class="nav-item" onclick="gotoPage('page-renumber',this)"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg></span>投稿編號管理</div>
     <div class="nav-item" onclick="gotoPage('page-finalpdf',this)"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>產生正式收錄 PDF</div>
@@ -279,6 +280,41 @@ canvas{max-height:240px;}
             <table>
               <thead><tr><th>投稿編號</th><th>論文題目</th><th>通訊作者</th><th>作者群</th><th>填寫會員姓名</th><th>目前狀態</th><th>修改繳費狀態</th><th>修正會員姓名</th><th>備註（可用 {備註} 插入信件）</th></tr></thead>
               <tbody id="memberBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PAGE: 錄取通知 ===== -->
+      <div class="page" id="page-accept">
+        <div class="card" style="margin-bottom:0.75rem">
+          <div class="card-body" style="padding:0.9rem 1.25rem">
+            <div style="font-size:0.85rem;font-weight:700;color:#333;margin-bottom:0.5rem">📥 從評分後台匯入錄取類型</div>
+            <div style="font-size:0.8rem;color:#666;margin-bottom:0.6rem">將評分後台「展出方式設定」匯出的 JSON（[{pid, mode}]）貼到下方，按「套用」即可依投稿編號自動寫入錄取類型欄位。</div>
+            <textarea id="acceptImportJson" placeholder='例如：[{"pid":"EP-01","mode":"eposter"},{"pid":"A-02","mode":"physical"}]' style="width:100%;min-height:80px;padding:0.6rem;border:1.5px solid #ccc;border-radius:8px;font-family:monospace;font-size:0.8rem"></textarea>
+            <div style="margin-top:0.5rem;display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" onclick="applyAcceptImport()">套用匯入</button>
+              <span style="font-size:0.78rem;color:#888">mode 值：eposter／physical／excellent（可用逗號組合，如 "eposter,excellent"）</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2 id="acceptTitle">錄取通知管理</h2>
+            <div class="btn-group">
+              <button class="btn btn-sm btn-primary" onclick="selectAccept(true)">全選</button>
+              <button class="btn btn-sm" style="background:#eee;color:#333" onclick="selectAccept(false)">取消</button>
+              <button class="btn btn-warning" onclick="saveAcceptTypeChanges()">💾 儲存錄取類型變更</button>
+              <button class="btn btn-success" onclick="openAcceptPreview()"><span style="display:inline-flex;align-items:center;gap:0.4rem"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg> 預覽並發送錄取通知</span></button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th style="width:2.5rem"><input type="checkbox" id="acceptCheckAll" onchange="document.querySelectorAll('.accept-chk').forEach(c=>c.checked=this.checked)"></th>
+                <th>投稿編號</th><th>論文題目</th><th>通訊作者</th><th>Email</th><th>錄取類型</th><th>錄取信狀態</th>
+              </tr></thead>
+              <tbody id="acceptBody"></tbody>
             </table>
           </div>
         </div>
@@ -496,6 +532,65 @@ canvas{max-height:240px;}
     </div>
   </div>
 </div>
+
+<!-- Acceptance notification modal -->
+<div class="modal-overlay" id="acceptModal">
+  <div class="modal-box" style="max-width:820px">
+    <div class="modal-header purple"><h2>🎓 錄取通知編輯與預覽</h2>
+      <button onclick="closeModal('acceptModal')" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:0.85rem;color:#555;margin-bottom:0.75rem">共選取 <strong id="acceptCount">0</strong> 筆。系統依各筆「錄取類型」自動套用對應範本，亦可手動切換或編輯。</p>
+      <div style="margin-bottom:0.75rem;display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+        <span style="font-size:0.85rem;font-weight:700;color:#333">選擇範本：</span>
+        <button class="btn btn-sm btn-primary" onclick="loadAcceptTemplate('eposter')">📧 E-Poster</button>
+        <button class="btn btn-sm" style="background:#2e7d32;color:white" onclick="loadAcceptTemplate('physical')">📧 實體張貼</button>
+        <button class="btn btn-sm" style="background:#6a1b9a;color:white" onclick="loadAcceptTemplate('excellent')">📧 優秀海報</button>
+        <button class="btn btn-sm" style="background:#e65100;color:white" onclick="loadAcceptTemplate('eposter_excellent')">📧 優秀＋E-Poster</button>
+        <button class="btn btn-sm" style="background:#0d47a1;color:white" onclick="loadAcceptTemplate('physical_excellent')">📧 優秀＋實體</button>
+      </div>
+      <div style="margin-bottom:0.6rem">
+        <label style="font-size:0.85rem;font-weight:700;color:#333;display:block;margin-bottom:0.4rem"><span style="display:inline-flex;align-items:center;gap:0.4rem"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> 信件內容（可直接編輯樣式）</span></label>
+        <div style="display:flex;gap:0.3rem;flex-wrap:wrap;padding:0.4rem 0.6rem;background:#f5f5f5;border:1.5px solid #ccc;border-bottom:none;border-radius:8px 8px 0 0;align-items:center">
+          <button type="button" class="editor-btn" onclick="fmtA('bold')" title="粗體"><b>B</b></button>
+          <button type="button" class="editor-btn" onclick="fmtA('italic')" title="斜體"><i>I</i></button>
+          <button type="button" class="editor-btn" onclick="fmtA('underline')" title="底線"><u>U</u></button>
+          <span style="width:1px;height:20px;background:#ccc;margin:0 0.2rem"></span>
+          <button type="button" class="editor-btn" onclick="fmtColorA('#0d47a1')" title="深藍色" style="background:#0d47a1;color:white;min-width:24px">A</button>
+          <button type="button" class="editor-btn" onclick="fmtColorA('#1565c0')" title="藍色" style="background:#1565c0;color:white;min-width:24px">A</button>
+          <button type="button" class="editor-btn" onclick="fmtColorA('#2e7d32')" title="綠色" style="background:#2e7d32;color:white;min-width:24px">A</button>
+          <button type="button" class="editor-btn" onclick="fmtColorA('#e65100')" title="橘色" style="background:#e65100;color:white;min-width:24px">A</button>
+          <button type="button" class="editor-btn" onclick="fmtColorA('#c62828')" title="紅色" style="background:#c62828;color:white;min-width:24px">A</button>
+          <button type="button" class="editor-btn" onclick="fmtColorA('#1a1a2e')" title="清除顏色" style="background:#eee;color:#333;min-width:24px">A</button>
+          <span style="width:1px;height:20px;background:#ccc;margin:0 0.2rem"></span>
+          <select onchange="fmtSizeA(this.value);this.value=''" style="font-size:0.78rem;padding:0.15rem 0.3rem;border:1px solid #ccc;border-radius:4px;font-family:var(--font)">
+            <option value="">字級</option>
+            <option value="1">小</option>
+            <option value="3">中</option>
+            <option value="4">大</option>
+            <option value="5">特大</option>
+          </select>
+          <span style="width:1px;height:20px;background:#ccc;margin:0 0.2rem"></span>
+          <span style="font-size:0.75rem;color:#888">可用變數：</span>
+          <code style="font-size:0.75rem;background:#e3f2fd;padding:0.1rem 0.3rem;border-radius:3px;cursor:pointer" onclick="insertVarA('{姓名}')">{姓名}</code>
+          <code style="font-size:0.75rem;background:#e3f2fd;padding:0.1rem 0.3rem;border-radius:3px;cursor:pointer" onclick="insertVarA('{編號}')">{編號}</code>
+          <code style="font-size:0.75rem;background:#e3f2fd;padding:0.1rem 0.3rem;border-radius:3px;cursor:pointer" onclick="insertVarA('{題目}')">{題目}</code>
+        </div>
+        <div id="acceptEditor" contenteditable="true"
+          style="min-height:280px;max-height:380px;overflow-y:auto;padding:0.9rem 1rem;border:1.5px solid #ccc;border-top:none;border-radius:0 0 8px 8px;font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;font-size:14px;line-height:1.9;outline:none;background:white"
+          oninput="syncAcceptTemplate()"></div>
+        <textarea id="acceptTemplate" style="display:none"></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
+        <button class="btn btn-primary btn-sm" onclick="refreshAcceptPreview()"><span style="display:inline-flex;align-items:center;gap:0.4rem"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> 重新預覽</span></button>
+      </div>
+      <div id="acceptPreviewList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('acceptModal')" style="background:#eee;color:#333">取消</button>
+      <button class="btn btn-success" onclick="sendAcceptEmails()">✅ 確認發送</button>
+    </div>
+  </div>
+</div>
       <div id="mailPreviewList"></div>
     </div>
     <div class="modal-footer">
@@ -648,6 +743,7 @@ async function loadAll() {
 function renderAll() {
   renderOverview();
   renderMailTable();
+  renderAcceptTable();
   renderMemberTable();
   renderRenumberTable();
   renderFpTable();
@@ -931,6 +1027,367 @@ async function sendEmails() {
     if(json.result!=='success') throw new Error(json.message);
     submissions[i][21] = '確認信已發送';
   }, r => `發送：${submissions[r][8]||''}`, () => { renderMailTable(); renderOverview(); });
+}
+
+// =====================================================
+// ===== 錄取通知（新增功能，獨立於確認信邏輯之外） =====
+// 欄位配置：X 欄 (index 23) = 錄取類型, Y 欄 (index 24) = 錄取信狀態
+// =====================================================
+const ACCEPT_TYPE_IDX = 23;
+const ACCEPT_STATUS_IDX = 24;
+
+const ACCEPT_TYPE_LABELS = {
+  eposter: 'E-Poster',
+  physical: '實體張貼',
+  excellent: '優秀海報'
+};
+
+function getAcceptTypeLabel(modeStr) {
+  const modes = (modeStr||'').split(',').map(s=>s.trim()).filter(Boolean);
+  if(!modes.length) return '—';
+  return modes.map(m => ACCEPT_TYPE_LABELS[m] || m).join('＋');
+}
+
+function getAcceptTemplateKey(modeStr) {
+  const modes = (modeStr||'').split(',').map(s=>s.trim()).filter(Boolean).sort();
+  if(modes.includes('excellent') && modes.includes('eposter')) return 'eposter_excellent';
+  if(modes.includes('excellent') && modes.includes('physical')) return 'physical_excellent';
+  if(modes.includes('excellent')) return 'excellent';
+  if(modes.includes('eposter')) return 'eposter';
+  if(modes.includes('physical')) return 'physical';
+  return 'eposter';
+}
+
+// ===== 匯入評分後台 displayMode JSON =====
+function applyAcceptImport() {
+  const raw = document.getElementById('acceptImportJson').value.trim();
+  if(!raw){ showInfo('請先貼上要匯入的 JSON 內容','warning'); return; }
+  let arr;
+  try { arr = JSON.parse(raw); } catch(e){ showInfo('❌ JSON 格式錯誤：'+e.message,'error'); return; }
+  if(!Array.isArray(arr)){ showInfo('❌ JSON 必須是陣列格式','error'); return; }
+  if(!submissions.length){ showInfo('請先載入投稿資料','warning'); return; }
+
+  const pidMap = {};
+  submissions.forEach((r,i) => { if(r[0]) pidMap[String(r[0]).trim()] = i; });
+
+  let matched = 0, unmatched = [];
+  arr.forEach(item => {
+    const pid = String(item.pid||'').trim();
+    const mode = String(item.mode||'').trim();
+    if(!pid || !mode) return;
+    if(pidMap.hasOwnProperty(pid)) {
+      const i = pidMap[pid];
+      const existing = (submissions[i][ACCEPT_TYPE_IDX]||'').split(',').map(s=>s.trim()).filter(Boolean);
+      if(!existing.includes(mode)) existing.push(mode);
+      acceptTypeChanges[i] = existing.join(',');
+      matched++;
+    } else {
+      unmatched.push(pid);
+    }
+  });
+
+  if(!matched){ showInfo('⚠️ 沒有任何投稿編號相符，請確認 JSON 內容','warning'); return; }
+  renderAcceptTable();
+  showInfo(`✅ 匹配 ${matched} 筆${unmatched.length ? `，${unmatched.length} 筆編號未找到（${unmatched.slice(0,5).join('、')}${unmatched.length>5?'...':''}）` : ''}。請記得按下方「儲存變更」寫回 Sheet。`, unmatched.length ? 'warning' : 'success');
+}
+
+let acceptTypeChanges = {}; // {rowIdx: '錄取類型字串'}
+
+function renderAcceptTable() {
+  const tbody = document.getElementById('acceptBody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  document.getElementById('acceptTitle').textContent = `錄取通知管理（共 ${submissions.length} 筆）`;
+  submissions.forEach((r,i) => {
+    const typeVal = acceptTypeChanges.hasOwnProperty(i) ? acceptTypeChanges[i] : (r[ACCEPT_TYPE_IDX]||'');
+    const sent = (r[ACCEPT_STATUS_IDX]||'').includes('已發送');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="text-align:center"><input type="checkbox" class="accept-chk" data-i="${i}"></td>
+      <td><strong>${esc(r[0]||'')}</strong></td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r[3]||'')}</td>
+      <td>${esc(r[8]||'')}</td>
+      <td style="font-size:0.8rem;color:#555">${esc(r[9]||'')}</td>
+      <td>
+        <select class="edit-select" style="font-size:0.78rem" onchange="acceptTypeChanges[${i}]=this.value">
+          <option value="" ${!typeVal?'selected':''}>（未指定）</option>
+          <option value="eposter" ${typeVal==='eposter'?'selected':''}>E-Poster</option>
+          <option value="physical" ${typeVal==='physical'?'selected':''}>實體張貼</option>
+          <option value="excellent" ${typeVal==='excellent'?'selected':''}>優秀海報</option>
+          <option value="eposter,excellent" ${typeVal==='eposter,excellent'?'selected':''}>優秀＋E-Poster</option>
+          <option value="physical,excellent" ${typeVal==='physical,excellent'?'selected':''}>優秀＋實體</option>
+        </select>
+      </td>
+      <td><span class="badge ${sent?'badge-sent':'badge-unsent'}">${sent?'✅ 已發送':'⬜ 未發送'}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+async function saveAcceptTypeChanges() {
+  const idxList = Object.keys(acceptTypeChanges).map(k=>parseInt(k));
+  if(!idxList.length){ showInfo('沒有任何變更','warning'); return; }
+  await runProgress(idxList, async (i) => {
+    const body = new URLSearchParams();
+    body.append('action','updateAcceptType');
+    body.append('rowIndex', i+2);
+    body.append('acceptType', acceptTypeChanges[i]);
+    const resp = await fetch(getUrl(), {method:'POST', body, headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    const json = await resp.json();
+    if(json.result !== 'success') throw new Error(json.message);
+    submissions[i][ACCEPT_TYPE_IDX] = acceptTypeChanges[i];
+  }, i => `更新：${submissions[i][8]||''}`, () => { acceptTypeChanges = {}; renderAcceptTable(); });
+}
+
+function selectAccept(v){ document.querySelectorAll('.accept-chk').forEach(c=>c.checked=v); }
+
+// ===== 錄取通知範本 =====
+const ACCEPT_TEMPLATES = {
+  eposter: `親愛的 {姓名} 先生／小姐 您好：
+
+台灣醫事聯合臨床技能發展學會「2026年會員大會暨學術研討會」海報論文徵稿已完成收稿及審查作業。
+
+恭喜您！您的海報論文已通過本會審查，並將以 E-Poster（電子看板）形式展示。
+
+‼️ 請務必依錄取之發表形式與附件《海報論文發表格式》製作海報，以確保發表品質。
+
+■ 發表日期：114年9月20日（星期六）08:00–16:00
+■ 發表地點：奇美醫院第五醫療大樓 5 樓國際會議廳（台南市永康區中華路901號）
+
+■ E-Poster 上傳說明：
+ - 上傳期限：114年9月10日（星期三）前
+ - 上傳連結：https://forms.gle/Bz4hMzLz2LfT5PVLA
+ - 檔案規格：
+   1. 直式，寬 38.1 cm × 高 64.73 cm，解析度 300 dpi
+   2. 格式：限 JPG 檔，單頁，檔案大小不得超過 10MB
+   3. 海報右上方請標示海報編號
+   4. 如錄取多篇，請逐篇分開上傳，勿合併檔案。
+
+■ 研討會報名：敬邀報名參加當日研討會！
+ - 報名連結：https://forms.gle/sRtRcDvcdYFwMEiE7
+ - 報名截止日：9月10日（星期三）
+
+■ 附件：
+ - 海報論文發表格式
+ - E-Poster 錄取名單
+
+若有任何問題，歡迎與秘書處聯繫，謝謝。
+
+────────────────────────
+台灣醫事聯合臨床技能發展學會
+秘書處　楊依玲
+Tel：06-2812811 轉 57426
+E-mail：tsmcsd2018@gmail.com
+710402 台南市永康區中華路 901 號
+（教學大樓 3F 教學部）
+────────────────────────`,
+
+  physical: `親愛的 {姓名} 先生／小姐 您好：
+
+台灣醫事聯合臨床技能發展學會「2026年會員大會暨學術研討會」海報論文徵稿已完成收稿及審查作業。
+
+恭喜您！您的海報論文已通過本會審查，並將以實體張貼形式展示。
+
+‼️ 請務必依錄取之發表形式與附件《海報論文發表格式》製作海報，以確保發表品質。
+
+■ 發表日期：114年9月20日（星期六）08:00–16:00
+■ 發表地點：奇美醫院第五醫療大樓 5 樓國際會議廳（台南市永康區中華路901號）
+
+■ 海報張貼注意事項：
+ - 張貼時間：08:00–09:10
+ - 移除時間：15:00–16:00（逾時將由本會統一移除，不負保管責任）
+ - 尺寸建議：寬 90 cm × 高 120 cm
+ - 張貼位置：請依海報編號於現場展示板尋找對應位置（現場備有黏貼用品）
+
+■ 研討會報名：敬邀報名參加當日研討會！
+ - 報名連結：https://forms.gle/sRtRcDvcdYFwMEiE7
+ - 報名截止日：9月10日（星期三）
+
+■ 附件：
+ - 海報論文發表格式
+ - 實體張貼錄取名單
+
+若有任何問題，歡迎與秘書處聯繫，謝謝。
+
+────────────────────────
+台灣醫事聯合臨床技能發展學會
+秘書處　楊依玲
+Tel：06-2812811 轉 57426
+E-mail：tsmcsd2018@gmail.com
+710402 台南市永康區中華路 901 號
+（教學大樓 3F 教學部）
+────────────────────────`,
+
+  excellent: `親愛的 {姓名} 先生／小姐 您好：
+
+台灣醫事聯合臨床技能發展學會「2025年會員大會暨學術研討會」海報論文徵稿已完成收稿及審查作業。
+
+恭喜您！您的海報論文入圍「優秀海報」候選，將以實體張貼展示，並邀請至現場進行口頭報告。
+
+‼️ 請務必依錄取之發表形式與附件《海報論文發表格式》製作海報，以確保發表品質。
+
+■ 發表日期：114年9月20日（星期六）08:00–16:00
+■ 發表地點：奇美醫院第五醫療大樓 5 樓國際會議廳（台南市永康區中華路901號）
+
+■ 優秀海報實體張貼注意事項：
+ - 張貼時間：08:00–09:10
+ - 移除時間：15:00–16:00（逾時將由本會統一移除，不負保管責任）
+ - 尺寸建議：寬 90 cm × 高 120 cm
+ - 張貼位置：請依海報編號於現場展示板尋找對應位置（現場備有黏貼用品）
+
+■ 現場口頭報告：
+ - 報告時間：11:00–12:00
+ - 報告地點：張貼海報展區（個人海報前）
+ - 發表方式：
+   ① 口頭報告 3 分鐘（簡要說明論文內容）
+   ② 提問回覆 2 分鐘（回答審查委員提問）
+ - 口頭報告須由第一作者出席，第一作者無法出席，可由共同作者代表。
+ - 口頭報告須由通訊作者陪同入列候審。
+ - 報告流程：工作人員將於約 2、3 分鐘前提醒，請報告者準備上臺報告。
+ - 未依規定執行口頭報告者，將視同放棄優秀海報評選資格。
+
+■ 研討會報名：敬邀報名參加當日研討會！
+ - 報名連結：https://forms.gle/sRtRcDvcdYFwMEiE7
+ - 報名截止日：9月10日（星期三）
+
+■ 附件：
+ - 海報論文發表格式
+ - 實體張貼暨優秀海報錄取名單
+
+若有任何問題，歡迎與秘書處聯繫，謝謝。
+
+────────────────────────
+台灣醫事聯合臨床技能發展學會
+秘書處　楊依玲
+Tel：06-2812811 轉 57426
+E-mail：tsmcsd2018@gmail.com
+710402 台南市永康區中華路 901 號
+（教學大樓 3F 教學部）
+────────────────────────`
+};
+// 合併版本（優秀海報＋另一展示形式），先以優秀海報內容為主體
+ACCEPT_TEMPLATES.eposter_excellent = ACCEPT_TEMPLATES.excellent.replace('並以實體張貼展示，並邀請至現場進行口頭報告。', '同時將以 E-Poster（電子看板）展示，並邀請至現場進行口頭報告。')
+  .replace(/■ 優秀海報實體張貼注意事項：[\s\S]*?■ 現場口頭報告：/, `■ E-Poster 上傳說明：
+ - 上傳期限：114年9月10日（星期三）前
+ - 上傳連結：https://forms.gle/Bz4hMzLz2LfT5PVLA
+ - 檔案規格：直式，寬 38.1 cm × 高 64.73 cm，解析度 300 dpi，限 JPG 檔，單頁，檔案大小不得超過 10MB，海報右上方請標示海報編號
+
+■ 現場口頭報告：`);
+ACCEPT_TEMPLATES.physical_excellent = ACCEPT_TEMPLATES.excellent;
+
+function loadAcceptTemplate(type) {
+  const tmpl = ACCEPT_TEMPLATES[type] || ACCEPT_TEMPLATES.eposter;
+  const editor = document.getElementById('acceptEditor');
+  editor.innerHTML = plainToEditorHtml(tmpl);
+  syncAcceptTemplate();
+  refreshAcceptPreview();
+}
+
+function openAcceptPreview() {
+  const sel = Array.from(document.querySelectorAll('.accept-chk:checked')).map(c=>parseInt(c.dataset.i));
+  if(!sel.length){ showInfo('請先勾選要發送錄取通知的投稿','warning'); return; }
+  // 檢查是否有未指定錄取類型的
+  const noType = sel.filter(i => !(acceptTypeChanges[i] || submissions[i][ACCEPT_TYPE_IDX]));
+  if(noType.length){
+    showInfo(`⚠️ ${noType.length} 筆尚未指定錄取類型（${noType.slice(0,5).map(i=>submissions[i][0]).join('、')}${noType.length>5?'...':''}），請先在表格中指定`, 'warning');
+    return;
+  }
+  document.getElementById('acceptCount').textContent = sel.length;
+  // 依第一筆的類型自動載入對應範本
+  const firstType = acceptTypeChanges[sel[0]] || submissions[sel[0]][ACCEPT_TYPE_IDX] || 'eposter';
+  const tmplKey = getAcceptTemplateKey(firstType);
+  const editor = document.getElementById('acceptEditor');
+  editor.innerHTML = plainToEditorHtml(ACCEPT_TEMPLATES[tmplKey] || ACCEPT_TEMPLATES.eposter);
+  syncAcceptTemplate();
+  refreshAcceptPreview();
+  document.getElementById('acceptModal').classList.add('show');
+}
+
+function refreshAcceptPreview() {
+  const sel = Array.from(document.querySelectorAll('.accept-chk:checked')).map(c=>parseInt(c.dataset.i));
+  const tmplHtml = document.getElementById('acceptTemplate').value;
+  const list = document.getElementById('acceptPreviewList');
+  list.innerHTML = '';
+  if(!tmplHtml.trim()){
+    list.innerHTML='<p style="color:#aaa;font-size:0.85rem;padding:0.5rem">請先點選上方範本按鈕。</p>';
+    return;
+  }
+  sel.forEach(i => {
+    const r = submissions[i];
+    const typeVal = acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || '';
+    const html = tmplHtml
+      .replace(/\{姓名\}/g, esc(r[8]||''))
+      .replace(/\{編號\}/g, esc(r[0]||''))
+      .replace(/\{題目\}/g, esc(r[3]||''));
+    const div = document.createElement('div');
+    div.style.cssText = 'margin-bottom:1rem;border:1px solid #ddd;border-radius:8px;overflow:hidden';
+    div.innerHTML = `<div style="background:#f3e5f5;padding:0.45rem 0.75rem;font-size:0.78rem;color:var(--purple);font-weight:700">${esc(r[8]||'')} &lt;${esc(r[9]||'')}&gt; ｜ ${esc(getAcceptTypeLabel(typeVal))}</div>
+      <div style="padding:1rem;font-family:'Noto Sans TC',sans-serif;font-size:14px;line-height:1.8">${html}</div>`;
+    list.appendChild(div);
+  });
+}
+
+function buildAcceptMail(r, tmplHtml) {
+  const body = (tmplHtml || '')
+    .replace(/\{姓名\}/g, (r[8]||'').replace(/&/g,'&amp;'))
+    .replace(/\{編號\}/g, (r[0]||'').replace(/&/g,'&amp;'))
+    .replace(/\{題目\}/g, (r[3]||'').replace(/&/g,'&amp;'));
+  return `<div style="text-align:left;font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif">${body}</div>`;
+}
+
+async function sendAcceptEmails() {
+  const sel = Array.from(document.querySelectorAll('.accept-chk:checked')).map(c=>parseInt(c.dataset.i));
+  const tmplHtml = document.getElementById('acceptTemplate').value;
+  closeModal('acceptModal');
+  await runProgress(sel, async (i) => {
+    const r = submissions[i];
+    const typeVal = acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || '';
+    const htmlBody = buildAcceptMail(r, tmplHtml);
+    const body = new URLSearchParams();
+    body.append('action','sendAcceptEmail');
+    body.append('rowIndex', i+2);
+    body.append('data', JSON.stringify({
+      submissionId:r[0], title:r[3],
+      contactName:r[8], contactEmail:r[9],
+      acceptType: typeVal,
+      htmlBody: htmlBody
+    }));
+    const resp = await fetch(getUrl(),{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    const json = await resp.json();
+    if(json.result!=='success') throw new Error(json.message);
+    submissions[i][ACCEPT_STATUS_IDX] = '錄取信已發送';
+    if(typeVal) submissions[i][ACCEPT_TYPE_IDX] = typeVal;
+  }, r => `發送：${submissions[r][8]||''}`, () => { renderAcceptTable(); });
+}
+
+// ===== 錄取通知編輯器工具列（獨立函式，避免共用同一編輯器狀態）=====
+function fmtA(cmd) {
+  document.getElementById('acceptEditor').focus();
+  document.execCommand(cmd, false, null);
+}
+function fmtColorA(color) {
+  document.getElementById('acceptEditor').focus();
+  document.execCommand('foreColor', false, color);
+}
+function fmtSizeA(size) {
+  if(!size) return;
+  document.getElementById('acceptEditor').focus();
+  document.execCommand('fontSize', false, size);
+}
+function insertVarA(v) {
+  const editor = document.getElementById('acceptEditor');
+  editor.focus();
+  const sel = window.getSelection();
+  if(sel && sel.rangeCount > 0) {
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    range.insertNode(document.createTextNode(v));
+    range.collapse(false);
+  } else {
+    editor.innerHTML += v;
+  }
+  syncAcceptTemplate();
+}
+function syncAcceptTemplate() {
+  document.getElementById('acceptTemplate').value = document.getElementById('acceptEditor').innerHTML;
 }
 
 
