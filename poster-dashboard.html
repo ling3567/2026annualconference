@@ -1225,9 +1225,63 @@ function loadAcceptTemplate(type) {
   const modes = type.split(',').map(s=>s.trim()).filter(Boolean);
   const tmpl = assembleAcceptTemplate(modes);
   const editor = document.getElementById('acceptEditor');
-  editor.innerHTML = plainToEditorHtml(tmpl);
+  editor.innerHTML = plainToAcceptEditorHtml(tmpl);
   syncAcceptTemplate();
   refreshAcceptPreview();
+}
+
+// ===== 錄取通知專屬：純文字 → 編輯器 HTML（依錄取通知範本結構上色，與確認信範本規則分開）=====
+function plainToAcceptEditorHtml(text) {
+  const lines = text.split('\n');
+  const out = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    const safe = esc(line);
+
+    if (line.trim() === '') { out.push('<br>'); i++; continue; }
+
+    // 開頭稱呼
+    if (/^親愛的/.test(line)) { out.push(`<div style="text-align:left">${safe}</div>`); i++; continue; }
+
+    // 恭喜句（藍色強調）
+    if (/^恭喜您/.test(line)) { out.push(`<div style="color:#0d47a1;font-weight:bold;text-align:left">${safe}</div>`); i++; continue; }
+
+    // 警語（紅色＋驚嘆號）
+    if (/^‼️/.test(line)) { out.push(`<div style="color:#c62828;font-weight:bold;text-align:left;margin-top:6px">${safe}</div>`); i++; continue; }
+
+    // 區塊標題（■ 開頭）：深藍色粗體
+    if (/^■/.test(line)) { out.push(`<div style="color:#0d47a1;font-weight:bold;text-align:left;margin-top:14px">${safe}</div>`); i++; continue; }
+
+    // 海報清單項目（ - 海報編號：開頭）：拆成獨立卡片，編號/題目/形式分行並加小標籤
+    if (/^\s*-\s*海報編號/.test(line)) {
+      const parts = line.split('｜').map(s=>s.replace(/^\s*-\s*/,'').trim());
+      // parts: ["海報編號：A-65", "論文題目：xxx", "錄取形式：實體張貼"]
+      const rowsHtml = parts.map(p => {
+        const [label, ...rest] = p.split('：');
+        const value = rest.join('：');
+        return `<div style="margin:2px 0"><span style="color:#888;font-size:0.85em">${esc(label)}：</span><span style="color:#1a1a2e;font-weight:bold">${esc(value)}</span></div>`;
+      }).join('');
+      out.push(`<div style="text-align:left;background:#f5f7fa;border-left:3px solid #0d47a1;padding:8px 12px;margin:6px 0;border-radius:4px">${rowsHtml}</div>`);
+      i++; continue;
+    }
+
+    // 子項目（ - 開頭）：縮排、深灰
+    if (/^\s*-\s/.test(line)) { out.push(`<div style="text-align:left;color:#333;padding-left:16px">${safe}</div>`); i++; continue; }
+
+    // 子子項目（更深縮排，如 1. 2. ① ②）
+    if (/^\s{3,}/.test(line)) { out.push(`<div style="text-align:left;color:#444;padding-left:32px;font-size:0.92em">${safe}</div>`); i++; continue; }
+
+    // 分隔線
+    if (/^────/.test(line)) { out.push(`<div style="color:#aaa;font-size:0.85em;text-align:left">${safe}</div>`); i++; continue; }
+
+    // 署名區（Tel/E-mail/地址/秘書處等）
+    if (/^(Tel|E-mail|710|秘書處|台灣醫事聯合|（教學大樓)/.test(line)) { out.push(`<div style="font-size:0.85em;color:#555;text-align:left">${safe}</div>`); i++; continue; }
+
+    out.push(`<div style="text-align:left">${safe}</div>`);
+    i++;
+  }
+  return out.join('');
 }
 
 // ===== 依通訊作者 Email 分組（同一 Email 視為同一人，多篇合併成一封信）=====
@@ -1246,7 +1300,7 @@ function groupAcceptByEmail(rowIdxList) {
   return Object.values(groups);
 }
 
-// 組成單一作者的「海報清單」文字（多篇列出多筆）
+// 組成單一作者的「海報清單」文字（多篇列出多筆，純文字版，供組裝原始範本字串時使用）
 function buildPosterListText(group) {
   return group.rows.map(i => {
     const r = submissions[i];
@@ -1254,6 +1308,20 @@ function buildPosterListText(group) {
     const label = getAcceptTypeLabel(typeVal);
     return ` - 海報編號：${r[0]||''}　｜　論文題目：${r[3]||''}　｜　錄取形式：${label}`;
   }).join('\n');
+}
+
+// 組成單一作者的「海報清單」HTML（卡片樣式，供插入已轉換好的 HTML 範本中使用）
+function buildPosterListHtml(group) {
+  return group.rows.map(i => {
+    const r = submissions[i];
+    const typeVal = acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || '';
+    const label = getAcceptTypeLabel(typeVal);
+    return `<div style="text-align:left;background:#f5f7fa;border-left:3px solid #0d47a1;padding:8px 12px;margin:6px 0;border-radius:4px">
+      <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">海報編號：</span><span style="color:#1a1a2e;font-weight:bold">${esc(r[0]||'')}</span></div>
+      <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">論文題目：</span><span style="color:#1a1a2e;font-weight:bold">${esc(r[3]||'')}</span></div>
+      <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">錄取形式：</span><span style="color:#1a1a2e;font-weight:bold">${esc(label)}</span></div>
+    </div>`;
+  }).join('');
 }
 
 function openAcceptPreview() {
@@ -1275,7 +1343,7 @@ function openAcceptPreview() {
   // 依第一組的類型組合自動載入對應範本（之後可手動編輯套用到所有人）
   const firstModes = Array.from(groups[0]?.modes || ['eposter']);
   const editor = document.getElementById('acceptEditor');
-  editor.innerHTML = plainToEditorHtml(assembleAcceptTemplate(firstModes));
+  editor.innerHTML = plainToAcceptEditorHtml(assembleAcceptTemplate(firstModes));
   syncAcceptTemplate();
   refreshAcceptPreview();
   document.getElementById('acceptModal').classList.add('show');
@@ -1292,26 +1360,26 @@ function refreshAcceptPreview() {
   }
   const groups = groupAcceptByEmail(sel);
   groups.forEach(group => {
-    const posterList = buildPosterListText(group);
+    const posterListHtml = buildPosterListHtml(group);
     const html = tmplHtml
       .replace(/\{姓名\}/g, esc(group.name))
-      .replace(/\{海報清單\}/g, esc(posterList).replace(/\n/g,'<br>'));
+      .replace(/\{海報清單\}/g, posterListHtml);
     const modesLabel = getAcceptTypeLabel(Array.from(group.modes).join(','));
     const div = document.createElement('div');
     div.style.cssText = 'margin-bottom:1rem;border:1px solid #ddd;border-radius:8px;overflow:hidden';
     div.innerHTML = `<div style="background:#f3e5f5;padding:0.45rem 0.75rem;font-size:0.78rem;color:var(--purple);font-weight:700">${esc(group.name)} &lt;${esc(group.email)}&gt; ｜ ${esc(modesLabel)} ｜ 共 ${group.rows.length} 篇</div>
-      <div style="padding:1rem;font-family:'Noto Sans TC',sans-serif;font-size:14px;line-height:1.8;white-space:pre-wrap">${html}</div>`;
+      <div style="padding:1rem;font-family:'Noto Sans TC',sans-serif;font-size:14px;line-height:1.8">${html}</div>`;
     list.appendChild(div);
   });
 }
 
 function buildAcceptMail(group, tmplHtml) {
-  const posterList = buildPosterListText(group);
+  const posterListHtml = buildPosterListHtml(group);
   const esc2 = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const body = (tmplHtml || '')
     .replace(/\{姓名\}/g, esc2(group.name))
-    .replace(/\{海報清單\}/g, esc2(posterList).replace(/\n/g,'<br>'));
-  return `<div style="text-align:left;font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;white-space:pre-wrap">${body}</div>`;
+    .replace(/\{海報清單\}/g, posterListHtml);
+  return `<div style="text-align:left;font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif">${body}</div>`;
 }
 
 async function sendAcceptEmails() {
