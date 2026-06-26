@@ -1138,9 +1138,9 @@ function selectAccept(v){ document.querySelectorAll('.accept-chk').forEach(c=>c.
 // 同一作者若有多篇／多類型，會自動把對應區塊組合進同一封信
 // 可用變數：{姓名}　{海報清單}（多筆海報編號+題目列表）
 // =====================================================
-const ACCEPT_HEADER = `您好：
+const ACCEPT_HEADER = `親愛的 {姓名} 先生／小姐 您好：
 
-台灣醫事聯合臨床技能發展學會「2026年會員大會暨學術研討會」海報論文徵稿已完成收稿及審查作業。
+==台灣醫事聯合臨床技能發展學會「2026年會員大會暨學術研討會」海報論文徵稿已完成收稿及審查作業。==
 
 恭喜您！您的海報論文已通過本會審查，錄取資訊如下：
 
@@ -1191,7 +1191,7 @@ const ACCEPT_BLOCK_EPOSTER = `
 【E-Poster 說明】
 ■ E-Poster 上傳說明：
  - 上傳期限：[[8月5日（星期三）前]]
- - 上傳連結：[LINK:https://forms.gle/tpbZmZaJ15R9MevVA:點此上傳 E-Poster]
+ - 上傳連結：[LINK|https://forms.gle/tpbZmZaJ15R9MevVA|點此上傳 E-Poster]
  - 檔案規格：
    1. 直式，寬 38.1 cm × 高 64.73 cm，解析度 300 dpi
    2. 格式：限 JPG 檔，單頁，檔案大小不得超過 10MB
@@ -1203,7 +1203,7 @@ const ACCEPT_BLOCK_EPOSTER = `
 const ACCEPT_FOOTER = `
 ■ 研討會報名：敬邀報名參加當日研討會！
  - 報名截止日：[[8月5日（星期三）]]，額滿將提前截止
- - 報名連結：[LINK:https://ling3567.github.io/2026annualconference/registration:點此報名]
+ - 報名連結：[LINK|https://ling3567.github.io/2026annualconference/registration|點此報名]
 
 若有任何問題，歡迎與秘書處聯絡，謝謝。
 
@@ -1257,8 +1257,7 @@ const ACCEPT_BASE_STYLE = 'text-align:left;font-size:14px;font-weight:normal;col
 function applyInlineMarkers(escapedLine) {
   return escapedLine
     .replace(/\[\[(.+?)\]\]/g, '<span style="color:#0d47a1;font-weight:bold">$1</span>')
-    .replace(/\(\((.+?)\)\)/g, '<span style="background:#fff3cd;padding:1px 4px;border-radius:3px;font-weight:bold">$1</span>')
-    .replace(/\[LINK:([^:]+):([^\]]+)\]/g, '<a href="$1" style="color:#0d47a1;font-weight:bold;text-decoration:underline" target="_blank">$2</a>');
+    .replace(/\(\((.+?)\)\)/g, '<span style="background:#fff3cd;padding:1px 4px;border-radius:3px;font-weight:bold">$1</span>');
 }
 
 function plainToAcceptEditorHtml(text) {
@@ -1268,9 +1267,28 @@ function plainToAcceptEditorHtml(text) {
   while (i < lines.length) {
     const line = lines[i];
     // 先處理跳脫，再套用行內標記（標記語法本身不含 HTML 特殊字元，順序上沒有衝突）
-    const safe = applyInlineMarkers(esc(line));
+    // 超連結：先用 token 佔位 → esc → 還原成 <a> HTML（避免 esc 破壞 HTML 標籤）
+    const linkTokens = [];
+    const lineWithTokens = line.replace(/\[LINK\|([^|]+)\|([^\]]+)\]/g, (_, url, text) => {
+      const token = `\x00LINK${linkTokens.length}\x00`;
+      linkTokens.push(`<a href="${url}" style="color:#0d47a1;font-weight:bold;text-decoration:underline" target="_blank">${esc(text)}</a>`);
+      return token;
+    });
+    let safe = applyInlineMarkers(esc(lineWithTokens));
+    linkTokens.forEach((html, idx) => { safe = safe.replace(`\x00LINK${idx}\x00`, html); });
 
     if (line.trim() === '') { out.push('<br>'); i++; continue; }
+
+    // 開頭稱呼
+    if (/^親愛的/.test(line)) { out.push(`<div style="${ACCEPT_BASE_STYLE}">${safe}</div>`); i++; continue; }
+
+    // 內文說明句（==...== 標記，樣式與一般行完全一致，確保不會因格式規則而異）
+    if (/^==(.+)==$/.test(line.trim())) {
+      const inner = line.trim().replace(/^==|==$/, '');
+      const safeInner = applyInlineMarkers(esc(inner));
+      out.push(`<div style="${ACCEPT_BASE_STYLE}">${safeInner}</div>`);
+      i++; continue;
+    }
 
     // 恭喜句（藍色強調）
     if (/^恭喜您/.test(line)) { out.push(`<div style="${ACCEPT_BASE_STYLE};color:#0d47a1;font-weight:bold">${safe}</div>`); i++; continue; }
