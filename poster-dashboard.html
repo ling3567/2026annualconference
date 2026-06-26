@@ -1454,8 +1454,7 @@ async function sendAcceptEmails() {
         submissionId: r[0], title: r[3],
         contactName: group.name, contactEmail: group.email,
         acceptType: isFirst ? modesStr : (acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || ''),
-        // 第一筆：傳 group 聯集 → GAS 用來決定主旨並實際寄信
-        // 其餘筆：傳各自單篇類型 → GAS 只更新該列的欄位，不重複寄信
+        posterIds: isFirst ? group.rows.map(idx => submissions[idx][0] || '') : [],
         htmlBody: htmlBody,
         skipSend: !isFirst
       }));
