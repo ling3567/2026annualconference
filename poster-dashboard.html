@@ -1852,7 +1852,7 @@ function renderHospTable(data){
   tbody.innerHTML='';
   // 同時更新機構下拉（若存在）
   data.forEach(([u,cnt])=>{
-    const ids=submissions.filter(r=>(r[11]||'').startsWith(u)).map(r=>r[0]).sort((a,b)=>{
+    const ids=submissions.filter(r=>(r[11]||'').split(/[（(]/)[0].trim()===u).map(r=>r[0]).sort((a,b)=>{
       // 依類別字母→數字排序
       const parseId = s => { const m=s.match(/^([A-C])-(\d+)$/); return m?[m[1],parseInt(m[2])]:['Z',9999]; };
       const [ac,an]=parseId(a); const [bc,bn]=parseId(b);
