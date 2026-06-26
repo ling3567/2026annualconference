@@ -294,7 +294,7 @@ canvas{max-height:240px;}
             <textarea id="acceptImportJson" placeholder='例如：[{"pid":"EP-01","mode":"eposter"},{"pid":"A-02","mode":"physical"}]' style="width:100%;min-height:80px;padding:0.6rem;border:1.5px solid #ccc;border-radius:8px;font-family:monospace;font-size:0.8rem"></textarea>
             <div style="margin-top:0.5rem;display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
               <button class="btn btn-primary btn-sm" onclick="applyAcceptImport()">套用匯入</button>
-              <span style="font-size:0.78rem;color:#888">mode 值：eposter／physical／excellent（可用逗號組合，如 "eposter,excellent"）</span>
+              <span style="font-size:0.78rem;color:#888">mode 值：eposter／physical／excellent（每筆投稿僅一種）</span>
             </div>
           </div>
         </div>
@@ -544,9 +544,7 @@ canvas{max-height:240px;}
         <span style="font-size:0.85rem;font-weight:700;color:#333">選擇範本：</span>
         <button class="btn btn-sm btn-primary" onclick="loadAcceptTemplate('eposter')">📧 E-Poster</button>
         <button class="btn btn-sm" style="background:#2e7d32;color:white" onclick="loadAcceptTemplate('physical')">📧 實體張貼</button>
-        <button class="btn btn-sm" style="background:#6a1b9a;color:white" onclick="loadAcceptTemplate('excellent')">📧 優秀海報（口頭報告段落）</button>
-        <button class="btn btn-sm" style="background:#e65100;color:white" onclick="loadAcceptTemplate('eposter,excellent')">📧 優秀＋E-Poster</button>
-        <button class="btn btn-sm" style="background:#0d47a1;color:white" onclick="loadAcceptTemplate('physical,excellent')">📧 優秀＋實體</button>
+        <button class="btn btn-sm" style="background:#6a1b9a;color:white" onclick="loadAcceptTemplate('excellent')">📧 優秀海報</button>
       </div>
       <div style="margin-bottom:0.6rem">
         <label style="font-size:0.85rem;font-weight:700;color:#333;display:block;margin-bottom:0.4rem"><span style="display:inline-flex;align-items:center;gap:0.4rem"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> 信件內容（可直接編輯樣式）</span></label>
@@ -1076,9 +1074,7 @@ function applyAcceptImport() {
     if(!pid || !mode) return;
     if(pidMap.hasOwnProperty(pid)) {
       const i = pidMap[pid];
-      const existing = (submissions[i][ACCEPT_TYPE_IDX]||'').split(',').map(s=>s.trim()).filter(Boolean);
-      if(!existing.includes(mode)) existing.push(mode);
-      acceptTypeChanges[i] = existing.join(',');
+      acceptTypeChanges[i] = mode; // 每篇投稿僅一種模式，直接覆蓋
       matched++;
     } else {
       unmatched.push(pid);
@@ -1112,8 +1108,6 @@ function renderAcceptTable() {
           <option value="eposter" ${typeVal==='eposter'?'selected':''}>E-Poster</option>
           <option value="physical" ${typeVal==='physical'?'selected':''}>實體張貼</option>
           <option value="excellent" ${typeVal==='excellent'?'selected':''}>優秀海報</option>
-          <option value="eposter,excellent" ${typeVal==='eposter,excellent'?'selected':''}>優秀＋E-Poster</option>
-          <option value="physical,excellent" ${typeVal==='physical,excellent'?'selected':''}>優秀＋實體</option>
         </select>
       </td>
       <td><span class="badge ${sent?'badge-sent':'badge-unsent'}">${sent?'✅ 已發送':'⬜ 未發送'}</span></td>`;
@@ -1154,7 +1148,7 @@ const ACCEPT_HEADER = `親愛的 {姓名} 先生／小姐 您好：
 
 ‼️ 請務必依錄取之發表形式及海報製作規格完成海報製作，並於大會當日依規定時間完成張貼，以確保發表品質。
 
-■ 發表日期：115年8月15日（星期六）08:30–15:30　（8:00開始報到）
+■ 發表日期：[[115年8月15日（星期六）08:30–15:30　（8:00開始報到）]]
 ■ 發表地點：奇美醫院第五醫療大樓 5 樓國際會議廳（台南市永康區中華路901號）
 `;
 
@@ -1167,31 +1161,38 @@ const ACCEPT_BLOCK_PHYSICAL = `
  - 海報內容：包含論文題目、作者(含服務單位)、研究動機、研究方法、研究結果、結論、關鍵字等，排版樣式可自行創意編排。
 `;
 
+const ACCEPT_BLOCK_PHYSICAL_EXCELLENT = `
+■ 優秀海報實體張貼注意事項：
+ - 張貼時間：08:00–09:10
+ - 移除時間：14:30–15:30（逾時將由本會統一移除，恕不負保管責任）
+ - 尺寸規格：直式，寬 90 cm × 高 120 cm
+ - 張貼位置：請依海報編號於指定展示板張貼（現場備有文具用品）
+ - 海報內容：包含論文題目、作者(含服務單位)、研究動機、研究方法、研究結果、結論、關鍵字等，排版樣式可自行創意編排。
+`;
+
 const ACCEPT_BLOCK_EPOSTER = `
 ■ E-Poster 上傳說明：
- - 上傳期限：115年8月5日（星期三）前
+ - 上傳期限：[[8月5日（星期三）前]]
  - 上傳連結：https://forms.gle/tpbZmZaJ15R9MevVA
  - 檔案規格：
    1. 直式，寬 38.1 cm × 高 64.73 cm，解析度 300 dpi
    2. 格式：限 JPG 檔，單頁，檔案大小不得超過 10MB
-   3. 海報右上方請標示海報編號
+   3. ((海報右上方請標示海報編號))
    4. 海報內容：包含論文題目、作者(含服務單位)、研究動機、研究方法、研究結果、結論、關鍵字等，排版樣式可自行創意編排。
    5. 如錄取多篇，請逐篇分開上傳，勿合併檔案。
 `;
 
 const ACCEPT_BLOCK_EXCELLENT = `
-■ 優秀海報評選說明：您獲邀進入「優秀海報」評選，並於大會當日進行現場口頭報告，請參閱以下說明：
-
 ■ 現場口頭報告：
- - 口頭時間：12:30–13:30
- - 口頭地點：張貼海報展區（個人海報前）
+ - 口報時間：12:30–13:30
+ - 口報地點：張貼海報展區（個人海報前）
  - 發表方式：
-   ① 口頭報告 3 分鐘（簡要說明論文內容）
-   ② 提問回覆 2 分鐘（回答審查委員提問）
- - 口頭報告須由第一作者出席，第一作者無法出席，可由共同作者代表。
- - 口頭報告須由通訊作者陪同入列候審。
- - 報告流程：工作人員將於約 2、3 分鐘前提醒，請報告者準備上臺報告。
- - 未依規定執行口頭報告者，將視同放棄優秀海報評選資格。
+   1. 口頭報告 3 分鐘（簡要說明論文內容）
+   2. 提問回覆 2 分鐘（回答審查委員問題）
+ - 口頭報告須由第一作者出席；若第一作者無法出席，可由共同作者代表。
+ - 口頭報告與回覆表現將計入評核總分。
+ - 口報進行方式：工作人員將於第2、3及5分鐘提醒時間，請報告者注意節奏與掌握時間。
+ - ((未依規定進行口頭報告者，將視同放棄優秀海報評選資格。))
 `;
 
 const ACCEPT_FOOTER = `
@@ -1210,12 +1211,21 @@ E-mail：tsmcsd2018@gmail.com
 （教學大樓 3F 教學部）
 ────────────────────────`;
 
-// 依錄取類型集合（去重後的 mode 陣列）組裝完整範本文字
-// modes 範例：['eposter'] / ['physical','excellent'] / ['eposter','excellent']
+// 依錄取類型集合（modes：該作者所有投稿篇目的模式聯集）組裝完整範本文字
+// 注意：每一「篇」投稿只會是 eposter / physical / excellent 其中一種（單選）
+//       modes 出現多個值，是因為同一作者投稿多篇、各篇模式不同，合併成一封信時才會同時出現
+// 規則：
+//   - 優秀海報（excellent）固定為實體展示＋現場口頭報告（前30篇實體張貼中分數最高的10篇），
+//     因此只要 modes 含 excellent，一律輸出「優秀海報實體張貼」版本的張貼說明
+//   - 若該作者「另一篇」是 eposter，則同時輸出 E-Poster 上傳說明（互不影響）
 function assembleAcceptTemplate(modes) {
   let body = ACCEPT_HEADER;
-  if (modes.includes('physical')) body += ACCEPT_BLOCK_PHYSICAL;
-  if (modes.includes('eposter'))  body += ACCEPT_BLOCK_EPOSTER;
+  if (modes.includes('excellent')) {
+    body += ACCEPT_BLOCK_PHYSICAL_EXCELLENT;
+  } else if (modes.includes('physical')) {
+    body += ACCEPT_BLOCK_PHYSICAL;
+  }
+  if (modes.includes('eposter')) body += ACCEPT_BLOCK_EPOSTER;
   if (modes.includes('excellent')) body += ACCEPT_BLOCK_EXCELLENT;
   body += ACCEPT_FOOTER;
   return body;
@@ -1231,27 +1241,48 @@ function loadAcceptTemplate(type) {
 }
 
 // ===== 錄取通知專屬：純文字 → 編輯器 HTML（依錄取通知範本結構上色，與確認信範本規則分開）=====
+// 行內標記語法（在組裝範本字串時使用）：
+//   [[文字]]  → 藍色文字強調（例如日期、期限）
+//   ((文字))  → 底色標示（例如重要提醒字句）
+const ACCEPT_BASE_STYLE = 'text-align:left;font-size:14px;font-weight:normal;color:#1a1a2e;font-family:inherit;line-height:1.9';
+
+// 處理單行文字中的 [[ ]] 與 (( )) 行內標記，轉成對應樣式的 <span>，其餘文字維持原樣（已 escape）
+function applyInlineMarkers(escapedLine) {
+  return escapedLine
+    .replace(/\[\[(.+?)\]\]/g, '<span style="color:#0d47a1;font-weight:bold">$1</span>')
+    .replace(/\(\((.+?)\)\)/g, '<span style="background:#fff3cd;padding:1px 4px;border-radius:3px;font-weight:bold">$1</span>');
+}
+
 function plainToAcceptEditorHtml(text) {
   const lines = text.split('\n');
   const out = [];
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
-    const safe = esc(line);
+    // 先處理跳脫，再套用行內標記（標記語法本身不含 HTML 特殊字元，順序上沒有衝突）
+    const safe = applyInlineMarkers(esc(line));
 
     if (line.trim() === '') { out.push('<br>'); i++; continue; }
 
     // 開頭稱呼
-    if (/^親愛的/.test(line)) { out.push(`<div style="text-align:left">${safe}</div>`); i++; continue; }
+    if (/^親愛的/.test(line)) { out.push(`<div style="${ACCEPT_BASE_STYLE}">${safe}</div>`); i++; continue; }
 
-    // 恭喜句（藍色強調）
-    if (/^恭喜您/.test(line)) { out.push(`<div style="color:#0d47a1;font-weight:bold;text-align:left">${safe}</div>`); i++; continue; }
+    // 恭喜句（藍色強調，字級與其他行一致）
+    if (/^恭喜您/.test(line)) { out.push(`<div style="${ACCEPT_BASE_STYLE};color:#0d47a1;font-weight:bold">${safe}</div>`); i++; continue; }
 
     // 警語（紅色＋驚嘆號）
-    if (/^‼️/.test(line)) { out.push(`<div style="color:#c62828;font-weight:bold;text-align:left;margin-top:6px">${safe}</div>`); i++; continue; }
+    if (/^‼️/.test(line)) { out.push(`<div style="${ACCEPT_BASE_STYLE};color:#c62828;font-weight:bold;margin-top:6px">${safe}</div>`); i++; continue; }
+
+    // 發表地點：不需特別標示顏色，且後面不留空行（直接略過下一行若為空白）
+    if (/^■\s*發表地點/.test(line)) {
+      out.push(`<div style="${ACCEPT_BASE_STYLE};font-weight:bold;margin-top:14px">${safe}</div>`);
+      i++;
+      if (lines[i] !== undefined && lines[i].trim() === '') i++; // 跳過緊接的空行
+      continue;
+    }
 
     // 區塊標題（■ 開頭）：深藍色粗體
-    if (/^■/.test(line)) { out.push(`<div style="color:#0d47a1;font-weight:bold;text-align:left;margin-top:14px">${safe}</div>`); i++; continue; }
+    if (/^■/.test(line)) { out.push(`<div style="${ACCEPT_BASE_STYLE};color:#0d47a1;font-weight:bold;margin-top:14px">${safe}</div>`); i++; continue; }
 
     // 海報清單項目（ - 海報編號：開頭）：拆成獨立卡片，編號/題目/形式分行並加小標籤
     if (/^\s*-\s*海報編號/.test(line)) {
@@ -1267,10 +1298,10 @@ function plainToAcceptEditorHtml(text) {
     }
 
     // 子項目（ - 開頭）：縮排、深灰
-    if (/^\s*-\s/.test(line)) { out.push(`<div style="text-align:left;color:#333;padding-left:16px">${safe}</div>`); i++; continue; }
+    if (/^\s*-\s/.test(line)) { out.push(`<div style="${ACCEPT_BASE_STYLE};color:#333;padding-left:16px">${safe}</div>`); i++; continue; }
 
     // 子子項目（更深縮排，如 1. 2. ① ②）
-    if (/^\s{3,}/.test(line)) { out.push(`<div style="text-align:left;color:#444;padding-left:32px;font-size:0.92em">${safe}</div>`); i++; continue; }
+    if (/^\s{3,}/.test(line)) { out.push(`<div style="${ACCEPT_BASE_STYLE};color:#444;padding-left:32px;font-size:13px">${safe}</div>`); i++; continue; }
 
     // 分隔線
     if (/^────/.test(line)) { out.push(`<div style="color:#aaa;font-size:0.85em;text-align:left">${safe}</div>`); i++; continue; }
@@ -1278,7 +1309,7 @@ function plainToAcceptEditorHtml(text) {
     // 署名區（Tel/E-mail/地址/秘書處等）
     if (/^(Tel|E-mail|710|秘書處|台灣醫事聯合|（教學大樓)/.test(line)) { out.push(`<div style="font-size:0.85em;color:#555;text-align:left">${safe}</div>`); i++; continue; }
 
-    out.push(`<div style="text-align:left">${safe}</div>`);
+    out.push(`<div style="${ACCEPT_BASE_STYLE}">${safe}</div>`);
     i++;
   }
   return out.join('');
