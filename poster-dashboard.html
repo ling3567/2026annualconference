@@ -1161,7 +1161,7 @@ const ACCEPT_BLOCK_PHYSICAL = `
 【實體張貼說明】
 ■ 海報實體張貼注意事項：
  - 張貼時間：08:00–09:10
- - 移除時間：14:30–15:30（逾時將由本會統一移除，恕不負保管責任）
+ - 移除時間：14:50–15:30（逾時將由本會統一移除，恕不負保管責任）
  - 尺寸規格：直式，寬 90 cm × 高 120 cm
  - 張貼位置：請依海報編號於指定展示板張貼（現場備有文具用品）
  - 海報內容：包含論文題目、作者(含服務單位)、研究動機、研究方法、研究結果、結論、關鍵字等，排版樣式可自行創意編排。
@@ -1171,7 +1171,7 @@ const ACCEPT_BLOCK_EXCELLENT_PHYSICAL = `
 【優秀海報說明】
 ■ 實體張貼注意事項：
  - 張貼時間：08:00–09:10
- - 移除時間：14:30–15:30（逾時將由本會統一移除，恕不負保管責任）
+ - 移除時間：14:50–15:30（逾時將由本會統一移除，恕不負保管責任）
  - 尺寸規格：直式，寬 90 cm × 高 120 cm
  - 張貼位置：請依海報編號於指定展示板張貼（現場備有文具用品）
  - 海報內容：包含論文題目、作者(含服務單位)、研究動機、研究方法、研究結果、結論、關鍵字等，排版樣式可自行創意編排。
@@ -1443,19 +1443,21 @@ async function sendAcceptEmails() {
   closeModal('acceptModal');
   await runProgress(groups, async (group) => {
     const htmlBody = buildAcceptMail(group, tmplHtml);
-    const modesStr = Array.from(group.modes).join(',');
-    // 同一作者底下每一筆投稿都各自記錄狀態，但只送一次信（用第一筆 row 當代表呼叫，後端仍逐列更新）
+    const modesStr = Array.from(group.modes).join(','); // group 全部篇目的類型聯集，用於決定信件主旨
     for (const i of group.rows) {
       const r = submissions[i];
+      const isFirst = group.rows.indexOf(i) === 0;
       const body = new URLSearchParams();
       body.append('action','sendAcceptEmail');
       body.append('rowIndex', i+2);
       body.append('data', JSON.stringify({
-        submissionId:r[0], title:r[3],
-        contactName:group.name, contactEmail:group.email,
-        acceptType: acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || '',
+        submissionId: r[0], title: r[3],
+        contactName: group.name, contactEmail: group.email,
+        acceptType: isFirst ? modesStr : (acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || ''),
+        // 第一筆：傳 group 聯集 → GAS 用來決定主旨並實際寄信
+        // 其餘筆：傳各自單篇類型 → GAS 只更新該列的欄位，不重複寄信
         htmlBody: htmlBody,
-        skipSend: group.rows.indexOf(i) !== 0 // 同一人只在第一筆真正寄信，其餘僅更新狀態
+        skipSend: !isFirst
       }));
       const resp = await fetch(getUrl(),{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
       const json = await resp.json();
