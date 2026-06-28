@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會 | 學術研討會手冊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --deep-blue: #1a3a5c;
+  --nav-blue: #1A5D99;
+  --medium-blue: #2c6fA0;
+  --mist-blue: #6a9ec0;
+  --light-blue: #a8cfea;
+  --pale-blue: #d6e9f5;
+  --ice-blue: #eaf3fa;
+  --teal-blue: #3a7ca5;
+  --warm-gold: #d4a843;
+  --light-gold: #f0d68a;
+  --pale-gold: #fdf5e0;
+  --cream: #faf6ee;
+  --warm-yellow: #f5e6b8;
+  --coral: #e07855;
+  --white: #ffffff;
+  --text-dark: #1a2a3a;
+  --text-body: #2c3e50;
+  --text-muted: #6b7c8d;
+  --break-gray: #f1f5f9;
+  --card-shadow: 0 4px 20px rgba(26,93,153,0.08);
+  --card-shadow-hover: 0 8px 32px rgba(26,93,153,0.14);
+  --card-radius: 16px;
+  --btn-radius: 28px;
+  --font-main: 'Noto Sans TC', 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+body {
+  font-family: var(--font-main);
+  color: var(--text-body);
+  background: var(--ice-blue);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== HEADER / NAV (與報名頁一致：電腦版固定列、手機版收合) ========== */
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(26,93,153,0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px rgba(26,93,153,0.2);
+  transition: background 0.3s;
+}
+.header-inner {
+  max-width: 1000px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.55rem 1.5rem;
+}
+.header-logo {
+  display: flex; align-items: center; gap: 0.6rem;
+  color: var(--white); font-weight: 700; font-size: 0.92rem;
+  text-decoration: none;
+}
+.header-logo .logo-img {
+  width: 36px; height: 36px; border-radius: 50%;
+  object-fit: contain; background: rgba(255,255,255,0.95);
+  padding: 2px;
+}
+.header-logo .logo-text { line-height: 1.2; }
+.header-logo .logo-text small {
+  display: block; font-size: 0.72rem; font-weight: 400;
+  opacity: 0.85; margin-top: 1px;
+}
+.nav-toggle {
+  display: none; background: none; border: none;
+  color: var(--white); cursor: pointer; padding: 0.4rem;
+}
+.main-nav { display: flex; gap: 0.1rem; align-items: center; }
+.main-nav a {
+  color: rgba(255,255,255,0.88); text-decoration: none; font-size: 0.85rem;
+  padding: 0.45rem 0.75rem; border-radius: 8px; transition: all 0.2s; font-weight: 500;
+  white-space: nowrap;
+}
+.main-nav a:focus { outline: none; }
+.main-nav a:focus-visible { outline: 2px solid var(--light-gold); outline-offset: 2px; }
+.main-nav a:hover { color: var(--light-gold); background: rgba(255,255,255,0.08); }
+.main-nav a.active { color: var(--light-gold); background: rgba(255,255,255,0.1); }
+
+/* Nav 下拉選單（海報論文） */
+.nav-dropdown { position: relative; }
+.nav-dropdown-trigger {
+  display: inline-flex !important; align-items: center; gap: 0.25rem;
+}
+.nav-dropdown-trigger .caret {
+  transition: transform 0.2s; opacity: 0.85;
+}
+.nav-dropdown:hover .nav-dropdown-trigger .caret { transform: rotate(180deg); }
+.nav-submenu {
+  position: absolute; top: 100%; left: 50%;
+  min-width: 140px;
+  transform: translateX(-50%) translateY(-6px);
+  background: var(--white);
+  border: 1px solid var(--pale-blue);
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(26,93,153,0.1), 0 2px 5px rgba(26,93,153,0.05);
+  padding: 0;
+  margin-top: 0.45rem;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+  z-index: 100;
+  overflow: hidden; /* 首/尾項目的背景色自然跟隨外框圓弧裁切 */
+}
+.nav-dropdown:hover .nav-submenu,
+.nav-dropdown:focus-within .nav-submenu {
+  opacity: 1; visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+/* 小三角形指標 */
+.nav-submenu::before {
+  content: ''; position: absolute;
+  top: -6px; left: 50%; transform: translateX(-50%) rotate(45deg);
+  width: 10px; height: 10px;
+  background: var(--white);
+  border-left: 1px solid var(--pale-blue);
+  border-top: 1px solid var(--pale-blue);
+  z-index: -1;
+}
+.nav-submenu a {
+  display: block;
+  padding: 0.75rem 1.1rem;
+  font-size: 0.86rem; font-weight: 500;
+  color: var(--text-body);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--pale-blue);
+  transition: color 0.15s, background 0.15s;
+}
+.nav-submenu a:last-child { border-bottom: none; }
+.nav-submenu a:focus { outline: none; }
+.nav-submenu a:focus-visible {
+  outline: 2px solid var(--nav-blue);
+  outline-offset: -2px;
+}
+.nav-submenu a.active:focus-visible { outline: none; }
+.nav-submenu a:hover {
+  background: var(--ice-blue);
+  color: var(--nav-blue);
+}
+.nav-submenu a.active {
+  background: var(--ice-blue);
+  color: var(--nav-blue);
+  font-weight: 700;
+}
+/* 滑鼠移到任一項目時，其他「目前選中」項目的底色暫時隱藏，
+   只剩滑鼠停的那一項顯示底色 */
+.nav-submenu:hover a.active:not(:hover) {
+  background: transparent;
+  color: var(--text-body);
+  font-weight: 500;
+}
+
+/* 主內容區留 fixed nav 空間 */
+body { padding-top: 58px; }
+
+/* ========== 議程區的「年會主題卡」（海報插圖 + 強力霧化遮罩） ========== */
+.theme-card {
+  position: relative; overflow: hidden;
+  background-color: #d6e9f5;
+  background-image: url('images/theme-bg.png');
+  background-size: cover;
+  background-position: right bottom; /* 圖底對齊，保留完整人物與腳底 */
+  background-repeat: no-repeat;
+  border: 1px solid rgba(26,93,153,0.18);
+  border-radius: var(--card-radius);
+  margin-bottom: 2.2rem;
+  box-shadow: 0 8px 28px rgba(26,93,153,0.15);
+  min-height: 300px;
+  display: flex; align-items: center;
+  padding: 1.8rem 1.9rem;
+}
+/* 強力霧化遮罩：下半部漸層化到接近實心天空藍，讓橋面/草叢「溶入雲霧」，人物像踏在雲層上 */
+.theme-card::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: clamp(80px, 9vw, 180px);
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(214,233,245,0.08) 22%,
+    rgba(214,233,245,0.28) 48%,
+    rgba(214,233,245,0.62) 72%,
+    rgba(214,233,245,0.9) 90%,
+    #d6e9f5 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+.theme-card-content {
+  position: relative; z-index: 1;
+  max-width: 56%;
+  text-align: left;
+}
+.theme-card-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(26,93,153,0.35);
+  color: var(--nav-blue);
+  font-size: 0.72rem; font-weight: 700;
+  padding: 0.28rem 0.95rem; border-radius: 99px;
+  letter-spacing: 0.22em;
+  margin-bottom: 1.05rem;
+}
+
+/* 主標題：僅 2 種樣式 */
+.theme-card-title { line-height: 1.5; margin-bottom: 1.15rem; letter-spacing: 0.04em; }
+
+/* 樣式 1：深藍標準字（前後兩行共用） — 配淺天空背景 */
+.theme-card-title .t-lead,
+.theme-card-title .t-sub {
+  display: block;
+  font-size: clamp(1rem, 2.3vw, 1.25rem);
+  color: var(--deep-blue);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-shadow: 0 1px 8px rgba(255,255,255,0.85), 0 0 2px rgba(255,255,255,0.95);
+}
+.theme-card-title .t-lead { margin-bottom: 0.3rem; }
+.theme-card-title .t-sub { margin-top: 0.45rem; font-size: clamp(0.95rem, 2.1vw, 1.15rem); }
+
+/* 樣式 2：橘色重點字（不被壓垮的教育者） */
+.theme-card-title .t-main {
+  display: block;
+  font-size: clamp(1.7rem, 5vw, 2.45rem);
+  color: #E96E3A;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-shadow:
+    0 2px 12px rgba(255,255,255,0.55),
+    0 0 4px rgba(255,255,255,0.7);
+}
+
+.theme-card-meta {
+  display: flex; flex-wrap: wrap; justify-content: flex-start;
+  gap: 0.5rem 1.6rem;
+  color: var(--deep-blue);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding-top: 1.1rem;
+  margin-top: 0.4rem;
+  border-top: 1px solid rgba(26,93,153,0.3);
+  text-shadow: 0 1px 5px rgba(255,255,255,0.8);
+}
+.theme-card-meta span {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+}
+.theme-card-meta svg { color: var(--nav-blue); }
+
+/* 平板 (768px↓)：文字寬度放寬，圖檔同樣下推 */
+@media (max-width: 768px) {
+  .theme-card {
+    min-height: 280px;
+    padding: 1.6rem 1.4rem;
+    background-image:
+      linear-gradient(to right, rgba(214,233,245,0.55) 0%, rgba(214,233,245,0.15) 50%, transparent 75%),
+      url('images/theme-bg.png');
+    background-position: 30% bottom, right bottom;
+  }
+  .theme-card-content { max-width: 70%; }
+}
+
+/* 手機 (540px↓)：圖背景變淡，文字全寬 */
+@media (max-width: 540px) {
+  .theme-card {
+    min-height: 240px;
+    padding: 1.4rem 1.2rem;
+    background-image:
+      linear-gradient(to bottom,
+        rgba(214,233,245,0.55) 0%,
+        rgba(214,233,245,0.25) 60%,
+        transparent 100%),
+      url('images/theme-bg.png');
+    background-position: center, center bottom;
+  }
+  .theme-card-content { max-width: 100%; }
+  .theme-card-title .t-main { font-size: 1.55rem; }
+  .theme-card-title .t-lead, .theme-card-title .t-sub { font-size: 0.95rem; }
+  .theme-card-meta { font-size: 0.82rem; gap: 0.4rem 1rem; }
+}
+
+/* ========== SECTION 基底 ========== */
+.section {
+  max-width: 1000px; margin: 0 auto;
+  padding: 2rem 1.5rem 1rem;
+}
+.section.section-wide { max-width: 100%; padding-left: 0; padding-right: 0; }
+.section.section-wide > .section-inner {
+  max-width: 1000px; margin: 0 auto; padding: 0 1.5rem;
+}
+/* 輕量化 section header：nav 已標示所在區段，不重複大標題 */
+.section-head {
+  margin-bottom: 1.6rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--pale-blue);
+  display: flex; align-items: baseline;
+  flex-wrap: wrap; gap: 0.5rem 1rem;
+}
+.section-head .tag {
+  display: inline-flex; align-items: center;
+  background: var(--nav-blue); color: var(--white);
+  padding: 0.32rem 0.85rem; border-radius: 6px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em;
+  line-height: 1; flex-shrink: 0;
+}
+/* 較大的標籤（作為區段標題使用，例如海報論文的動態分類名） */
+.section-head .tag.tag-lg {
+  background: linear-gradient(135deg, var(--nav-blue), var(--medium-blue));
+  padding: 0.5rem 1.1rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  box-shadow: 0 3px 10px rgba(26,93,153,0.18);
+}
+.section-head .meta {
+  color: var(--text-muted); font-size: 0.88rem;
+  line-height: 1.5; flex: 1; min-width: 0;
+}
+.section-head .meta strong { color: var(--nav-blue); font-weight: 600; }
+.section-bg-white { background: var(--white); }
+@media (max-width: 540px) {
+  .section-head { gap: 0.4rem 0.8rem; }
+  .section-head .meta { font-size: 0.82rem; flex-basis: 100%; }
+}
+
+/* 分頁式：每區單獨呈現，預設隱藏，加 .active 顯示 */
+.section { display: none; }
+.section.active { display: block; animation: sectionFade 0.3s ease; }
+@keyframes sectionFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== 議程 表格 ========== */
+.agenda-table-wrap { overflow-x: auto; }
+.agenda-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  background: var(--white); border-radius: var(--card-radius);
+  overflow: hidden; box-shadow: var(--card-shadow);
+}
+.agenda-table thead {
+  background: linear-gradient(135deg, var(--nav-blue), var(--medium-blue));
+}
+.agenda-table th {
+  color: var(--white); font-weight: 600; font-size: 0.92rem;
+  padding: 1rem 0.9rem; text-align: left; letter-spacing: 0.05em;
+}
+.agenda-table th:first-child { width: 130px; }
+.agenda-table th:nth-child(2) { width: 45%; }   /* 主題 */
+.agenda-table th:nth-child(3) { width: 21%; }   /* 講師 */
+.agenda-table th:nth-child(4) { width: 21%; }   /* 座長 */
+.agenda-table td {
+  padding: 0.95rem 0.9rem; border-bottom: 1px solid var(--pale-blue);
+  font-size: 0.92rem; vertical-align: top;
+}
+.agenda-table tr:last-child td { border-bottom: none; }
+.agenda-table .time-cell {
+  color: var(--nav-blue); font-weight: 600; white-space: nowrap;
+  font-size: 0.92rem;
+  font-feature-settings: "tnum";
+}
+.agenda-table .topic-title { font-weight: 600; color: var(--text-dark); }
+.agenda-table .speaker-info,
+.agenda-table .chair-info {
+  color: var(--text-body); font-size: 0.88rem; line-height: 1.55;
+  word-break: keep-all;   /* 防止中文詞語被拆斷（例：「中心」不會分行）*/
+}
+.agenda-table .chair-info { color: var(--text-dark); }
+.agenda-table .chair-info strong {
+  color: var(--text-dark); font-weight: 700;
+}
+.agenda-table tr.lecture-row:hover { background: var(--ice-blue); }
+.agenda-table tr.break-row td {
+  background: var(--break-gray);
+  color: var(--text-muted); font-size: 0.88rem; font-style: normal;
+}
+.agenda-table tr.break-row .time-cell {
+  color: var(--nav-blue); font-size: 0.92rem;
+}
+.handout-btn {
+  display: flex; align-items: center; gap: 0.35rem;
+  margin-top: 0.6rem; padding: 0.4rem 0.9rem;
+  width: fit-content;
+  background: linear-gradient(135deg, var(--warm-gold), #c89a30);
+  color: var(--white); border: none; border-radius: 99px;
+  font-size: 0.78rem; font-weight: 600; text-decoration: none;
+  cursor: pointer; transition: all 0.2s;
+  font-family: var(--font-main);
+}
+.handout-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,168,67,0.4); }
+.handout-btn.disabled {
+  background: #cbd5e0; cursor: not-allowed; pointer-events: none;
+}
+
+/* ========== 講師卡片 ========== */
+.speakers-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 1.2rem;
+}
+.speaker-card {
+  background: var(--white); border-radius: var(--card-radius);
+  overflow: hidden; box-shadow: var(--card-shadow);
+  transition: transform 0.25s, box-shadow 0.25s;
+  scroll-margin-top: 80px;
+}
+.speaker-card:hover { transform: translateY(-3px); box-shadow: var(--card-shadow-hover); }
+.speaker-card.highlight {
+  box-shadow: 0 0 0 3px var(--warm-gold), var(--card-shadow-hover);
+}
+.speaker-header {
+  background: linear-gradient(135deg, var(--nav-blue), var(--medium-blue));
+  color: var(--white); padding: 1.2rem 1.3rem;
+  min-height: 84px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.speaker-name {
+  display: flex; align-items: baseline; flex-wrap: wrap;
+  gap: 0.5em;
+  letter-spacing: 0.04em;
+}
+.speaker-name .name-main {
+  font-size: 1.45rem; font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.speaker-name .name-title {
+  font-size: 0.95rem; font-weight: 500;
+  opacity: 0.92;
+}
+/* 現職職稱維持與單位同樣的文字樣式 */
+.speaker-body { padding: 1.2rem; }
+.speaker-block { margin-bottom: 0.9rem; }
+.speaker-block:last-child { margin-bottom: 0; }
+.speaker-block h4 {
+  color: var(--nav-blue); font-size: 0.82rem; font-weight: 700;
+  letter-spacing: 0.08em; padding-bottom: 0.25rem;
+  border-bottom: 2px solid var(--pale-blue);
+  display: inline-block; margin-bottom: 0.45rem;
+}
+.speaker-block p {
+  color: var(--text-body); font-size: 0.85rem; line-height: 1.65;
+  white-space: pre-line;
+}
+.speaker-block p + p { margin-top: 0.3rem; }
+.speaker-topic {
+  background: var(--ice-blue); border-left: 3px solid var(--warm-gold);
+  padding: 0.55rem 0.8rem; border-radius: 0 8px 8px 0;
+  font-size: 0.86rem; color: var(--text-dark); font-weight: 600;
+}
+
+/* ========== 會場資訊 ========== */
+.venue-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;
+}
+.venue-floorplan {
+  background: var(--white); border-radius: var(--card-radius);
+  padding: 1rem; box-shadow: var(--card-shadow); text-align: center;
+}
+.venue-floorplan img {
+  width: 100%; height: auto; border-radius: 8px; display: block;
+}
+.venue-floorplan .placeholder {
+  width: 100%; padding: 4rem 1rem; background: var(--ice-blue);
+  border: 2px dashed var(--mist-blue); border-radius: 8px;
+  color: var(--text-muted); font-size: 0.9rem;
+}
+.venue-floorplan .caption {
+  font-size: 0.85rem; color: var(--text-muted); margin-top: 0.7rem;
+}
+.venue-zones {
+  background: var(--white); border-radius: var(--card-radius);
+  padding: 1.5rem; box-shadow: var(--card-shadow);
+}
+.venue-zones h3 {
+  color: var(--deep-blue); font-size: 1.05rem; margin-bottom: 1rem;
+  padding-bottom: 0.6rem; border-bottom: 2px solid var(--pale-blue);
+}
+.zone-item {
+  display: grid; grid-template-columns: 168px 1fr;
+  align-items: start; gap: 0.8rem;
+  padding: 0.6rem 0; border-bottom: 1px dashed var(--pale-blue);
+  font-size: 0.88rem; line-height: 1.6;
+}
+.zone-item:last-child { border-bottom: none; }
+.zone-tag {
+  background: var(--ice-blue); color: var(--nav-blue);
+  padding: 0.35rem 0.6rem; border-radius: 6px;
+  font-size: 0.78rem; font-weight: 600;
+  text-align: center; line-height: 1.5;
+  align-self: start;
+  word-break: keep-all;
+}
+@media (max-width: 540px) {
+  .zone-item { grid-template-columns: 1fr; gap: 0.35rem; }
+  .zone-tag { justify-self: start; }
+}
+
+/* ========== 海報論文：子分類由 nav 下拉切換 ========== */
+.poster-panel { display: none; }
+.poster-panel.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* 目前分類顯示已搬到 section-head 的 .tag.tag-lg */
+
+.poster-list { display: flex; flex-direction: column; gap: 0.7rem; }
+.poster-item {
+  background: var(--white); border-radius: 12px;
+  padding: 1rem 1.2rem; box-shadow: var(--card-shadow);
+  display: grid; grid-template-columns: 1fr auto; gap: 0.6rem 1rem;
+  align-items: start; transition: box-shadow 0.2s;
+}
+.poster-item:hover { box-shadow: var(--card-shadow-hover); }
+
+/* 編號改為矩形 chip（橫向、緊湊） */
+.poster-num {
+  display: inline-flex; align-items: center;
+  background: linear-gradient(135deg, var(--nav-blue), var(--medium-blue));
+  color: var(--white);
+  padding: 0.28rem 0.7rem; border-radius: 6px;
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.06em; white-space: nowrap;
+  width: fit-content;
+  margin-bottom: 0.45rem;
+}
+
+.poster-body { grid-column: 1; }
+.poster-body .poster-title {
+  font-weight: 600; color: var(--text-dark); line-height: 1.55;
+  font-size: 0.95rem; margin-bottom: 0.45rem;
+}
+/* 通訊作者、服務機構各自一行 */
+.poster-body .poster-meta {
+  font-size: 0.85rem; color: var(--text-muted);
+  display: flex; flex-direction: column; gap: 0.15rem;
+}
+.poster-body .poster-meta span { display: block; }
+.poster-pdf-btn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.4rem 0.9rem; border-radius: 99px;
+  background: linear-gradient(135deg, var(--warm-gold), #c89a30);
+  color: var(--white); font-size: 0.78rem; font-weight: 600;
+  text-decoration: none; transition: all 0.2s;
+  white-space: nowrap;
+}
+.poster-pdf-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(212,168,67,0.4); }
+.poster-pdf-btn.disabled {
+  background: #cbd5e0; pointer-events: none; cursor: not-allowed;
+}
+
+.poster-review {
+  margin-top: 0.7rem; padding: 0.7rem 0.9rem;
+  background: var(--pale-gold); border-left: 3px solid var(--warm-gold);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.85rem; color: var(--text-body); line-height: 1.65;
+  grid-column: 1 / -1;
+}
+.poster-review strong { color: #8a6418; }
+
+.poster-empty {
+  text-align: center; padding: 3rem 1rem;
+  color: var(--text-muted); font-size: 0.95rem;
+  background: var(--white); border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+.poster-empty .icon { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5; }
+
+/* ========== OSCE 教案卡片 ========== */
+.osce-list { display: flex; flex-direction: column; gap: 0.8rem; }
+.osce-item {
+  background: var(--white); border-radius: 12px;
+  padding: 1.1rem 1.3rem; box-shadow: var(--card-shadow);
+  transition: box-shadow 0.2s;
+}
+.osce-item:hover { box-shadow: var(--card-shadow-hover); }
+.osce-num {
+  display: inline-flex; align-items: center;
+  background: linear-gradient(135deg, var(--nav-blue), var(--medium-blue));
+  color: var(--white);
+  padding: 0.28rem 0.7rem; border-radius: 6px;
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.06em; white-space: nowrap;
+  margin-bottom: 0.5rem;
+}
+.osce-title {
+  font-weight: 700; color: var(--text-dark); line-height: 1.5;
+  font-size: 1rem; margin-bottom: 0.6rem;
+}
+.osce-meta {
+  font-size: 0.88rem; color: var(--text-body);
+  display: flex; flex-direction: column; gap: 0.15rem;
+  margin-bottom: 0.8rem;
+}
+.osce-meta span { display: block; }
+.osce-summary {
+  border-top: 1px dashed var(--pale-blue);
+  padding-top: 0.8rem;
+  margin-top: 0.4rem;
+}
+.osce-summary h4 {
+  color: var(--nav-blue);
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.45rem;
+}
+.osce-summary p {
+  font-size: 0.88rem; color: var(--text-body);
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+/* ========== 入會 / 通用 link card ========== */
+.link-card-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;
+}
+.link-card {
+  background: var(--white); border-radius: var(--card-radius);
+  padding: 1.4rem; box-shadow: var(--card-shadow);
+  text-decoration: none; color: inherit;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex; flex-direction: column; gap: 0.6rem;
+}
+.link-card:hover { transform: translateY(-3px); box-shadow: var(--card-shadow-hover); }
+.link-card h3 {
+  color: var(--deep-blue); font-size: 1.05rem; font-weight: 700;
+}
+.link-card p { color: var(--text-muted); font-size: 0.88rem; }
+.link-card .arrow {
+  color: var(--nav-blue); font-weight: 600; font-size: 0.88rem;
+  margin-top: auto;
+}
+
+/* ========== 滿意度調查 表單 ========== */
+.survey-card {
+  background: var(--white); border-radius: var(--card-radius);
+  padding: 2rem 1.8rem; box-shadow: var(--card-shadow);
+  width: 100%;
+}
+.survey-intro {
+  background: var(--ice-blue); border-left: 4px solid var(--nav-blue);
+  padding: 0.9rem 1.1rem; border-radius: 0 8px 8px 0;
+  margin-bottom: 1.6rem; font-size: 0.9rem;
+  color: var(--text-body);
+}
+.form-group { margin-bottom: 1.3rem; }
+.form-label {
+  display: block; font-weight: 600; color: var(--text-dark);
+  font-size: 0.92rem; margin-bottom: 0.45rem;
+}
+.form-label .required { color: var(--coral); margin-left: 0.25rem; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 0.65rem 0.85rem;
+  border: 1.5px solid var(--pale-blue); border-radius: 10px;
+  font-family: var(--font-main); font-size: 0.92rem;
+  background: var(--white); color: var(--text-body);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none; border-color: var(--nav-blue);
+  box-shadow: 0 0 0 3px rgba(26,93,153,0.12);
+}
+.form-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+.rating-group {
+  display: flex; gap: 0.3rem; flex-wrap: wrap;
+}
+.rating-option {
+  flex: 1; min-width: 80px;
+}
+.rating-option input { display: none; }
+.rating-option label {
+  display: block; text-align: center;
+  padding: 0.55rem 0.4rem;
+  background: var(--white); border: 1.5px solid var(--pale-blue);
+  border-radius: 10px; cursor: pointer;
+  font-size: 0.82rem; color: var(--text-body);
+  transition: all 0.15s; font-weight: 500;
+}
+.rating-option label:hover { border-color: var(--mist-blue); background: var(--ice-blue); }
+.rating-option input:checked + label {
+  background: linear-gradient(135deg, var(--nav-blue), var(--medium-blue));
+  color: var(--white); border-color: var(--nav-blue);
+  font-weight: 600;
+}
+
+.submit-btn {
+  display: block; width: 100%;
+  padding: 0.85rem; margin-top: 0.8rem;
+  background: linear-gradient(135deg, var(--warm-gold), var(--coral));
+  color: var(--white); border: none; border-radius: var(--btn-radius);
+  font-family: var(--font-main); font-size: 1.05rem; font-weight: 700;
+  cursor: pointer; transition: all 0.25s;
+  box-shadow: 0 4px 16px rgba(212,168,67,0.35);
+}
+.submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(212,168,67,0.45); }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.form-status {
+  text-align: center; padding: 0.9rem; margin-top: 1rem;
+  border-radius: 10px; font-size: 0.9rem; font-weight: 500;
+  display: none;
+}
+.form-status.success { background: #e6f7ee; color: #1e6b3a; border: 1px solid #95d5b2; display: block; }
+.form-status.error { background: #fdecea; color: #a31b1b; border: 1px solid #f5b7b1; display: block; }
+.form-status.loading { background: var(--ice-blue); color: var(--nav-blue); display: block; }
+
+/* 滿意度調查：分區標題 + Likert 緊湊樣式 */
+.form-section-header {
+  margin: 1.6rem 0 0.9rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--pale-blue);
+}
+.form-section-header h3 {
+  color: var(--nav-blue); font-size: 1.05rem; font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.form-section-header .hint {
+  color: var(--text-muted); font-size: 0.82rem;
+  margin-top: 0.2rem; font-weight: 400;
+}
+.form-section-header:first-of-type { margin-top: 0; }
+
+/* 職類別：chip radio 群 */
+.chip-radio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  gap: 0.4rem;
+}
+.chip-radio input { display: none; }
+.chip-radio label {
+  display: block; text-align: center; cursor: pointer;
+  padding: 0.45rem 0.3rem;
+  background: var(--white); border: 1.5px solid var(--pale-blue);
+  border-radius: 99px; font-size: 0.82rem;
+  color: var(--text-body); transition: all 0.15s;
+}
+.chip-radio label:hover { border-color: var(--mist-blue); background: var(--ice-blue); }
+.chip-radio input:checked + label {
+  background: linear-gradient(135deg, var(--nav-blue), var(--medium-blue));
+  color: var(--white); border-color: var(--nav-blue); font-weight: 600;
+}
+.chip-other-input {
+  margin-top: 0.5rem; display: none;
+}
+.chip-other-input.show { display: block; }
+
+/* 縱向 radio 群 (擔任年資) */
+.stack-radio {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+}
+.stack-radio > div { flex: 1 1 calc(33% - 0.4rem); min-width: 120px; }
+.stack-radio label {
+  display: block; text-align: center; cursor: pointer;
+  padding: 0.5rem 0.4rem;
+  background: var(--white); border: 1.5px solid var(--pale-blue);
+  border-radius: 10px; font-size: 0.85rem;
+  color: var(--text-body); transition: all 0.15s;
+}
+.stack-radio input { display: none; }
+.stack-radio label:hover { border-color: var(--mist-blue); background: var(--ice-blue); }
+.stack-radio input:checked + label {
+  background: linear-gradient(135deg, var(--nav-blue), var(--medium-blue));
+  color: var(--white); border-color: var(--nav-blue); font-weight: 600;
+}
+
+/* Likert 問題列：題目在上，5 點量表在下 */
+.likert-item {
+  background: var(--ice-blue); border-radius: 12px;
+  padding: 0.85rem 1rem; margin-bottom: 0.7rem;
+}
+.likert-item .q-text {
+  font-size: 0.9rem; color: var(--text-dark);
+  font-weight: 500; line-height: 1.55;
+  margin-bottom: 0.6rem;
+}
+.likert-item .q-text .q-num {
+  display: inline-block;
+  background: var(--nav-blue); color: var(--white);
+  width: 22px; height: 22px; border-radius: 50%;
+  text-align: center; line-height: 22px;
+  font-size: 0.78rem; font-weight: 700;
+  margin-right: 0.45rem; vertical-align: 1px;
+}
+.likert-scale {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.3rem;
+}
+.likert-scale > div { position: relative; }
+.likert-scale input { display: none; }
+.likert-scale label {
+  display: block; text-align: center; cursor: pointer;
+  padding: 0.45rem 0.2rem;
+  background: var(--white); border: 1.5px solid var(--pale-blue);
+  border-radius: 8px; font-size: 0.75rem;
+  color: var(--text-body); line-height: 1.3;
+  transition: all 0.15s;
+}
+.likert-scale label .num {
+  display: block; font-weight: 700; font-size: 0.95rem; color: var(--nav-blue);
+  margin-bottom: 0.1rem;
+}
+.likert-scale label:hover { border-color: var(--mist-blue); background: var(--ice-blue); }
+.likert-scale input:checked + label {
+  background: linear-gradient(135deg, var(--nav-blue), var(--medium-blue));
+  color: var(--white); border-color: var(--nav-blue);
+}
+.likert-scale input:checked + label .num { color: var(--white); }
+
+@media (max-width: 540px) {
+  .likert-scale label { font-size: 0.65rem; padding: 0.4rem 0.1rem; }
+  .likert-scale label .num { font-size: 0.85rem; }
+}
+
+/* ========== FOOTER ========== */
+.site-footer {
+  background: #1A5D99;
+  color: rgba(255,255,255,0.7);
+  text-align: center; padding: 1.5rem 1.2rem;
+  font-size: 0.82rem; line-height: 1.7;
+  margin-top: 3rem;
+}
+.site-footer .footer-main { color: var(--white); font-weight: 500; margin-bottom: 0.3rem; }
+
+/* ========== Back to top ========== */
+.back-top {
+  position: fixed; right: 1rem; bottom: 1rem;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--nav-blue); color: var(--white);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(26,93,153,0.3);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 999;
+}
+.back-top.show { opacity: 1; pointer-events: auto; }
+.back-top:hover { transform: translateY(-3px); }
+
+/* ========== MOBILE ========== */
+@media (max-width: 860px) {
+  .nav-toggle { display: block; }
+  .main-nav {
+    display: none; flex-direction: column;
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: rgba(26,93,153,0.98);
+    padding: 0.6rem 1rem 1rem;
+    gap: 0.2rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .main-nav.open { display: flex; }
+  .main-nav a { padding: 0.7rem 0.8rem; font-size: 0.95rem; }
+  .header-logo .logo-text small { display: none; }
+
+  /* 手機：下拉子項目改為內嵌展開（深色 nav 上以淡分隔線分隔） */
+  .nav-dropdown { width: 100%; }
+  .nav-dropdown-trigger { width: 100%; justify-content: space-between; }
+  .nav-dropdown:hover .nav-dropdown-trigger .caret { transform: none; }
+  .nav-submenu {
+    position: static; opacity: 1; visibility: visible; transform: none;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    margin: 0.1rem 0 0.4rem 1rem;
+    padding: 0;
+    min-width: 0;
+    border-radius: 0;
+    overflow: visible;
+  }
+  .nav-submenu::before { display: none; }
+  .nav-submenu a {
+    padding: 0.6rem 0.8rem; font-size: 0.88rem;
+    color: rgba(255,255,255,0.85);
+    background: transparent;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+  .nav-submenu a:last-child { border-bottom: none; }
+  .nav-submenu a:hover {
+    background: transparent;
+    color: var(--light-gold);
+  }
+  .nav-submenu a.active {
+    background: transparent;
+    color: var(--light-gold);
+    font-weight: 700;
+  }
+
+  .hero { padding: 6rem 1rem 2.5rem; }
+
+  .venue-grid { grid-template-columns: 1fr; }
+
+  /* Agenda: 卡片式 */
+  .agenda-table { box-shadow: none; background: transparent; }
+  .agenda-table thead { display: none; }
+  .agenda-table, .agenda-table tbody, .agenda-table tr { display: block; }
+  .agenda-table tr {
+    background: var(--white); border-radius: 12px;
+    padding: 0.9rem 1rem; margin-bottom: 0.6rem;
+    box-shadow: 0 1px 6px rgba(26,93,153,0.06);
+    border-left: 3px solid var(--nav-blue);
+  }
+  .agenda-table tr.break-row {
+    background: var(--break-gray); border-left-color: transparent;
+    padding: 0.6rem 1rem;
+  }
+  .agenda-table tr.break-row td {
+    background: transparent; padding: 0; border: none;
+  }
+  .agenda-table td {
+    display: block; padding: 0; border: none;
+  }
+  .agenda-table .time-cell { font-size: 0.85rem; margin-bottom: 0.35rem; }
+  .agenda-table tr.break-row .time-cell { font-size: 0.85rem; }
+  .agenda-table .topic-title { font-size: 0.96rem; }
+  .agenda-table .speaker-info,
+  .agenda-table .chair-info {
+    margin-top: 0.3rem; font-size: 0.85rem; line-height: 1.6;
+    color: var(--text-dark);
+  }
+  .agenda-table .speaker-info::before {
+    content: '講師｜'; font-weight: 600; color: var(--nav-blue); font-size: 0.78rem;
+  }
+  .agenda-table .chair-info::before {
+    content: '座長｜'; font-weight: 600; color: var(--warm-gold); font-size: 0.78rem;
+  }
+  .agenda-table td:empty { display: none; }
+
+  .poster-item { grid-template-columns: 1fr; padding: 0.85rem 1rem; }
+  .poster-pdf-btn { justify-self: start; margin-top: 0.4rem; }
+
+  .speakers-grid { grid-template-columns: 1fr; }
+
+  .survey-card { padding: 1.4rem 1.1rem; }
+  .rating-option { min-width: 0; }
+  .rating-option label { padding: 0.5rem 0.2rem; font-size: 0.78rem; }
+}
+</style>
+</head>
+<body id="top">
+
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="#top" class="header-logo">
+      <img src="https://raw.githubusercontent.com/ling3567/2026annualconference/main/images/TSMCSD-logo.png" alt="TSMCSD" class="logo-img">
+      <span class="logo-text">
+        台灣醫事聯合臨床技能發展學會
+        <small>2026 學術研討會手冊</small>
+      </span>
+    </a>
+    <button class="nav-toggle" onclick="document.querySelector('.main-nav').classList.toggle('open')" aria-label="選單">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <nav class="main-nav">
+      <a href="#schedule">議程</a>
+      <a href="#speakers">講師簡歷</a>
+      <a href="#venue">會場資訊</a>
+      <div class="nav-dropdown">
+        <a href="#posters" class="nav-dropdown-trigger">
+          海報論文
+          <svg class="caret" viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 5 6 8 9 5"/></svg>
+        </a>
+        <div class="nav-submenu">
+          <a href="#posters" data-subtab="physical">實體海報論文</a>
+          <a href="#posters" data-subtab="award">優秀海報論文</a>
+          <a href="#posters" data-subtab="eposter">E-Poster</a>
+        </div>
+      </div>
+      <a href="#osce">OSCE教案</a>
+      <a href="https://sub.chimei.org.tw/TSMCSD/index.php/vip/vip01" target="_blank" rel="noopener">入會說明</a>
+      <a href="#survey">滿意度調查</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== 議程（預設顯示） ===== -->
+<section class="section section-wide active" id="schedule">
+  <div class="section-inner">
+
+    <!-- 年會主題卡（取代原 Hero；僅在議程區出現） -->
+    <div class="theme-card">
+      <div class="theme-card-content">
+        <span class="theme-card-badge">2026 年會主題</span>
+        <h1 class="theme-card-title">
+          <span class="t-lead">在高壓醫療中成為</span>
+          <span class="t-main">不被壓垮的教育者</span>
+          <span class="t-sub">重塑教師韌性，邁向醫學教育的未來</span>
+        </h1>
+        <div class="theme-card-meta">
+          <span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2026年8月15日（六）08:00–15:30
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.75-7-11a7 7 0 1 1 14 0c0 5.25-7 11-7 11z"/><circle cx="12" cy="10" r="3"/></svg>
+            奇美醫院第五醫療大樓 5F 國際會議廳
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="tag">AGENDA</span>
+    </div>
+
+    <div class="agenda-table-wrap">
+      <table class="agenda-table">
+        <thead>
+          <tr>
+            <th>時間</th>
+            <th>主題</th>
+            <th>講師</th>
+            <th>座長</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="time-cell">08:00 – 08:30</td>
+            <td><span class="topic-title">報到</span></td>
+            <td></td><td></td>
+          </tr>
+          <tr>
+            <td class="time-cell">08:30 – 08:40</td>
+            <td><span class="topic-title">開幕致詞</span></td>
+            <td></td><td></td>
+          </tr>
+          <tr class="lecture-row">
+            <td class="time-cell">08:40 – 09:20</td>
+            <td>
+              <span class="topic-title">當壓力成為日常：醫療現場的心理韌性練習</span>
+              <a href="https://drive.google.com/file/d/1uIQ08eBEG1EvNL0Xu05TOqZ9PV4nRPGG/view?usp=sharing" target="_blank" rel="noopener" class="handout-btn" data-handout="蘇益賢">📄 課程講義</a>
+            </td>
+            <td><div class="speaker-info"><a href="#sp-蘇益賢" class="topic-title" style="color:var(--nav-blue);text-decoration:none">蘇益賢 臨床心理師</a><br>初色心理治療所</div></td>
+            <td><div class="chair-info"><strong>蘇慧真 理事長</strong><br>奇美醫院藥劑部部長<br>兼代理教學部部長</div></td>
+          </tr>
+          <tr class="break-row">
+            <td class="time-cell">09:20 – 09:40</td>
+            <td colspan="3">茶敘與交流</td>
+          </tr>
+          <tr class="lecture-row">
+            <td class="time-cell">09:40 – 10:20</td>
+            <td>
+              <span class="topic-title">能力導向醫學教育中的教學設計：從課程架構到臨床實踐</span>
+              <a href="https://drive.google.com/file/d/1e15FerxF7PzqTA2Gk7Hr1V5Y4UU2ezDp/view?usp=sharing" target="_blank" rel="noopener" class="handout-btn" data-handout="陳志弘">📄 課程講義</a>
+            </td>
+            <td><div class="speaker-info"><a href="#sp-陳志弘" class="topic-title" style="color:var(--nav-blue);text-decoration:none">陳志弘 主任</a><br>高雄長庚紀念醫院<br>教師培育中心</div></td>
+            <td><div class="chair-info"><strong>楊浚銘 常務理事</strong><br>奇美醫院<br>神經內科主任</div></td>
+          </tr>
+          <tr class="lecture-row">
+            <td class="time-cell">10:20 – 11:00</td>
+            <td>
+              <span class="topic-title">事半功倍的教學：AI 工具在教案製作的應用</span>
+              <a href="https://drive.google.com/file/d/1xIsnY1KPj1ydQ4Vrx8FGDDfbI7nySxMB/view?usp=sharing" target="_blank" rel="noopener" class="handout-btn" data-handout="邱俊文">📄 課程講義</a>
+            </td>
+            <td><div class="speaker-info"><a href="#sp-邱俊文" class="topic-title" style="color:var(--nav-blue);text-decoration:none">邱俊文 副部主任</a><br>彰化基督教醫院<br>急診暨重症醫學部</div></td>
+            <td><div class="chair-info"><strong>江惠英 常務理事</strong><br>奇美醫院<br>護理部副部長</div></td>
+          </tr>
+          <tr>
+            <td class="time-cell">11:00 – 12:00</td>
+            <td><span class="topic-title">第五屆第 1 次會員大會暨第五屆理監事選舉</span></td>
+            <td></td><td></td>
+          </tr>
+          <tr class="break-row">
+            <td class="time-cell">12:00 – 13:30</td>
+            <td colspan="3">午餐休息（會員備有餐盒）<br><span style="color: var(--coral); font-weight: 700;">12:30 – 13:30 入選海報論文觀賞及評選</span></td>
+          </tr>
+          <tr class="lecture-row">
+            <td class="time-cell">13:30 – 14:10</td>
+            <td>
+              <span class="topic-title">從評量到信賴：OSCE、EPA 與 CCC 連結臨床能力培育與總結性能力評定</span>
+              <a href="https://drive.google.com/file/d/1OY4JfX5LoYHVY4TowpNi_G8INRXiW-76/view?usp=sharing" target="_blank" rel="noopener" class="handout-btn" data-handout="張雅惠">📄 課程講義</a>
+            </td>
+            <td><div class="speaker-info"><a href="#sp-張雅惠" class="topic-title" style="color:var(--nav-blue);text-decoration:none">張雅惠 主任</a><br>馬偕紀念醫院<br>藥劑部臨床藥學科</div></td>
+            <td><div class="chair-info"><strong>鄭奕帝 理事</strong><br>中國醫藥大學附設醫院<br>藥劑部主任</div></td>
+          </tr>
+          <tr class="break-row">
+            <td class="time-cell">14:10 – 14:30</td>
+            <td colspan="3">茶敘與交流</td>
+          </tr>
+          <tr class="lecture-row">
+            <td class="time-cell">14:30 – 15:10</td>
+            <td>
+              <span class="topic-title">在高壓醫療環境中，如何系統性支持臨床教師的學術發展</span>
+              <a href="https://drive.google.com/file/d/1mXBK1IYnNsEOg9c5xXePuKkAbw1fllGd/view?usp=sharing" target="_blank" rel="noopener" class="handout-btn" data-handout="張玉喆">📄 課程講義</a>
+            </td>
+            <td><div class="speaker-info"><a href="#sp-張玉喆" class="topic-title" style="color:var(--nav-blue);text-decoration:none">張玉喆 教授</a><br>長庚醫學教育研究中心<br>副主任</div></td>
+            <td><div class="chair-info"><strong>郭進榮 名譽理事長</strong><br>奇美醫院<br>教師培育中心主任</div></td>
+          </tr>
+          <tr>
+            <td class="time-cell">15:10 – 15:20</td>
+            <td><span class="topic-title">海報論文暨 OSCE 教案競賽頒獎</span></td>
+            <td></td><td></td>
+          </tr>
+          <tr>
+            <td class="time-cell">15:20 – 15:30</td>
+            <td><span class="topic-title">閉幕致詞</span></td>
+            <td></td><td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 講師簡歷 ===== -->
+<section class="section" id="speakers">
+  <div class="section-head">
+    <span class="tag">SPEAKERS</span>
+  </div>
+
+  <div class="speakers-grid" id="speakers-grid"></div>
+</section>
+
+<!-- ===== 會場資訊 ===== -->
+<section class="section section-wide" id="venue">
+  <div class="section-inner">
+    <div class="section-head">
+      <span class="tag">VENUE</span>
+      <p class="meta"><strong>奇美醫院第五醫療大樓 5F</strong>｜平面圖與各區位指引</p>
+    </div>
+
+    <div class="venue-grid">
+      <div class="venue-floorplan">
+        <!-- 平面圖：請將檔案存到 images/floorplan-5f.png 後此處會自動顯示 -->
+        <img src="images/floorplan-5f.png" alt="第五醫療大樓 5 樓平面圖" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="placeholder" style="display:none">
+          <strong>第五醫療大樓 5 樓平面圖</strong><br>
+          <span style="font-size:0.82rem">請將平面圖檔存到 <code>images/floorplan-5f.png</code></span>
+        </div>
+      </div>
+
+      <div class="venue-zones">
+        <h3>會場區域指南</h3>
+        <div class="zone-item">
+          <span class="zone-tag">國際會議廳</span>
+          <span>年會主會場，專題演講、會員大會及競賽頒獎皆於此舉行。</span>
+        </div>
+        <div class="zone-item">
+          <span class="zone-tag">報到區</span>
+          <span>請於此完成報到；會員禮品領取及繼續教育積分簽到亦於此辦理。</span>
+        </div>
+        <div class="zone-item">
+          <span class="zone-tag">552／554／556／558 會議室</span>
+          <span>午餐及茶敘休息區，並設有優良 OSCE 教案播放展示。</span>
+        </div>
+        <div class="zone-item">
+          <span class="zone-tag">海報論文展示區</span>
+          <span>實體海報論文展示區，歡迎與會者於議程空檔參觀交流。</span>
+        </div>
+        <div class="zone-item">
+          <span class="zone-tag">E-Poster 輪播區</span>
+          <span>提供電子海報論文輪播瀏覽。</span>
+        </div>
+        <div class="zone-item">
+          <span class="zone-tag">點心區</span>
+          <span>茶敘時間提供點心及飲品。</span>
+        </div>
+        <div class="zone-item">
+          <span class="zone-tag">飲水機</span>
+          <span>歡迎自備環保杯取用。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 海報論文 ===== -->
+<section class="section" id="posters">
+  <div class="section-head">
+    <span class="tag" id="posters-section-tag">實體海報論文</span>
+  </div>
+
+  <!-- 子分類由頂部 nav「海報論文 ▾」下拉選單切換；目前分類顯示於上方 section-head -->
+
+  <div class="poster-panel active" id="poster-physical" role="tabpanel">
+    <div class="poster-list" id="poster-list-physical"></div>
+  </div>
+
+  <div class="poster-panel" id="poster-award" role="tabpanel">
+    <div class="poster-list" id="poster-list-award"></div>
+  </div>
+
+  <div class="poster-panel" id="poster-eposter" role="tabpanel">
+    <div class="poster-list" id="poster-list-eposter"></div>
+  </div>
+</section>
+
+<!-- ===== OSCE 教案 ===== -->
+<section class="section section-wide" id="osce">
+  <div class="section-inner">
+    <div class="section-head">
+      <span class="tag">OSCE CASES</span>
+      <p class="meta">優良 OSCE 教案將於會場 <strong>552／554／556／558 會議室</strong>播放展示，歡迎與會者於議程空檔前往觀賞。</p>
+    </div>
+
+    <div class="osce-list" id="osce-list"></div>
+  </div>
+</section>
+
+<!-- ===== 滿意度調查 ===== -->
+<section class="section" id="survey">
+  <div class="section-head">
+    <span class="tag">FEEDBACK</span>
+  </div>
+
+  <div class="survey-card">
+    <div class="survey-intro">
+      為了持續精進研討會品質，誠摯邀請您撥冗填寫本表。您的回饋將協助學會優化未來的學術交流與服務。
+    </div>
+
+    <!--
+      使用方式：將下方 SURVEY_ENDPOINT 改成你部署的 Apps Script Web App URL（請見 apps-script-survey.gs）
+      表單欄位可依實際題目調整；name 屬性會原樣寫入 Google Sheet 欄位
+    -->
+    <form id="survey-form" autocomplete="off"></form>
+
+    <!-- 表單欄位由 JS 渲染 (見頁尾 script)；如需手動調整題目，搜尋 SURVEY_QUESTIONS -->
+
+    <p style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin-top:1.2rem">
+      資料將以加密方式直接寫入學會 Google Sheet，僅用於本次研討會品質改進，不另作他用。
+    </p>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div class="footer-main">2026 年會員大會暨學術研討會｜學術研討會手冊</div>
+  © 台灣醫事聯合臨床技能發展學會 · All rights reserved.
+</footer>
+
+<button class="back-top" id="back-top" aria-label="回到頂部">
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   1. 設定區：endpoint / 海報資料 / 滿意度題目
+   （資料更新後重新部署網頁即可）
+   ════════════════════════════════════════════════════════════════ */
+
+/* ----- Apps Script Web App 網址（部署後填入；見 apps-script-survey.gs） ----- */
+const SURVEY_ENDPOINT = ''; // 例： https://script.google.com/macros/s/AKfycb.../exec
+
+/* ----- 講師資料 -----
+   id：對應議程連結錨點（議程點講師名時跳到此卡）
+   title：顯示在 header 姓名旁的職稱（例 教授／臨床心理師／主任）
+   positions：完整現職陣列，每筆 {org, title}，顯示在 body「現職」區塊
+   topic：講授課程
+   education / experience：學歷、經歷（可多行；用 \n 換行） */
+const SPEAKERS = [
+  {
+    id: 'sp-蘇益賢',
+    name: '蘇益賢',
+    title: '臨床心理師',
+    positions: [
+      { org: '初色心理治療所', title: '臨床心理師' },
+      { org: '警政署', title: '心理輔導諮詢委員' },
+    ],
+    topic: '當壓力成為日常：醫療現場的心理韌性練習',
+    education: '國立政治大學心理學研究所 諮商與臨床心理學組 碩士',
+    experience:
+      '政治大學通識教育中心 兼任講師\n' +
+      '佛光大學心理系 兼任講師\n' +
+      '政治大學人文創新學程 兼任講師\n' +
+      '教育部未來想像與創意人才培育計畫 領航子計畫研發長',
+  },
+  {
+    id: 'sp-陳志弘',
+    name: '陳志弘',
+    title: '主任',
+    positions: [
+      { org: '高雄長庚紀念醫院 教師培育中心', title: '主任' },
+      { org: '高雄長庚紀念醫院 一般內科', title: '副教授' },
+      { org: '長庚大學 醫學系', title: '部定副教授' },
+    ],
+    topic: '能力導向醫學教育中的教學設計：從課程架構到臨床實踐',
+    education:
+      '國立高雄師範大學 成人教育所 博士\n' +
+      '中山醫學大學 醫學系 學士',
+    experience:
+      '高雄長庚紀念醫院 教師培育中心委員\n' +
+      '高雄長庚紀念醫院 衛福部臨床醫事人員培訓計畫小組委員',
+  },
+  {
+    id: 'sp-邱俊文',
+    name: '邱俊文',
+    title: '副部主任',
+    positions: [
+      { org: '彰化基督教醫院 急診暨重症醫學部', title: '副部主任' },
+      { org: '彰化基督教醫院 急診暨重症醫學部', title: '主治醫師' },
+      { org: '彰化基督教醫院 臨床技能中心', title: '專責教學主治醫師' },
+    ],
+    topic: '事半功倍的教學：AI 工具在教案製作的應用',
+    education:
+      '國立嘉義大學 教育學系 博士班（就讀中）\n' +
+      '高雄醫學大學 臨床醫學研究所 碩士\n' +
+      '國立陽明大學 醫學系 醫學士',
+    experience:
+      '彰化基督教醫院 急診暨重症醫學部 實習醫師訓練計畫主持人\n' +
+      '台灣急診醫學會 教育委員會委員\n' +
+      '大葉大學 護理學系講師',
+  },
+  {
+    id: 'sp-張雅惠',
+    name: '張雅惠',
+    title: '主任',
+    positions: [
+      { org: '馬偕紀念醫院 藥劑部臨床藥學科', title: '主任' },
+      { org: '馬偕醫學大學 醫學系', title: '兼任助理教授' },
+      { org: '馬偕紀念醫院 醫學教育部', title: '醫事教育者' },
+    ],
+    topic: '從評量到信賴：OSCE、EPA 與 CCC 連結臨床能力培育與總結性能力評定',
+    education: '國立台灣大學 藥理學研究所 碩士',
+    experience: '花蓮門諾會醫院 藥劑科主任',
+  },
+  {
+    id: 'sp-張玉喆',
+    name: '張玉喆',
+    title: '教授',  // 議程介紹用學術職稱「教授」（與議程一致）
+    positions: [
+      { org: '長庚紀念醫院 醫學教育研究中心', title: '副主任' },
+      { org: '長庚大學 醫學系', title: '副系主任' },
+      { org: '林口長庚紀念醫院 急診醫學部', title: '主治醫師' },
+      { org: '台灣醫學教育學會 秘書處', title: '副秘書長' },
+    ],
+    topic: '在高壓醫療環境中，如何系統性支持臨床教師的學術發展',
+    education:
+      'Flinders University, Australia — Clinical Education (by coursework) 碩士\n' +
+      '陽明大學 急重症醫學研究所 碩士\n' +
+      '陽明大學 醫學系 學士',
+    experience:
+      '長庚大學 醫學系專任教授\n' +
+      '林口長庚紀念醫院 專責教學主治醫師\n' +
+      'Frontiers in Medicine – Healthcare Professions Education, Associate Editor\n' +
+      'BMC Medical Education, Associate Editor',
+  },
+];
+
+/* ----- OSCE 優良教案資料（評選後填入；無 PDF 下載，僅內容呈現） -----
+   num：編號（例 OSCE-01）
+   title：教案名稱
+   team：投稿團隊
+   org：機構名稱
+   summary：教案概述（可多行；用 \n 換行） */
+const OSCE_CASES = [
+  {
+    num: 'OSCE-01',
+    title: '科技輔助 EPA 導向跨領域全人照護教案 ─ 放射治療頭頸癌青少年之跨團隊全人照護',
+    team: '林佳儀、吳淑鈞、謝梨君',
+    org: '中山醫學大學附設醫院',
+    summary: '本教案專為放射師與營養師設計，測驗全程由實際標準化病人（SP）參與演出，生動演繹面臨放療副作用與吞嚥困難的頭頸癌青少年，真實考驗考生的臨床應變與溝通溫度。本教案具備嚴謹的專家信效度，由跨領域的醫師、社工師及護理師共同進行專業評核與驗證。同時，測驗全面強化 AI 考官應用：在考生與真實 SP 互動時，AI 考官會同步進行語音及語意分析，客觀紀錄放射師的安撫衛教與營養師的介入計畫。透過「AI 精準數據追蹤」結合「跨領域專家回饋」，雙管齊下大幅提升 EPA 評估效能與全人照護實戰力。',
+  },
+  {
+    num: 'OSCE-02',
+    title: '失智症末期進食決策之跨領域全人照護',
+    team: '林舒晴、陳盈汝、黃馨葆',
+    org: '中山醫學大學附設醫院（大慶院區）',
+    summary: '本教案以失智症末期個案為情境，設計醫師、語言治療師與營養師跨領域全人照護 OSCE。學員需整合各專業評估結果，並透過跨領域全人會議討論舒適進食與鼻胃管灌食之利弊，最終與家屬進行以病人為中心的共享決策與衛教。',
+  },
+];
+
+/* ----- 海報論文資料（評分後填入；每篇對應獨立 PDF 連結） -----
+   pdf 欄請使用 Google Drive 的「檔案分享連結」， 形如：
+     https://drive.google.com/file/d/【FILE_ID】/view?usp=sharing
+   評審意見只在 award 類別會顯示。 */
+const POSTERS = {
+  physical: [
+    {
+      num: '實體海報01',
+      title: '第2封測試',
+      author: '楊依玲02',
+      org: '中國醫藥大學新竹附設醫院',
+      pdf: 'https://drive.google.com/file/d/1XvnP42x4wW9fxqacqRMhZXewLQN14PHD/view',
+    },
+  ],
+  award: [
+    {
+      num: '優秀海報01',
+      title: '第3封測試聽見呼吸背後的人：呼吸治療以病人為中心之人文照護教育模式',
+      author: '楊依玲03',
+      org: '奇美醫療財團法人奇美醫院',
+      pdf: 'https://drive.google.com/file/d/1EKSnTaLZQ-HhMmq7vNHIT1sznnseExQo/view',
+      review: '本研究結合 EPAs 信任等級與數位教具…（評審意見內容）',
+    },
+  ],
+  eposter: [
+    {
+      num: 'EP-01',
+      title: '第1封測試-探討 QCPR APP 介入對行政及醫護人員 CPR 技能之影響與長期維持—以 OSCE 評估為例',
+      author: '楊依玲01',
+      org: '中國醫藥大學新竹附設醫院',
+      pdf: 'https://drive.google.com/file/d/1G_npt2jZjC3e5-Ug29IW7l63ZLiYB_gc/view',
+    },
+  ],
+};
+
+/* ----- 滿意度調查題目 ----- */
+const SURVEY_QUESTIONS = {
+  intro: '為了持續精進研討會品質，誠摯邀請您撥冗填寫本表。您的回饋將協助學會優化未來的學術交流與服務。',
+
+  basic: {
+    title: '一、基本資料',
+    items: [
+      {
+        type: 'chip-radio',
+        name: '職類別',
+        label: '1. 職類別',
+        required: true,
+        options: ['西醫','牙醫','中醫','藥事','醫事放射','醫事檢驗','牙體技術','護理','營養','呼吸治療','聽力','物理治療','職能治療','臨床心理','諮商心理','語言治療','專科護理師','驗光師'],
+        otherOption: '其他',
+      },
+      {
+        type: 'stack-radio',
+        name: '臨床教師年資',
+        label: '2. 目前是否擔任臨床教師或參與醫學教育相關工作',
+        required: true,
+        options: ['否，目前尚未擔任或參與','是，1–3年','是，4–5年','是，6–9年','是，10年以上'],
+      },
+    ],
+  },
+
+  overall: {
+    title: '二、研討會整體評估',
+    hint: '5 非常同意　4 同意　3 普通　2 不同意　1 非常不同意',
+    scale: [
+      { value: 5, label: '非常同意' },
+      { value: 4, label: '同意' },
+      { value: 3, label: '普通' },
+      { value: 2, label: '不同意' },
+      { value: 1, label: '非常不同意' },
+    ],
+    items: [
+      '本次議程主題符合我對臨床教學與醫學教育實務的學習需求。',
+      '本次研討會有助於我理解醫學教育目前的重要發展方向。',
+      '本次研討會內容兼具理論觀念與實務應用。',
+      '本次研討會有助於我思考如何將所學應用於臨床教學、課程設計或教育訓練相關工作。',
+      '我能從本次研討會中帶回至少一項可應用於工作場域的做法。',
+      '本次研討會整體時數與活動安排適當。',
+      '本次活動場地、設備與行政安排能支持學習需求。',
+      '我願意推薦同事或其他對醫學教育有興趣者參加本學會未來辦理之研討會。',
+    ],
+  },
+
+  sessions: {
+    title: '三、各場次學習收穫',
+    hint: '5 非常有幫助　4 有幫助　3 普通　2 幫助不大　1 完全沒有幫助',
+    scale: [
+      { value: 5, label: '非常有幫助' },
+      { value: 4, label: '有幫助' },
+      { value: 3, label: '普通' },
+      { value: 2, label: '幫助不大' },
+      { value: 1, label: '完全沒有幫助' },
+    ],
+    items: [
+      '當壓力成為日常：醫療現場的心理韌性練習',
+      '能力導向醫學教育中的教學設計：從課程架構到臨床實踐',
+      '事半功倍的教學：AI工具在教案製作的應用',
+      '從評量到信賴：OSCE、EPA與CCC連結臨床能力培養與總結性能力評定',
+      '在高壓醫療環境中，如何系統性支持臨床教師的學術發展',
+    ],
+  },
+
+  satisfaction: {
+    title: '四、整體滿意度',
+    name: '整體滿意度',
+    label: '整體而言，您對本次研討會的滿意度為：',
+    required: true,
+    scale: [
+      { value: 5, label: '非常滿意' },
+      { value: 4, label: '滿意' },
+      { value: 3, label: '普通' },
+      { value: 2, label: '不滿意' },
+      { value: 1, label: '非常不滿意' },
+    ],
+  },
+
+  open: {
+    title: '五、開放式回饋',
+    items: [
+      { name: '最有幫助內容', label: '1. 本次研討會中，對您最有幫助的一項內容是什麼？' },
+      { name: '未來希望主題', label: '2. 未來希望學會再規劃哪些主題或課程？' },
+    ],
+  },
+};
+
+/* ════════════════════════════════════════════════════════════════
+   2. 分頁切換（每區單獨呈現，nav 點擊切換 section）
+   ════════════════════════════════════════════════════════════════ */
+const SECTION_IDS = ['schedule','speakers','venue','posters','osce','survey'];
+
+function switchSection(id, opts = {}) {
+  if (!SECTION_IDS.includes(id)) id = 'schedule';
+  document.querySelectorAll('.section').forEach(s => {
+    s.classList.toggle('active', s.id === id);
+  });
+  document.querySelectorAll('.main-nav a[href^="#"]').forEach(a => {
+    // 子選單項目由 showPosterSubtab() 另外管理 active 狀態
+    if (a.closest('.nav-submenu')) return;
+    a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+  });
+  if (opts.updateHash !== false) {
+    history.replaceState(null, '', '#' + id);
+  }
+  // 切換後回到頁首（避免停在中段；可用 skipScroll 跳過，例如要捲到特定卡片時）
+  if (!opts.skipScroll) {
+    window.scrollTo({ top: 0, behavior: opts.smooth === false ? 'auto' : 'smooth' });
+  }
+}
+
+document.querySelectorAll('.main-nav a[href^="#"]').forEach(a => {
+  // 排除子選單連結（由下方專屬 handler 處理）
+  if (a.closest('.nav-submenu')) return;
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    const id = a.getAttribute('href').slice(1);
+    switchSection(id);
+    document.querySelector('.main-nav').classList.remove('open');
+  });
+});
+
+/* 跳轉到指定講師卡片（切換到講師簡歷分頁 → 捲到該卡 → 加亮） */
+function goToSpeakerCard(cardId) {
+  switchSection('speakers', { updateHash: false, skipScroll: true });
+  // 等下一次 paint，section 已 display:block，卡片才有有效 offsetTop
+  requestAnimationFrame(() => {
+    const card = document.getElementById(cardId);
+    if (!card) return;
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.speaker-card.highlight').forEach(c => c.classList.remove('highlight'));
+    card.classList.add('highlight');
+    setTimeout(() => card.classList.remove('highlight'), 2400);
+  });
+}
+
+/* 處理首載 / hashchange */
+function applyHash() {
+  const hash = (location.hash || '').replace('#','');
+  if (hash.startsWith('sp-')) {
+    goToSpeakerCard(hash);
+    return;
+  }
+  // 深層連結：#posters-physical / #posters-award / #posters-eposter
+  if (hash.startsWith('posters-')) {
+    const sub = hash.slice('posters-'.length);
+    switchSection('posters', { smooth: false, updateHash: false });
+    showPosterSubtab(sub);
+    return;
+  }
+  switchSection(hash || 'schedule', { smooth: false, updateHash: !!hash });
+}
+window.addEventListener('hashchange', applyHash);
+
+/* 議程內 #sp-XXX 連結：用 click 攔截，避免瀏覽器預設 anchor 行為干擾 */
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[href^="#sp-"]');
+  if (!a) return;
+  e.preventDefault();
+  const id = a.getAttribute('href').slice(1);
+  // 不更新 location.hash，避免兩次切換（一次 click 一次 hashchange）
+  goToSpeakerCard(id);
+});
+
+/* ════════════════════════════════════════════════════════════════
+   3. 海報子分類：由頂部 nav 下拉切換
+   ════════════════════════════════════════════════════════════════ */
+const POSTER_LABELS = {
+  physical: '實體海報論文',
+  award: '優秀海報論文',
+  eposter: 'E-Poster',
+};
+
+function showPosterSubtab(sub) {
+  if (!POSTER_LABELS[sub]) sub = 'physical';
+  document.querySelectorAll('.poster-panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'poster-' + sub);
+  });
+  const label = document.getElementById('posters-section-tag');
+  if (label) label.textContent = POSTER_LABELS[sub];
+  document.querySelectorAll('.nav-submenu a').forEach(a => {
+    a.classList.toggle('active', a.dataset.subtab === sub);
+  });
+}
+
+document.querySelectorAll('.nav-submenu a[data-subtab]').forEach(a => {
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    const sub = a.dataset.subtab;
+    switchSection('posters', { skipScroll: true, updateHash: false });
+    history.replaceState(null, '', '#posters-' + sub);
+    showPosterSubtab(sub);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelector('.main-nav').classList.remove('open');
+  });
+});
+
+/* ════════════════════════════════════════════════════════════════
+   4. 海報清單渲染（從 POSTERS 物件）
+   ════════════════════════════════════════════════════════════════ */
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+function renderPosters(category, list, opts = {}) {
+  const target = document.getElementById('poster-list-' + category);
+  if (!target) return;
+  if (!list || list.length === 0) {
+    const tips = {
+      physical: { icon: '📋', text: '實體海報論文清單待評分完成後公布' },
+      award:    { icon: '🏆', text: '優秀海報論文待評選完成後公布' },
+      eposter:  { icon: '💻', text: 'E-Poster 清單待評分完成後公布' },
+    };
+    const t = tips[category];
+    target.innerHTML = `
+      <div class="poster-empty">
+        <div class="icon">${t.icon}</div>
+        <strong>${t.text}</strong><br>
+        <span style="font-size:0.85rem">每篇將提供 PDF 連結，可線上預覽</span>
+      </div>`;
+    return;
+  }
+
+  target.innerHTML = list.map(p => {
+    const pdfBtn = p.pdf
+      ? `<a href="${escapeHtml(p.pdf)}" target="_blank" rel="noopener" class="poster-pdf-btn">📄 PDF</a>`
+      : `<span class="poster-pdf-btn disabled">PDF 待提供</span>`;
+    const review = (category === 'award' && p.review)
+      ? `<div class="poster-review"><strong>評審意見：</strong>${escapeHtml(p.review)}</div>`
+      : '';
+    return `
+      <div class="poster-item">
+        <div class="poster-body">
+          <span class="poster-num">${escapeHtml(p.num)}</span>
+          <div class="poster-title">${escapeHtml(p.title)}</div>
+          <div class="poster-meta">
+            <span>通訊作者：${escapeHtml(p.author)}</span>
+            <span>服務機構：${escapeHtml(p.org)}</span>
+          </div>
+        </div>
+        ${pdfBtn}
+        ${review}
+      </div>`;
+  }).join('');
+}
+
+renderPosters('physical', POSTERS.physical);
+renderPosters('award', POSTERS.award);
+renderPosters('eposter', POSTERS.eposter);
+
+// 初始同步：讓子選單的 active 狀態與預設顯示的「實體海報論文」面板一致
+showPosterSubtab('physical');
+
+/* ════════════════════════════════════════════════════════════════
+   4c. OSCE 教案渲染
+   ════════════════════════════════════════════════════════════════ */
+function renderOSCECases() {
+  const target = document.getElementById('osce-list');
+  if (!target) return;
+  if (!OSCE_CASES.length) {
+    target.innerHTML = `
+      <div class="poster-empty">
+        <div class="icon">📚</div>
+        <strong>OSCE 優良教案清單待評選完成後公布</strong><br>
+        <span style="font-size:0.85rem">屆時將呈現教案名稱、投稿團隊、機構及概述</span>
+      </div>`;
+    return;
+  }
+  target.innerHTML = OSCE_CASES.map(c => `
+    <div class="osce-item">
+      <span class="osce-num">${escapeHtml(c.num)}</span>
+      <div class="osce-title">${escapeHtml(c.title)}</div>
+      <div class="osce-meta">
+        <span>投稿團隊：${escapeHtml(c.team)}</span>
+        <span>機構名稱：${escapeHtml(c.org)}</span>
+      </div>
+      <div class="osce-summary"><h4>教案概述</h4><p>${escapeHtml(c.summary)}</p></div>
+    </div>`).join('');
+}
+renderOSCECases();
+
+/* ════════════════════════════════════════════════════════════════
+   4b. 講師簡歷渲染
+   ════════════════════════════════════════════════════════════════ */
+function renderSpeakers() {
+  const target = document.getElementById('speakers-grid');
+  if (!target) return;
+  target.innerHTML = SPEAKERS.map(s => {
+    const positions = Array.isArray(s.positions) ? s.positions : [];
+
+    const positionsHtml = positions.length
+      ? `<div class="speaker-block">
+           <h4>現職</h4>
+           ${positions.map(p => `<p>${escapeHtml(p.org)} <span class="pos-title">${escapeHtml(p.title)}</span></p>`).join('')}
+         </div>`
+      : '';
+
+    const eduHtml = (s.education && s.education !== '（待提供）')
+      ? `<div class="speaker-block"><h4>學歷</h4><p>${escapeHtml(s.education)}</p></div>`
+      : `<div class="speaker-block"><h4>學歷</h4><p style="color:var(--text-muted)">（待提供）</p></div>`;
+    const expHtml = (s.experience && s.experience !== '（待提供）')
+      ? `<div class="speaker-block"><h4>經歷</h4><p>${escapeHtml(s.experience)}</p></div>`
+      : `<div class="speaker-block"><h4>經歷</h4><p style="color:var(--text-muted)">（待提供）</p></div>`;
+
+    return `
+      <article class="speaker-card" id="${escapeHtml(s.id)}">
+        <header class="speaker-header">
+          <div class="speaker-name">
+            <span class="name-main">${escapeHtml(s.name)}</span>${s.title ? `<span class="name-title">${escapeHtml(s.title)}</span>` : ''}
+          </div>
+        </header>
+        <div class="speaker-body">
+          <div class="speaker-block">
+            <div class="speaker-topic">${escapeHtml(s.topic)}</div>
+          </div>
+          ${positionsHtml}
+          ${eduHtml}
+          ${expHtml}
+        </div>
+      </article>`;
+  }).join('');
+}
+renderSpeakers();
+
+/* ════════════════════════════════════════════════════════════════
+   5. 滿意度調查表單渲染
+   ════════════════════════════════════════════════════════════════ */
+function renderSurveyForm() {
+  const form = document.getElementById('survey-form');
+  if (!form) return;
+  const q = SURVEY_QUESTIONS;
+  const html = [];
+
+  // 介紹語在表單外，已寫死於 HTML，不重複輸出
+
+  // 一、基本資料
+  html.push(`<div class="form-section-header"><h3>${escapeHtml(q.basic.title)}</h3></div>`);
+  q.basic.items.forEach(item => html.push(renderBasicItem(item)));
+
+  // 二、整體評估
+  html.push(`<div class="form-section-header"><h3>${escapeHtml(q.overall.title)}</h3><div class="hint">${escapeHtml(q.overall.hint)}</div></div>`);
+  q.overall.items.forEach((text, i) => html.push(renderLikert(`整體評估_${i+1}`, `${i+1}. ${text}`, q.overall.scale, true)));
+
+  // 三、各場次
+  html.push(`<div class="form-section-header"><h3>${escapeHtml(q.sessions.title)}</h3><div class="hint">${escapeHtml(q.sessions.hint)}</div></div>`);
+  q.sessions.items.forEach((text, i) => html.push(renderLikert(`場次_${text}`, `${i+1}. ${text}`, q.sessions.scale, true)));
+
+  // 四、整體滿意度
+  html.push(`<div class="form-section-header"><h3>${escapeHtml(q.satisfaction.title)}</h3></div>`);
+  html.push(renderLikert(q.satisfaction.name, q.satisfaction.label, q.satisfaction.scale, q.satisfaction.required, false));
+
+  // 五、開放式
+  html.push(`<div class="form-section-header"><h3>${escapeHtml(q.open.title)}</h3></div>`);
+  q.open.items.forEach(item => {
+    html.push(`
+      <div class="form-group">
+        <label class="form-label" for="sv-${cssId(item.name)}">${escapeHtml(item.label)}</label>
+        <textarea class="form-textarea" id="sv-${cssId(item.name)}" name="${escapeHtml(item.name)}" placeholder="請分享您的想法…"></textarea>
+      </div>`);
+  });
+
+  html.push(`
+    <button type="submit" class="submit-btn" id="sv-submit">送出回饋</button>
+    <div class="form-status" id="sv-status"></div>
+  `);
+
+  form.innerHTML = html.join('');
+}
+
+function cssId(s) {
+  return String(s).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 40);
+}
+
+function renderBasicItem(item) {
+  if (item.type === 'chip-radio') {
+    const safe = cssId(item.name);
+    const opts = item.options.map((v, i) => `
+      <div class="chip-radio">
+        <input type="radio" id="sv-${safe}-${i}" name="${escapeHtml(item.name)}" value="${escapeHtml(v)}" ${item.required ? 'required' : ''}>
+        <label for="sv-${safe}-${i}">${escapeHtml(v)}</label>
+      </div>`).join('');
+    const otherChip = item.otherOption ? `
+      <div class="chip-radio">
+        <input type="radio" id="sv-${safe}-other" name="${escapeHtml(item.name)}" value="__OTHER__">
+        <label for="sv-${safe}-other">${escapeHtml(item.otherOption)}…</label>
+      </div>` : '';
+    const otherInput = item.otherOption ? `
+      <div class="chip-other-input" id="sv-${safe}-other-input">
+        <input class="form-input" type="text" name="${escapeHtml(item.name)}_其他" placeholder="請說明其他項目">
+      </div>` : '';
+    return `
+      <div class="form-group">
+        <label class="form-label">${escapeHtml(item.label)} ${item.required ? '<span class="required">*</span>' : ''}</label>
+        <div class="chip-radio-grid">${opts}${otherChip}</div>
+        ${otherInput}
+      </div>`;
+  }
+  if (item.type === 'stack-radio') {
+    const opts = item.options.map((v, i) => {
+      const id = `sv-${cssId(item.name)}-${i}`;
+      return `
+        <div>
+          <input type="radio" id="${id}" name="${escapeHtml(item.name)}" value="${escapeHtml(v)}" ${item.required ? 'required' : ''}>
+          <label for="${id}">${escapeHtml(v)}</label>
+        </div>`;
+    }).join('');
+    return `
+      <div class="form-group">
+        <label class="form-label">${escapeHtml(item.label)} ${item.required ? '<span class="required">*</span>' : ''}</label>
+        <div class="stack-radio">${opts}</div>
+      </div>`;
+  }
+  return '';
+}
+
+function renderLikert(name, label, scale, required, compact = true) {
+  const safeName = cssId(name);
+  const opts = scale.map((s, i) => {
+    const id = `sv-${safeName}-${s.value}`;
+    return `
+      <div>
+        <input type="radio" id="${id}" name="${escapeHtml(name)}" value="${s.value}" ${required && i === 0 ? 'required' : ''}>
+        <label for="${id}"><span class="num">${s.value}</span>${escapeHtml(s.label)}</label>
+      </div>`;
+  }).join('');
+  if (compact) {
+    return `
+      <div class="likert-item">
+        <div class="q-text">${escapeHtml(label)} ${required ? '<span class="required">*</span>' : ''}</div>
+        <div class="likert-scale">${opts}</div>
+      </div>`;
+  }
+  return `
+    <div class="form-group">
+      <label class="form-label">${escapeHtml(label)} ${required ? '<span class="required">*</span>' : ''}</label>
+      <div class="likert-scale">${opts}</div>
+    </div>`;
+}
+
+renderSurveyForm();
+
+/* 「其他」職類別欄位開合 */
+document.addEventListener('change', (e) => {
+  if (e.target.matches('input[name="職類別"]')) {
+    const otherBox = document.getElementById('sv-' + cssId('職類別') + '-other-input');
+    if (otherBox) {
+      const isOther = e.target.value === '__OTHER__';
+      otherBox.classList.toggle('show', isOther);
+      const inp = otherBox.querySelector('input');
+      if (inp) {
+        inp.required = isOther;
+        if (!isOther) inp.value = '';
+      }
+    }
+  }
+});
+
+/* ════════════════════════════════════════════════════════════════
+   6. 表單送出
+   ════════════════════════════════════════════════════════════════ */
+document.addEventListener('submit', async (e) => {
+  if (e.target.id !== 'survey-form') return;
+  e.preventDefault();
+  const form = e.target;
+  const statusEl = document.getElementById('sv-status');
+  const submitBtn = document.getElementById('sv-submit');
+
+  if (!SURVEY_ENDPOINT) {
+    statusEl.className = 'form-status error';
+    statusEl.textContent = '⚠ 表單尚未設定 Apps Script endpoint，請聯絡管理員。';
+    return;
+  }
+
+  const data = {};
+  new FormData(form).forEach((v, k) => {
+    // 若同一 key 多次，合併為陣列
+    if (data[k] !== undefined) {
+      data[k] = [].concat(data[k], v);
+    } else {
+      data[k] = v;
+    }
+  });
+  // 「其他」職類別 → 合併文字
+  if (data['職類別'] === '__OTHER__' && data['職類別_其他']) {
+    data['職類別'] = '其他：' + data['職類別_其他'];
+  }
+  delete data['職類別_其他'];
+
+  submitBtn.disabled = true;
+  statusEl.className = 'form-status loading';
+  statusEl.textContent = '送出中…';
+
+  try {
+    const res = await fetch(SURVEY_ENDPOINT, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      statusEl.className = 'form-status success';
+      statusEl.textContent = '✓ 感謝您的回饋！資料已成功送出。';
+      form.reset();
+      window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
+    } else {
+      throw new Error(json.error || '未知錯誤');
+    }
+  } catch (err) {
+    statusEl.className = 'form-status error';
+    statusEl.textContent = '✗ 送出失敗：' + err.message + '（請重試或聯絡會務人員）';
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+/* ════════════════════════════════════════════════════════════════
+   7. Back to top
+   ════════════════════════════════════════════════════════════════ */
+const backTop = document.getElementById('back-top');
+backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+window.addEventListener('scroll', () => {
+  backTop.classList.toggle('show', window.scrollY > 400);
+}, { passive: true });
+
+/* ════════════════════════════════════════════════════════════════
+   8. 首載
+   ════════════════════════════════════════════════════════════════ */
+applyHash();
+</script>
+
+</body>
+</html>
