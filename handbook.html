@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -1064,7 +1065,7 @@ body { padding-top: 58px; }
           </tr>
           <tr class="break-row">
             <td class="time-cell">12:00 – 13:30</td>
-            <td colspan="3">午餐休息（會員備有餐盒）<br><span style="color: var(--coral); font-weight: 700;">12:30 – 13:30 入選海報論文觀賞及評選</span></td>
+            <td colspan="3">午餐休息（會員備有餐盒）<br><span style="color: var(--coral); font-weight: 700;">12:30 – 13:30 入選海報論文觀賞及優秀海報評選</span></td>
           </tr>
           <tr class="lecture-row">
             <td class="time-cell">13:30 – 14:10</td>
@@ -1214,7 +1215,7 @@ body { padding-top: 58px; }
       使用方式：將下方 SURVEY_ENDPOINT 改成你部署的 Apps Script Web App URL（請見 apps-script-survey.gs）
       表單欄位可依實際題目調整；name 屬性會原樣寫入 Google Sheet 欄位
     -->
-    <form id="https://script.google.com/macros/s/AKfycbx-L6y0Dpz_gBCkHYkiUkKVaK3-93q7CoE3tW1aMb5LrwR56cEOn1nryggjvwctw3u8/exec" autocomplete="off"></form>
+    <form id="survey-form" autocomplete="off"></form>
 
     <!-- 表單欄位由 JS 渲染 (見頁尾 script)；如需手動調整題目，搜尋 SURVEY_QUESTIONS -->
 
@@ -1241,7 +1242,7 @@ body { padding-top: 58px; }
    ════════════════════════════════════════════════════════════════ */
 
 /* ----- Apps Script Web App 網址（部署後填入；見 apps-script-survey.gs） ----- */
-const SURVEY_ENDPOINT = ''; // 例： https://script.google.com/macros/s/AKfycb.../exec
+const SURVEY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx-L6y0Dpz_gBCkHYkiUkKVaK3-93q7CoE3tW1aMb5LrwR56cEOn1nryggjvwctw3u8/exec';
 
 /* ----- 講師資料 -----
    id：對應議程連結錨點（議程點講師名時跳到此卡）
