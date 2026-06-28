@@ -677,7 +677,12 @@ body { padding-top: 58px; }
 .rating-option {
   flex: 1; min-width: 80px;
 }
-.rating-option input { display: none; }
+.rating-option { position: relative; }
+.rating-option input {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%; margin: 0;
+  opacity: 0; pointer-events: none;
+}
 .rating-option label {
   display: block; text-align: center;
   padding: 0.55rem 0.4rem;
@@ -736,7 +741,12 @@ body { padding-top: 58px; }
   grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
   gap: 0.4rem;
 }
-.chip-radio input { display: none; }
+.chip-radio { position: relative; }
+.chip-radio input {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%; margin: 0;
+  opacity: 0; pointer-events: none;
+}
 .chip-radio label {
   display: block; text-align: center; cursor: pointer;
   padding: 0.45rem 0.3rem;
@@ -766,7 +776,12 @@ body { padding-top: 58px; }
   border-radius: 10px; font-size: 0.85rem;
   color: var(--text-body); transition: all 0.15s;
 }
-.stack-radio input { display: none; }
+.stack-radio > div { position: relative; }
+.stack-radio input {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%; margin: 0;
+  opacity: 0; pointer-events: none;
+}
 .stack-radio label:hover { border-color: var(--mist-blue); background: var(--ice-blue); }
 .stack-radio input:checked + label {
   background: linear-gradient(135deg, var(--nav-blue), var(--medium-blue));
@@ -795,10 +810,18 @@ body { padding-top: 58px; }
   display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.3rem;
 }
 .likert-scale > div { position: relative; }
-.likert-scale input { display: none; }
+.likert-scale > div { position: relative; display: flex; }
+.likert-scale input {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%; margin: 0;
+  opacity: 0; pointer-events: none;
+}
 .likert-scale label {
-  display: block; text-align: center; cursor: pointer;
-  padding: 0.45rem 0.2rem;
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; cursor: pointer;
+  padding: 0.5rem 0.25rem;
   background: var(--white); border: 1.5px solid var(--pale-blue);
   border-radius: 8px; font-size: 0.75rem;
   color: var(--text-body); line-height: 1.3;
@@ -806,7 +829,7 @@ body { padding-top: 58px; }
 }
 .likert-scale label .num {
   display: block; font-weight: 700; font-size: 0.95rem; color: var(--nav-blue);
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.15rem;
 }
 .likert-scale label:hover { border-color: var(--mist-blue); background: var(--ice-blue); }
 .likert-scale input:checked + label {
