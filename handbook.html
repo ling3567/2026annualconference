@@ -652,7 +652,12 @@ body { padding-top: 58px; }
   display: block; font-weight: 600; color: var(--text-dark);
   font-size: 0.92rem; margin-bottom: 0.45rem;
 }
-.form-label .required { color: var(--coral); margin-left: 0.25rem; }
+.required {
+  color: #e74c3c;
+  font-weight: 700;
+  font-size: 1.05em;
+  margin-left: 0.2em;
+}
 .form-input, .form-select, .form-textarea {
   width: 100%; padding: 0.65rem 0.85rem;
   border: 1.5px solid var(--pale-blue); border-radius: 10px;
@@ -1208,7 +1213,7 @@ body { padding-top: 58px; }
 
   <div class="survey-card">
     <div class="survey-intro">
-      為了持續精進研討會品質，誠摯邀請您撥冗填寫本表。您的回饋將協助學會優化未來的學術交流與服務。
+      感謝您參與本次研討會。您的回饋將作為學會持續優化課程規劃、學術交流與活動服務之重要參考。
     </div>
 
     <!--
@@ -1220,7 +1225,7 @@ body { padding-top: 58px; }
     <!-- 表單欄位由 JS 渲染 (見頁尾 script)；如需手動調整題目，搜尋 SURVEY_QUESTIONS -->
 
     <p style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin-top:1.2rem">
-      資料將以加密方式直接寫入學會 Google Sheet，僅用於本次研討會品質改進，不另作他用。
+      本問卷蒐集之資料僅作為本次研討會品質改進及學會未來活動規劃參考，不另作其他用途。
     </p>
   </div>
 </section>
@@ -1424,7 +1429,7 @@ const SURVEY_QUESTIONS = {
 
   overall: {
     title: '二、研討會整體評估',
-    hint: '5 非常同意　4 同意　3 普通　2 不同意　1 非常不同意',
+    hint: '',
     scale: [
       { value: 5, label: '非常同意' },
       { value: 4, label: '同意' },
@@ -1446,13 +1451,14 @@ const SURVEY_QUESTIONS = {
 
   sessions: {
     title: '三、各場次學習收穫',
-    hint: '5 非常有幫助　4 有幫助　3 普通　2 幫助不大　1 完全沒有幫助',
+    hint: '',
     scale: [
       { value: 5, label: '非常有幫助' },
       { value: 4, label: '有幫助' },
       { value: 3, label: '普通' },
       { value: 2, label: '幫助不大' },
       { value: 1, label: '完全沒有幫助' },
+      { value: 'N/A', label: '未參與或不適用', noNum: true },
     ],
     items: [
       '當壓力成為日常：醫療現場的心理韌性練習',
@@ -1482,6 +1488,7 @@ const SURVEY_QUESTIONS = {
     items: [
       { name: '最有幫助內容', label: '1. 本次研討會中，對您最有幫助的一項內容是什麼？' },
       { name: '未來希望主題', label: '2. 未來希望學會再規劃哪些主題或課程？' },
+      { name: '其他建議或回饋', label: '3. 其他建議或回饋：' },
     ],
   },
 };
@@ -1741,11 +1748,11 @@ function renderSurveyForm() {
   q.basic.items.forEach(item => html.push(renderBasicItem(item)));
 
   // 二、整體評估
-  html.push(`<div class="form-section-header"><h3>${escapeHtml(q.overall.title)}</h3><div class="hint">${escapeHtml(q.overall.hint)}</div></div>`);
+  html.push(`<div class="form-section-header"><h3>${escapeHtml(q.overall.title)}</h3>${q.overall.hint ? `<div class="hint">${escapeHtml(q.overall.hint)}</div>` : ''}</div>`);
   q.overall.items.forEach((text, i) => html.push(renderLikert(`整體評估_${i+1}`, `${i+1}. ${text}`, q.overall.scale, true)));
 
   // 三、各場次
-  html.push(`<div class="form-section-header"><h3>${escapeHtml(q.sessions.title)}</h3><div class="hint">${escapeHtml(q.sessions.hint)}</div></div>`);
+  html.push(`<div class="form-section-header"><h3>${escapeHtml(q.sessions.title)}</h3>${q.sessions.hint ? `<div class="hint">${escapeHtml(q.sessions.hint)}</div>` : ''}</div>`);
   q.sessions.items.forEach((text, i) => html.push(renderLikert(`場次_${text}`, `${i+1}. ${text}`, q.sessions.scale, true)));
 
   // 四、整體滿意度
@@ -1819,24 +1826,27 @@ function renderBasicItem(item) {
 function renderLikert(name, label, scale, required, compact = true) {
   const safeName = cssId(name);
   const opts = scale.map((s, i) => {
-    const id = `sv-${safeName}-${s.value}`;
+    const idVal = String(s.value).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const id = `sv-${safeName}-${idVal}`;
+    const numHtml = s.noNum ? '' : `<span class="num">${s.value}</span>`;
     return `
       <div>
-        <input type="radio" id="${id}" name="${escapeHtml(name)}" value="${s.value}" ${required && i === 0 ? 'required' : ''}>
-        <label for="${id}"><span class="num">${s.value}</span>${escapeHtml(s.label)}</label>
+        <input type="radio" id="${id}" name="${escapeHtml(name)}" value="${escapeHtml(String(s.value))}" ${required && i === 0 ? 'required' : ''}>
+        <label for="${id}">${numHtml}${escapeHtml(s.label)}</label>
       </div>`;
   }).join('');
+  const colStyle = `style="grid-template-columns: repeat(${scale.length}, 1fr);"`;
   if (compact) {
     return `
       <div class="likert-item">
         <div class="q-text">${escapeHtml(label)} ${required ? '<span class="required">*</span>' : ''}</div>
-        <div class="likert-scale">${opts}</div>
+        <div class="likert-scale" ${colStyle}>${opts}</div>
       </div>`;
   }
   return `
     <div class="form-group">
       <label class="form-label">${escapeHtml(label)} ${required ? '<span class="required">*</span>' : ''}</label>
-      <div class="likert-scale">${opts}</div>
+      <div class="likert-scale" ${colStyle}>${opts}</div>
     </div>`;
 }
 
