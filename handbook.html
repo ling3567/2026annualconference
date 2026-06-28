@@ -1801,7 +1801,15 @@ function renderSurveyForm() {
 }
 
 function cssId(s) {
-  return String(s).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 40);
+  // 中文字會被換成 _，多題接近的題目會撞 id；用 hash 後綴保證唯一
+  const str = String(s);
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash = hash | 0;   // 轉成 32-bit int
+  }
+  const base = str.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 24);
+  return base + '_' + Math.abs(hash).toString(36);
 }
 
 function renderBasicItem(item) {
