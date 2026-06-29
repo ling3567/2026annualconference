@@ -853,6 +853,77 @@ body { padding-top: 58px; }
 }
 .site-footer .footer-main { color: var(--white); font-weight: 500; margin-bottom: 0.3rem; }
 
+/* ========== 感謝對話框（Modal） ========== */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15, 42, 71, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  animation: modalFadeIn 0.25s ease;
+}
+.modal-overlay[hidden] { display: none; }
+@keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-card {
+  background: var(--white);
+  border-radius: 18px;
+  padding: 2.2rem 1.8rem 1.8rem;
+  max-width: 420px; width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(15,42,71,0.35);
+  animation: modalScaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes modalScaleIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+.modal-icon {
+  width: 68px; height: 68px;
+  margin: 0 auto 1.1rem;
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  border-radius: 50%;
+  color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.35);
+  animation: iconPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+}
+@keyframes iconPop {
+  from { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+.modal-card h2 {
+  color: var(--deep-blue);
+  font-size: 1.35rem; font-weight: 800;
+  margin-bottom: 0.7rem;
+  letter-spacing: 0.05em;
+}
+.modal-card p {
+  color: var(--text-body);
+  font-size: 0.95rem; line-height: 1.7;
+  margin-bottom: 0.3rem;
+}
+.modal-card .modal-sub {
+  color: var(--text-muted); font-size: 0.86rem;
+  margin-top: 0.4rem;
+}
+.modal-btn {
+  margin-top: 1.6rem;
+  padding: 0.75rem 2.4rem;
+  background: linear-gradient(135deg, var(--warm-gold), var(--coral));
+  color: var(--white);
+  border: none; border-radius: 99px;
+  font-size: 1rem; font-weight: 700;
+  font-family: var(--font-main);
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(212,168,67,0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.modal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(212,168,67,0.45);
+}
+
 /* ========== Back to top ========== */
 .back-top {
   position: fixed; right: 1rem; bottom: 1rem;
@@ -1262,6 +1333,19 @@ body { padding-top: 58px; }
 <button class="back-top" id="back-top" aria-label="回到頂部">
   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
 </button>
+
+<!-- 滿意度調查送出後的感謝對話框 -->
+<div id="thank-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="thank-title">
+  <div class="modal-card" role="document">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2 id="thank-title">感謝您的回饋！</h2>
+    <p>我們已收到您的寶貴意見。</p>
+    <p class="modal-sub">您的分享將作為學會持續精進學術活動與服務品質的重要參考。</p>
+    <button type="button" class="modal-btn" onclick="closeThankModal()">關閉</button>
+  </div>
+</div>
 
 <script>
 /* ════════════════════════════════════════════════════════════════
@@ -1943,10 +2027,10 @@ document.addEventListener('submit', async (e) => {
     });
     const json = await res.json();
     if (json.ok) {
-      statusEl.className = 'form-status success';
-      statusEl.textContent = '✓ 感謝您的回饋！資料已成功送出。';
+      statusEl.className = 'form-status';
+      statusEl.style.display = 'none';
       form.reset();
-      window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
+      showThankModal();
     } else {
       throw new Error(json.error || '未知錯誤');
     }
@@ -1955,6 +2039,33 @@ document.addEventListener('submit', async (e) => {
     statusEl.textContent = '✗ 送出失敗：' + err.message + '（請重試或聯絡會務人員）';
   } finally {
     submitBtn.disabled = false;
+  }
+});
+
+/* ════════════════════════════════════════════════════════════════
+   6b. 感謝對話框
+   ════════════════════════════════════════════════════════════════ */
+function showThankModal() {
+  const m = document.getElementById('thank-modal');
+  if (!m) return;
+  m.hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+function closeThankModal() {
+  const m = document.getElementById('thank-modal');
+  if (!m) return;
+  m.hidden = true;
+  document.body.style.overflow = '';
+}
+// 點對話框外部 overlay 也可關閉
+document.addEventListener('click', (e) => {
+  if (e.target.id === 'thank-modal') closeThankModal();
+});
+// ESC 也可關閉
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const m = document.getElementById('thank-modal');
+    if (m && !m.hidden) closeThankModal();
   }
 });
 
