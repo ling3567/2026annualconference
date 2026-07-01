@@ -760,7 +760,7 @@ function renderOverview() {
     const m = r[7]||'';
     if(m.includes('已繳')) paid.paid++;
     else if(m.includes('未繳')) paid.pending++;
-    else if(m==='非會員') nonMember++;
+    else if(m.includes('非會員')) nonMember++;
     if((r[21]||'').includes('確認信')) sent++;
   });
   document.getElementById('ov-total').textContent = n;
@@ -807,7 +807,7 @@ function renderMailTable() {
       <td>${esc(r[8]||'')}</td>
       <td style="font-size:0.8rem;color:#555">${esc(r[9]||'')}</td>
       <td style="font-size:0.78rem;color:#888;white-space:nowrap">${formatTs(r[1])}</td>
-      <td><span class="badge ${sent?'badge-sent':'badge-unsent'}">${sent?'✅ 已發送':'⬜ 未發送'}</span></td>`;
+      <td style="white-space:nowrap"><span class="badge ${sent?'badge-sent':'badge-unsent'}">${sent?'✅ 已發送':'⬜ 未發送'}</span></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1113,7 +1113,7 @@ function renderAcceptTable() {
           <option value="excellent" ${typeVal==='excellent'?'selected':''}>優秀海報</option>
         </select>
       </td>
-      <td><span class="badge ${sent?'badge-sent':'badge-unsent'}">${sent?'✅ 已發送':'⬜ 未發送'}</span></td>`;
+      <td style="white-space:nowrap"><span class="badge ${sent?'badge-sent':'badge-unsent'}">${sent?'✅ 已發送':'⬜ 未發送'}</span></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1647,7 +1647,7 @@ function renderRenumberTable() {
       </select></td>
       <td style="min-width:160px;word-break:break-all;line-height:1.4">${esc(r[3]||'')}</td>
       <td>${esc(r[8]||'')}</td>
-      <td id="rn-status-${i}"><span style="color:#aaa">⬜ 待更新</span></td>
+      <td id="rn-status-${i}" style="white-space:nowrap"><span style="color:#aaa">⬜ 待更新</span></td>
       <td><button class="btn btn-sm" style="background:#e3f2fd;color:#1565c0;white-space:nowrap" onclick="regenPdf(${i})">🔄 重新產生</button></td>`;
     tbody.appendChild(tr);
     const chk = document.createElement('input');
@@ -1732,7 +1732,7 @@ function renderFpTable(){
       <td style="min-width:160px;word-break:break-all;line-height:1.4">${esc(r[3]||'')}</td>
       <td><span class="badge badge-${cat}">${esc(r[2]||'')}</span></td>
       <td>${esc(r[8]||'')}</td>
-      <td id="fp-status-${i}"><span style="color:#aaa">⬜ 待產生</span></td>`;
+      <td id="fp-status-${i}" style="white-space:nowrap"><span style="color:#aaa">⬜ 待產生</span></td>`;
     tbody.appendChild(tr);
     const chk=document.createElement('input');
     chk.type='checkbox'; chk.className='fp-chk'; chk.dataset.i=i;
