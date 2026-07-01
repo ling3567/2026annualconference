@@ -217,6 +217,7 @@ canvas{max-height:240px;}
           <div class="stat-card"><div class="stat-num" id="ov-c" style="color:#2e7d32">—</div><div class="stat-label">C 類</div></div>
           <div class="stat-card"><div class="stat-num" id="ov-paid" style="color:var(--success)">—</div><div class="stat-label">會員已繳費</div></div>
           <div class="stat-card"><div class="stat-num" id="ov-pending" style="color:var(--warning)">—</div><div class="stat-label">會員未繳費</div></div>
+          <div class="stat-card"><div class="stat-num" id="ov-nonmember" style="color:#e53935">—</div><div class="stat-label">非會員</div></div>
           <div class="stat-card"><div class="stat-num" id="ov-sent" style="color:var(--primary)">—</div><div class="stat-label">確認信已發送</div></div>
         </div>
         <div class="card">
@@ -752,13 +753,14 @@ function renderOverview() {
   const n = submissions.length;
   const cats = {A:0,B:0,C:0};
   const paid = {paid:0,pending:0};
-  let sent = 0;
+  let sent = 0, nonMember = 0;
   submissions.forEach(r => {
     const c = (r[2]||'').replace('類','').trim();
     if(cats[c]!==undefined) cats[c]++;
     const m = r[7]||'';
     if(m.includes('已繳')) paid.paid++;
     else if(m.includes('未繳')) paid.pending++;
+    else if(m==='非會員') nonMember++;
     if((r[21]||'').includes('確認信')) sent++;
   });
   document.getElementById('ov-total').textContent = n;
@@ -767,6 +769,7 @@ function renderOverview() {
   document.getElementById('ov-c').textContent = cats.C;
   document.getElementById('ov-paid').textContent = paid.paid;
   document.getElementById('ov-pending').textContent = paid.pending;
+  document.getElementById('ov-nonmember').textContent = nonMember;
   document.getElementById('ov-sent').textContent = sent;
 
   const tbody = document.getElementById('overviewBody');
@@ -799,11 +802,11 @@ function renderMailTable() {
     const sent = (r[21]||'').includes('確認信');
     const tr = document.createElement('tr');
     tr.innerHTML = `<td style="text-align:center"><input type="checkbox" class="mail-chk" data-i="${i}"></td>
-      <td><strong>${esc(r[0]||'')}</strong></td>
-      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r[3]||'')}</td>
+      <td style="white-space:nowrap;width:5rem"><strong>${esc(r[0]||'')}</strong></td>
+      <td style="min-width:160px;word-break:break-all;line-height:1.4">${esc(r[3]||'')}</td>
       <td>${esc(r[8]||'')}</td>
       <td style="font-size:0.8rem;color:#555">${esc(r[9]||'')}</td>
-      <td style="font-size:0.78rem;color:#888">${formatTs(r[1])}</td>
+      <td style="font-size:0.78rem;color:#888;white-space:nowrap">${formatTs(r[1])}</td>
       <td><span class="badge ${sent?'badge-sent':'badge-unsent'}">${sent?'✅ 已發送':'⬜ 未發送'}</span></td>`;
     tbody.appendChild(tr);
   });
@@ -1098,8 +1101,8 @@ function renderAcceptTable() {
     const sent = (r[ACCEPT_STATUS_IDX]||'').includes('已發送');
     const tr = document.createElement('tr');
     tr.innerHTML = `<td style="text-align:center"><input type="checkbox" class="accept-chk" data-i="${i}"></td>
-      <td><strong>${esc(r[0]||'')}</strong></td>
-      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r[3]||'')}</td>
+      <td style="white-space:nowrap;width:5rem"><strong>${esc(r[0]||'')}</strong></td>
+      <td style="min-width:160px;word-break:break-all;line-height:1.4">${esc(r[3]||'')}</td>
       <td>${esc(r[8]||'')}</td>
       <td style="font-size:0.8rem;color:#555">${esc(r[9]||'')}</td>
       <td>
@@ -1635,14 +1638,14 @@ function renderRenumberTable() {
     tr.id = 'rn-row-'+i;
     tr.innerHTML = `<td style="text-align:center" id="rn-chk-td-${i}"></td>
       <td style="color:#999;font-size:0.78rem">${i+1}</td>
-      <td style="color:#888;font-size:0.8rem;white-space:nowrap">${esc(oldId)}</td>
+      <td style="color:#888;font-size:0.8rem;white-space:nowrap;width:4.5rem">${esc(oldId)}</td>
       <td style="min-width:180px"><input class="new-id-input ${isModified?'modified':''}" value="${esc(curNew)}" id="rnid-${i}" oninput="onRnChange(${i},this.value)">${isDup?'<span class="dup-tag">⚠️重複</span>':''}</td>
       <td><select class="edit-select" id="rncat-${i}" onchange="catChanges[${i}]=this.value;document.getElementById('rn-row-${i}').classList.add('changed')">
         <option value="A類" ${cat==='A類'?'selected':''}>A 類</option>
         <option value="B類" ${cat==='B類'?'selected':''}>B 類</option>
         <option value="C類" ${cat==='C類'?'selected':''}>C 類</option>
       </select></td>
-      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r[3]||'')}">${esc(r[3]||'')}</td>
+      <td style="min-width:160px;word-break:break-all;line-height:1.4">${esc(r[3]||'')}</td>
       <td>${esc(r[8]||'')}</td>
       <td id="rn-status-${i}"><span style="color:#aaa">⬜ 待更新</span></td>
       <td><button class="btn btn-sm" style="background:#e3f2fd;color:#1565c0;white-space:nowrap" onclick="regenPdf(${i})">🔄 重新產生</button></td>`;
@@ -1725,8 +1728,8 @@ function renderFpTable(){
     const cat=(r[2]||'').replace('類','').trim().toLowerCase();
     const tr=document.createElement('tr');
     tr.innerHTML=`<td style="text-align:center" id="fp-chk-td-${i}"></td>
-      <td><strong>${esc(r[0]||'')}</strong></td>
-      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r[3]||'')}</td>
+      <td style="white-space:nowrap;width:5rem"><strong>${esc(r[0]||'')}</strong></td>
+      <td style="min-width:160px;word-break:break-all;line-height:1.4">${esc(r[3]||'')}</td>
       <td><span class="badge badge-${cat}">${esc(r[2]||'')}</span></td>
       <td>${esc(r[8]||'')}</td>
       <td id="fp-status-${i}"><span style="color:#aaa">⬜ 待產生</span></td>`;
