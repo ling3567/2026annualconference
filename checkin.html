@@ -59,6 +59,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .header-btn{display:flex;align-items:center;gap:0.3rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(240,236,231,.75);padding:0.3rem 0.65rem;border-radius:var(--radius-sm);font-size:0.74rem;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s;letter-spacing:.02em}
 .header-btn:hover{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.25)}
 .header-btn.active{background:var(--terra);color:#fff;border-color:var(--terra)}
+.sync-indicator{width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0;opacity:0;transition:opacity .3s}
+.sync-indicator.syncing{opacity:1;animation:pulse 1s ease infinite}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
 
 /* ===== PAGE VIEWS ===== */
 .page{display:none}
@@ -331,6 +334,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
       <svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
       重新整理
     </button>
+    <span class="sync-indicator" id="syncIndicator" title="自動同步中"></span>
   </div>
 </header>
 
@@ -552,6 +556,7 @@ function loadData(){
       if(selectedIndex>=0) selectPerson(selectedIndex);
       if(currentPage==='stats') renderStats();
       showToast(`資料已載入（${registrations.length} 位）`);
+      startAutoSync();
     })
     .catch(err=>{
       showLoading(false);
@@ -560,6 +565,82 @@ function loadData(){
     });
 }
 function refreshData(){loadData()}
+
+// ===== AUTO SYNC (每 30 秒背景同步) =====
+let syncTimer = null;
+let lastActionTime = 0; // 最近一次操作的時間
+
+function startAutoSync() {
+  if (syncTimer) clearInterval(syncTimer);
+  syncTimer = setInterval(() => {
+    // 若最近 5 秒內有操作（報到/撤銷/繳費），跳過此次同步
+    if (Date.now() - lastActionTime < 5000) return;
+    syncData();
+  }, 30000);
+}
+
+function syncData() {
+  const indicator = document.getElementById('syncIndicator');
+  indicator.classList.add('syncing');
+
+  fetch(CONFIG.API_URL + '?action=checkin_list', { redirect: 'follow' })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(d => {
+      if (d.status === 'error') throw new Error(d.message);
+
+      // 保留目前選取的人員姓名（用於同步後重新定位）
+      const prevSelected = selectedIndex >= 0 ? registrations[selectedIndex] : null;
+      const prevName = prevSelected ? prevSelected.name : null;
+      const prevId = prevSelected ? prevSelected.idNumber : null;
+
+      registrations = d.registrations || [];
+      posterPresenters = d.posterPresenters || [];
+      creditProfessions = d.creditProfessions || [];
+      badgeMap = d.badgeMap || {};
+      groups = d.groups || [];
+
+      // 合併現場繳費（伺服器端 + 本機暫存）
+      onsitePayMap = {};
+      (d.onsitePayments || []).forEach(op => {
+        onsitePayMap[op.name + '|' + op.idNumber] = op;
+      });
+      registrations.forEach(r => {
+        const op = onsitePayMap[r.name + '|' + r.idNumber];
+        if (op) { r.onsitePaid = true; r.onsiteMeal = op.meal; }
+      });
+
+      // 合併本機報到紀錄（本台已報到但伺服器可能尚未回寫的）
+      checkinLog.forEach(l => {
+        const p = registrations.find(r => r.name === l.name && r.idNumber === l.idNumber);
+        if (p && !p.checkedIn) p.checkedIn = true;
+      });
+
+      // 更新統計
+      updateStats();
+      renderGroupChips();
+
+      // 重新定位選取的人員
+      if (prevName) {
+        selectedIndex = registrations.findIndex(r => r.name === prevName && r.idNumber === prevId);
+        if (selectedIndex >= 0) selectPerson(selectedIndex);
+      }
+
+      // 更新搜尋結果
+      const q = document.getElementById('searchInput').value.trim();
+      if (q || activeGroupFilter) doSearch(q);
+
+      // 更新統計頁面
+      if (currentPage === 'stats') renderStats();
+
+      indicator.classList.remove('syncing');
+    })
+    .catch(() => {
+      indicator.classList.remove('syncing');
+    });
+}
+
+// 標記操作時間（避免同步衝突）
+function markAction() { lastActionTime = Date.now(); }
 
 // Search (name OR org), name matches sorted by stroke count
 const strokeCollator = new Intl.Collator('zh-Hant-TW-u-co-stroke');
@@ -770,6 +851,7 @@ function ac(cls,icon,title,sub){return `<div class="action-card ${cls}"><div cla
 
 // Checkin
 function doCheckin(idx){
+  markAction();
   const p=registrations[idx];if(!p||p.checkedIn)return;
   p.checkedIn=true;
   const now=new Date();
@@ -780,6 +862,7 @@ function doCheckin(idx){
   fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'checkin',name:p.name,idNumber:p.idNumber,time:now.toISOString()})}).catch(()=>{});
 }
 function undoCheckin(idx){
+  markAction();
   const p=registrations[idx];if(!p)return;
   p.checkedIn=false;
   checkinLog=checkinLog.filter(l=>!(l.name===p.name&&l.idNumber===p.idNumber));
@@ -791,6 +874,7 @@ function undoCheckin(idx){
 
 // Onsite payment
 function onsitePay(idx, meal, e) {
+  markAction();
   if(e) e.stopPropagation();
   const p=registrations[idx];if(!p)return;
 
