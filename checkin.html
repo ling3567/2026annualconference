@@ -434,13 +434,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 
   <!-- 報名資料分析 -->
   <div class="stat-section" id="sectionFields" style="display:none">
-    <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:.75rem;flex-wrap:wrap">
-      <label style="font-size:.78rem;font-weight:600;color:var(--text-muted)">依欄位分組：</label>
-      <select id="fieldSelect" onchange="renderFieldStats()" style="padding:.4rem .7rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;font-family:var(--font);background:var(--card);color:var(--text);outline:none;cursor:pointer;min-width:140px">
+    <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.6rem;flex-wrap:wrap">
+      <label style="font-size:.78rem;font-weight:600;color:var(--text-muted)">分組：</label>
+      <select id="fieldSelect" onchange="onFieldChange()" style="padding:.4rem .7rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;font-family:var(--font);background:var(--card);color:var(--text);outline:none;cursor:pointer;min-width:120px">
         <option value="org">服務單位</option>
         <option value="profession">職類</option>
       </select>
-      <div class="search-box" style="flex:1;min-width:160px;margin:0">
+      <label style="font-size:.78rem;font-weight:600;color:var(--text-muted);margin-left:.3rem">篩選：</label>
+      <select id="fieldFilter" onchange="renderFieldStats()" style="padding:.4rem .7rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;font-family:var(--font);background:var(--card);color:var(--text);outline:none;cursor:pointer;min-width:120px">
+        <option value="__all__">全部</option>
+      </select>
+      <div class="search-box" style="flex:1;min-width:140px;margin:0">
         <div class="search-icon-wrap"><svg class="icon-svg sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg></div>
         <input type="text" id="fieldSearchInput" placeholder="搜尋…" autocomplete="off" oninput="renderFieldStats()" style="width:100%;padding:.45rem .7rem .45rem 2.2rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;font-family:var(--font);outline:none;background:var(--bg)">
       </div>
@@ -862,7 +866,7 @@ function switchStatTab(tab, btn) {
   btn.classList.add('active');
   document.getElementById('sectionGroups').style.display = tab==='groups'?'block':'none';
   document.getElementById('sectionFields').style.display = tab==='fields'?'block':'none';
-  if(tab==='fields') renderFieldStats();
+  if(tab==='fields'){updateFilterOptions();renderFieldStats()}
 }
 
 // ===== 身分群組統計（下拉選擇）=====
@@ -897,26 +901,70 @@ function renderGroupStats(){
   }).join('');
 }
 
-// ===== 報名資料分析（依欄位分組）=====
+// ===== 報名資料分析（依欄位分組 + 交叉篩選）=====
 // 職類排序：依報名表單選單順序
-const PROFESSION_ORDER = ['醫師','牙醫師','中醫師','藥師','藥事','護理師','護理','物理治療師','物理治療','職能治療師','職能治療','呼吸治療師','呼吸治療','醫事放射師','醫事放射','醫事檢驗師','醫事檢驗','營養師','營養','語言治療師','語言治療','臨床心理師','臨床心理','諮商心理師','聽力師','社工師','社工','其他'];
+const PROFESSION_ORDER = ['醫師','牙醫師','中醫師','藥師','藥事','護理師','護理','物理治療師','物理治療','職能治療師','職能治療','呼吸治療師','呼吸治療','醫事放射師','醫事放射','醫事檢驗師','醫事檢驗','營養師','營養','語言治療師','語言治療','臨床心理師','臨床心理','諮商心理師','聽力師','社工師','社工','專科護理師','西醫','行政','其他'];
+
+const fieldLabels = {org:'服務單位',profession:'職類'};
+
+/** 切換分組欄位時，更新篩選下拉選項 */
+function onFieldChange() {
+  updateFilterOptions();
+  renderFieldStats();
+}
+
+function updateFilterOptions() {
+  const field = document.getElementById('fieldSelect').value;
+  const filterSelect = document.getElementById('fieldFilter');
+  // 篩選欄位 = 分組欄位的對面
+  const filterField = field === 'org' ? 'profession' : 'org';
+  const filterLabel = fieldLabels[filterField];
+
+  // 收集所有篩選值
+  const vals = new Set();
+  registrations.forEach(r => { if (r[filterField]) vals.add(r[filterField]); });
+
+  let sorted = [...vals];
+  if (filterField === 'profession') {
+    sorted.sort((a, b) => {
+      const ia = PROFESSION_ORDER.indexOf(a);
+      const ib = PROFESSION_ORDER.indexOf(b);
+      if (ia >= 0 && ib >= 0) return ia - ib;
+      if (ia >= 0) return -1;
+      if (ib >= 0) return 1;
+      return strokeCollator.compare(a, b);
+    });
+  } else {
+    sorted.sort((a, b) => strokeCollator.compare(a, b));
+  }
+
+  filterSelect.innerHTML = `<option value="__all__">全部${filterLabel}</option>`
+    + sorted.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
+}
 
 function renderFieldStats() {
   const field = document.getElementById('fieldSelect').value;
-  const q = (document.getElementById('fieldSearchInput')?.value||'').trim();
+  const filterField = field === 'org' ? 'profession' : 'org';
+  const filterVal = document.getElementById('fieldFilter').value;
+  const q = (document.getElementById('fieldSearchInput')?.value || '').trim();
   const container = document.getElementById('statsFields');
   const hint = document.getElementById('fieldSearchHint');
 
+  // 先依篩選條件過濾人員
+  let pool = registrations;
+  if (filterVal !== '__all__') {
+    pool = registrations.filter(r => r[filterField] === filterVal);
+  }
+
+  // 再依選定欄位分組
   const fieldMap = {};
-  registrations.forEach(r => {
+  pool.forEach(r => {
     const val = r[field] || '（未填）';
     if (!fieldMap[val]) fieldMap[val] = [];
     fieldMap[val].push(r);
   });
 
   let keys = Object.keys(fieldMap);
-
-  // 排序：職類依報名順序，其他依筆畫
   if (field === 'profession') {
     keys.sort((a, b) => {
       const ia = PROFESSION_ORDER.indexOf(a);
@@ -932,12 +980,12 @@ function renderFieldStats() {
 
   if (q) keys = keys.filter(k => k.includes(q));
 
-  const fieldLabels = {org:'服務單位',profession:'職類'};
-  const label = fieldLabels[field]||field;
+  const label = fieldLabels[field];
+  const filterDesc = filterVal !== '__all__' ? `（${fieldLabels[filterField]}：${filterVal}）` : '';
 
-  if (hint) hint.textContent = q
-    ? `找到 ${keys.length} 個${label}`
-    : `共 ${Object.keys(fieldMap).length} 個${label}`;
+  if (hint) hint.textContent = keys.length
+    ? `${keys.length} 個${label}，共 ${pool.length} 人${filterDesc}`
+    : `查無符合的${label}`;
 
   if (keys.length === 0) {
     container.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:2rem;font-size:.85rem;">查無符合的${label}</div>`;
@@ -946,7 +994,7 @@ function renderFieldStats() {
 
   container.innerHTML = keys.map(key => {
     const people = fieldMap[key];
-    const members = people.map(r => ({name: r.name, checked: r.checkedIn, found: true}));
+    const members = people.map(r => ({ name: r.name, checked: r.checkedIn, found: true }));
     const ckCount = members.filter(m => m.checked).length;
     const rate = members.length > 0 ? Math.round(ckCount / members.length * 100) : 0;
     return renderStatGroup(key, members, ckCount, rate);
