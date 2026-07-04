@@ -681,7 +681,15 @@ function selectPerson(idx){
 
   const feeDisplay=isMem?(isPaid?(isOnsitePaid?'現場繳費':'已繳'):(isConfirmedNoPay?'確認不繳':'未繳')):'—';
   const fields=[['服務單位',r.org],['部門',r.dept],['職稱',r.title],['職類',r.profession],['聯絡電話',r.phone],['Email',r.email],['會員身分',isMem?'本會個人會員':'非會員'],['會費狀態',feeDisplay]];
-  document.getElementById('infoGrid').innerHTML=fields.map(([l,v])=>`<div><div class="info-label">${l}</div><div class="info-value">${esc(v||'—')}</div></div>`).join('');
+  let infoHtml=fields.map(([l,v])=>`<div><div class="info-label">${l}</div><div class="info-value">${esc(v||'—')}</div></div>`).join('');
+  // 備註：有內容時以醒目樣式顯示
+  if(r.note){
+    infoHtml+=`<div style="grid-column:1/-1;margin-top:.3rem;padding:.5rem .7rem;background:#fff4ec;border:1.5px solid #e8a06c;border-radius:6px">
+      <div class="info-label" style="color:#b5622a">備註</div>
+      <div class="info-value" style="color:#8c4517">${esc(r.note)}</div>
+    </div>`;
+  }
+  document.getElementById('infoGrid').innerHTML=infoHtml;
 
   // Right
   document.getElementById('actionEmpty').style.display='none';
