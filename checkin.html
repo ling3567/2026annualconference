@@ -745,7 +745,7 @@ function selectPerson(idx){
   }
   if(needsCredit){
     if(creditInfo.type==='報到即有'){
-      acts+=ac('act-default',I.checked,'繼續教育積分：報到即取得','職類：'+esc(r.profession)+'，完成報到即有學分，無需額外簽到');
+      acts+=ac('act-default',I.checked,'繼續教育積分：完成報到即可','職類：'+esc(r.profession)+'，無需額外紙本簽到');
     } else {
       acts+=ac('act-info',I.pencil,'提醒至「繼續教育積分簽到處」簽名','職類：'+esc(r.profession));
     }
