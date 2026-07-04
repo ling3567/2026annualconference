@@ -136,9 +136,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .action-card.act-info .ai-wrap{background:rgba(74,109,140,.1);color:var(--info)}
 .action-card.act-accent{background:var(--accent-bg);border-color:#d9cbd2}
 .action-card.act-accent .ai-wrap{background:rgba(140,92,110,.1);color:var(--accent)}
-.action-card.act-muted{background:#f5f4f3;border-color:#e6e4e1;opacity:.7}
-.action-card.act-muted .ai-wrap{background:rgba(0,0,0,.04);color:var(--text-muted)}
-.action-card.act-muted .at{color:var(--text-muted)}
+.action-card.act-muted{background:#f0efed;border-color:#d5d2cd}
+.action-card.act-muted .ai-wrap{background:rgba(0,0,0,.06);color:#999}
+.action-card.act-muted .at{color:#999}
 .action-card.act-special{background:#fff4ec;border-color:#e8a06c;border-width:2px}
 .action-card.act-special .ai-wrap{background:#f4dcc8;color:#b5622a}
 .action-card.act-special .at{color:#8c4517}
@@ -742,7 +742,7 @@ function selectPerson(idx){
       }
     });
   }
-  if(needsCredit) acts+=ac('act-info',I.pencil,'引導至紙本學分簽到處','職類：'+esc(r.profession));
+  if(needsCredit) acts+=ac('act-info',I.pencil,'提醒至「繼續教育積分簽到處」簽名','職類：'+esc(r.profession));
   document.getElementById('actionList').innerHTML=acts;
 
   // Checkin btn
