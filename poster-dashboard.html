@@ -57,11 +57,11 @@ body{font-family:var(--font);background:#f0f4f8;color:#1a1a2e;line-height:1.6;ov
 .logout-btn:hover{background:rgba(198,40,40,0.4);color:white;}
 
 /* Main area */
-.main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
 .topbar{background:white;padding:0.75rem 1.5rem;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .topbar-title{font-size:1rem;font-weight:700;color:var(--primary-dark);}
 .topbar-sub{font-size:0.78rem;color:#888;}
-.content{flex:1;overflow-y:auto;padding:1.25rem 1.5rem 2rem;}
+.content{flex:1;overflow-y:auto;overflow-x:auto;padding:1.25rem 1.5rem 2rem;}
 
 /* ===== SHARED ===== */
 .page{display:none;}.page.active{display:block;}
@@ -338,7 +338,14 @@ canvas{max-height:240px;}
             <table>
               <thead><tr>
                 <th style="width:2.5rem"><input type="checkbox" id="rnChkAll" onchange="toggleRnAll(this)"></th>
-                <th>#</th><th>原始編號</th><th>新編號</th><th>修改類別</th><th>論文題目</th><th>通訊作者</th><th>狀態</th><th>重新產生PDF</th>
+                <th style="width:2rem">#</th>
+                <th style="width:5rem">原始編號</th>
+                <th style="width:7rem">新編號</th>
+                <th style="width:5.5rem">修改類別</th>
+                <th>論文題目</th>
+                <th style="width:5rem">通訊作者</th>
+                <th style="width:4.5rem">狀態</th>
+                <th style="width:7rem">重新產生PDF</th>
               </tr></thead>
               <tbody id="renumberBody"></tbody>
             </table>
@@ -1519,9 +1526,12 @@ function renderMemberTable() {
     tr.innerHTML = `<td style="white-space:nowrap"><strong>${esc(r[0]||'')}</strong></td>
       <td style="max-width:140px;word-break:break-all;font-size:0.8rem">${esc(r[3]||'')}</td>
       <td style="white-space:nowrap">${esc(r[8]||'')}</td>
-      <td style="max-width:160px;font-size:0.78rem;color:#555;word-break:break-all">${esc(r[5]||'')}</td>
-      <td><strong>${esc(r[6]||'（無）')}</strong></td>
-      <td><span class="badge ${cls}" id="mbadge-${i}">${esc(mDisplay)}</span>${isConfirmed?'<span style="color:var(--success);font-size:0.75rem;font-weight:700;margin-left:4px">✓已確認</span>':''}</td>
+      <td style="max-width:160px;font-size:0.78rem;color:#555">${esc(r[5]||'').replace(/\n/g,'<br>')}</td>
+      <td style="white-space:nowrap"><strong>${esc(r[6]||'（無）')}</strong></td>
+      <td style="white-space:nowrap">
+        <div><span class="badge ${cls}" id="mbadge-${i}">${esc(mDisplay)}</span></div>
+        ${isConfirmed?'<div style="color:var(--success);font-size:0.75rem;font-weight:700;margin-top:3px">✓已確認</div>':''}
+      </td>
       <td><select class="edit-select" onchange="onMemberChg(${i},this.value)">
         <option value="會員已繳年費" ${mDisplay==='會員已繳年費'?'selected':''}>✅ 已繳費</option>
         <option value="會員未繳年費" ${mDisplay==='會員未繳年費'?'selected':''}>⏳ 未繳費</option>
