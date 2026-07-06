@@ -2473,16 +2473,19 @@ function renderDispStats(papers){
   const modeBorder={physical:'#bfdbfe',award:'#fde68a',eposter:'#e2e8f0',rejected:'#fecaca'};
 
   const allPapers=papers||[];
-  // 委員一致退稿的論文（獨立計算，不依賴 _displayMode）
+  // 退稿判斷：委員全數一致退稿 OR 管理員手動設定展出方式為退稿（取聯集）
   const isRejFn=r=>r.rejected===true||r.rejected==='true'||r.rejected==='TRUE'||r.rejected==='1';
-  const fullyRejPapers=allPapers.filter(p=>p.reviews.length>0&&p.reviews.every(r=>isRejFn(r)));
-  const fullyRejIds=new Set(fullyRejPapers.map(p=>p.id));
+  const isRejPaper=p=>
+    (_displayMode[p.id]==='rejected') ||
+    (p.reviews.length>0 && p.reviews.every(r=>isRejFn(r)));
+  const rejPapers=allPapers.filter(p=>isRejPaper(p));
+  const rejIds=new Set(rejPapers.map(p=>p.id));
   // 非退稿論文（依展出方式統計）
-  const activePapers=allPapers.filter(p=>!fullyRejIds.has(p.id));
+  const activePapers=allPapers.filter(p=>!rejIds.has(p.id));
 
   function count(mode, cat){
     if(mode==='rejected'){
-      return fullyRejPapers.filter(p=>{
+      return rejPapers.filter(p=>{
         const eff=(_catOverrides[p.id])||p.category;
         return !cat||(eff===cat);
       }).length;
