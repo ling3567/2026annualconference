@@ -2256,7 +2256,8 @@ function renderResultsTable(papers){
     }catch(e){ console.warn('avgTotal recalc error for',p.id,e); }
   });
 
-  function isFullyRejected(p){ return p.reviews.length>0 && p.reviews.filter(r=>!r.rejected).length===0; }
+  function isRej_(r){return r.rejected===true||r.rejected==='true'||r.rejected==='TRUE'||r.rejected==='1';}
+  function isFullyRejected(p){ return p.reviews.length>0 && p.reviews.filter(r=>!isRej_(r)).length===0; }
   const rejected  = papers.filter(p=>isFullyRejected(p));
   const rankable  = papers.filter(p=>p.avgTotal!==null && !isFullyRejected(p));
   const noScore   = papers.filter(p=>p.avgTotal===null && !isFullyRejected(p));
@@ -2297,8 +2298,7 @@ function renderResultsTable(papers){
   // ── 有效論文列 ──
   function row(p,rb){
     // 退稿狀態
-    const isRejected=r=>(r.rejected===true||r.rejected==='true'||r.rejected==='TRUE'||r.rejected==='1');
-    const rejCount=p.reviews.filter(isRejected).length;
+    const rejCount=p.reviews.filter(r=>isRej_(r)).length;
     const totalRevs=p.reviews.length;
     let rejCell='—';
     if(rejCount>0) rejCell=`<span style="background:#fee2e2;color:#991b1b;padding:.15rem .5rem;border-radius:5px;font-size:.75rem;font-weight:700">${rejCount}/${totalRevs}位退稿</span>`;
@@ -2395,7 +2395,7 @@ function renderResultsTable(papers){
 
   // ── 退稿論文列 ──
   function rejRow(p){
-    const rejReviews=p.reviews.filter(r=>r.rejected);
+    const rejReviews=p.reviews.filter(r=>isRej_(r));
     const totalRej=rejReviews.length;
     const totalReviews=p.reviews.length;
     // 個別委員退稿原因
@@ -2467,7 +2467,7 @@ function renderResultsTable(papers){
 function renderDispStats(papers){
   const el2=el('dispStatsCards'); if(!el2) return;
   const cats=['A','B','C'];
-  const modes=['physical','award','eposter','rejected'];
+  const modes=['award','physical','eposter','rejected'];
   const modeLabel={physical:'實體展示',award:'優秀海報',eposter:'ePoster',rejected:'退稿'};
   const modeBg={physical:'#eff6ff',award:'#fffbeb',eposter:'#f8fafc',rejected:'#fef2f2'};
   const modeColor={physical:'#1d4ed8',award:'#92400e',eposter:'#475569',rejected:'#b91c1c'};
@@ -2838,6 +2838,7 @@ function renderOsceResultsTable(cases){
             <div>${osceMemberBadge(confirmed)}${!confirmed?'<span style="font-size:.72rem;color:#94a3b8;margin-left:.4rem">（Sheet 未填入）</span>':''}</div>
           </div>
         </div>
+        ${c.target?`<div style="margin-top:.6rem"><div style="font-size:.7rem;font-weight:700;color:#475569;letter-spacing:.06em;margin-bottom:.25rem">評分對象（target）</div><div style="font-size:.82rem;color:#334155;line-height:1.65">${esc(c.target)}</div></div>`:''}
         ${confirmed==='會員未繳年費'?'<div style="margin-top:.5rem;padding:.28rem .7rem;background:#fef2f2;border-left:3px solid #ef4444;font-size:.78rem;font-weight:600;color:#b91c1c">⚠ 未繳年費，請確認是否得展出</div>':''}
       </td>
     </tr>`;
