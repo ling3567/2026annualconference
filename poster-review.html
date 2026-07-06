@@ -2471,18 +2471,31 @@ function renderDispStats(papers){
   const modeBg={physical:'#eff6ff',award:'#fffbeb',eposter:'#f8fafc',rejected:'#fef2f2'};
   const modeColor={physical:'#1d4ed8',award:'#92400e',eposter:'#475569',rejected:'#b91c1c'};
   const modeBorder={physical:'#bfdbfe',award:'#fde68a',eposter:'#e2e8f0',rejected:'#fecaca'};
-  const validPapers=(papers||[]).filter(p=>!( p.reviews.length>0&&p.reviews.filter(r=>!r.rejected).length===0));
-  // 計算各類別各展出方式數量
+
+  const allPapers=papers||[];
+  // 委員一致退稿的論文（獨立計算，不依賴 _displayMode）
+  const isRejFn=r=>r.rejected===true||r.rejected==='true'||r.rejected==='TRUE'||r.rejected==='1';
+  const fullyRejPapers=allPapers.filter(p=>p.reviews.length>0&&p.reviews.every(r=>isRejFn(r)));
+  const fullyRejIds=new Set(fullyRejPapers.map(p=>p.id));
+  // 非退稿論文（依展出方式統計）
+  const activePapers=allPapers.filter(p=>!fullyRejIds.has(p.id));
+
   function count(mode, cat){
-    return validPapers.filter(p=>{
+    if(mode==='rejected'){
+      return fullyRejPapers.filter(p=>{
+        const eff=(_catOverrides[p.id])||p.category;
+        return !cat||(eff===cat);
+      }).length;
+    }
+    return activePapers.filter(p=>{
       const eff=(_catOverrides[p.id])||p.category;
       const m=_displayMode[p.id]||'eposter';
       return (!cat||eff===cat)&&m===mode;
     }).length;
   }
-  const total=validPapers.length;
+
+  const total=allPapers.length; // 合計包含所有論文
   let html='';
-  // 實體展示、ePoster、退稿、合計 四張卡
   [...modes,'total'].forEach(mode=>{
     const isTotal=mode==='total';
     const bg=isTotal?'#f8fafc':modeBg[mode];
@@ -2490,7 +2503,7 @@ function renderDispStats(papers){
     const border=isTotal?'#cbd5e0':modeBorder[mode];
     const label=isTotal?'合計':modeLabel[mode];
     const catRows=cats.map(cat=>{
-      const n=isTotal?validPapers.filter(p=>(_catOverrides[p.id]||p.category)===cat).length:count(mode,cat);
+      const n=isTotal?allPapers.filter(p=>(_catOverrides[p.id]||p.category)===cat).length:count(mode,cat);
       return `<div style="display:flex;justify-content:space-between;font-size:.78rem;padding:.12rem 0;border-bottom:1px solid ${border}">
         <span style="color:#64748b">• ${cat} 類</span>
         <span style="font-weight:700;color:${color}">${n} 篇</span>
