@@ -2299,9 +2299,8 @@ function renderResultsTable(papers){
   function row(p,rb){
     // 退稿狀態
     const rejCount=p.reviews.filter(r=>isRej_(r)).length;
-    const totalRevs=p.reviews.length;
-    let rejCell='—';
-    if(rejCount>0) rejCell=`<span style="background:#fee2e2;color:#991b1b;padding:.15rem .5rem;border-radius:5px;font-size:.75rem;font-weight:700">${rejCount}/${totalRevs}位退稿</span>`;
+    const totalRevs=p.reviews.filter(r=>r.reviewer).length;
+    const rejCell=rejCount>0?`<span style="background:#fee2e2;color:#991b1b;padding:.15rem .5rem;border-radius:5px;font-size:.75rem;font-weight:700">${rejCount}/${totalRevs}位退稿</span>`:'—';
     // 推薦：純數字
     const recCount=p.reviews.filter(r=>r.recommended||r.recommend).length;
     const recCell=p.avgTotal!==null?`<span style="font-weight:700;color:#1c1c2e">${recCount}</span>`:'—';
@@ -2837,8 +2836,11 @@ function renderOsceResultsTable(cases){
             <div style="font-size:.7rem;font-weight:700;color:#475569;letter-spacing:.06em;margin-bottom:.25rem">繳費狀態</div>
             <div>${osceMemberBadge(confirmed)}${!confirmed?'<span style="font-size:.72rem;color:#94a3b8;margin-left:.4rem">（Sheet 未填入）</span>':''}</div>
           </div>
+          ${c.target?`<div>
+            <div style="font-size:.7rem;font-weight:700;color:#475569;letter-spacing:.06em;margin-bottom:.25rem">教案對象</div>
+            <div style="font-size:.88rem;font-weight:600;color:#0f172a">${esc(c.target)}</div>
+          </div>`:''}
         </div>
-        ${c.target?`<div style="margin-top:.6rem"><div style="font-size:.7rem;font-weight:700;color:#475569;letter-spacing:.06em;margin-bottom:.25rem">評分對象（target）</div><div style="font-size:.82rem;color:#334155;line-height:1.65">${esc(c.target)}</div></div>`:''}
         ${confirmed==='會員未繳年費'?'<div style="margin-top:.5rem;padding:.28rem .7rem;background:#fef2f2;border-left:3px solid #ef4444;font-size:.78rem;font-weight:600;color:#b91c1c">⚠ 未繳年費，請確認是否得展出</div>':''}
       </td>
     </tr>`;
