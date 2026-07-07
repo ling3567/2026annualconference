@@ -1250,9 +1250,8 @@ async function loadDriveFiles(caseId, driveUrl) {
     try {
       const controller = new AbortController();
       const tid = setTimeout(()=>controller.abort(), 8000);
-      const fd = new FormData();
-      fd.append('action','getDriveFiles'); fd.append('driveUrl',driveUrl);
-      const resp = await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd,redirect:'follow',signal:controller.signal});
+      const url2 = APPS_SCRIPT_URL+'?action=getDriveFiles&driveUrl='+encodeURIComponent(driveUrl);
+      const resp = await fetch(url2,{method:'GET',redirect:'follow',signal:controller.signal});
       clearTimeout(tid);
       const text = await resp.text();
       r = JSON.parse(text);
@@ -2934,7 +2933,9 @@ function toggleOsceSubRow(cid, e){
 // ══ OSCE 名次覆蓋 ══
 function updateOsceRank(caseId, rank){
   _osceRankOverride[caseId] = rank;
-  showToast('名次已調整，請點「儲存名次」存入系統','ok');
+  // 即時重新渲染讓畫面更新
+  if(osceData&&osceData.cases) renderOsceResultsTable(osceData.cases);
+  showToast('名次已更新，請點「儲存名次」存入系統','ok');
 }
 
 async function saveOsceRanks(){
@@ -2943,7 +2944,11 @@ async function saveOsceRanks(){
   setLdr(true);
   try{
     const r = await api({action:'saveOsceRank', data: JSON.stringify(data)});
-    if(r.success) showToast('名次已儲存','ok');
+    if(r.success){
+      showToast('名次已儲存','ok');
+      // 儲存後重新渲染確保顯示一致
+      if(osceData&&osceData.cases) renderOsceResultsTable(osceData.cases);
+    }
     else showToast('儲存失敗','err');
   }catch(e){showToast('連線失敗','err');}
   setLdr(false);
@@ -3213,12 +3218,13 @@ function toggleAssignDetail(sid,did){const s=el(sid),d=el(did);if(!s||!d)return;
 
 // ══ Core Helpers ══
 async function api(params, timeoutMs=30000){
-  const fd=new FormData();
-  Object.entries(params).forEach(([k,v])=>fd.append(k,String(v??'')));
   const controller=new AbortController();
   const tid=setTimeout(()=>controller.abort(),timeoutMs);
   try{
-    const resp=await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd,redirect:'follow',signal:controller.signal});
+    // 改用 GET + query string 避免 GAS redirect POST→GET 問題
+    const qs=Object.entries(params).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(String(v??''))).join('&');
+    const url=APPS_SCRIPT_URL+'?'+qs;
+    const resp=await fetch(url,{method:'GET',redirect:'follow',signal:controller.signal});
     clearTimeout(tid);
     if(!resp.ok)throw new Error('HTTP '+resp.status);
     const text=await resp.text();
