@@ -2801,14 +2801,26 @@ function renderOsceResultsTable(cases){
     }catch(e){}
   });
 
-  // 名次（全部教案一起排，avgTotal 有值才計入）
+  // 名次（依平均分排序，前1/2/3名各1案，第4-5名為佳作，同分並列）
   const rankable=cases.filter(c=>c.avgTotal!==null);
-  const rankMap={};let rk=1,pv=null;
-  [...rankable].sort((a,b)=>b.avgTotal-a.avgTotal).forEach((c,i)=>{
-    if(c.avgTotal!==pv){rk=i+1;} rankMap[c.id]=rk; pv=c.avgTotal;
+  const sortedByScore=[...rankable].sort((a,b)=>b.avgTotal-a.avgTotal);
+  // 建立自動名次 map：1→第一名, 2→第二名, 3→第三名, 4/5→佳作, 其餘→無
+  const autoRankLabelMap={};
+  let pos=1;
+  sortedByScore.forEach((c,i)=>{
+    if(i>0&&sortedByScore[i].avgTotal!==sortedByScore[i-1].avgTotal) pos=i+1;
+    let label;
+    if(pos===1) label='第一名';
+    else if(pos===2) label='第二名';
+    else if(pos===3) label='第三名';
+    else if(pos<=5) label='佳作'; // 第4、5名（同分並列佳作）
+    else label='無';
+    autoRankLabelMap[c.id]=label;
   });
 
   const RANK_OPTS=['第一名','第二名','第三名','佳作','無'];
+  // 排序權重：第一名=0, 第二名=1, 第三名=2, 佳作=3, 無=4
+  const RANK_ORDER={'第一名':0,'第二名':1,'第三名':2,'佳作':3,'無':4};
   const RANK_STYLE={
     '第一名':{bg:'#fef9c3',co:'#854d0e',icon:'🥇'},
     '第二名':{bg:'#f0f4f8',co:'#334155',icon:'🥈'},
@@ -2816,17 +2828,19 @@ function renderOsceResultsTable(cases){
     '佳作'  :{bg:'#f0fdf4',co:'#166534',icon:'🌟'},
     '無'    :{bg:'#f8fafc',co:'#94a3b8',icon:''},
   };
-  function badge(autoRank, caseId){
-    // 優先用手動覆蓋，否則依自動名次推算
-    const override=_osceRankOverride[caseId];
-    let label = override || (autoRank===undefined?null:autoRank<=3?`第${['一','二','三'][autoRank-1]}名`:'無');
-    if(!label) label='無';
+  function badge(_, caseId){
+    // 優先用手動覆蓋，否則用自動名次
+    const label=_osceRankOverride[caseId]||autoRankLabelMap[caseId]||'無';
     const s=RANK_STYLE[label]||RANK_STYLE['無'];
     const opts=RANK_OPTS.map(o=>`<option value="${o}" ${label===o?'selected':''}>${o}</option>`).join('');
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:.25rem">
-      <span style="display:inline-flex;align-items:center;gap:.2rem;background:${s.bg};color:${s.co};padding:.2rem .5rem;border-radius:7px;font-size:.8rem;font-weight:700">${s.icon} ${label}</span>
+    // 問題3：icon 和文字分兩行
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:.15rem">
+      <div style="display:flex;flex-direction:column;align-items:center;background:${s.bg};color:${s.co};padding:.2rem .45rem;border-radius:7px;line-height:1.3;min-width:48px">
+        ${s.icon?`<span style="font-size:.9rem">${s.icon}</span>`:''}
+        <span style="font-size:.72rem;font-weight:700">${label}</span>
+      </div>
       <select onchange="updateOsceRank('${caseId}',this.value)" onclick="event.stopPropagation()"
-        style="font-size:.72rem;padding:.1rem .3rem;border:1px solid #e2e8f0;border-radius:5px;color:#475569;font-family:inherit;cursor:pointer;background:white">
+        style="font-size:.7rem;padding:.1rem .2rem;border:1px solid #e2e8f0;border-radius:4px;color:#475569;font-family:inherit;cursor:pointer;background:white;max-width:60px">
         ${opts}
       </select>
     </div>`;
@@ -2845,8 +2859,10 @@ function renderOsceResultsTable(cases){
   }
 
   const sorted=[...cases].sort((a,b)=>{
-    const ra=_osceRankOverride[a.id]?RANK_OPTS.indexOf(_osceRankOverride[a.id]):((rankMap[a.id]??99)+99);
-    const rb=_osceRankOverride[b.id]?RANK_OPTS.indexOf(_osceRankOverride[b.id]):((rankMap[b.id]??99)+99);
+    const labelA=_osceRankOverride[a.id]||autoRankLabelMap[a.id]||'無';
+    const labelB=_osceRankOverride[b.id]||autoRankLabelMap[b.id]||'無';
+    const ra=RANK_ORDER[labelA]??4;
+    const rb=RANK_ORDER[labelB]??4;
     return ra!==rb?ra-rb:(b.avgTotal??-1)-(a.avgTotal??-1);
   });
 
