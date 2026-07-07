@@ -2904,7 +2904,7 @@ function renderOsceResultsTable(cases){
     </tr>`;
     html+=`<tr data-osce-title="${esc(c.title).toLowerCase()}" data-osce-hospital="${esc(c.hospital||'').toLowerCase()}"
       onclick="toggleOsceSubRow('${c.id}',event)" style="cursor:pointer">
-      <td style="text-align:center">${badge(rankMap[c.id], c.id)}</td>
+      <td style="text-align:center">${badge(null, c.id)}</td>
       <td><span class="chip chip-blue chip-no">${esc(c.caseNo||'—')}</span></td>
       <td style="max-width:220px;line-height:1.5;font-size:.88rem">${esc(c.title)}</td>
       <td style="font-size:.82rem">${esc(c.hospital||'—')}</td>
