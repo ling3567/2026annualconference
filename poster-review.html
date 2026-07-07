@@ -2709,12 +2709,15 @@ async function loadOsceDashboard(forceRefresh=false){
     renderOsceDashTable(osceData.cases);
     renderOsceAssignTable(osceData.cases,osceData.reviewers);
     renderOsceResultsTable(osceData.cases);
-    await loadOsceRanks();
     if(dashData){
       renderStats(dashData.stats, osceData.stats);
       if(assignType==='osce') renderOsceAssignTable(osceData.cases,osceData.reviewers);
       if(resultsType==='osce') renderOsceResultsTable(osceData.cases);
     }
+    // 名次覆蓋在最後載入（失敗不影響主要顯示）
+    loadOsceRanks().then(()=>{
+      if(resultsType==='osce') renderOsceResultsTable(osceData.cases);
+    }).catch(()=>{});
   }catch(e){console.error('OSCE:',e);osceData={cases:[],reviewers:[],stats:{}};}
 }
 
@@ -2949,10 +2952,11 @@ async function saveOsceRanks(){
 async function loadOsceRanks(){
   try{
     const r = await api({action:'getOsceRank'});
-    if(r.success && r.data){
-      r.data.forEach(({id,rank})=>{ _osceRankOverride[id]=rank; });
+    if(r && r.success && r.data){
+      r.data.forEach(({id,rank})=>{ if(id&&rank) _osceRankOverride[id]=rank; });
     }
-  }catch(e){ console.warn('loadOsceRanks failed',e); }
+    // 若 action 不存在（GAS 未部署），靜默忽略
+  }catch(e){ console.warn('loadOsceRanks skip:',e); }
 }
 
 function filterOsceResults(){const q=(el('osceResultSearch')||{}).value?.toLowerCase()||'';document.querySelectorAll('#osceResultsBody tr[data-osce-title]').forEach(tr=>{const ok=!q||tr.dataset.osceTitle.includes(q)||( tr.dataset.osceHospital||'').includes(q);tr.style.display=ok?'':'none';});}
