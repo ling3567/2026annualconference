@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#3a4550">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>優秀海報論文評選｜TSMCSD 2026</title>
+<style>
+/* ══════════════════════════════════════════════
+   TSMCSD 2026 優秀海報論文現場評選
+   Mobile-first：手機 → 平板 → 桌機
+   共用 poster-review.html 的設計語彙與後端
+══════════════════════════════════════════════ */
+:root{
+  --dark:#3a4550; --dark-2:#546070;
+  --main:#7a90a4; --main-d:#5e7080; --main-l:#a8bfcc; --main-bg:#dce6ec;
+  --bg:#e4e2dc; --bg2:#f0eeea; --white:#fff;
+  --ink:#2a2420; --slate:#4a3e38; --muted:#7a6e68;
+  --border:#b8c8d4; --border2:#ccd8e0;
+  --green:#3d6b54; --green-bg:#d4e8de; --green-br:#88b8a0;
+  --red:#7a3838; --red-bg:#f0dada; --red-br:#c09090;
+  --gold:#9a6f0a; --gold-bg:#fdf6e3; --gold-br:#e6cf8a;
+  --blue:#1e4d8c; --blue-bg:#e8f0fb; --blue-br:#bfdbfe;
+  --sh-sm:0 1px 4px rgba(42,36,32,.08);
+  --sh:0 2px 10px rgba(42,36,32,.09);
+  --sh-md:0 6px 20px rgba(42,36,32,.14);
+  --r:12px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:'Microsoft JhengHei','Noto Sans TC','PingFang TC','Helvetica Neue',sans-serif;
+  background:var(--bg); color:var(--ink);
+  font-size:16px; line-height:1.65; font-weight:400;
+  overscroll-behavior-y:none;
+}
+button,input,textarea,select{font-family:inherit;font-size:inherit}
+button{cursor:pointer}
+h1,h2,h3,h4{font-weight:700;line-height:1.35}
+
+/* ══════════ 通用元件 ══════════ */
+.hide{display:none !important}
+.ldr{position:fixed;inset:0;background:rgba(42,36,32,.45);display:none;align-items:center;justify-content:center;z-index:9000;backdrop-filter:blur(2px)}
+.ldr.on{display:flex}
+.spinner{width:44px;height:44px;border:4px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(1.5rem + var(--safe-b));
+  padding:.75rem 1.25rem;border-radius:10px;color:#fff;font-size:.9rem;font-weight:600;
+  z-index:9500;box-shadow:var(--sh-md);max-width:88vw;text-align:center;
+  animation:toastIn .25s ease
+}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+.toast.ok{background:#2f6b52}
+.toast.err{background:#9b3535}
+.toast.info{background:var(--dark-2)}
+
+/* ══════════ 登入 ══════════ */
+#loginScreen{
+  min-height:100dvh;display:flex;flex-direction:column;justify-content:center;
+  padding:calc(1.5rem + var(--safe-t)) 1.25rem calc(1.5rem + var(--safe-b));
+  background:linear-gradient(160deg,#3a4550 0%,#546070 55%,#7a90a4 100%);
+  position:relative;overflow:hidden
+}
+#loginScreen::before,#loginScreen::after{
+  content:'';position:absolute;border-radius:50%;background:rgba(255,255,255,.055);pointer-events:none
+}
+#loginScreen::before{width:340px;height:340px;top:-130px;right:-110px}
+#loginScreen::after{width:250px;height:250px;bottom:-90px;left:-80px}
+.lg-wrap{width:100%;max-width:420px;margin:0 auto;position:relative;z-index:2}
+.lg-brand{text-align:center;color:#fff;margin-bottom:1.5rem}
+.lg-brand img{height:52px;width:auto;display:block;margin:0 auto .7rem;filter:brightness(0) invert(1);opacity:.95}
+.lg-org{font-size:.8rem;letter-spacing:.06em;opacity:.8;font-weight:500}
+.lg-brand h1{font-size:1.45rem;margin:.45rem 0 .5rem;letter-spacing:.02em}
+.lg-tagline{
+  display:inline-flex;align-items:center;gap:.35rem;
+  background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+  padding:.28rem .8rem;border-radius:999px;font-size:.78rem;font-weight:600
+}
+.lg-brand p{font-size:.83rem;opacity:.82;line-height:1.7;margin-top:.7rem}
+.lg-card{background:#fff;border-radius:16px;padding:1.4rem 1.25rem;box-shadow:var(--sh-md)}
+.fl{display:block;font-size:.8rem;font-weight:700;color:var(--slate);margin:0 0 .35rem;letter-spacing:.03em}
+.fi{
+  width:100%;padding:.85rem .9rem;border:1.5px solid var(--border2);border-radius:10px;
+  font-size:1rem;margin-bottom:1rem;background:var(--bg2);transition:border-color .15s,background .15s
+}
+.fi:focus{outline:none;border-color:var(--main);background:#fff}
+.btn-login{
+  width:100%;padding:.95rem;background:var(--dark);color:#fff;border:none;border-radius:10px;
+  font-size:1.02rem;font-weight:700;letter-spacing:.06em;transition:background .15s
+}
+.btn-login:active{background:var(--dark-2)}
+.lg-err{
+  display:none;margin-top:.8rem;padding:.6rem .8rem;background:var(--red-bg);
+  border:1px solid var(--red-br);border-radius:8px;color:var(--red);font-size:.85rem;text-align:center
+}
+.lg-err.on{display:block}
+.lg-foot{text-align:center;margin-top:1.1rem;font-size:.75rem;color:rgba(255,255,255,.6);line-height:1.8}
+.lg-foot a{color:rgba(255,255,255,.85)}
+
+/* ══════════ 評審 App 外框 ══════════ */
+#rvApp,#admApp{display:none;min-height:100dvh;flex-direction:column}
+#rvApp.on,#admApp.on{display:flex}
+
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:var(--dark);color:#fff;
+  padding:calc(.6rem + var(--safe-t)) .9rem .6rem;
+  display:flex;align-items:center;gap:.6rem;box-shadow:var(--sh)
+}
+.tb-title{font-size:.95rem;font-weight:700;letter-spacing:.02em;flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-title small{display:block;font-size:.68rem;font-weight:500;opacity:.65;letter-spacing:.04em}
+.tb-btn{
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff;
+  border-radius:8px;padding:.42rem .7rem;font-size:.78rem;font-weight:600;
+  display:inline-flex;align-items:center;gap:.3rem;white-space:nowrap
+}
+.tb-btn:active{background:rgba(255,255,255,.26)}
+.tb-btn.solid{background:var(--gold);border-color:var(--gold)}
+
+/* 進度條 */
+.progbar{background:var(--white);padding:.6rem .9rem;border-bottom:1px solid var(--border2);
+  position:sticky;top:0;z-index:90}
+.progbar .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.35rem}
+.progbar .lbl{font-size:.75rem;font-weight:700;color:var(--muted);letter-spacing:.06em}
+.progbar .val{font-size:.9rem;font-weight:700;color:var(--dark)}
+.progbar .val b{color:var(--gold);font-size:1.05rem}
+.track{height:6px;background:var(--bg2);border-radius:99px;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,var(--gold),#c9a227);border-radius:99px;transition:width .35s ease}
+
+/* 工具列（排序/篩選） */
+.toolbar{display:flex;gap:.4rem;padding:.6rem .9rem;overflow-x:auto;background:var(--bg2);
+  border-bottom:1px solid var(--border2);-webkit-overflow-scrolling:touch}
+.toolbar::-webkit-scrollbar{display:none}
+.chipbtn{
+  flex-shrink:0;background:#fff;border:1.5px solid var(--border2);border-radius:99px;
+  padding:.35rem .8rem;font-size:.78rem;font-weight:600;color:var(--muted);transition:all .15s
+}
+.chipbtn.on{background:var(--dark);border-color:var(--dark);color:#fff}
+
+/* ══════════ 論文卡片清單 ══════════ */
+.list{padding:.8rem .9rem calc(2rem + var(--safe-b));display:flex;flex-direction:column;gap:.7rem}
+.pcard{
+  background:#fff;border:1.5px solid var(--border2);border-left:4px solid var(--border);
+  border-radius:var(--r);padding:.85rem .95rem;box-shadow:var(--sh-sm);
+  transition:transform .12s,box-shadow .12s
+}
+.pcard:active{transform:scale(.985);box-shadow:var(--sh)}
+.pcard.done{border-left-color:var(--green);background:linear-gradient(90deg,#f4faf7 0%,#fff 22%)}
+.pcard.draft{border-left-color:var(--gold)}
+.pc-top{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.5rem}
+.pno{
+  background:var(--dark);color:#fff;font-size:.76rem;font-weight:700;
+  padding:.16rem .55rem;border-radius:6px;letter-spacing:.04em
+}
+.pcat{background:var(--main-bg);color:var(--main-d);font-size:.72rem;font-weight:700;
+  padding:.16rem .5rem;border-radius:6px}
+.pstat{margin-left:auto;font-size:.72rem;font-weight:700;padding:.16rem .55rem;border-radius:6px}
+.pstat.wait{background:var(--bg2);color:var(--muted);border:1px solid var(--border2)}
+.pstat.draft{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-br)}
+.pstat.done{background:var(--green-bg);color:var(--green);border:1px solid var(--green-br)}
+.pc-title{font-size:.95rem;font-weight:600;line-height:1.55;color:var(--ink);margin-bottom:.5rem}
+.pc-meta{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+  font-size:.75rem;color:var(--muted);padding-top:.5rem;border-top:1px dashed var(--border2)}
+.pc-ref{display:inline-flex;align-items:center;gap:.28rem;background:var(--blue-bg);
+  border:1px solid var(--blue-br);color:var(--blue);padding:.12rem .45rem;border-radius:5px;font-weight:700}
+.pc-mine{display:inline-flex;align-items:center;gap:.28rem;font-weight:700;color:var(--gold)}
+.empty{text-align:center;padding:3rem 1.5rem;color:var(--muted)}
+.empty .ic{font-size:2.6rem;margin-bottom:.6rem;opacity:.55}
+.empty h3{font-size:1rem;margin-bottom:.4rem;color:var(--slate)}
+.empty p{font-size:.83rem;line-height:1.8}
+
+/* ══════════ 評分頁（手機為 overlay，平板為右欄）══════════ */
+#scoreView{
+  position:fixed;inset:0;z-index:200;background:var(--bg);
+  display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+  visibility:hidden
+}
+#scoreView.on{transform:translateX(0);visibility:visible}
+.sv-head{
+  background:var(--dark);color:#fff;padding:calc(.55rem + var(--safe-t)) .8rem .55rem;
+  display:flex;align-items:center;gap:.5rem;box-shadow:var(--sh);flex-shrink:0
+}
+.sv-back{background:rgba(255,255,255,.14);border:none;color:#fff;border-radius:8px;
+  padding:.42rem .6rem;font-size:.82rem;font-weight:600;display:inline-flex;align-items:center;gap:.25rem}
+.sv-head-t{flex:1;min-width:0;font-size:.85rem;font-weight:700;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.sv-nav{display:flex;gap:.3rem}
+.sv-nav button{background:rgba(255,255,255,.14);border:none;color:#fff;border-radius:8px;
+  width:32px;height:32px;font-size:1rem;font-weight:700;line-height:1}
+.sv-nav button:disabled{opacity:.3}
+.sv-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:.85rem .9rem calc(7.5rem + var(--safe-b))}
+
+/* 論文資訊卡 */
+.info-card{background:#fff;border:1px solid var(--border2);border-radius:var(--r);
+  padding:.95rem;margin-bottom:.85rem;box-shadow:var(--sh-sm)}
+.info-title{font-size:1.05rem;font-weight:700;line-height:1.55;margin:.55rem 0 .6rem}
+.info-authors{font-size:.8rem;color:var(--muted);line-height:1.7;
+  padding-top:.55rem;border-top:1px dashed var(--border2)}
+.info-authors b{color:var(--slate);font-weight:700}
+
+/* 論文全文 PDF */
+.pdf-card{background:#fff;border:1.5px solid var(--blue-br);border-radius:var(--r);
+  padding:.8rem .9rem;margin-bottom:.85rem;box-shadow:var(--sh-sm)}
+.pdf-card.none{border-color:var(--border2);border-style:dashed;display:flex;
+  align-items:center;gap:.6rem;opacity:.8}
+.pdf-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.65rem}
+.pdf-ic{font-size:1.5rem;line-height:1;flex-shrink:0}
+.pdf-txt{min-width:0}
+.pdf-txt b{display:block;font-size:.9rem;color:var(--ink);font-weight:700}
+.pdf-txt small{display:block;font-size:.74rem;color:var(--muted);line-height:1.5}
+.pdf-btns{display:flex;gap:.5rem}
+.pdf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.3rem;
+  padding:.65rem .5rem;border:1.5px solid var(--border2);border-radius:9px;
+  background:var(--bg2);color:var(--slate);font-size:.85rem;font-weight:700;
+  text-decoration:none;white-space:nowrap}
+.pdf-btn.primary{background:var(--blue-bg);border-color:var(--blue-br);color:var(--blue)}
+.pdf-btn:active{opacity:.7}
+.pdf-frame-wrap{margin-top:.7rem}
+.pdf-frame{width:100%;height:min(68vh,560px);border:1px solid var(--border2);
+  border-radius:9px;background:var(--bg2);display:block}
+.pdf-hint{font-size:.72rem;color:var(--muted);line-height:1.6;margin-top:.4rem;text-align:center}
+
+/* 摺疊區塊 */
+.acc{background:#fff;border:1px solid var(--border2);border-radius:var(--r);
+  margin-bottom:.85rem;overflow:hidden;box-shadow:var(--sh-sm)}
+.acc-head{
+  width:100%;display:flex;align-items:center;gap:.5rem;padding:.8rem .95rem;
+  background:none;border:none;text-align:left;font-size:.88rem;font-weight:700;color:var(--slate)
+}
+.acc-head .arrow{margin-left:auto;transition:transform .2s;font-size:.75rem;color:var(--muted)}
+.acc.open .acc-head .arrow{transform:rotate(180deg)}
+.acc-body{display:none;padding:0 .95rem .95rem;border-top:1px solid var(--border2)}
+.acc.open .acc-body{display:block}
+.acc.ref .acc-head{background:var(--blue-bg);color:var(--blue)}
+.acc.ref{border-color:var(--blue-br)}
+.abs-sec{margin-top:.75rem}
+.abs-lbl{font-size:.72rem;font-weight:700;color:var(--main-d);letter-spacing:.08em;margin-bottom:.25rem}
+.abs-txt{font-size:.86rem;line-height:1.85;color:var(--slate);white-space:pre-wrap}
+
+/* 初審參考資料 */
+.ref-summary{display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap}
+.ref-stat{flex:1;min-width:88px;background:var(--bg2);border:1px solid var(--border2);
+  border-radius:9px;padding:.55rem .5rem;text-align:center}
+.ref-stat .n{font-size:1.35rem;font-weight:700;color:var(--blue);line-height:1.2}
+.ref-stat .n.warn{color:#b45309}
+.ref-stat .l{font-size:.68rem;color:var(--muted);font-weight:600;letter-spacing:.03em}
+.ref-rv{background:var(--bg2);border:1px solid var(--border2);border-radius:9px;
+  padding:.65rem .75rem;margin-top:.6rem}
+.ref-rv-top{display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:.4rem;margin-bottom:.4rem;border-bottom:1px solid var(--border2)}
+.ref-rv-who{font-size:.78rem;font-weight:700;color:var(--slate)}
+.ref-rv-total{font-size:.92rem;font-weight:700;color:var(--blue)}
+.ref-crit{display:flex;justify-content:space-between;font-size:.76rem;padding:.13rem 0;color:var(--muted)}
+.ref-crit b{color:var(--slate);font-weight:700}
+.ref-cmt{font-size:.78rem;line-height:1.8;color:var(--slate);background:#fff;
+  border-left:3px solid var(--border2);border-radius:6px;padding:.5rem .65rem;margin-top:.45rem}
+.ref-rec{display:inline-block;margin-top:.4rem;background:var(--green-bg);border:1px solid var(--green-br);
+  color:var(--green);font-size:.72rem;font-weight:700;padding:.15rem .5rem;border-radius:5px}
+/* 初審各項平均得分表（對應紙本評分表）*/
+.ref-tbl{width:100%;border-collapse:collapse;margin-top:.85rem;background:#fff;
+  border:1px solid var(--border2);border-radius:8px;overflow:hidden;font-size:.78rem}
+.ref-tbl th,.ref-tbl td{padding:.42rem .45rem;text-align:center;border-bottom:1px solid var(--border2)}
+.ref-tbl thead th{background:var(--main-bg);color:var(--main-d);font-size:.72rem;font-weight:700;
+  letter-spacing:.02em;white-space:nowrap}
+.ref-tbl td.item,.ref-tbl th:first-child{text-align:left;line-height:1.45;color:var(--slate);font-weight:600}
+.ref-tbl .wt{color:var(--muted);font-weight:500;font-size:.9em;margin-left:.15rem}
+.ref-tbl th.avg,.ref-tbl td.avg{background:var(--blue-bg);color:var(--blue);font-weight:700}
+.ref-tbl tr.sum td{background:var(--bg2);font-weight:700;color:var(--ink);border-bottom:none}
+.ref-tbl tr.sum td.avg{background:#d9e6f7;font-size:.92rem}
+.ref-cmt-hd{font-size:.76rem;font-weight:700;color:var(--main-d);letter-spacing:.06em;
+  margin:.95rem 0 .1rem}
+/* 最終總分換算提示 */
+.calc-note{background:var(--gold-bg);border:1px solid var(--gold-br);border-radius:10px;
+  padding:.6rem .75rem;margin-bottom:.8rem;font-size:.78rem;color:#78500a;line-height:1.7}
+.calc-note b{font-weight:700}
+.calc-row{display:flex;align-items:center;justify-content:center;gap:.4rem;
+  font-size:.72rem;color:var(--muted);margin-bottom:.35rem;flex-wrap:wrap}
+.calc-row .eq{font-weight:700;color:var(--slate)}
+.calc-row .proj{font-weight:700;color:var(--gold);font-size:.85rem}
+
+/* ══════════ 評分表 ══════════ */
+.crit{background:#fff;border:1px solid var(--border2);border-radius:var(--r);
+  padding:.9rem .95rem;margin-bottom:.75rem;box-shadow:var(--sh-sm);transition:border-color .15s}
+.crit.filled{border-color:var(--green-br)}
+.crit.empty-warn{border-color:var(--red-br);background:#fffafa}
+.crit-top{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.15rem}
+.crit-name{flex:1;font-size:.92rem;font-weight:700;color:var(--ink);line-height:1.5}
+.crit-max{flex-shrink:0;background:var(--bg2);border:1px solid var(--border2);color:var(--muted);
+  font-size:.72rem;font-weight:700;padding:.12rem .45rem;border-radius:5px}
+.crit-desc{font-size:.76rem;color:var(--muted);line-height:1.65;margin-bottom:.7rem}
+.crit-inp{display:flex;align-items:center;gap:.7rem}
+.stepper{display:flex;align-items:center;gap:0;flex-shrink:0;
+  border:1.5px solid var(--border2);border-radius:10px;overflow:hidden;background:var(--bg2)}
+.stepper button{
+  width:40px;height:44px;border:none;background:none;font-size:1.3rem;font-weight:700;
+  color:var(--main-d);line-height:1;display:flex;align-items:center;justify-content:center
+}
+.stepper button:active{background:var(--main-bg)}
+.stepper input{
+  width:56px;height:44px;border:none;border-left:1.5px solid var(--border2);
+  border-right:1.5px solid var(--border2);text-align:center;
+  font-size:1.15rem;font-weight:700;color:var(--dark);background:#fff;
+  -moz-appearance:textfield
+}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{
+  -webkit-appearance:none;margin:0}
+.stepper input:focus{outline:none;background:var(--main-bg)}
+.slider{flex:1;min-width:0;display:flex;flex-direction:column;gap:.2rem}
+.slider input[type=range]{
+  width:100%;height:30px;-webkit-appearance:none;background:none;margin:0
+}
+.slider input[type=range]::-webkit-slider-runnable-track{
+  height:7px;border-radius:99px;background:var(--bg2);border:1px solid var(--border2)}
+.slider input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:28px;height:28px;border-radius:50%;
+  background:var(--dark);border:3px solid #fff;box-shadow:var(--sh);margin-top:-11px}
+.slider input[type=range]::-moz-range-track{
+  height:7px;border-radius:99px;background:var(--bg2);border:1px solid var(--border2)}
+.slider input[type=range]::-moz-range-thumb{
+  width:28px;height:28px;border-radius:50%;background:var(--dark);border:3px solid #fff;box-shadow:var(--sh)}
+.slider .ticks{display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);padding:0 2px}
+
+.cmt-box{background:#fff;border:1px solid var(--border2);border-radius:var(--r);
+  padding:.9rem .95rem;margin-bottom:.75rem;box-shadow:var(--sh-sm)}
+.cmt-box label{display:block;font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.5rem}
+.cmt-box textarea{
+  width:100%;min-height:96px;padding:.7rem .8rem;border:1.5px solid var(--border2);
+  border-radius:9px;font-size:.9rem;line-height:1.75;background:var(--bg2);resize:vertical
+}
+.cmt-box textarea:focus{outline:none;border-color:var(--main);background:#fff}
+.cmt-hint{font-size:.72rem;color:var(--muted);margin-top:.35rem}
+
+/* 底部固定操作列 */
+.sv-foot{
+  position:absolute;left:0;right:0;bottom:0;z-index:10;
+  background:rgba(255,255,255,.97);backdrop-filter:blur(8px);
+  border-top:1px solid var(--border2);box-shadow:0 -3px 14px rgba(42,36,32,.1);
+  padding:.65rem .9rem calc(.65rem + var(--safe-b))
+}
+.sv-total{display:flex;align-items:baseline;justify-content:center;gap:.4rem;margin-bottom:.55rem}
+.sv-total .lbl{font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.06em}
+.sv-total .num{font-size:1.9rem;font-weight:700;color:var(--dark);line-height:1}
+.sv-total .num.full{color:var(--gold)}
+.sv-total .den{font-size:.85rem;color:var(--muted);font-weight:600}
+.sv-btns{display:flex;gap:.55rem}
+.btn-draft{
+  flex:1;padding:.85rem;background:#fff;border:1.5px solid var(--border);color:var(--slate);
+  border-radius:10px;font-size:.92rem;font-weight:700
+}
+.btn-draft:active{background:var(--bg2)}
+.btn-submit{
+  flex:2;padding:.85rem;background:var(--gold);border:none;color:#fff;
+  border-radius:10px;font-size:.98rem;font-weight:700;letter-spacing:.04em
+}
+.btn-submit:active{background:#7d5a08}
+.btn-submit:disabled{background:#c8c3bb;color:#fff}
+.done-banner{
+  background:var(--green-bg);border:1px solid var(--green-br);color:var(--green);
+  border-radius:10px;padding:.7rem .85rem;font-size:.84rem;font-weight:600;
+  margin-bottom:.85rem;line-height:1.65;text-align:center
+}
+
+/* ══════════ 管理端 ══════════ */
+.adm-body{flex:1;overflow-y:auto;padding:.85rem .9rem calc(2rem + var(--safe-b))}
+.adm-tabs{display:flex;gap:.4rem;padding:.6rem .9rem;background:var(--bg2);
+  border-bottom:1px solid var(--border2);overflow-x:auto}
+.adm-tabs::-webkit-scrollbar{display:none}
+.sec{background:#fff;border:1px solid var(--border2);border-radius:var(--r);
+  margin-bottom:.85rem;overflow:hidden;box-shadow:var(--sh-sm)}
+.sec-head{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+  padding:.75rem .9rem;border-bottom:1px solid var(--border2);background:var(--bg2)}
+.sec-head h3{font-size:.92rem;flex:1;min-width:120px}
+.sec-body{padding:.85rem .9rem}
+.abtn{background:#fff;border:1.5px solid var(--border2);color:var(--slate);border-radius:8px;
+  padding:.4rem .7rem;font-size:.78rem;font-weight:700;white-space:nowrap}
+.abtn.pri{background:var(--dark);border-color:var(--dark);color:#fff}
+.abtn.gold{background:var(--gold);border-color:var(--gold);color:#fff}
+.abtn:active{opacity:.75}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:.55rem;margin-bottom:.85rem}
+.stat{background:#fff;border:1px solid var(--border2);border-radius:10px;padding:.7rem .6rem;text-align:center}
+.stat .n{font-size:1.5rem;font-weight:700;color:var(--dark);line-height:1.2}
+.stat .l{font-size:.72rem;color:var(--muted);font-weight:600}
+.stat.gold .n{color:var(--gold)}
+.stat.green .n{color:var(--green)}
+
+.rank-card{
+  background:#fff;border:1px solid var(--border2);border-left:4px solid var(--border);
+  border-radius:10px;padding:.75rem .85rem;margin-bottom:.6rem
+}
+.rank-card.r1{border-left-color:#c9a227;background:linear-gradient(90deg,#fdf6e3 0%,#fff 25%)}
+.rank-card.r2{border-left-color:#9aa5ad;background:linear-gradient(90deg,#f2f5f7 0%,#fff 25%)}
+.rank-card.r3{border-left-color:#b08050;background:linear-gradient(90deg,#f9f2ea 0%,#fff 25%)}
+.rank-top{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap}
+.rank-pos{font-size:1.15rem;font-weight:700;color:var(--dark);min-width:2ch}
+.rank-score{margin-left:auto;font-size:1.15rem;font-weight:700;color:var(--gold)}
+.rank-score small{font-size:.7rem;color:var(--muted);font-weight:600}
+.rank-title{font-size:.88rem;font-weight:600;line-height:1.55;margin-bottom:.45rem}
+.rank-meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-size:.74rem;color:var(--muted)}
+.rank-sel{border:1.5px solid var(--border2);border-radius:7px;padding:.28rem .5rem;
+  font-size:.78rem;font-weight:700;background:#fff;color:var(--slate)}
+.rank-sel.set{background:var(--gold-bg);border-color:var(--gold-br);color:var(--gold)}
+.judge-pill{background:var(--bg2);border:1px solid var(--border2);border-radius:5px;
+  padding:.08rem .4rem;font-size:.7rem;font-weight:600}
+/* 初審 ＋ 現場 ＝ 總分 拆解列 */
+.score-split{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;
+  background:var(--bg2);border:1px solid var(--border2);border-radius:8px;
+  padding:.35rem .6rem;margin-bottom:.5rem;font-size:.76rem;color:var(--muted)}
+.score-split b{color:var(--slate);font-size:.92rem;font-weight:700}
+.score-split small{font-size:.68rem;opacity:.75}
+.score-split .plus{color:var(--border);font-weight:700}
+.score-split .tot{margin-left:auto;color:var(--gold);font-size:1rem;font-weight:700}
+/* 帳號管理 */
+.acct-form{display:flex;gap:.55rem;flex-wrap:wrap;align-items:flex-end}
+.acct-form>div{flex:1;min-width:120px}
+.acct-form label{display:block;font-size:.74rem;font-weight:700;color:var(--muted);
+  letter-spacing:.04em;margin-bottom:.25rem}
+.acct-form input{width:100%;padding:.5rem .6rem;border:1.5px solid var(--border2);
+  border-radius:8px;font-size:.9rem;background:var(--bg2)}
+.acct-form input:focus{outline:none;border-color:var(--main);background:#fff}
+.acct-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+  background:#fff;border:1px solid var(--border2);border-left:4px solid var(--gold);
+  border-radius:9px;padding:.6rem .75rem;margin-bottom:.5rem}
+.acct-row.off{border-left-color:var(--border);background:var(--bg2);opacity:.72}
+.acct-cred{display:flex;flex-direction:column;gap:.1rem;min-width:0}
+.acct-cred .u{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9rem;
+  font-weight:700;color:var(--ink)}
+.acct-cred .p{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.78rem;color:var(--muted)}
+.acct-name{font-size:.88rem;font-weight:700;color:var(--slate)}
+.acct-act{margin-left:auto;display:flex;gap:.35rem;flex-wrap:wrap}
+.acct-badge{font-size:.68rem;font-weight:700;padding:.1rem .4rem;border-radius:4px}
+.acct-badge.on{background:var(--green-bg);border:1px solid var(--green-br);color:var(--green)}
+.acct-badge.off{background:var(--bg2);border:1px solid var(--border2);color:var(--muted)}
+.notice{background:var(--gold-bg);border:1px solid var(--gold-br);color:#78500a;
+  border-radius:10px;padding:.7rem .85rem;font-size:.8rem;line-height:1.75;margin-bottom:.85rem}
+.notice b{font-weight:700}
+.notice code{background:rgba(0,0,0,.06);padding:.05rem .3rem;border-radius:4px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em}
+
+/* ══════════ 平板 ≥ 820px ══════════ */
+@media(min-width:820px){
+  body{font-size:16px}
+  .list{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:.85rem;padding:1rem 1.25rem calc(2rem + var(--safe-b));
+    max-width:1400px;margin:0 auto;width:100%
+  }
+  .progbar,.toolbar{padding-left:1.25rem;padding-right:1.25rem}
+  .sv-body{padding:1.1rem 1.25rem calc(8rem + var(--safe-b));max-width:900px;margin:0 auto;width:100%}
+  .sv-foot{padding-left:1.25rem;padding-right:1.25rem}
+  .sv-foot-inner{max-width:900px;margin:0 auto}
+  .crit-inp{gap:1.1rem}
+  .stats{grid-template-columns:repeat(4,1fr)}
+  .adm-body{max-width:1200px;margin:0 auto;width:100%;padding:1rem 1.25rem}
+  .ref-summary{flex-wrap:nowrap}
+  .info-title{font-size:1.15rem}
+}
+/* 平板橫向 / 桌機：評分頁改為兩欄 */
+@media(min-width:1100px){
+  .sv-body{max-width:1200px}
+  .sv-cols{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;align-items:start}
+  .sv-cols>div{min-width:0}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ 登入 ══════════ -->
+<div id="loginScreen">
+  <div class="lg-wrap">
+    <div class="lg-brand">
+      <img src="images/TSMCSD-logo.png" alt="TSMCSD">
+      <div class="lg-org">TSMCSD 2026 年會暨學術研討會</div>
+      <h1>優秀海報論文評選</h1>
+      <span class="lg-tagline">🏆 年會現場評分系統</span>
+      <p>請以秘書處提供之評審帳號密碼登入<br>
+      系統會顯示各篇的書面初審成績供您參考，<br>
+      您只需評「口頭報告之結構性、完整性及海報製作品質」一項</p>
+    </div>
+    <div class="lg-card">
+      <label class="fl" for="lgUser">帳號</label>
+      <input class="fi" id="lgUser" type="text" placeholder="請輸入帳號" autocomplete="username"
+             autocapitalize="none" autocorrect="off" spellcheck="false">
+      <label class="fl" for="lgPass">密碼</label>
+      <input class="fi" id="lgPass" type="password" placeholder="請輸入密碼" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn-login" onclick="doLogin()">登入系統</button>
+      <div class="lg-err" id="lgErr"></div>
+    </div>
+    <div class="lg-foot">
+      初審評分系統請至 <a href="poster-review.html">poster-review</a><br>
+      如有問題請聯絡秘書處 依玲 06-2812811#57426
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 評審委員端 ══════════ -->
+<div id="rvApp">
+  <div class="topbar">
+    <div class="tb-title">
+      優秀海報論文評選
+      <small id="rvWho"></small>
+    </div>
+    <button class="tb-btn" onclick="reloadPapers()" title="重新載入">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      更新
+    </button>
+    <button class="tb-btn" onclick="doLogout()">登出</button>
+  </div>
+
+  <div class="progbar">
+    <div class="row">
+      <span class="lbl">我的評分進度</span>
+      <span class="val"><b id="progDone">0</b> / <span id="progTotal">0</span> 篇</span>
+    </div>
+    <div class="track"><div class="fill" id="progFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="toolbar">
+    <button class="chipbtn on" id="sortNo" onclick="setSort('no')">依編號</button>
+    <button class="chipbtn" id="sortRef" onclick="setSort('ref')">依初審分數</button>
+    <button class="chipbtn" id="sortMine" onclick="setSort('mine')">未評優先</button>
+    <button class="chipbtn" id="filtTodo" onclick="toggleTodo()">只看未評</button>
+  </div>
+
+  <div class="list" id="paperList"></div>
+</div>
+
+<!-- ══════════ 評分頁 ══════════ -->
+<div id="scoreView">
+  <div class="sv-head">
+    <button class="sv-back" onclick="closeScore()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      返回
+    </button>
+    <div class="sv-head-t" id="svHeadTitle"></div>
+    <div class="sv-nav">
+      <button id="svPrev" onclick="gotoAdj(-1)" title="上一篇">‹</button>
+      <button id="svNext" onclick="gotoAdj(1)" title="下一篇">›</button>
+    </div>
+  </div>
+  <div class="sv-body" id="svBody"></div>
+  <div class="sv-foot">
+    <div class="sv-foot-inner">
+      <div class="calc-row" id="svCalc"></div>
+      <div class="sv-total">
+        <span class="lbl">現場評分</span>
+        <span class="num" id="svTotal">0</span>
+        <span class="den">/ <span id="svMax">20</span></span>
+      </div>
+      <div class="sv-btns">
+        <button class="btn-draft" onclick="saveDraft(true)">暫存</button>
+        <button class="btn-submit" id="btnSubmit" onclick="submitScore()">提交評分</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 管理端 ══════════ -->
+<div id="admApp">
+  <div class="topbar">
+    <div class="tb-title">
+      優秀海報論文 — 評選後台
+      <small id="admWho"></small>
+    </div>
+    <button class="tb-btn" id="autoBtn" onclick="toggleAuto()">⏱ 自動更新</button>
+    <button class="tb-btn solid" onclick="loadAdmin()">重新統計</button>
+    <button class="tb-btn" onclick="doLogout()">登出</button>
+  </div>
+  <div class="adm-tabs">
+    <button class="chipbtn on" id="tabRank" onclick="admTab('rank')">🏆 即時排名</button>
+    <button class="chipbtn" id="tabAcct" onclick="admTab('acct')">👤 現場委員帳號</button>
+  </div>
+  <div class="adm-body">
+    <!-- ── 即時排名 ── -->
+    <div id="admPaneRank">
+      <div class="stats" id="admStats"></div>
+      <div id="admNotice"></div>
+      <div class="sec">
+        <div class="sec-head">
+          <h3>即時排名</h3>
+          <button class="abtn" onclick="exportAwardCSV()">匯出 CSV</button>
+          <button class="abtn gold" onclick="saveRanks()">儲存名次</button>
+        </div>
+        <div class="sec-body" id="admRank">
+          <p style="color:var(--muted);font-size:.85rem;text-align:center;padding:1.5rem">載入中…</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 現場委員帳號 ── -->
+    <div id="admPaneAcct" style="display:none">
+      <div class="calc-note" style="margin-bottom:.9rem">
+        <b>用途</b>　為年會當日的現場評審委員另開帳號。帳號建立後即可登入
+        <b>預覽所有入選海報的論文資料與全文 PDF</b>，年會當天直接評分。<br>
+        現場委員帳號<b>不會</b>被指派任何書面初審工作，登入初審系統也不會看到待評項目。
+      </div>
+
+      <div class="sec">
+        <div class="sec-head"><h3>快速建立</h3></div>
+        <div class="sec-body">
+          <p style="font-size:.8rem;color:var(--muted);line-height:1.7;margin-bottom:.7rem">
+            一鍵產生 <b id="qcCount">3</b> 組帳號（<code>award01</code>～），密碼隨機 8 碼。
+            建立後請用下方「複製全部帳密」貼到 Email 寄給委員。
+          </p>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+            <label style="font-size:.8rem;color:var(--slate);font-weight:600">組數
+              <input type="number" id="qcN" value="3" min="1" max="10"
+                style="width:56px;padding:.32rem .4rem;border:1.5px solid var(--border2);border-radius:7px;text-align:center;font-weight:700;margin-left:.35rem">
+            </label>
+            <button class="abtn pri" onclick="quickCreateAccounts()">＋ 一鍵建立</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-head"><h3>手動新增單一帳號</h3></div>
+        <div class="sec-body">
+          <div class="acct-form">
+            <div><label>帳號</label><input id="acUser" placeholder="award04" autocapitalize="none" spellcheck="false"></div>
+            <div><label>密碼</label><input id="acPw" placeholder="留白則自動產生"></div>
+            <div><label>姓名</label><input id="acName" placeholder="王大明"></div>
+            <button class="abtn pri" onclick="addOnsiteAccount()">＋ 新增</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-head">
+          <h3>現場委員帳號列表</h3>
+          <button class="abtn" onclick="copyAllCreds()">📋 複製全部帳密</button>
+          <button class="abtn" onclick="loadAccounts()">重新整理</button>
+        </div>
+        <div class="sec-body" id="acctList">
+          <p style="color:var(--muted);font-size:.85rem;text-align:center;padding:1.5rem">載入中…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ldr" id="ldr"><div class="spinner"></div></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   TSMCSD 2026 — 優秀海報論文現場評選
+   後端沿用 poster-review.html 的同一支 Google Apps Script
+══════════════════════════════════════════════════════════════ */
+
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2njUGr6eORWe6V5iMITA_dbpuOzhOebyxDW43P8RySVezxUevEOvQZGUV0tl_Mhm9/exec';
+
+/* ─────────────────────────────────────────────────────────────
+   ★★★ 現場評分設定 — 依 2025 年會「優秀海報論文評分表」★★★
+   現場委員只評一項（占 20%），其餘 100 分為書面初審成績。
+   若日後要增列項目，往陣列加一筆即可，滿分會自動重算。
+───────────────────────────────────────────────────────────── */
+const AWARD_CRITERIA = [
+  { id:'a1',
+    label:'口頭報告之結構性、完整性及海報製作品質',
+    desc:'占最終總成績 20%（滿分 20 分）',
+    max:20 }
+];
+const AWARD_MAX = AWARD_CRITERIA.reduce((s,c)=>s+c.max,0);
+
+/* 現場評審委員人數（用於後台進度顯示與平均計算） */
+const ONSITE_JUDGE_COUNT = 3;
+
+/* 現場委員帳號的命名前綴 —— 用來與書面初審委員區分（award01、award02…） */
+const ONSITE_USER_PREFIX = 'award';
+
+/* 最終總分 = 初審平均分（100） + 現場 N 位委員平均分（20） */
+const REVIEW_MAX = 100;
+const FINAL_MAX  = REVIEW_MAX + AWARD_MAX;
+
+/* 初審評分向度（唯讀，用於顯示參考資料，與 poster-review.html 一致） */
+const REVIEW_CRITERIA = [
+  { id:'c1', label:'主題創新性',         max:20 },
+  { id:'c2', label:'研究設計合理性',     max:15 },
+  { id:'c3', label:'文字表達流暢性',     max:15 },
+  { id:'c4', label:'內容結構的完整性',   max:25 },
+  { id:'c5', label:'結果與討論的正確性', max:15 },
+  { id:'c6', label:'學術貢獻',           max:10 }
+];
+
+/* 是否對現場評審顯示「初審委員姓名」；false 則顯示「初審委員 A/B/C」 */
+const SHOW_REVIEWER_NAMES = false;
+
+/* 名次選項 */
+const RANK_OPTIONS = ['未定','第一名','第二名','第三名','佳作','未得獎'];
+
+/* 送出時使用的識別，避免與初審資料在同一張表互相覆蓋 */
+const AWARD_ID_PREFIX = 'AW_';
+const AWARD_PAPER_TYPE = 'award';
+
+const CAT_FULL = {
+  A:'臨床技能教育、模擬教學與跨專業學習',
+  B:'評量、信任決策與能力導向醫學教育',
+  C:'人文素養、醫療韌性與專業認同'
+};
+
+/* ══════════ State ══════════ */
+let role = null;             // 'reviewer' | 'admin'
+let me = null;               // { username, name }
+let papers = [];             // 入選優秀海報的論文
+let submittedMap = {};       // { paperId: true }
+let drafts = {};             // { paperId: {a1..an, comment} }
+let curIdx = -1;
+let sortMode = 'no';
+let todoOnly = false;
+let reviewerNames = {};
+let admResults = null;
+let rankOverride = {};       // { paperId: '第一名'... }
+let backendHasAward = null;  // 專用 GAS action 是否可用
+
+/* ══════════ 小工具 ══════════ */
+function el(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function setLdr(v){ el('ldr').classList.toggle('on',!!v); }
+function showToast(msg,type){
+  const t=document.createElement('div');
+  t.className='toast '+(type||'info'); t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),3200);
+}
+function normCat(raw){ const m=String(raw||'').match(/^[ABC]/i); return m?m[0].toUpperCase():''; }
+function awardId(pid){ return AWARD_ID_PREFIX+pid; }
+
+/* 與 poster-review.html 完全相同的智慧平均：取差距最小的兩個分數平均（並列取高組） */
+function smartAvg(scores){
+  const s=scores.filter(v=>!isNaN(v)&&v!==null);
+  if(!s.length) return null;
+  if(s.length<=2) return Math.round(s.reduce((a,b)=>a+b,0)/s.length*10)/10;
+  const sorted=[...s].sort((a,b)=>a-b);
+  let minGap=Infinity,best=[sorted[0],sorted[1]];
+  for(let i=0;i<sorted.length-1;i++){
+    const g=sorted[i+1]-sorted[i];
+    if(g<minGap){ minGap=g; best=[sorted[i],sorted[i+1]]; }
+    else if(g===minGap && sorted[i]+sorted[i+1]>best[0]+best[1]){ best=[sorted[i],sorted[i+1]]; }
+  }
+  return Math.round((best[0]+best[1])/2*10)/10;
+}
+function plainAvg(scores){
+  const s=scores.filter(v=>!isNaN(v)&&v!==null);
+  if(!s.length) return null;
+  return Math.round(s.reduce((a,b)=>a+b,0)/s.length*10)/10;
+}
+
+async function api(params, timeoutMs=30000){
+  const controller=new AbortController();
+  const tid=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+    const qs=Object.entries(params)
+      .map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(String(v==null?'':v))).join('&');
+    const resp=await fetch(APPS_SCRIPT_URL+'?'+qs,{method:'GET',redirect:'follow',signal:controller.signal});
+    clearTimeout(tid);
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const text=await resp.text();
+    try{ return JSON.parse(text); }
+    catch(e){ throw new Error('非 JSON 回應：'+text.substring(0,80)); }
+  }catch(e){
+    clearTimeout(tid);
+    if(e.name==='AbortError') throw new Error('請求逾時（'+(timeoutMs/1000)+' 秒），請確認網路後重試');
+    throw e;
+  }
+}
+
+/* ══════════ 登入 / 登出 ══════════ */
+async function doLogin(){
+  const u=el('lgUser').value.trim(), p=el('lgPass').value.trim();
+  const err=el('lgErr'); err.classList.remove('on');
+  if(!u||!p){ err.textContent='請輸入帳號與密碼'; err.classList.add('on'); return; }
+  setLdr(true);
+  try{
+    // 先試評審帳號
+    let r=await api({action:'reviewerLogin', username:u, password:p});
+    if(r && r.success){
+      role='reviewer'; me=r.reviewer;
+      reviewerNames=r.reviewerNames||{};
+      // reviewerLogin 回傳的 submitted 可能含本系統的 AW_ 前綴紀錄
+      Object.keys(r.submitted||{}).forEach(k=>{
+        if(String(k).startsWith(AWARD_ID_PREFIX)) submittedMap[String(k).slice(AWARD_ID_PREFIX.length)]=true;
+      });
+      sessionStorage.setItem('tsmcsd_award_auth', JSON.stringify({role,me}));
+      el('loginScreen').style.display='none';
+      el('rvApp').classList.add('on');
+      el('rvWho').textContent=me.name+'　委員';
+      await reloadPapers();
+      setLdr(false);
+      return;
+    }
+    // 再試管理員
+    let a=await api({action:'adminLogin', username:u, password:p});
+    if(a && a.success){
+      role='admin'; me={username:u,name:(a.admin&&a.admin.name)||a.name||'管理員'};
+      sessionStorage.setItem('tsmcsd_award_auth', JSON.stringify({role,me}));
+      el('loginScreen').style.display='none';
+      el('admApp').classList.add('on');
+      el('admWho').textContent=me.name;
+      await loadAdmin();
+      setLdr(false);
+      return;
+    }
+    err.textContent=(r&&r.message)||(a&&a.message)||'帳號或密碼錯誤';
+    err.classList.add('on');
+  }catch(e){
+    err.textContent='連線失敗：'+(e.message||e);
+    err.classList.add('on');
+    console.error(e);
+  }
+  setLdr(false);
+}
+
+function doLogout(){
+  stopAuto();
+  sessionStorage.removeItem('tsmcsd_award_auth');
+  location.reload();
+}
+
+/* ══════════ 載入入選論文 ══════════
+   優先呼叫專用 action awardGetPapers；
+   若 GAS 尚未加入該 action，自動退回「adminGetDashboard + getDisplayMode」組合，
+   讓本頁在後端還沒更新前就能運作。
+──────────────────────────────────── */
+async function reloadPapers(){
+  setLdr(true);
+  try{
+    // 入選名單來自初審後台的「展出方式 = award（優秀海報）」，
+    // 兩支請求並行送出，減少現場網路延遲。
+    const [dash,disp]=await Promise.all([
+      api({action:'adminGetDashboard', forceRefresh:'false'},60000),
+      api({action:'getDisplayMode'},30000)
+    ]);
+    if(!dash||!dash.success) throw new Error((dash&&dash.message)||'無法取得論文資料');
+    const modeMap={};
+    if(disp&&disp.success&&Array.isArray(disp.data)) disp.data.forEach(({pid,mode})=>{ modeMap[pid]=mode; });
+    if(dash.reviewerNamesMap) Object.assign(reviewerNames,dash.reviewerNamesMap);
+    else (dash.reviewers||[]).forEach(rv=>{ reviewerNames[rv.username]=rv.name||rv.username; });
+    const list=(dash.papers||[]).filter(p=>modeMap[p.id]==='award');
+
+    // ── 整理：計算初審參考分數 ──
+    papers=list.map(p=>{
+      const reviews=Array.isArray(p.reviews)?p.reviews:[];
+      const valid=reviews.filter(r=>!isRejected(r));
+      const totals=valid.map(r=>Number(r.total)).filter(v=>!isNaN(v));
+      return Object.assign({},p,{
+        reviews,
+        _cat:normCat(p.category),
+        _refAvg:totals.length?smartAvg(totals):null,
+        _refRec:reviews.filter(r=>r.recommended===true||r.recommend===true||r.recommended==='true'||r.recommend==='true').length,
+        _refCount:valid.length
+      });
+    });
+
+    // 讀回本機草稿（離線保險）
+    loadLocalDrafts();
+    // 背景向 GAS 取回已送出的評分（跨裝置）
+    fetchMySubmitted();
+
+    applySort();
+    renderList();
+  }catch(e){
+    showToast('載入失敗：'+(e.message||e),'err');
+    console.error(e);
+    el('paperList').innerHTML='<div class="empty"><div class="ic">⚠️</div><h3>資料載入失敗</h3>'+
+      '<p>'+esc(e.message||'')+'<br>請確認網路後點右上角「更新」重試</p></div>';
+  }
+  setLdr(false);
+}
+
+function isRejected(r){
+  return r.rejected===true||r.rejected==='true'||r.rejected==='TRUE'||r.rejected==='1';
+}
+
+function loadLocalDrafts(){
+  if(!me) return;
+  try{
+    const prefix='tsmcsd_award_'+me.username+'_';
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&k.startsWith(prefix)){
+        const pid=k.slice(prefix.length);
+        if(submittedMap[pid]){ localStorage.removeItem(k); continue; }
+        try{ drafts[pid]=JSON.parse(localStorage.getItem(k)); }catch(e){}
+      }
+    }
+  }catch(e){}
+}
+
+/* 背景取回本委員已提交的現場評分（不阻塞畫面） */
+async function fetchMySubmitted(){
+  if(!me) return;
+  try{
+    const r=await api({action:'awardGetMyScores', reviewerUsername:me.username},20000);
+    if(r&&r.success&&r.scores){
+      Object.entries(r.scores).forEach(([pid,sc])=>{
+        const clean=String(pid).startsWith(AWARD_ID_PREFIX)?String(pid).slice(AWARD_ID_PREFIX.length):pid;
+        submittedMap[clean]=true;
+        drafts[clean]=Object.assign({},drafts[clean],sc);
+      });
+      renderList();
+    }
+  }catch(e){ /* GAS 尚未支援時靜默略過，以 localStorage 為準 */ }
+}
+
+/* ══════════ 清單 ══════════ */
+function setSort(m){
+  sortMode=m;
+  ['no','ref','mine'].forEach(k=>el('sort'+k[0].toUpperCase()+k.slice(1)).classList.toggle('on',k===m));
+  applySort(); renderList();
+}
+function toggleTodo(){
+  todoOnly=!todoOnly;
+  el('filtTodo').classList.toggle('on',todoOnly);
+  renderList();
+}
+function applySort(){
+  if(sortMode==='no'){
+    papers.sort((a,b)=>String(a.paperNo||'').localeCompare(String(b.paperNo||''),'zh-Hant',{numeric:true}));
+  }else if(sortMode==='ref'){
+    papers.sort((a,b)=>(b._refAvg||0)-(a._refAvg||0));
+  }else{
+    papers.sort((a,b)=>{
+      const da=submittedMap[a.id]?1:0, db=submittedMap[b.id]?1:0;
+      if(da!==db) return da-db;
+      return String(a.paperNo||'').localeCompare(String(b.paperNo||''),'zh-Hant',{numeric:true});
+    });
+  }
+}
+
+function renderList(){
+  const done=papers.filter(p=>submittedMap[p.id]).length;
+  el('progDone').textContent=done;
+  el('progTotal').textContent=papers.length;
+  el('progFill').style.width=papers.length?(done/papers.length*100)+'%':'0%';
+
+  const show=todoOnly?papers.filter(p=>!submittedMap[p.id]):papers;
+
+  if(!papers.length){
+    el('paperList').innerHTML='<div class="empty"><div class="ic">🏆</div>'+
+      '<h3>目前沒有入選的優秀海報</h3>'+
+      '<p>請先由管理員在初審系統的「評分結果」頁，<br>將入選論文的<strong>展出方式</strong>設為「優秀海報」，<br>本頁即會自動帶入名單。</p></div>';
+    return;
+  }
+  if(!show.length){
+    el('paperList').innerHTML='<div class="empty"><div class="ic">✅</div><h3>全部評分完成</h3>'+
+      '<p>共 '+papers.length+' 篇皆已提交，感謝您的協助！</p></div>';
+    return;
+  }
+
+  el('paperList').innerHTML=show.map(p=>{
+    const isDone=!!submittedMap[p.id];
+    const d=drafts[p.id];
+    const hasDraft=!isDone&&d&&AWARD_CRITERIA.some(c=>d[c.id]!==undefined&&d[c.id]!=='');
+    const cls=isDone?'done':(hasDraft?'draft':'');
+    const stat=isDone?'<span class="pstat done">已提交</span>'
+              :hasDraft?'<span class="pstat draft">已暫存</span>'
+              :'<span class="pstat wait">待評分</span>';
+    const myTotal=isDone||hasDraft?calcTotal(d||{}):null;
+    const idx=papers.indexOf(p);
+    return '<div class="pcard '+cls+'" onclick="openScore('+idx+')">'
+      +'<div class="pc-top">'
+        +'<span class="pno">'+esc(p.paperNo||'—')+'</span>'
+        +(p._cat?'<span class="pcat">'+p._cat+' 類</span>':'')
+        +stat
+      +'</div>'
+      +'<div class="pc-title">'+esc(p.title)+'</div>'
+      +'<div class="pc-meta">'
+        +(p._refAvg!==null?'<span class="pc-ref">初審 '+p._refAvg+' 分</span>':'')
+        +(p._refRec?'<span>★ '+p._refRec+' 位推薦</span>':'')
+        +(myTotal!==null?'<span class="pc-mine">我的評分 '+myTotal+'</span>':'')
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function calcTotal(d){
+  let t=0;
+  AWARD_CRITERIA.forEach(c=>{ const v=Number(d[c.id]); if(!isNaN(v)) t+=v; });
+  return t;
+}
+function isComplete(d){
+  return AWARD_CRITERIA.every(c=>{
+    const v=d[c.id];
+    return v!==undefined && v!=='' && !isNaN(Number(v));
+  });
+}
+
+/* ══════════ 評分頁 ══════════ */
+function openScore(i){
+  curIdx=i;
+  const p=papers[i]; if(!p) return;
+  const d=drafts[p.id]||{};
+  const isDone=!!submittedMap[p.id];
+
+  el('svHeadTitle').textContent=(p.paperNo||'')+'　'+(p._cat?p._cat+' 類':'');
+  el('svMax').textContent=AWARD_MAX;
+  el('svPrev').disabled=(i<=0);
+  el('svNext').disabled=(i>=papers.length-1);
+
+  el('svBody').innerHTML=
+    (isDone?'<div class="done-banner">✅ 本篇已提交評分。如需修改請洽秘書處<br>依玲 06-2812811#57426</div>':'')
+    +'<div class="sv-cols">'
+      +'<div>'+renderInfo(p)+renderRef(p)+'</div>'
+      +'<div>'+renderForm(p,d,isDone)+'</div>'
+    +'</div>';
+
+  el('btnSubmit').disabled=isDone;
+  el('btnSubmit').textContent=isDone?'已提交':'提交評分';
+  document.querySelector('.btn-draft').style.display=isDone?'none':'';
+
+  updateTotal();
+  el('scoreView').classList.add('on');
+  el('svBody').scrollTop=0;
+  document.body.style.overflow='hidden';
+}
+
+function closeScore(){
+  el('scoreView').classList.remove('on');
+  document.body.style.overflow='';
+  renderList();
+}
+
+function gotoAdj(delta){
+  const n=curIdx+delta;
+  if(n<0||n>=papers.length) return;
+  if(!submittedMap[papers[curIdx].id]) saveDraft(false);
+  openScore(n);
+}
+
+function renderInfo(p){
+  const abs=[
+    ['研究動機',p.absMotivation],['研究方法',p.absMethod],
+    ['研究結果',p.absResult],['結論',p.absConclusion]
+  ].filter(x=>x[1]);
+  let h='<div class="info-card">'
+    +'<div class="pc-top">'
+      +'<span class="pno">'+esc(p.paperNo||'—')+'</span>'
+      +(p._cat?'<span class="pcat">'+p._cat+'｜'+esc(CAT_FULL[p._cat]||'')+'</span>':'')
+    +'</div>'
+    +'<div class="info-title">'+esc(p.title)+'</div>';
+  if(p.authors) h+='<div class="info-authors"><b>作者群</b>　'+esc(p.authors)+'</div>';
+  h+='</div>';
+
+  if(abs.length){
+    h+='<div class="acc" id="accAbs"><button class="acc-head" onclick="toggleAcc(\'accAbs\')">'
+      +'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
+      +'摘要內容<span class="arrow">▾</span></button><div class="acc-body">'
+      +abs.map(([l,t])=>'<div class="abs-sec"><div class="abs-lbl">'+l+'</div><div class="abs-txt">'+esc(String(t).trim())+'</div></div>').join('')
+      +'</div></div>';
+  }
+  h+=renderPdf(p);
+  return h;
+}
+
+/* ★ 核心需求：把初審的原始評分資料帶到現場給委員參考 */
+function renderRef(p){
+  const reviews=p.reviews||[];
+  if(!reviews.length){
+    return '<div class="acc ref" id="accRef"><button class="acc-head" onclick="toggleAcc(\'accRef\')">'
+      +'📋 初審評分參考<span class="arrow">▾</span></button>'
+      +'<div class="acc-body"><p style="font-size:.83rem;color:var(--muted);padding-top:.8rem">本篇尚無初審評分資料。</p></div></div>';
+  }
+  const valid=reviews.filter(r=>!isRejected(r));
+  const totals=valid.map(r=>Number(r.total)).filter(v=>!isNaN(v));
+  const gap=totals.length>=2?Math.round((Math.max.apply(null,totals)-Math.min.apply(null,totals))*10)/10:null;
+
+  let h='<div class="acc ref open" id="accRef"><button class="acc-head" onclick="toggleAcc(\'accRef\')">'
+    +'📋 書面初審成績（'+valid.length+' 位委員）<span class="arrow">▾</span></button><div class="acc-body">'
+    +'<div class="ref-summary">'
+      +'<div class="ref-stat"><div class="n">'+(p._refAvg!==null?p._refAvg:'—')+'</div><div class="l">初審平均分</div></div>'
+      +'<div class="ref-stat"><div class="n">'+p._refRec+'<span style="font-size:.8rem;color:var(--muted)">/'+valid.length+'</span></div><div class="l">推薦實體展示</div></div>'
+      +'<div class="ref-stat"><div class="n'+(gap!==null&&gap>10?' warn':'')+'">'+(gap!==null?gap:'—')+'</div><div class="l">委員間差距</div></div>'
+    +'</div>';
+
+  /* 各項平均得分 —— 對應紙本評分表的「平均得分」欄 */
+  h+='<table class="ref-tbl"><thead><tr><th>評分項目</th>'
+    +valid.map((r,i)=>'<th>'+(SHOW_REVIEWER_NAMES?esc(reviewerNames[r.reviewer]||r.reviewer):('委員'+(i+1)))+'</th>').join('')
+    +'<th class="avg">平均</th></tr></thead><tbody>';
+  REVIEW_CRITERIA.forEach(c=>{
+    const vals=valid.map(r=>{
+      const v=r.scores&&r.scores[c.id]!==undefined?Number(r.scores[c.id]):NaN;
+      return isNaN(v)?null:v;
+    });
+    const got=vals.filter(v=>v!==null);
+    const avg=got.length?Math.round(got.reduce((a,b)=>a+b,0)/got.length*10)/10:null;
+    h+='<tr><td class="item">'+c.label+'<span class="wt">('+c.max+'%)</span></td>'
+      +vals.map(v=>'<td>'+(v===null?'—':v)+'</td>').join('')
+      +'<td class="avg">'+(avg===null?'—':avg)+'</td></tr>';
+  });
+  h+='<tr class="sum"><td class="item">總分</td>'
+    +valid.map(r=>'<td>'+(r.total!=null?r.total:'—')+'</td>').join('')
+    +'<td class="avg">'+(p._refAvg!==null?p._refAvg:'—')+'</td></tr>'
+    +'</tbody></table>';
+
+  /* 初審評審意見 */
+  const withCmt=valid.filter(r=>r.comment);
+  if(withCmt.length){
+    h+='<div class="ref-cmt-hd">初審評審意見</div>';
+    valid.forEach((r,i)=>{
+      if(!r.comment) return;
+      const who=SHOW_REVIEWER_NAMES
+        ? (reviewerNames[r.reviewer]||r.reviewer||('委員'+(i+1)))
+        : ('委員'+(i+1));
+      h+='<div class="ref-rv"><div class="ref-rv-top">'
+        +'<span class="ref-rv-who">'+esc(who)+'</span>'
+        +'<span class="ref-rv-total">'+(r.total!=null?r.total:'—')+' <small style="color:var(--muted);font-weight:600">/'+REVIEW_MAX+'</small></span>'
+        +'</div>'
+        +'<div class="ref-cmt">'+esc(r.comment).replace(/\n/g,'<br>')+'</div>';
+      if(r.recommended===true||r.recommend===true||r.recommended==='true'||r.recommend==='true')
+        h+='<div class="ref-rec">★ 推薦進行紙本實體壁報展示</div>';
+      h+='</div>';
+    });
+  }
+
+  const rejCount=reviews.length-valid.length;
+  if(rejCount) h+='<p style="font-size:.76rem;color:var(--red);margin-top:.6rem">※ 另有 '+rejCount+' 位委員於初審標記退稿，該筆分數未計入上方統計。</p>';
+  h+='<p style="font-size:.74rem;color:var(--muted);margin-top:.7rem;line-height:1.7">'
+    +'※ 以上為<strong>書面初審成績</strong>，已占最終總分 '+REVIEW_MAX+' 分，<strong>不需重複評分</strong>；'
+    +'請就現場口頭報告與海報實體呈現給分。</p>';
+  return h+'</div></div>';
+}
+
+function renderForm(p,d,isDone){
+  let h='<div class="calc-note">'
+    +'<b>現場報告評分</b>　最終總分 = <b>書面初審平均分（'+REVIEW_MAX+'）</b> ＋ '
+    +'<b>現場 '+ONSITE_JUDGE_COUNT+' 位委員平均分（'+AWARD_MAX+'）</b>，滿分 '+FINAL_MAX+' 分。<br>'
+    +'初審成績已完成，您只需就下列項目給分並填寫評審意見。'
+    +'</div>';
+  AWARD_CRITERIA.forEach(c=>{
+    const v=(d[c.id]!==undefined&&d[c.id]!=='')?Number(d[c.id]):'';
+    const filled=v!=='';
+    h+='<div class="crit'+(filled?' filled':'')+'" id="crit_'+c.id+'">'
+      +'<div class="crit-top"><div class="crit-name">'+c.label+'</div>'
+      +'<span class="crit-max">'+c.max+' 分</span></div>'
+      +'<div class="crit-desc">'+c.desc+'</div>'
+      +'<div class="crit-inp">'
+        +'<div class="stepper">'
+          +'<button type="button" onclick="bump(\''+c.id+'\',-1,'+c.max+')" '+(isDone?'disabled':'')+'>−</button>'
+          +'<input type="number" inputmode="numeric" pattern="[0-9]*" id="in_'+c.id+'" '
+            +'min="0" max="'+c.max+'" step="1" value="'+v+'" placeholder="—" '
+            +(isDone?'disabled ':'')+'oninput="onScoreInput(\''+c.id+'\','+c.max+')">'
+          +'<button type="button" onclick="bump(\''+c.id+'\',1,'+c.max+')" '+(isDone?'disabled':'')+'>＋</button>'
+        +'</div>'
+        +'<div class="slider">'
+          +'<input type="range" id="rg_'+c.id+'" min="0" max="'+c.max+'" step="1" value="'+(v===''?0:v)+'" '
+            +(isDone?'disabled ':'')+'oninput="onSlider(\''+c.id+'\','+c.max+')">'
+          +'<div class="ticks"><span>0</span><span>'+Math.round(c.max/2)+'</span><span>'+c.max+'</span></div>'
+        +'</div>'
+      +'</div></div>';
+  });
+  h+='<div class="cmt-box"><label for="cmtIn">評審意見<span style="font-weight:500;color:var(--muted);font-size:.8rem">（選填）</span></label>'
+    +'<textarea id="cmtIn" '+(isDone?'disabled':'')+' placeholder="請就口頭報告的結構性、完整性，以及海報製作品質提供意見…" '
+    +'oninput="autoDraft()">'+esc(d.comment||'')+'</textarea>'
+    +'<div class="cmt-hint">評審意見將由秘書處彙整，並可回饋給投稿者。</div></div>';
+  return h;
+}
+
+function toggleAcc(id){ el(id).classList.toggle('open'); }
+
+/* ══════════ 論文全文 PDF ══════════
+   把 Google Drive / Docs 的分享連結轉成可內嵌預覽的網址。
+   （與 poster-review.html 的 getDriveEmbedUrl 同邏輯）
+──────────────────────────────────── */
+function pdfEmbedUrl(url){
+  if(!url) return '';
+  const u=String(url);
+  let m=u.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(m) return 'https://drive.google.com/file/d/'+m[1]+'/preview';
+  m=u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if(m && u.indexOf('drive.google.com')>=0) return 'https://drive.google.com/file/d/'+m[1]+'/preview';
+  m=u.match(/docs\.google\.com\/(document|spreadsheets|presentation)\/d\/([a-zA-Z0-9_-]+)/);
+  if(m) return u.replace(/\/(edit|view).*$/,'/preview');
+  return u;   // 一般 http(s) PDF 直接內嵌
+}
+
+function renderPdf(p){
+  if(!p.absPdfUrl){
+    return '<div class="pdf-card none">'
+      +'<span class="pdf-ic">📄</span>'
+      +'<div class="pdf-txt"><b>論文全文 PDF</b><small>本篇未提供，請以上方摘要與現場海報為準</small></div>'
+      +'</div>';
+  }
+  const open=_pdfOpen[p.id];
+  return '<div class="pdf-card" id="pdfCard_'+p.id+'">'
+    +'<div class="pdf-head">'
+      +'<span class="pdf-ic">📄</span>'
+      +'<div class="pdf-txt"><b>論文全文 PDF</b><small>初審時委員審閱的同一份檔案</small></div>'
+    +'</div>'
+    +'<div class="pdf-btns">'
+      +'<button class="pdf-btn primary" onclick="togglePdf(\''+p.id+'\')" id="pdfBtn_'+p.id+'">'
+        +(open?'✕ 收合預覽':'👁 在此預覽')+'</button>'
+      +'<a class="pdf-btn" href="'+esc(p.absPdfUrl)+'" target="_blank" rel="noopener">↗ 新分頁開啟</a>'
+    +'</div>'
+    +'<div class="pdf-frame-wrap" id="pdfWrap_'+p.id+'"'+(open?'':' style="display:none"')+'>'
+      +(open?'<iframe class="pdf-frame" src="'+esc(pdfEmbedUrl(p.absPdfUrl))+'" '
+        +'allow="autoplay" referrerpolicy="no-referrer" '
+        +'sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>':'')
+      +'<p class="pdf-hint">若預覽空白，請改用「新分頁開啟」（部分手機瀏覽器不支援內嵌 PDF）。</p>'
+    +'</div>'
+  +'</div>';
+}
+
+/* 記住每篇的展開狀態，切換論文再回來時維持一致 */
+let _pdfOpen={};
+
+function togglePdf(pid){
+  const wrap=el('pdfWrap_'+pid), btn=el('pdfBtn_'+pid);
+  if(!wrap) return;
+  const p=papers.find(x=>x.id===pid);
+  const willOpen=wrap.style.display==='none';
+  _pdfOpen[pid]=willOpen;
+  if(willOpen){
+    // 第一次展開才載入 iframe，避免一開始就吃流量
+    if(!wrap.querySelector('iframe') && p && p.absPdfUrl){
+      const f=document.createElement('iframe');
+      f.className='pdf-frame';
+      f.src=pdfEmbedUrl(p.absPdfUrl);
+      f.setAttribute('referrerpolicy','no-referrer');
+      f.setAttribute('sandbox','allow-scripts allow-same-origin allow-popups allow-forms');
+      wrap.insertBefore(f,wrap.firstChild);
+    }
+    wrap.style.display='';
+    btn.textContent='✕ 收合預覽';
+    setTimeout(()=>wrap.scrollIntoView({behavior:'smooth',block:'nearest'}),120);
+  }else{
+    wrap.style.display='none';
+    btn.textContent='👁 在此預覽';
+  }
+}
+
+function onScoreInput(cid,max){
+  const inp=el('in_'+cid);
+  let v=inp.value.replace(/[^\d]/g,'');
+  if(v!==''){
+    let n=Math.min(Number(v),max);
+    v=String(n);
+  }
+  if(inp.value!==v) inp.value=v;
+  const rg=el('rg_'+cid); if(rg) rg.value=(v===''?0:v);
+  el('crit_'+cid).classList.toggle('filled',v!=='');
+  el('crit_'+cid).classList.remove('empty-warn');
+  updateTotal(); autoDraft();
+}
+function onSlider(cid,max){
+  const rg=el('rg_'+cid);
+  el('in_'+cid).value=rg.value;
+  el('crit_'+cid).classList.add('filled');
+  el('crit_'+cid).classList.remove('empty-warn');
+  updateTotal(); autoDraft();
+}
+function bump(cid,delta,max){
+  const inp=el('in_'+cid);
+  let n=inp.value===''?(delta>0?1:0):Number(inp.value)+delta;
+  n=Math.max(0,Math.min(max,n));
+  inp.value=String(n);
+  const rg=el('rg_'+cid); if(rg) rg.value=n;
+  el('crit_'+cid).classList.add('filled');
+  el('crit_'+cid).classList.remove('empty-warn');
+  updateTotal(); autoDraft();
+  if(navigator.vibrate) navigator.vibrate(8);
+}
+
+function readForm(){
+  const d={};
+  AWARD_CRITERIA.forEach(c=>{
+    const inp=el('in_'+c.id);
+    d[c.id]=inp&&inp.value!==''?Number(inp.value):'';
+  });
+  const cm=el('cmtIn'); d.comment=cm?cm.value:'';
+  return d;
+}
+
+function updateTotal(){
+  const d=readForm();
+  const t=calcTotal(d);
+  const numEl=el('svTotal');
+  numEl.textContent=t;
+  numEl.classList.toggle('full',isComplete(d));
+
+  // 換算提示：初審平均 ＋ 現場分數 → 參考總分
+  const p=papers[curIdx];
+  const calc=el('svCalc');
+  if(!calc) return;
+  if(p && p._refAvg!==null && isComplete(d)){
+    const proj=Math.round((p._refAvg+t)*10)/10;
+    calc.innerHTML='初審 <b>'+p._refAvg+'</b> ＋ 現場 <b>'+t+'</b> '
+      +'<span class="eq">＝</span> <span class="proj">'+proj+'</span> / '+FINAL_MAX
+      +'<span style="width:100%;text-align:center;font-size:.66rem">＊最終總分以 '+ONSITE_JUDGE_COUNT+' 位現場委員的平均分計算</span>';
+  }else if(p && p._refAvg!==null){
+    calc.innerHTML='初審成績 <b>'+p._refAvg+'</b> / '+REVIEW_MAX+'　·　現場滿分 '+AWARD_MAX+' 分';
+  }else{
+    calc.innerHTML='';
+  }
+}
+
+let _draftTimer=null;
+function autoDraft(){
+  clearTimeout(_draftTimer);
+  _draftTimer=setTimeout(()=>saveDraft(false),700);
+}
+
+function saveDraft(notify){
+  if(curIdx<0) return;
+  const p=papers[curIdx]; if(!p||submittedMap[p.id]) return;
+  const d=readForm();
+  drafts[p.id]=d;
+  try{ localStorage.setItem('tsmcsd_award_'+me.username+'_'+p.id, JSON.stringify(d)); }catch(e){}
+  if(notify){
+    showToast('已暫存於本機','ok');
+    // 同步到 GAS（若後端支援），失敗不影響本機暫存
+    api({action:'awardSaveDraft', reviewerUsername:me.username, paperId:awardId(p.id),
+         scoresJson:JSON.stringify(d)},15000).catch(()=>{});
+  }
+}
+
+async function submitScore(){
+  if(curIdx<0) return;
+  const p=papers[curIdx]; if(!p) return;
+  if(submittedMap[p.id]) return;
+  const d=readForm();
+
+  // 必填檢查
+  const missing=AWARD_CRITERIA.filter(c=>d[c.id]===''||d[c.id]===undefined);
+  if(missing.length){
+    missing.forEach(c=>el('crit_'+c.id).classList.add('empty-warn'));
+    el('crit_'+missing[0].id).scrollIntoView({behavior:'smooth',block:'center'});
+    showToast('尚有 '+missing.length+' 個項目未評分','err');
+    return;
+  }
+  const total=calcTotal(d);
+  if(!confirm('確定提交本篇評分？\n\n'+(p.paperNo||'')+'\n總分：'+total+' / '+AWARD_MAX+'\n\n提交後將無法自行修改。')) return;
+
+  setLdr(true);
+  try{
+    const scores={};
+    AWARD_CRITERIA.forEach(c=>{ scores[c.id]=Number(d[c.id]); });
+
+    // 優先寫入專用工作表；後端尚未安裝時，退回既有 submitScore（以 AW_ 前綴避免蓋掉初審資料）
+    let r=null;
+    try{
+      r=await api({
+        action:'awardSubmitScore',
+        reviewerUsername:me.username, reviewerName:me.name||'',
+        paperId:p.id, paperNo:p.paperNo||'', title:p.title||'',
+        scoresJson:JSON.stringify(scores), total:total, comment:d.comment||''
+      },30000);
+      if(!(r&&r.success)) r=null;
+    }catch(e){ console.warn('awardSubmitScore 不可用，改用 submitScore：',e.message); r=null; }
+
+    if(!r){
+      r=await api({
+        action:'submitScore',
+        reviewerUsername:me.username,
+        paperId:awardId(p.id),
+        paperNo:p.paperNo||'',
+        paperType:AWARD_PAPER_TYPE,
+        scoresJson:JSON.stringify(scores),
+        total:total,
+        rejected:'false', rejectReason:'',
+        recommend:'false', catAdjust:'',
+        comment:d.comment||''
+      },30000);
+    }
+
+    if(r&&r.success){
+      submittedMap[p.id]=true;
+      drafts[p.id]=d;
+      try{ localStorage.removeItem('tsmcsd_award_'+me.username+'_'+p.id); }catch(e){}
+      showToast('評分已提交','ok');
+      renderList();
+      // 自動跳到下一篇未評的
+      const next=papers.findIndex(x=>!submittedMap[x.id]);
+      if(next>=0){ setTimeout(()=>openScore(next),450); }
+      else { setTimeout(closeScore,450); }
+    }else{
+      showToast((r&&r.message)||'提交失敗，請重試','err');
+      console.error('submitScore:',r);
+    }
+  }catch(e){
+    showToast('連線失敗：'+String(e.message||e).substring(0,40),'err');
+    console.error(e);
+  }
+  setLdr(false);
+}
+
+/* ══════════ 管理端：分頁切換 ══════════ */
+function admTab(t){
+  el('tabRank').classList.toggle('on',t==='rank');
+  el('tabAcct').classList.toggle('on',t==='acct');
+  el('admPaneRank').style.display=t==='rank'?'':'none';
+  el('admPaneAcct').style.display=t==='acct'?'':'none';
+  if(t==='acct'&&!accounts.length) loadAccounts();
+}
+
+/* ══════════ 現場委員帳號管理 ══════════
+   沿用初審系統既有的帳號 API，不需要新的後端函式。
+   以 username 前綴辨識「現場委員」，避免與初審委員混淆。
+──────────────────────────────────────── */
+let accounts=[];      // 現場委員帳號
+let allReviewers=[];  // 全部帳號（用於檢查重複）
+
+function genPassword(len){
+  // 去掉容易看錯的字元（0/O/1/l/I），方便口頭或 Email 傳達
+  const cs='abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let s='';
+  const buf=new Uint32Array(len||8);
+  (window.crypto||window.msCrypto).getRandomValues(buf);
+  for(let i=0;i<(len||8);i++) s+=cs[buf[i]%cs.length];
+  return s;
+}
+
+function isOnsite(u){ return String(u||'').toLowerCase().indexOf(ONSITE_USER_PREFIX)===0; }
+
+async function loadAccounts(){
+  setLdr(true);
+  try{
+    const r=await api({action:'adminGetReviewers'},30000);
+    if(!r||!r.success) throw new Error((r&&r.message)||'載入失敗');
+    allReviewers=r.reviewers||[];
+    accounts=allReviewers.filter(x=>isOnsite(x.username));
+    renderAccounts();
+  }catch(e){
+    showToast('載入失敗：'+(e.message||e),'err');
+    el('acctList').innerHTML='<p style="color:var(--red);font-size:.85rem;text-align:center;padding:1.5rem">'+esc(e.message||'')+'</p>';
+  }
+  setLdr(false);
+}
+
+function renderAccounts(){
+  if(!accounts.length){
+    el('acctList').innerHTML='<div class="empty" style="padding:2rem 1rem"><div class="ic">👤</div>'
+      +'<h3>尚未建立現場委員帳號</h3>'
+      +'<p>請用上方「一鍵建立」產生帳號，<br>或手動新增（帳號需以 <code>'+ONSITE_USER_PREFIX+'</code> 開頭才會列在這裡）。</p></div>';
+    return;
+  }
+  el('acctList').innerHTML=accounts.map(a=>{
+    const on=a.enabled!==false;
+    return '<div class="acct-row'+(on?'':' off')+'">'
+      +'<div class="acct-cred">'
+        +'<span class="u">'+esc(a.username)+'</span>'
+        +'<span class="p">密碼：'+esc(a.password||'（未提供）')+'</span>'
+      +'</div>'
+      +'<span class="acct-name">'+esc(a.name||'—')+'</span>'
+      +'<span class="acct-badge '+(on?'on':'off')+'">'+(on?'啟用中':'已停用')+'</span>'
+      +'<div class="acct-act">'
+        +'<button class="abtn" onclick="copyCred(\''+esc(a.username)+'\')">複製</button>'
+        +'<button class="abtn" onclick="toggleAccount(\''+esc(a.username)+'\','+(!on)+')">'+(on?'停用':'啟用')+'</button>'
+        +'<button class="abtn" style="color:var(--red);border-color:var(--red-br)" onclick="deleteAccount(\''+esc(a.username)+'\')">刪除</button>'
+      +'</div>'
+    +'</div>';
+  }).join('')
+  +'<p style="font-size:.76rem;color:var(--muted);margin-top:.7rem;line-height:1.7">'
+  +'※ 共 '+accounts.length+' 組。委員登入網址：<b>'+location.origin+location.pathname+'</b></p>';
+}
+
+async function addOnsiteAccount(){
+  const u=el('acUser').value.trim();
+  let pw=el('acPw').value.trim();
+  const n=el('acName').value.trim();
+  if(!u||!n){ showToast('請填寫帳號與姓名','err'); return; }
+  if(!pw) pw=genPassword(8);
+  if(allReviewers.some(x=>x.username===u)){ showToast('此帳號已存在','err'); return; }
+  if(!isOnsite(u) && !confirm('帳號「'+u+'」不是以 '+ONSITE_USER_PREFIX+' 開頭，\n建立後不會出現在這份現場委員清單中。\n\n仍要建立嗎？')) return;
+
+  setLdr(true);
+  try{
+    const r=await api({action:'adminAddReviewer', username:u, password:pw, name:n},30000);
+    if(r&&r.success){
+      showToast('已建立 '+u,'ok');
+      el('acUser').value=''; el('acPw').value=''; el('acName').value='';
+      await loadAccounts();
+    }else showToast((r&&r.message)||'新增失敗','err');
+  }catch(e){ showToast('連線失敗：'+(e.message||e),'err'); }
+  setLdr(false);
+}
+
+async function quickCreateAccounts(){
+  const n=Math.max(1,Math.min(10,Number(el('qcN').value)||ONSITE_JUDGE_COUNT));
+  // 從既有編號往後接，不覆蓋已建立的帳號
+  let maxNo=0;
+  allReviewers.forEach(a=>{
+    const m=String(a.username).match(new RegExp('^'+ONSITE_USER_PREFIX+'(\\d+)$','i'));
+    if(m) maxNo=Math.max(maxNo,Number(m[1]));
+  });
+  const plan=[];
+  for(let i=1;i<=n;i++){
+    const no=maxNo+i;
+    plan.push({ username:ONSITE_USER_PREFIX+String(no).padStart(2,'0'),
+                password:genPassword(8),
+                name:'現場評審委員'+no });
+  }
+  if(!confirm('將建立以下 '+n+' 組帳號：\n\n'
+      +plan.map(x=>'　'+x.username+'　'+x.password).join('\n')
+      +'\n\n姓名先以「現場評審委員N」帶入，之後可再修改。\n確定建立？')) return;
+
+  setLdr(true);
+  let ok=0, fail=[];
+  for(const x of plan){
+    try{
+      const r=await api({action:'adminAddReviewer', username:x.username, password:x.password, name:x.name},30000);
+      if(r&&r.success) ok++; else fail.push(x.username+'（'+((r&&r.message)||'失敗')+'）');
+    }catch(e){ fail.push(x.username+'（連線失敗）'); }
+  }
+  setLdr(false);
+  await loadAccounts();
+  if(fail.length) showToast('建立 '+ok+' 組，'+fail.length+' 組失敗','err');
+  else showToast('已建立 '+ok+' 組帳號','ok');
+  if(fail.length) console.warn('建立失敗：',fail);
+}
+
+async function toggleAccount(u,enable){
+  setLdr(true);
+  try{
+    const r=await api({action:'adminUpdateReviewer', username:u, enabled:String(enable)},30000);
+    if(r&&r.success){ showToast('已'+(enable?'啟用':'停用')+' '+u,'ok'); await loadAccounts(); }
+    else showToast('操作失敗','err');
+  }catch(e){ showToast('連線失敗','err'); }
+  setLdr(false);
+}
+
+async function deleteAccount(u){
+  if(!confirm('確定刪除帳號「'+u+'」？\n\n若該委員已送出評分，分數不會一併刪除。\n此操作無法復原。')) return;
+  setLdr(true);
+  try{
+    const r=await api({action:'adminDeleteReviewer', username:u},30000);
+    if(r&&r.success){ showToast('已刪除 '+u,'ok'); await loadAccounts(); }
+    else showToast((r&&r.message)||'刪除失敗','err');
+  }catch(e){ showToast('連線失敗','err'); }
+  setLdr(false);
+}
+
+function _copy(text,okMsg){
+  const done=()=>showToast(okMsg,'ok');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>_copyFallback(text,done));
+  }else _copyFallback(text,done);
+}
+function _copyFallback(text,done){
+  const ta=document.createElement('textarea');
+  ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); done(); }
+  catch(e){ prompt('請手動複製：',text); }
+  ta.remove();
+}
+
+function copyCred(u){
+  const a=accounts.find(x=>x.username===u); if(!a) return;
+  _copy('帳號：'+a.username+'\n密碼：'+(a.password||'')+'\n登入網址：'+location.origin+location.pathname,
+        '已複製 '+u+' 的帳密');
+}
+
+function copyAllCreds(){
+  if(!accounts.length){ showToast('尚無帳號','err'); return; }
+  const url=location.origin+location.pathname;
+  const body='TSMCSD 2026 優秀海報論文評選系統｜評審委員登入資訊\n'
+    +'登入網址：'+url+'\n'
+    +'──────────────────────────────\n'
+    +accounts.map(a=>(a.name||'')+'\n　帳號：'+a.username+'\n　密碼：'+(a.password||'')).join('\n\n')
+    +'\n──────────────────────────────\n'
+    +'登入後可預覽所有入選海報的論文資料與全文 PDF；\n'
+    +'年會當日（2026/8/15）現場報告後，請於系統中完成評分。';
+  _copy(body,'已複製 '+accounts.length+' 組帳密，可直接貼到 Email');
+}
+
+/* ══════════ 管理端：排名 ══════════ */
+async function loadAdmin(){
+  setLdr(true);
+  el('admNotice').innerHTML='';
+  try{
+    // ① 入選名單 — 一律取自初審後台（不需要新的後端函式）
+    const [dash,disp]=await Promise.all([
+      api({action:'adminGetDashboard', forceRefresh:'false'},60000),
+      api({action:'getDisplayMode'},30000)
+    ]);
+    if(!dash||!dash.success) throw new Error((dash&&dash.message)||'無法取得論文資料');
+    const modeMap={};
+    if(disp&&disp.success&&Array.isArray(disp.data)) disp.data.forEach(({pid,mode})=>{ modeMap[pid]=mode; });
+    if(dash.reviewerNamesMap) Object.assign(reviewerNames,dash.reviewerNamesMap);
+    else (dash.reviewers||[]).forEach(rv=>{ reviewerNames[rv.username]=rv.name||rv.username; });
+
+    const shortlist=(dash.papers||[]).filter(p=>modeMap[p.id]==='award').map(p=>{
+      const reviews=Array.isArray(p.reviews)?p.reviews:[];
+      const totals=reviews.filter(r=>!isRejected(r)).map(r=>Number(r.total)).filter(v=>!isNaN(v));
+      return {
+        id:p.id, paperNo:p.paperNo, title:p.title, category:p.category,
+        authors:p.authors, reviews:reviews, awardScores:[],
+        _refAvg: totals.length?smartAvg(totals):null   // 書面初審平均分（滿分 100）
+      };
+    });
+
+    // ② 現場評分 — 取自專用工作表
+    let scoreRows=null, rankRows=null;
+    try{
+      const s=await api({action:'awardGetScores'},45000);
+      if(s&&s.success&&Array.isArray(s.scores)) scoreRows=s.scores;
+      if(s&&Array.isArray(s.ranks)) rankRows=s.ranks;
+    }catch(e){ console.warn('awardGetScores 不可用：',e.message); }
+
+    if(scoreRows===null){
+      backendHasAward=false;
+      stopAuto();
+      el('autoBtn').style.display='none';
+      el('admNotice').innerHTML='<div class="notice">'
+        +'<b>⚠ 後端尚未安裝本系統的 Apps Script 函式</b><br>'
+        +'入選名單已正常帶入，但現場評分無法彙總。請把 <code>award-gas-snippet.gs</code> '
+        +'的內容貼到既有的 Apps Script 專案末端並「重新部署」，即可啟用即時排名與名次儲存。'
+        +'</div>';
+    }else{
+      backendHasAward=true;
+      el('autoBtn').style.display='';
+      const byId={};
+      shortlist.forEach(p=>{ byId[p.id]=p; });
+      scoreRows.forEach(row=>{
+        const pid=String(row.paperId||'').replace(new RegExp('^'+AWARD_ID_PREFIX),'');
+        if(byId[pid]) byId[pid].awardScores.push(row);
+      });
+      (rankRows||[]).forEach(({pid,rank})=>{ if(byId[pid]) byId[pid].awardRank=rank; });
+    }
+
+    admResults={papers:shortlist};
+    renderAdmin();
+  }catch(e){
+    showToast('載入失敗：'+(e.message||e),'err');
+    el('admRank').innerHTML='<p style="color:var(--red);font-size:.85rem;text-align:center;padding:1.5rem">'+esc(e.message||'')+'</p>';
+    console.error(e);
+  }
+  setLdr(false);
+}
+
+/* 總分 = 書面初審平均分 + 現場 N 位委員平均分 */
+function computeAdminList(){
+  return (admResults.papers||[]).map(p=>{
+    const sc=(p.awardScores||[]).map(s=>Number(s.total)).filter(v=>!isNaN(v));
+    const onsite = sc.length?plainAvg(sc):null;
+    const ref    = p._refAvg;
+    return Object.assign({},p,{
+      _onsite: onsite,
+      _n: sc.length,
+      _gap: sc.length>=2?Math.round((Math.max.apply(null,sc)-Math.min.apply(null,sc))*10)/10:null,
+      _final: (ref!==null&&onsite!==null)?Math.round((ref+onsite)*10)/10:null
+    });
+  }).sort((a,b)=>{
+    if((b._final===null)!==(a._final===null)) return a._final===null?1:-1;
+    if(b._final!==a._final) return (b._final||0)-(a._final||0);
+    return (b._refAvg||0)-(a._refAvg||0);          // 同分時以初審成績為序
+  });
+}
+
+function renderAdmin(){
+  const list=computeAdminList();
+
+  const judges=new Set();
+  list.forEach(p=>(p.awardScores||[]).forEach(s=>judges.add(s.reviewer)));
+  const complete=list.filter(p=>p._n>=ONSITE_JUDGE_COUNT).length;
+  const partial =list.filter(p=>p._n>0&&p._n<ONSITE_JUDGE_COUNT).length;
+
+  el('admStats').innerHTML=
+     '<div class="stat gold"><div class="n">'+list.length+'</div><div class="l">入選篇數</div></div>'
+    +'<div class="stat green"><div class="n">'+complete+'</div><div class="l">'+ONSITE_JUDGE_COUNT+' 位皆已評</div></div>'
+    +'<div class="stat"><div class="n">'+partial+'</div><div class="l">評分中</div></div>'
+    +'<div class="stat"><div class="n">'+judges.size+'<span style="font-size:.8rem;color:var(--muted)">/'+ONSITE_JUDGE_COUNT+'</span></div><div class="l">現場委員已送出</div></div>';
+
+  if(!list.length){
+    el('admRank').innerHTML='<div class="empty"><div class="ic">🏆</div><h3>尚無入選名單</h3>'
+      +'<p>請在初審系統「評分結果」頁將入選論文的展出方式設為「優秀海報」。</p></div>';
+    return;
+  }
+
+  const formula='<div class="calc-note" style="margin-bottom:.9rem">'
+    +'<b>總分計算</b>　書面初審平均分（滿分 '+REVIEW_MAX+'）＋ 現場 '+ONSITE_JUDGE_COUNT+' 位委員口頭報告平均分（滿分 '+AWARD_MAX+'）'
+    +' <span class="eq">＝</span> <b>總分（滿分 '+FINAL_MAX+'）</b>，依總分高低排名。'
+    +'<br>未滿 '+ONSITE_JUDGE_COUNT+' 位評分者以<b>目前已送出者</b>的平均暫計，並標示「評分中」。'
+    +'</div>'
+    +'<div style="display:flex;gap:.5rem;margin-bottom:.9rem;flex-wrap:wrap">'
+    +'<button class="abtn pri" onclick="autoAssignRanks()">依總分自動帶入名次</button>'
+    +'<button class="abtn" onclick="clearRanks()">清除名次</button></div>';
+
+  el('admRank').innerHTML=formula+list.map((p,i)=>{
+    const ranked=p._final!==null;
+    const pos=ranked?(i+1):'—';
+    const rk=rankOverride[p.id]||p.awardRank||'未定';
+    const cls=!ranked?'':(i===0?'r1':i===1?'r2':i===2?'r3':'');
+    const done=p._n>=ONSITE_JUDGE_COUNT;
+    const progCls=done?'style="background:#d4e8de;border-color:#88b8a0;color:#3d6b54"'
+                      :(p._n>0?'style="background:#fdf6e3;border-color:#e6cf8a;color:#9a6f0a"':'');
+    return '<div class="rank-card '+cls+'">'
+      +'<div class="rank-top">'
+        +'<span class="rank-pos">'+pos+'</span>'
+        +'<span class="pno">'+esc(p.paperNo||'—')+'</span>'
+        +(normCat(p.category)?'<span class="pcat">'+normCat(p.category)+'</span>':'')
+        +'<span class="rank-score">'+(ranked?p._final:'—')+' <small>/'+FINAL_MAX+'</small></span>'
+      +'</div>'
+      +'<div class="rank-title">'+esc(p.title)+'</div>'
+      +'<div class="score-split">'
+        +'<span>初審 <b>'+(p._refAvg!==null?p._refAvg:'—')+'</b><small>/'+REVIEW_MAX+'</small></span>'
+        +'<span class="plus">＋</span>'
+        +'<span>現場 <b>'+(p._onsite!==null?p._onsite:'—')+'</b><small>/'+AWARD_MAX+'</small></span>'
+        +'<span class="plus">＝</span>'
+        +'<span class="tot">'+(ranked?p._final:'—')+'</span>'
+      +'</div>'
+      +'<div class="rank-meta">'
+        +'<span class="judge-pill" '+progCls+'>'+p._n+'/'+ONSITE_JUDGE_COUNT+' 位已評'+(done?'':'　評分中')+'</span>'
+        +(p._gap!==null?'<span class="judge-pill"'+(p._gap>5?' style="background:#f0dada;border-color:#c09090;color:#7a3838"':'')+'>委員差距 '+p._gap+'</span>':'')
+        +'<select class="rank-sel'+(rk!=='未定'?' set':'')+'" onchange="setRank(\''+p.id+'\',this.value,this)">'
+          +RANK_OPTIONS.map(o=>'<option value="'+o+'"'+(o===rk?' selected':'')+'>'+o+'</option>').join('')
+        +'</select>'
+        +'<button class="abtn" style="margin-left:auto" onclick="showJudgeDetail(\''+p.id+'\')">明細</button>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+/* 依總分順序自動帶入名次（第一/二/三名，其餘佳作），仍可手動調整 */
+function autoAssignRanks(){
+  const list=computeAdminList().filter(p=>p._final!==null);
+  if(!list.length){ showToast('尚無可排名的資料','err'); return; }
+  const incomplete=list.filter(p=>p._n<ONSITE_JUDGE_COUNT).length;
+  if(incomplete && !confirm('有 '+incomplete+' 篇尚未滿 '+ONSITE_JUDGE_COUNT+' 位委員評分，\n名次可能會變動。仍要帶入嗎？')) return;
+  list.forEach((p,i)=>{
+    rankOverride[p.id]= i===0?'第一名' : i===1?'第二名' : i===2?'第三名' : '佳作';
+  });
+  renderAdmin();
+  showToast('已依總分帶入名次，可再手動調整','ok');
+}
+
+function clearRanks(){
+  if(!confirm('確定清除畫面上所有名次？（尚未儲存的變更會消失）')) return;
+  rankOverride={};
+  (admResults.papers||[]).forEach(p=>{ delete p.awardRank; });
+  renderAdmin();
+}
+
+function setRank(pid,val,selEl){
+  rankOverride[pid]=val;
+  selEl.classList.toggle('set',val!=='未定');
+}
+
+/* ── 後台自動更新（現場評分陸續送出時即時反映）──
+   只重抓現場評分，不重抓整份初審 dashboard，速度快且不干擾操作。 */
+let _autoTimer=null;
+const AUTO_INTERVAL_MS=20000;
+
+function toggleAuto(){
+  if(_autoTimer){ stopAuto(); showToast('已停止自動更新','info'); }
+  else{ startAuto(); showToast('每 '+(AUTO_INTERVAL_MS/1000)+' 秒自動更新現場分數','ok'); refreshScores(); }
+}
+function startAuto(){
+  stopAuto();
+  _autoTimer=setInterval(refreshScores,AUTO_INTERVAL_MS);
+  const b=el('autoBtn'); if(b){ b.classList.add('solid'); b.textContent='⏱ 自動更新中'; }
+}
+function stopAuto(){
+  if(_autoTimer){ clearInterval(_autoTimer); _autoTimer=null; }
+  const b=el('autoBtn'); if(b){ b.classList.remove('solid'); b.textContent='⏱ 自動更新'; }
+}
+
+/* 只更新現場評分，不動入選名單與初審成績（不顯示 loading 遮罩，避免干擾） */
+async function refreshScores(){
+  if(!admResults||!admResults.papers) return;
+  try{
+    const s=await api({action:'awardGetScores'},30000);
+    if(!(s&&s.success&&Array.isArray(s.scores))) return;
+    const before=JSON.stringify((admResults.papers||[]).map(p=>p.awardScores.length));
+    admResults.papers.forEach(p=>{ p.awardScores=[]; });
+    const byId={};
+    admResults.papers.forEach(p=>{ byId[p.id]=p; });
+    s.scores.forEach(row=>{
+      const pid=String(row.paperId||'').replace(new RegExp('^'+AWARD_ID_PREFIX),'');
+      if(byId[pid]) byId[pid].awardScores.push(row);
+    });
+    (s.ranks||[]).forEach(({pid,rank})=>{ if(byId[pid]&&!rankOverride[pid]) byId[pid].awardRank=rank; });
+    const after=JSON.stringify((admResults.papers||[]).map(p=>p.awardScores.length));
+    renderAdmin();
+    if(before!==after) showToast('已收到新的現場評分','ok');
+  }catch(e){ console.warn('refreshScores:',e.message); }
+}
+
+function showJudgeDetail(pid){
+  const p=computeAdminList().find(x=>x.id===pid); if(!p) return;
+  const sc=p.awardScores||[];
+  let msg=(p.paperNo||'')+'　'+(p.title||'')+'\n'
+    +'──────────────────────────\n'
+    +'書面初審平均分：'+(p._refAvg!==null?p._refAvg:'—')+' / '+REVIEW_MAX+'\n\n';
+  if(!sc.length){
+    msg+='現場尚無委員評分。';
+  }else{
+    msg+='現場報告評分（'+sc.length+'/'+ONSITE_JUDGE_COUNT+' 位）\n';
+    sc.forEach(s=>{
+      msg+='• '+(reviewerNames[s.reviewer]||s.reviewerName||s.reviewer)+'：'+s.total+' / '+AWARD_MAX+'\n';
+      if(s.comment) msg+='   意見：'+s.comment+'\n';
+    });
+    msg+='\n現場平均：'+(p._onsite!==null?p._onsite:'—')+' / '+AWARD_MAX+'\n'
+      +'──────────────────────────\n'
+      +'總分：'+(p._final!==null?p._final:'—')+' / '+FINAL_MAX;
+    if(p._n<ONSITE_JUDGE_COUNT) msg+='\n※ 尚未滿 '+ONSITE_JUDGE_COUNT+' 位，為暫計分數';
+  }
+  alert(msg);
+}
+
+async function saveRanks(){
+  const entries=Object.entries(rankOverride).filter(([,v])=>v&&v!=='未定').map(([pid,rank])=>({pid,rank}));
+  if(!entries.length){ showToast('尚未指定任何名次','err'); return; }
+  setLdr(true);
+  try{
+    const r=await api({action:'awardSaveRank', dataJson:JSON.stringify(entries)},30000);
+    if(r&&r.success) showToast('名次已儲存','ok');
+    else showToast('儲存失敗，請確認後端已安裝 awardSaveRank','err');
+  }catch(e){ showToast('連線失敗：'+(e.message||e),'err'); }
+  setLdr(false);
+}
+
+function exportAwardCSV(){
+  if(!admResults||!admResults.papers){ showToast('尚無資料','err'); return; }
+  const list=computeAdminList();
+
+  // 現場委員固定 N 位 → 每位一欄，方便對照紙本
+  const judgeCols=[];
+  list.forEach(p=>(p.awardScores||[]).forEach(s=>{
+    if(judgeCols.indexOf(s.reviewer)<0) judgeCols.push(s.reviewer);
+  }));
+
+  const head=['排名','名次','編號','論文題目','類別','作者群',
+              '初審平均分(/'+REVIEW_MAX+')']
+    .concat(judgeCols.map(u=>'現場-'+(reviewerNames[u]||u)+'(/'+AWARD_MAX+')'))
+    .concat(['現場平均分(/'+AWARD_MAX+')','已評人數','總分(/'+FINAL_MAX+')','現場評審意見']);
+
+  const rows=list.map((p,i)=>{
+    const byJudge={};
+    (p.awardScores||[]).forEach(s=>{ byJudge[s.reviewer]=s; });
+    const cmts=(p.awardScores||[]).filter(s=>s.comment)
+      .map(s=>'【'+(reviewerNames[s.reviewer]||s.reviewer)+'】'+s.comment).join('\n');
+    return [p._final!==null?(i+1):'', rankOverride[p.id]||p.awardRank||'', p.paperNo||'',
+            p.title||'', normCat(p.category), p.authors||'',
+            p._refAvg!==null?p._refAvg:'']
+      .concat(judgeCols.map(u=>byJudge[u]?byJudge[u].total:''))
+      .concat([p._onsite!==null?p._onsite:'', p._n+'/'+ONSITE_JUDGE_COUNT,
+               p._final!==null?p._final:'', cmts]);
+  });
+  const csv=[head].concat(rows)
+    .map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='TSMCSD2026_優秀海報論文評選結果_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  showToast('CSV 已下載','ok');
+}
+
+/* ══════════ 啟動 ══════════ */
+(function init(){
+  // 手機返回鍵關閉評分頁
+  window.addEventListener('popstate',()=>{
+    if(el('scoreView').classList.contains('on')) closeScore();
+  });
+  // 離開頁面前保存草稿
+  window.addEventListener('beforeunload',()=>{
+    if(curIdx>=0 && el('scoreView').classList.contains('on')) saveDraft(false);
+  });
+  // session 內重新整理不用再登入
+  try{
+    const s=JSON.parse(sessionStorage.getItem('tsmcsd_award_auth')||'null');
+    if(s&&s.role&&s.me){
+      role=s.role; me=s.me;
+      el('loginScreen').style.display='none';
+      if(role==='admin'){
+        el('admApp').classList.add('on');
+        el('admWho').textContent=me.name;
+        loadAdmin();
+      }else{
+        el('rvApp').classList.add('on');
+        el('rvWho').textContent=me.name+'　委員';
+        reloadPapers();
+      }
+    }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
