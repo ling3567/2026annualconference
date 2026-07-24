@@ -386,6 +386,13 @@ table{ width:100%; border-collapse:collapse; }
 th{ padding:.65rem .9rem; font-size:.8rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#718096; background:#f7f6f3; text-align:left; white-space:nowrap; }
 td{ padding:.72rem .9rem; font-size:.9rem; border-top:1px solid #edf2f7; vertical-align:middle; }
 tr:hover td{ background:#fafafa; }
+/* 評分結果表：統一字級、緊湊留白 */
+.res-tbl{ table-layout:fixed; width:100%; }
+.res-tbl th{ padding:.55rem .5rem; font-size:.78rem; }
+.res-tbl td{ padding:.6rem .5rem; font-size:.85rem; line-height:1.55; vertical-align:middle; word-break:break-word; }
+.res-tbl td .chip-no{ font-size:.85rem !important; padding:.2rem .4rem !important; min-width:0; }
+.res-tbl td .adm-btn-sm{ padding:.28rem .45rem; font-size:.8rem; }
+.res-tbl td .sub-lbl{ font-size:.72rem; }
 .chip{ padding:.22rem .7rem; border-radius:20px; font-size:.75rem; font-weight:700; letter-spacing:.04em; display:inline-block; }
 .chip-blue{ background:var(--adm-blue-l); color:var(--adm-blue); }
 .chip-no{ min-width:64px; text-align:center; white-space:nowrap; letter-spacing:.02em; font-size:.78rem !important; padding:.22rem .55rem !important; }
@@ -947,9 +954,9 @@ body.cat-override-on .cat-override-cell:hover{
             <span style="font-size:.82rem;color:#718096;background:#f1f5f9;padding:.15rem .5rem;border-radius:4px">A / B / C 各類論文・依推薦票數→平均總分排列・可拖動調整・或點擊欄標題重新排序</span>
 <div style="display:flex;gap:.4rem"><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="collapseAllSubRows('cat')" title="縮合所有展開的子列">縮合全部</button><button class="adm-btn adm-btn-sm" style="background:#1d4ed8;color:white;border:none" onclick="saveDisplayModeToGAS()">儲存展出方式</button><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">匯出 CSV</button></div>
           </div>
-          <div class="tbl-wrap"><table style="table-layout:fixed;width:100%">
+          <div class="tbl-wrap"><table class="res-tbl">
             <thead><tr>
-              <th style="width:84px;cursor:pointer;user-select:none" id="thCatDisp" onclick="sortResultsByDisplay('cat')" title="點擊依展出方式排序">展出方式 <span id="thCatDispIcon" style="font-size:.7rem">↕</span></th><th style="width:74px;cursor:pointer;user-select:none" id="thCatPaperNo" onclick="sortResultsByPaperNo('cat')" title="點擊依公告序號排序">公告序號 <span id="thCatPaperNoIcon" style="font-size:.7rem">↕</span></th><th style="width:64px;cursor:pointer;user-select:none" id="thCatNo" onclick="sortResultsByNo('cat')" title="點擊依編號排序">編號 <span id="thCatNoIcon" style="font-size:.7rem">↕</span></th><th>論文題目</th><th style="width:150px;cursor:pointer;user-select:none" id="thCatUnit" onclick="sortResultsByUnit('cat')" title="點擊依投稿單位排序">投稿單位 <span id="thCatUnitIcon" style="font-size:.7rem">↕</span></th><th style="width:78px">類別</th><th style="width:76px;cursor:pointer;user-select:none" id="thCatScore" onclick="sortResultsByScore('cat')" title="點擊依分數排序">平均總分 <span id="thCatScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:84px;cursor:pointer;user-select:none" id="thCatGap" onclick="sortResultsByGap('cat')" title="點擊依差距排序">分數差距 <span id="thCatGapIcon" style="font-size:.7rem">↕</span></th><th style="width:56px;cursor:pointer;user-select:none" id="thCatRec" onclick="sortResultsByRec('cat')" title="點擊依推薦票數排序">推薦 <span id="thCatRecIcon" style="font-size:.7rem">↕</span></th><th style="width:86px">退稿</th><th style="width:100px">詳細</th>
+              <th style="width:78px;cursor:pointer;user-select:none" id="thCatDisp" onclick="sortResultsByDisplay('cat')" title="點擊依展出方式排序">展出方式 <span id="thCatDispIcon" style="font-size:.7rem">↕</span></th><th style="width:70px;cursor:pointer;user-select:none" id="thCatPaperNo" onclick="sortResultsByPaperNo('cat')" title="點擊依公告序號排序">公告序號 <span id="thCatPaperNoIcon" style="font-size:.7rem">↕</span></th><th style="width:56px;cursor:pointer;user-select:none" id="thCatNo" onclick="sortResultsByNo('cat')" title="點擊依編號排序">編號 <span id="thCatNoIcon" style="font-size:.7rem">↕</span></th><th>論文題目</th><th style="width:130px;cursor:pointer;user-select:none" id="thCatUnit" onclick="sortResultsByUnit('cat')" title="點擊依投稿單位排序">投稿單位 <span id="thCatUnitIcon" style="font-size:.7rem">↕</span></th><th style="width:60px">類別</th><th style="width:64px;cursor:pointer;user-select:none" id="thCatScore" onclick="sortResultsByScore('cat')" title="點擊依分數排序">平均總分 <span id="thCatScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:70px;cursor:pointer;user-select:none" id="thCatGap" onclick="sortResultsByGap('cat')" title="點擊依差距排序">分數差距 <span id="thCatGapIcon" style="font-size:.7rem">↕</span></th><th style="width:46px;cursor:pointer;user-select:none" id="thCatRec" onclick="sortResultsByRec('cat')" title="點擊依推薦票數排序">推薦 <span id="thCatRecIcon" style="font-size:.7rem">↕</span></th><th style="width:66px">退稿</th><th style="width:80px">詳細</th>
             </tr></thead>
             <tbody id="resultsCatBody"</tbody>
           </table></div>
@@ -965,9 +972,9 @@ body.cat-override-on .cat-override-cell:hover{
               <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportResultsCSV('poster')">匯出 CSV</button>
             </div>
           </div>
-          <div class="tbl-wrap"><table style="table-layout:fixed;width:100%">
+          <div class="tbl-wrap"><table class="res-tbl">
             <thead><tr>
-              <th style="width:84px;cursor:pointer;user-select:none" id="thAllDisp" onclick="sortResultsByDisplay('all')" title="點擊依展出方式排序">展出方式 <span id="thAllDispIcon" style="font-size:.7rem">↕</span></th><th style="width:74px;cursor:pointer;user-select:none" id="thAllPaperNo" onclick="sortResultsByPaperNo('all')" title="點擊依公告序號排序">公告序號 <span id="thAllPaperNoIcon" style="font-size:.7rem">↕</span></th><th style="width:64px;cursor:pointer;user-select:none" id="thAllNo" onclick="sortResultsByNo('all')" title="點擊依編號排序">編號 <span id="thAllNoIcon" style="font-size:.7rem">↕</span></th><th>論文題目</th><th style="width:150px;cursor:pointer;user-select:none" id="thAllUnit" onclick="sortResultsByUnit('all')" title="點擊依投稿單位排序">投稿單位 <span id="thAllUnitIcon" style="font-size:.7rem">↕</span></th><th style="width:78px">類別</th><th style="width:76px;cursor:pointer;user-select:none" id="thAllScore" onclick="sortResultsByScore('all')" title="點擊依分數排序">平均總分 <span id="thAllScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:84px;cursor:pointer;user-select:none" id="thAllGap" onclick="sortResultsByGap('all')" title="點擊依差距排序">分數差距 <span id="thAllGapIcon" style="font-size:.7rem">↕</span></th><th style="width:56px;cursor:pointer;user-select:none" id="thAllRec" onclick="sortResultsByRec('all')" title="點擊依推薦票數排序">推薦 <span id="thAllRecIcon" style="font-size:.7rem">↕</span></th><th style="width:86px">退稿</th><th style="width:100px">詳細</th>
+              <th style="width:78px;cursor:pointer;user-select:none" id="thAllDisp" onclick="sortResultsByDisplay('all')" title="點擊依展出方式排序">展出方式 <span id="thAllDispIcon" style="font-size:.7rem">↕</span></th><th style="width:70px;cursor:pointer;user-select:none" id="thAllPaperNo" onclick="sortResultsByPaperNo('all')" title="點擊依公告序號排序">公告序號 <span id="thAllPaperNoIcon" style="font-size:.7rem">↕</span></th><th style="width:56px;cursor:pointer;user-select:none" id="thAllNo" onclick="sortResultsByNo('all')" title="點擊依編號排序">編號 <span id="thAllNoIcon" style="font-size:.7rem">↕</span></th><th>論文題目</th><th style="width:130px;cursor:pointer;user-select:none" id="thAllUnit" onclick="sortResultsByUnit('all')" title="點擊依投稿單位排序">投稿單位 <span id="thAllUnitIcon" style="font-size:.7rem">↕</span></th><th style="width:60px">類別</th><th style="width:64px;cursor:pointer;user-select:none" id="thAllScore" onclick="sortResultsByScore('all')" title="點擊依分數排序">平均總分 <span id="thAllScoreIcon" style="font-size:.7rem">↕</span></th><th style="width:70px;cursor:pointer;user-select:none" id="thAllGap" onclick="sortResultsByGap('all')" title="點擊依差距排序">分數差距 <span id="thAllGapIcon" style="font-size:.7rem">↕</span></th><th style="width:46px;cursor:pointer;user-select:none" id="thAllRec" onclick="sortResultsByRec('all')" title="點擊依推薦票數排序">推薦 <span id="thAllRecIcon" style="font-size:.7rem">↕</span></th><th style="width:66px">退稿</th><th style="width:80px">詳細</th>
             </tr></thead>
             <tbody id="resultsAllBody"</tbody>
           </table></div>
@@ -2288,10 +2295,10 @@ function renderResultsTable(papers){
       const scores=valid.map(r=>Number(r.total)).filter(v=>!isNaN(v));
       const g=calcSmartGap(scores);
       if(g===null) return '—';
-      if(g<=10) return `<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;
-      return `<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700;white-space:nowrap">&#9651; ${g}分</span>`;
+      if(g<=10) return `<span style="color:#16a34a;font-weight:600;white-space:nowrap">✓ ${g}分</span>`;
+      return `<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.15rem .3rem;border-radius:6px;font-weight:700;white-space:nowrap">&#9651;${g}分</span>`;
     }
-    if(valid.length===1)return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
+    if(valid.length===1)return '<span style="color:#718096">僅1位</span>';
     return '—';
   }
   function sepRow(label){return `<tr><td colspan="11" style="background:#f8fafc;font-size:.78rem;font-weight:700;color:#3a4550;padding:.4rem .9rem;border-top:2px solid #dce6ec;letter-spacing:.03em">${label}</td></tr>`;}
@@ -2301,17 +2308,17 @@ function renderResultsTable(papers){
     // 退稿狀態
     const rejCount=p.reviews.filter(r=>isRej_(r)).length;
     const totalRevs=p.reviews.filter(r=>r.reviewer).length;
-    const rejCell=rejCount>0?`<span style="background:#fee2e2;color:#991b1b;padding:.15rem .5rem;border-radius:5px;font-size:.75rem;font-weight:700">${rejCount}/${totalRevs}位退稿</span>`:'—';
+    const rejCell=rejCount>0?`<span style="background:#fee2e2;color:#991b1b;padding:.15rem .35rem;border-radius:5px;font-weight:700;display:inline-block;line-height:1.35">${rejCount}/${totalRevs}<br>位退稿</span>`:'—';
     // 推薦：純數字
     const recCount=p.reviews.filter(r=>r.recommended||r.recommend).length;
     const recCell=p.avgTotal!==null?`<span style="font-weight:700;color:#1c1c2e">${recCount}</span>`:'—';
     // 類別
     const catAdjusts=[...new Set(p.reviews.filter(r=>r.catAdjust).map(r=>normCat(r.catAdjust)||r.catAdjust))].filter(Boolean);
     const catFull={A:'A 類｜臨床技能教育、模擬教學與跨專業學習',B:'B 類｜評量、信任決策與能力導向醫學教育',C:'C 類｜人文素養、醫療韌性與專業認同'};
-    const catAdjustBadge=catAdjusts.length?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:.3rem" title="${catAdjusts.map(c=>catFull[c]||c).join('；')}">建議改→${catAdjusts.join('/')}</span>`:'';
+    const catAdjustBadge=catAdjusts.length?`<span style="background:#fef3c7;color:#92400e;padding:.1rem .35rem;border-radius:4px;font-size:.72rem;font-weight:700;display:inline-block;margin-top:.15rem" title="${catAdjusts.map(c=>catFull[c]||c).join('；')}">建議改→${catAdjusts.join('/')}</span>`:'';
     const effectiveCat=(_catOverrides&&_catOverrides[p.id])||normCat(p.category)||'—';
     const isOverridden=_catOverrides&&_catOverrides[p.id]&&_catOverrides[p.id]!==normCat(p.category);
-    const catCellContent=`<span style="font-weight:600">${effectiveCat}</span>${isOverridden?`<span style="background:#fef3c7;color:#92400e;font-size:.65rem;font-weight:700;padding:.1rem .3rem;border-radius:3px;margin-left:.25rem;display:inline-block">↑覆蓋</span>`:''}${catAdjustBadge}`;
+    const catCellContent=`<span style="font-weight:600">${effectiveCat}</span>${isOverridden?`<span style="background:#fef3c7;color:#92400e;font-size:.72rem;font-weight:700;padding:.1rem .3rem;border-radius:3px;margin-left:.2rem;display:inline-block">↑覆蓋</span>`:''}${catAdjustBadge}`;
     // 展出方式
     const dispMode=_displayMode[p.id]||'eposter';
     const confirmed=p.memberConfirmed||'';
@@ -2331,14 +2338,14 @@ function renderResultsTable(papers){
       dispLabel='優秀海報';
       dispStyle='border:1.5px solid #d97706;background:#fffbeb;color:#92400e;';
     } else if(isPhys){
-      dispLabel='實體展示'+(warnDup?'<br><span style="font-size:.65rem;color:#f59e0b;font-weight:700">⚠ 同人重複</span>':'');
+      dispLabel='實體展示'+(warnDup?'<br><span class="sub-lbl" style="color:#f59e0b;font-weight:700">⚠ 同人重複</span>':'');
       dispStyle='border:1.5px solid #2563eb;background:#eff6ff;color:#1d4ed8;';
     } else {
-      dispLabel='ePoster'+(canPhysical?'':('<br><span style="font-size:.65rem;color:#f87171">'+(confirmed==='非會員'?'非會員':'未繳費')+'</span>'));
+      dispLabel='ePoster'+(canPhysical?'':('<br><span class="sub-lbl" style="color:#f87171">'+(confirmed==='非會員'?'非會員':'未繳費')+'</span>'));
       dispStyle='border:1.5px solid #cbd5e0;background:#f8fafc;color:#64748b;';
     }
     const dispCell=`<button onclick="toggleDisplay('${p.id}',this,${canPhysical})" data-pid="${p.id}"
-      style="${dispStyle}border-radius:6px;padding:.28rem .6rem;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;line-height:1.5">${dispLabel}</button>`;
+      style="${dispStyle}border-radius:6px;padding:.28rem .35rem;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;line-height:1.45;width:100%">${dispLabel}</button>`;
     // 子列（點擊列展開）
     const memberOk=confirmed==='會員已繳年費';
     const memberBadge=memberOk
@@ -2379,15 +2386,15 @@ function renderResultsTable(papers){
       ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)"
       ondragleave="this.style.borderTop=''" onclick="toggleSubRow('${p.id}',event)" style="cursor:pointer">
       <td style="text-align:center" onclick="event.stopPropagation()">${dispCell}</td>
-      <td style="font-size:.75rem;font-weight:600;color:#1e4d8c;white-space:nowrap;max-width:65px;overflow:hidden;text-overflow:ellipsis">${esc(p.paperNo||'—')}</td>
+      <td style="font-weight:600;color:#1e4d8c;white-space:nowrap">${esc(p.paperNo||'—')}</td>
       <td><span class="chip chip-blue chip-no">${p.submissionId||p.paperNo||'—'}</span></td>
-      <td style="line-height:1.5;font-size:.88rem;word-break:break-word">${esc(p.title)}</td>
-      <td style="font-size:.8rem;color:#64748b;line-height:1.45;word-break:keep-all">${esc(p.contactUnit||'—')}</td>
+      <td>${esc(p.title)}</td>
+      <td style="color:#64748b">${esc(p.contactUnit||'—')}</td>
       <td class="cat-override-cell" data-pid="${p.id}" data-orig-cat="${normCat(p.category)||''}" onclick="event.stopPropagation();clickCatCell('${p.id}','${effectiveCat}')" style="cursor:default">${catCellContent}</td>
-      <td style="font-weight:700;font-size:1rem;white-space:nowrap;text-align:center">${p.avgTotal!==null?p.avgTotal+'分':'—'}</td>
+      <td style="font-weight:700;white-space:nowrap;text-align:center">${p.avgTotal!==null?p.avgTotal+'分':'—'}</td>
       <td style="white-space:nowrap;text-align:center">${gapCell(p)}</td>
       <td style="white-space:nowrap;text-align:center">${recCell}</td>
-      <td style="white-space:nowrap;text-align:center;font-size:.75rem">${rejCell}</td>
+      <td style="text-align:center">${rejCell}</td>
       <td onclick="event.stopPropagation()" style="text-align:center">
         <div style="display:flex;gap:.25rem;align-items:center;justify-content:center;flex-wrap:wrap">
           <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="showDetail('${p.id}')">詳細</button>
@@ -2412,12 +2419,12 @@ function renderResultsTable(papers){
       </div>`;
     }).join('');
     return `<tr data-pid="${p.id}" data-title="${esc(p.title).toLowerCase()}" data-unit="${esc(p.contactUnit||'').toLowerCase()}" style="opacity:.75;background:#fff8f8">
-      <td style="text-align:center"><span style="background:#fee2e2;color:#991b1b;padding:.2rem .6rem;border-radius:7px;font-size:.78rem;font-weight:700">退稿</span></td>
-      <td style="font-size:.8rem;font-weight:600;color:#991b1b">${esc(p.paperNo||'—')}</td>
+      <td style="text-align:center"><span style="background:#fee2e2;color:#991b1b;padding:.2rem .5rem;border-radius:7px;font-weight:700">退稿</span></td>
+      <td style="font-weight:600;color:#991b1b;white-space:nowrap">${esc(p.paperNo||'—')}</td>
       <td><span class="chip chip-no" style="background:#fee2e2;color:#991b1b">${p.submissionId||'—'}</span></td>
-      <td style="line-height:1.5;font-size:.88rem;color:#6b7280;word-break:break-word">${esc(p.title)}</td>
-      <td style="font-size:.8rem;color:#9ca3af;line-height:1.45;word-break:keep-all" title="職類：${esc(p.profession||'—')}">${esc(p.contactUnit||'—')}</td>
-      <td colspan="5" style="font-size:.78rem">
+      <td style="color:#6b7280">${esc(p.title)}</td>
+      <td style="color:#9ca3af" title="職類：${esc(p.profession||'—')}">${esc(p.contactUnit||'—')}</td>
+      <td colspan="5" style="font-size:.85rem">
         <div style="color:#991b1b;font-weight:600;margin-bottom:.2rem">
           ${totalRej}/${totalReviews} 位委員退稿
         </div>
@@ -2884,10 +2891,10 @@ function renderOsceResultsTable(cases){
       const scores=valid.map(r=>Number(r.total)).filter(v=>!isNaN(v));
       const g=calcSmartGap(scores);
       if(g===null) return '—';
-      if(g<=10) return `<span style="color:#16a34a;font-size:.82rem;font-weight:600">✓ ${g}分</span>`;
-      return `<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.18rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700;white-space:nowrap">&#9651; ${g}分</span>`;
+      if(g<=10) return `<span style="color:#16a34a;font-weight:600;white-space:nowrap">✓ ${g}分</span>`;
+      return `<span style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:.15rem .3rem;border-radius:6px;font-weight:700;white-space:nowrap">&#9651;${g}分</span>`;
     }
-    if(valid.length===1)return '<span style="color:#718096;font-size:.78rem">僅1位</span>';
+    if(valid.length===1)return '<span style="color:#718096">僅1位</span>';
     return '—';
   }
 
