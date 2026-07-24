@@ -786,7 +786,9 @@ function renderOverview() {
     const m   = r[7]||'';
     const mCls = m.includes('已繳')?'badge-paid':m.includes('未繳')?'badge-pending':'badge-none';
     const sent2 = (r[21]||'').includes('確認信');
+    const isRejected = (r[21]||'').includes('退稿');
     const tr = document.createElement('tr');
+    if(isRejected) tr.style.background = '#fff0f0';
     tr.innerHTML = `<td style="white-space:nowrap"><strong>${esc(r[0]||'')}</strong></td>
       <td style="max-width:200px;min-width:140px;word-break:break-all;line-height:1.4">${esc(r[3]||'')}</td>
       <td><span class="badge badge-${cat.toLowerCase()}">${esc(r[2]||'')}</span></td>
@@ -795,7 +797,7 @@ function renderOverview() {
       <td style="font-size:0.8rem;white-space:nowrap">${esc(r[14]||'—')}</td>
       <td><span class="badge ${mCls}">${esc(m)}</span></td>
       <td><span class="badge ${sent2?'badge-sent':'badge-unsent'}">${sent2?'✅ 已發送':'⬜ 未發送'}</span></td>
-      <td style="font-size:0.78rem;color:#888;white-space:nowrap">${formatTs(r[1])}</td>`;
+      <td style="font-size:0.78rem;white-space:nowrap">${isRejected?'<span style="color:#c62828;font-weight:700">❌ 退稿</span>':formatTs(r[1])}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -807,13 +809,15 @@ function renderMailTable() {
   document.getElementById('mailTitle').textContent = `確認信管理（共 ${submissions.length} 筆）`;
   submissions.forEach((r,i) => {
     const sent = (r[21]||'').includes('確認信');
+    const isRejected = (r[21]||'').includes('退稿');
     const tr = document.createElement('tr');
+    if(isRejected) tr.style.background = '#fff0f0';
     tr.innerHTML = `<td style="text-align:center"><input type="checkbox" class="mail-chk" data-i="${i}"></td>
       <td style="white-space:nowrap;width:5rem"><strong>${esc(r[0]||'')}</strong></td>
       <td style="min-width:160px;word-break:break-all;line-height:1.4">${esc(r[3]||'')}</td>
       <td>${esc(r[8]||'')}</td>
       <td style="font-size:0.8rem;color:#555">${esc(r[9]||'')}</td>
-      <td style="font-size:0.78rem;color:#888;white-space:nowrap">${formatTs(r[1])}</td>
+      <td style="font-size:0.78rem;white-space:nowrap">${isRejected?'<span style="color:#c62828;font-weight:700">❌ 退稿</span>':formatTs(r[1])}</td>
       <td style="white-space:nowrap"><span class="badge ${sent?'badge-sent':'badge-unsent'}">${sent?'✅ 已發送':'⬜ 未發送'}</span></td>`;
     tbody.appendChild(tr);
   });
@@ -1049,6 +1053,13 @@ const ACCEPT_TYPE_LABELS = {
   excellent: '優秀海報（實體張貼＋口頭報告）'
 };
 
+function formatPaperNo(v) {
+  if (!v) return '';
+  if (/^實體\d+$/.test(v)) return v.replace('實體', '實體海報');
+  if (/^優秀\d+$/.test(v)) return v.replace('優秀', '優秀海報');
+  return v;
+}
+
 function getAcceptTypeLabel(modeStr) {
   const modes = (modeStr||'').split(',').map(s=>s.trim()).filter(Boolean);
   if(!modes.length) return '—';
@@ -1109,7 +1120,7 @@ function renderAcceptTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `<td style="text-align:center"><input type="checkbox" class="accept-chk" data-i="${i}"></td>
       <td style="white-space:nowrap;width:5rem"><strong>${esc(r[0]||'')}</strong></td>
-      <td style="white-space:nowrap;width:6rem;color:#0d47a1;font-weight:600">${esc(r[25]||'—')}</td>
+      <td style="white-space:nowrap;width:6rem;color:#0d47a1;font-weight:600">${esc(formatPaperNo(r[25])||'—')}</td>
       <td style="min-width:160px;word-break:break-all;line-height:1.4">${esc(r[3]||'')}</td>
       <td>${esc(r[8]||'')}</td>
       <td style="font-size:0.8rem;color:#555">${esc(r[9]||'')}</td>
@@ -1371,7 +1382,7 @@ function buildPosterListText(group) {
     const r = submissions[i];
     const typeVal = acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || '';
     const label = getAcceptTypeLabel(typeVal);
-    return ` - 海報編號：${r[25]||r[0]||''}　｜　論文題目：${r[3]||''}　｜　錄取形式：${label}`;
+    return ` - 海報編號：${formatPaperNo(r[25])||r[0]||''}　｜　論文題目：${r[3]||''}　｜　錄取形式：${label}`;
   }).join('\n');
 }
 
@@ -1382,7 +1393,7 @@ function buildPosterListHtml(group) {
     const typeVal = acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || '';
     const label = getAcceptTypeLabel(typeVal);
     return `<div style="text-align:left;background:#f5f7fa;border-left:3px solid #0d47a1;padding:8px 12px;margin:6px 0;border-radius:4px">
-      <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">海報編號：</span><span style="color:#1a1a2e;font-weight:bold">${esc(r[25]||r[0]||'')}</span></div>
+      <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">海報編號：</span><span style="color:#1a1a2e;font-weight:bold">${esc(formatPaperNo(r[25])||r[0]||'')}</span></div>
       <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">論文題目：</span><span style="color:#1a1a2e;font-weight:bold">${esc(r[3]||'')}</span></div>
       <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">錄取形式：</span><span style="color:#1a1a2e;font-weight:bold">${esc(label)}</span></div>
     </div>`;
@@ -1740,7 +1751,7 @@ function renderFpTable(){
     const tr=document.createElement('tr');
     tr.innerHTML=`<td style="text-align:center" id="fp-chk-td-${i}"></td>
       <td style="white-space:nowrap;width:5rem"><strong>${esc(r[0]||'')}</strong></td>
-      <td style="white-space:nowrap;width:6rem;color:#0d47a1;font-weight:600">${esc(r[25]||'—')}</td>
+      <td style="white-space:nowrap;width:6rem;color:#0d47a1;font-weight:600">${esc(formatPaperNo(r[25])||'—')}</td>
       <td style="min-width:160px;word-break:break-all;line-height:1.4">${esc(r[3]||'')}</td>
       <td><span class="badge badge-${cat}">${esc(r[2]||'')}</span></td>
       <td>${esc(r[8]||'')}</td>
