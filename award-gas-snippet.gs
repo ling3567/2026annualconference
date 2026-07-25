@@ -37,6 +37,14 @@
    • 若之後要移除本功能，刪掉這個檔案 + doGet 那兩行即可，其餘不受影響。
    ══════════════════════════════════════════════════════════════════════════ */
 
+/** ★ 試算表 ID ★
+ *  這份 Apps Script 若是「獨立式」（standalone，非從試算表擴充功能建立），
+ *  SpreadsheetApp.getActiveSpreadsheet() 會回傳 null，必須改用 openById。
+ *  請填入放評分資料的那份試算表 ID（在既有評分系統程式碼搜 openById，
+ *  或從試算表網址 https://docs.google.com/spreadsheets/d/【這一段就是ID】/edit 取得）。
+ *  若本 script 是「綁定式」（從試算表擴充功能建立），此處留空亦可。 */
+var AWARD_SPREADSHEET_ID = '';
+
 /** 工作表名稱 —— 如需改名，改這兩個常數即可 */
 var AWARD_SHEET_SCORES = '優秀海報評分';
 var AWARD_SHEET_RANKS  = '優秀海報名次';
@@ -83,8 +91,18 @@ function _awardJson(obj) {
 /* ══════════════════════════════════════════════════════════════
    工作表存取
 ══════════════════════════════════════════════════════════════ */
+/** 取得試算表：優先用 AWARD_SPREADSHEET_ID（獨立式 script 必需），
+ *  留空則退回 getActiveSpreadsheet()（綁定式 script 適用）。 */
+function _awardSS_() {
+  var ss = AWARD_SPREADSHEET_ID
+    ? SpreadsheetApp.openById(AWARD_SPREADSHEET_ID)
+    : SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) throw new Error('找不到試算表：本 script 為獨立式，請在 award.gs 最上方的 AWARD_SPREADSHEET_ID 填入試算表 ID');
+  return ss;
+}
+
 function _awardSheet_(name, headers) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = _awardSS_();
   var sh = ss.getSheetByName(name);
   if (!sh) {
     sh = ss.insertSheet(name);
