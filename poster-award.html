@@ -186,9 +186,6 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 }
 .pcat{background:var(--main-bg);color:var(--main-d);font-size:.72rem;font-weight:700;
   padding:.16rem .5rem;border-radius:6px}
-.subid{background:var(--bg2);border:1px solid var(--border2);color:var(--muted);
-  font-size:.7rem;font-weight:600;padding:.14rem .45rem;border-radius:5px;
-  font-family:ui-monospace,Menlo,Consolas,monospace}
 .pstat{margin-left:auto;font-size:.72rem;font-weight:700;padding:.16rem .55rem;border-radius:6px}
 .pstat.wait{background:var(--bg2);color:var(--muted);border:1px solid var(--border2)}
 .pstat.draft{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-br)}
@@ -515,6 +512,54 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
   .sv-cols{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;align-items:start}
   .sv-cols>div{min-width:0}
 }
+
+/* ══════════════════════════════════════════════
+   平板橫向 / 桌機 ≥1024px：常駐三欄
+   左＝論文清單｜中＝內容＋初審成績｜右＝評分表
+   （手機 <1024px 維持覆蓋式抽屜，完全不受影響）
+══════════════════════════════════════════════ */
+@media(min-width:1024px){
+  #rvApp.on{
+    display:grid;
+    grid-template-columns:340px minmax(0,1fr);
+    grid-template-rows:auto minmax(0,1fr);
+    grid-template-areas:"top top" "rail main";
+    height:100dvh;
+  }
+  #rvApp>.topbar{grid-area:top}
+
+  /* 左欄：進度＋工具列＋清單，獨立捲動 */
+  .rv-rail{grid-area:rail;min-height:0;overflow-y:auto;
+    border-right:1px solid var(--border2);background:var(--bg2);
+    display:flex;flex-direction:column}
+  .rv-rail .progbar,.rv-rail .toolbar{position:static;flex-shrink:0}
+  .rv-rail .list{flex:1;display:block;   /* 覆蓋 820px 的多欄 grid 版型 */
+    grid-template-columns:none;padding:.7rem .7rem 1.5rem;max-width:none}
+  .pcard{cursor:pointer}
+  .pcard.active{border-color:var(--adm-blue);border-left-color:var(--adm-blue);
+    box-shadow:0 0 0 2px var(--adm-blue-l)}
+
+  /* 右側主區：取消覆蓋層行為，改為常駐格 */
+  #scoreView{grid-area:main;position:relative;inset:auto;transform:none;
+    visibility:visible;z-index:1;height:auto;min-height:0;box-shadow:none}
+  #scoreView .sv-head{display:none}        /* 標題與導覽改由清單點選，內容區已含題目 */
+  #scoreView .sv-body{max-width:none;margin:0;padding:1.2rem 1.3rem calc(7.5rem + var(--safe-b))}
+  #scoreView .sv-cols{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);
+    gap:1.3rem;align-items:start}
+  #scoreView .sv-foot-inner{max-width:none}
+
+  /* 未選取論文時的提示 */
+  #scoreView.empty .sv-foot{display:none}
+  .sv-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;height:100%;min-height:60vh;color:var(--muted);padding:2rem}
+  .sv-empty .ic{font-size:3rem;margin-bottom:.8rem;opacity:.5}
+  .sv-empty h3{font-size:1.1rem;color:var(--slate);margin-bottom:.5rem}
+  .sv-empty p{font-size:.9rem;line-height:1.8;max-width:22rem}
+}
+@media(min-width:1440px){
+  #rvApp.on{grid-template-columns:380px minmax(0,1fr)}
+  #scoreView .sv-body{padding-left:1.7rem;padding-right:1.7rem}
+}
 </style>
 </head>
 <body>
@@ -562,26 +607,27 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
     <button class="tb-btn" onclick="doLogout()">登出</button>
   </div>
 
-  <div class="progbar">
-    <div class="row">
-      <span class="lbl">我的評分進度</span>
-      <span class="val"><b id="progDone">0</b> / <span id="progTotal">0</span> 篇</span>
+  <div class="rv-rail">
+    <div class="progbar">
+      <div class="row">
+        <span class="lbl">我的評分進度</span>
+        <span class="val"><b id="progDone">0</b> / <span id="progTotal">0</span> 篇</span>
+      </div>
+      <div class="track"><div class="fill" id="progFill" style="width:0%"></div></div>
     </div>
-    <div class="track"><div class="fill" id="progFill" style="width:0%"></div></div>
+
+    <div class="toolbar">
+      <button class="chipbtn on" id="sortNo" onclick="setSort('no')">依編號</button>
+      <button class="chipbtn" id="sortRef" onclick="setSort('ref')">依初審分數</button>
+      <button class="chipbtn" id="sortMine" onclick="setSort('mine')">未評優先</button>
+      <button class="chipbtn" id="filtTodo" onclick="toggleTodo()">只看未評</button>
+    </div>
+
+    <div class="list" id="paperList"></div>
   </div>
 
-  <div class="toolbar">
-    <button class="chipbtn on" id="sortNo" onclick="setSort('no')">依編號</button>
-    <button class="chipbtn" id="sortRef" onclick="setSort('ref')">依初審分數</button>
-    <button class="chipbtn" id="sortMine" onclick="setSort('mine')">未評優先</button>
-    <button class="chipbtn" id="filtTodo" onclick="toggleTodo()">只看未評</button>
-  </div>
-
-  <div class="list" id="paperList"></div>
-</div>
-
-<!-- ══════════ 評分頁 ══════════ -->
-<div id="scoreView">
+  <!-- ══════════ 評分頁（窄螢幕＝覆蓋抽屜；寬螢幕＝右側主區）══════════ -->
+  <div id="scoreView">
   <div class="sv-head">
     <button class="sv-back" onclick="closeScore()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -608,7 +654,8 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
       </div>
     </div>
   </div>
-</div>
+  </div><!-- /scoreView -->
+</div><!-- /rvApp -->
 
 <!-- ══════════ 管理端 ══════════ -->
 <div id="admApp">
@@ -789,13 +836,6 @@ function showToast(msg,type){
   t.className='toast '+(type||'info'); t.textContent=msg;
   document.body.appendChild(t); setTimeout(()=>t.remove(),3200);
 }
-/* 投稿編號（submissionId）與論文編號（paperNo）並存時，以小標籤並列顯示，
-   方便與初審後台交叉對照；兩者相同或缺漏時不顯示。 */
-function subIdTag(p){
-  if(!p||!p.submissionId||p.submissionId===p.paperNo) return '';
-  return '<span class="subid" title="投稿編號">'+esc(p.submissionId)+'</span>';
-}
-
 function normCat(raw){ const m=String(raw||'').match(/^[ABC]/i); return m?m[0].toUpperCase():''; }
 function awardId(pid){ return AWARD_ID_PREFIX+pid; }
 
@@ -932,6 +972,7 @@ async function reloadPapers(){
 
     applySort();
     renderList();
+    if(isWide()&&curIdx<0) renderScoreEmpty();   // 寬螢幕：右側先顯示提示
   }catch(e){
     showToast('載入失敗：'+(e.message||e),'err');
     console.error(e);
@@ -1031,17 +1072,15 @@ function renderList(){
               :'<span class="pstat wait">待評分</span>';
     const myTotal=isDone||hasDraft?calcTotal(d||{}):null;
     const idx=papers.indexOf(p);
-    return '<div class="pcard '+cls+'" onclick="openScore('+idx+')">'
+    return '<div class="pcard '+cls+(idx===curIdx?' active':'')+'" onclick="openScore('+idx+')">'
       +'<div class="pc-top">'
         +'<span class="pno">'+esc(p.paperNo||'—')+'</span>'
-        +subIdTag(p)
         +(p._cat?'<span class="pcat">'+p._cat+' 類</span>':'')
         +stat
       +'</div>'
       +'<div class="pc-title">'+esc(p.title||'—')+'</div>'
       +'<div class="pc-meta">'
         +(p._refAvg!==null?'<span class="pc-ref">初審 '+p._refAvg+' 分</span>':'')
-        +(p._refRec?'<span>★ '+p._refRec+' 位推薦</span>':'')
         +(myTotal!==null?'<span class="pc-mine">我的評分 '+myTotal+'</span>':'')
       +'</div>'
     +'</div>';
@@ -1061,6 +1100,9 @@ function isComplete(d){
 }
 
 /* ══════════ 評分頁 ══════════ */
+/* ≥1024px：清單與評分頁常駐三欄；<1024px：評分頁為覆蓋抽屜 */
+function isWide(){ return window.matchMedia('(min-width:1024px)').matches; }
+
 function openScore(i){
   curIdx=i;
   const p=papers[i]; if(!p) return;
@@ -1068,7 +1110,6 @@ function openScore(i){
   const isDone=!!submittedMap[p.id];
 
   el('svHeadTitle').textContent=(p.paperNo||'')
-    +(p.submissionId&&p.submissionId!==p.paperNo?'（'+p.submissionId+'）':'')
     +'　'+(p._cat?p._cat+' 類':'');
   el('svMax').textContent=AWARD_MAX;
   el('svPrev').disabled=(i<=0);
@@ -1086,15 +1127,45 @@ function openScore(i){
   document.querySelector('.btn-draft').style.display=isDone?'none':'';
 
   updateTotal();
-  el('scoreView').classList.add('on');
+  const sv=el('scoreView');
+  sv.classList.remove('empty');
+  sv.classList.add('on');
   el('svBody').scrollTop=0;
-  document.body.style.overflow='hidden';
+  if(isWide()){
+    renderList();               // 更新左欄選取高亮
+  }else{
+    document.body.style.overflow='hidden';
+  }
+}
+
+/* 寬螢幕：尚未選取論文時，右側主區顯示提示 */
+function renderScoreEmpty(){
+  curIdx=-1;
+  const sv=el('scoreView');
+  sv.classList.add('empty');
+  el('svHeadTitle').textContent='';
+  el('svBody').innerHTML='<div class="sv-empty"><div class="ic">👈</div>'
+    +'<h3>請從左側選擇論文</h3>'
+    +'<p>點選後，這裡會顯示論文摘要、書面初審成績，以及現場評分表。</p></div>';
 }
 
 function closeScore(){
   el('scoreView').classList.remove('on');
   document.body.style.overflow='';
+  if(isWide()) renderScoreEmpty();
   renderList();
+}
+
+/* 視窗尺寸切換（平板旋轉等）時，維持一致行為 */
+function onViewportChange(){
+  if(isWide()){
+    document.body.style.overflow='';
+    if(curIdx<0) renderScoreEmpty();
+  }else{
+    // 回到窄螢幕：有選取則以抽屜呈現，否則收起
+    if(curIdx>=0){ el('scoreView').classList.add('on'); }
+    else { el('scoreView').classList.remove('on'); document.body.style.overflow=''; }
+  }
 }
 
 function gotoAdj(delta){
@@ -1112,7 +1183,6 @@ function renderInfo(p){
   let h='<div class="info-card">'
     +'<div class="pc-top">'
       +'<span class="pno">'+esc(p.paperNo||'—')+'</span>'
-      +subIdTag(p)
       +(p._cat?'<span class="pcat">'+p._cat+'｜'+esc(CAT_FULL[p._cat]||'')+'</span>':'')
     +'</div>'
     +'<div class="info-title">'+esc(p.title||'—')+'</div>'
@@ -1145,7 +1215,6 @@ function renderRef(p){
     +'📋 書面初審成績（'+valid.length+' 位委員）<span class="arrow">▾</span></button><div class="acc-body">'
     +'<div class="ref-summary">'
       +'<div class="ref-stat"><div class="n">'+(p._refAvg!==null?p._refAvg:'—')+'</div><div class="l">初審平均分</div></div>'
-      +'<div class="ref-stat"><div class="n">'+p._refRec+'<span style="font-size:.8rem;color:var(--muted)">/'+valid.length+'</span></div><div class="l">推薦實體展示</div></div>'
       +'<div class="ref-stat"><div class="n'+(gap!==null&&gap>10?' warn':'')+'">'+(gap!==null?gap:'—')+'</div><div class="l">委員間差距</div></div>'
     +'</div>';
 
@@ -1183,8 +1252,6 @@ function renderRef(p){
         +'<span class="ref-rv-total">'+(r.total!=null?r.total:'—')+' <small style="color:var(--muted);font-weight:600">/'+REVIEW_MAX+'</small></span>'
         +'</div>'
         +'<div class="ref-cmt">'+esc(r.comment).replace(/\n/g,'<br>')+'</div>';
-      if(r.recommended===true||r.recommend===true||r.recommended==='true'||r.recommend==='true')
-        h+='<div class="ref-rec">★ 推薦進行紙本實體壁報展示</div>';
       h+='</div>';
     });
   }
@@ -1335,7 +1402,7 @@ async function submitScore(){
     return;
   }
   const total=calcTotal(d);
-  if(!confirm('確定提交本篇評分？\n\n'+(p.paperNo||'')+(p.submissionId&&p.submissionId!==p.paperNo?'（投稿編號 '+p.submissionId+'）':'')+'\n總分：'+total+' / '+AWARD_MAX+'\n\n提交後將無法自行修改。')) return;
+  if(!confirm('確定提交本篇評分？\n\n'+(p.paperNo||'')+'\n總分：'+total+' / '+AWARD_MAX+'\n\n提交後將無法自行修改。')) return;
 
   setLdr(true);
   try{
@@ -2095,6 +2162,9 @@ function exportAwardCSV(){
   window.addEventListener('beforeunload',()=>{
     if(curIdx>=0 && el('scoreView').classList.contains('on')) saveDraft(false);
   });
+  // 視窗尺寸切換（平板旋轉／視窗縮放）時維持三欄/抽屜一致
+  let _rzT=null;
+  window.addEventListener('resize',()=>{ clearTimeout(_rzT); _rzT=setTimeout(onViewportChange,150); });
   // session 內重新整理不用再登入
   try{
     const s=JSON.parse(sessionStorage.getItem('tsmcsd_award_auth')||'null');
