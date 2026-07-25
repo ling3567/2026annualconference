@@ -58,7 +58,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 /* 根字級 = 所有 rem 的基準。委員多為年長者，手機/平板整體放大；
    桌機（>1024px，主要是後台）維持標準密度。要再放大只需調整此處數字。 */
-html{-webkit-text-size-adjust:100%; font-size:18px}
+html{-webkit-text-size-adjust:100%; font-size:20px}
 @media(min-width:1025px){ html{font-size:16px} }
 body{
   font-family:'Microsoft JhengHei','Noto Sans TC','PingFang TC','Helvetica Neue',sans-serif;
@@ -88,41 +88,46 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 .toast.err{background:var(--adm-red)}
 .toast.info{background:var(--dark-2)}
 
-/* ══════════ 登入 ══════════ */
+/* ══════════ 登入（配色比照 handbook.html：nav-blue → medium-blue）══════════ */
 #loginScreen{
   min-height:100dvh;display:flex;flex-direction:column;justify-content:center;
   padding:calc(1.5rem + var(--safe-t)) 1.25rem calc(1.5rem + var(--safe-b));
-  background:linear-gradient(160deg,#3a4550 0%,#546070 55%,#7a90a4 100%);
+  background:linear-gradient(160deg,#1a3a5c 0%,#1A5D99 55%,#2c6fA0 100%);
   position:relative;overflow:hidden
 }
 #loginScreen::before,#loginScreen::after{
-  content:'';position:absolute;border-radius:50%;background:rgba(255,255,255,.055);pointer-events:none
+  content:'';position:absolute;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none
 }
 #loginScreen::before{width:340px;height:340px;top:-130px;right:-110px}
 #loginScreen::after{width:250px;height:250px;bottom:-90px;left:-80px}
 .lg-wrap{width:100%;max-width:420px;margin:0 auto;position:relative;z-index:2}
 .lg-brand{text-align:center;color:#fff;margin-bottom:1.5rem}
-.lg-brand img{height:52px;width:auto;display:block;margin:0 auto .7rem;filter:brightness(0) invert(1);opacity:.95}
-.lg-org{font-size:.8rem;letter-spacing:.06em;opacity:.8;font-weight:500}
-.lg-brand h1{font-size:1.45rem;margin:.45rem 0 .5rem;letter-spacing:.02em}
+/* LOGO 加白底卡片，讓深色 LOGO 在藍底上清楚可見 */
+.lg-logo{display:inline-flex;align-items:center;justify-content:center;
+  background:#fff;border-radius:16px;padding:.7rem 1.15rem;margin:0 auto 1rem;
+  box-shadow:0 6px 18px rgba(0,0,0,.22)}
+.lg-logo img{height:54px;width:auto;display:block}
+.lg-org{font-size:.8rem;letter-spacing:.06em;opacity:.85;font-weight:500}
+.lg-brand h1{font-size:1.4rem;margin:.45rem 0 .55rem;letter-spacing:.02em;line-height:1.4}
 .lg-tagline{
   display:inline-flex;align-items:center;gap:.35rem;
-  background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);
   padding:.28rem .8rem;border-radius:999px;font-size:.78rem;font-weight:600
 }
-.lg-brand p{font-size:.83rem;opacity:.82;line-height:1.7;margin-top:.7rem}
+.lg-brand p{font-size:.83rem;opacity:.88;line-height:1.7;margin-top:.7rem}
 .lg-card{background:#fff;border-radius:16px;padding:1.4rem 1.25rem;box-shadow:var(--sh-md)}
 .fl{display:block;font-size:.8rem;font-weight:700;color:var(--slate);margin:0 0 .35rem;letter-spacing:.03em}
 .fi{
   width:100%;padding:.85rem .9rem;border:1.5px solid var(--border2);border-radius:10px;
   font-size:1rem;margin-bottom:1rem;background:var(--bg2);transition:border-color .15s,background .15s
 }
-.fi:focus{outline:none;border-color:var(--main);background:#fff}
+.fi:focus{outline:none;border-color:#2c6fA0;background:#fff}
 .btn-login{
-  width:100%;padding:.95rem;background:var(--dark);color:#fff;border:none;border-radius:10px;
-  font-size:1.02rem;font-weight:700;letter-spacing:.06em;transition:background .15s
+  width:100%;padding:.95rem;background:linear-gradient(135deg,#1A5D99,#2c6fA0);color:#fff;
+  border:none;border-radius:10px;
+  font-size:1.02rem;font-weight:700;letter-spacing:.06em;transition:filter .15s
 }
-.btn-login:active{background:var(--dark-2)}
+.btn-login:active{filter:brightness(.9)}
 .lg-err{
   display:none;margin-top:.8rem;padding:.6rem .8rem;background:var(--red-bg);
   border:1px solid var(--red-br);border-radius:8px;color:var(--red);font-size:.85rem;text-align:center
@@ -162,14 +167,19 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 .track{height:6px;background:var(--bg2);border-radius:99px;overflow:hidden}
 .fill{height:100%;background:linear-gradient(90deg,var(--adm-gold),var(--adm-gold-br));border-radius:99px;transition:width .35s ease}
 
-/* 批次送出列 */
-.batch-bar{display:flex;align-items:center;gap:.7rem;padding:.6rem .9rem;
-  background:var(--gold-bg);border-bottom:1px solid var(--gold-br)}
+/* 批次送出列 —— 固定於頁面底部 */
+.batch-bar{position:fixed;left:0;right:0;bottom:0;z-index:150;
+  display:flex;align-items:center;gap:.7rem;
+  padding:.6rem .9rem calc(.6rem + var(--safe-b));
+  background:var(--gold-bg);border-top:1px solid var(--gold-br);
+  box-shadow:0 -3px 14px rgba(42,36,32,.12)}
 .batch-info{flex:1;font-size:.85rem;font-weight:600;color:var(--gold);line-height:1.5}
 .batch-info b{font-size:1.05rem;font-weight:700}
 .batch-btn{flex-shrink:0;background:var(--gold);color:#fff;border:none;border-radius:9px;
-  padding:.6rem 1rem;font-size:.9rem;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+  padding:.7rem 1.1rem;font-size:.9rem;font-weight:700;letter-spacing:.03em;white-space:nowrap}
 .batch-btn:active{filter:brightness(.9)}
+/* 批次列出現時，清單底部預留空間避免遮住最後一張卡片 */
+.list.has-batch{padding-bottom:calc(5rem + var(--safe-b))}
 
 /* 工具列（排序/篩選） */
 .toolbar{display:flex;gap:.4rem;padding:.6rem .9rem;overflow-x:auto;background:var(--bg2);
@@ -234,15 +244,16 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
   width:32px;height:32px;font-size:1rem;font-weight:700;line-height:1}
 .sv-nav button:disabled{opacity:.3}
 .sv-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:.85rem .9rem calc(9rem + var(--safe-b))}
+  padding:.85rem .9rem calc(7.5rem + var(--safe-b))}
 
 /* 論文資訊卡 */
 .info-card{background:#fff;border:1px solid var(--border2);border-radius:var(--r);
   padding:.95rem;margin-bottom:.85rem;box-shadow:var(--sh-sm)}
 .info-title{font-size:1.05rem;font-weight:700;line-height:1.55;margin:.55rem 0 .6rem}
-.info-authors{font-size:.8rem;color:var(--muted);line-height:1.7;
-  padding-top:.55rem;border-top:1px dashed var(--border2)}
-.info-authors b{color:var(--slate);font-weight:700}
+.info-authors{font-size:.95rem;color:var(--ink);line-height:1.85;
+  padding-top:.6rem;border-top:1px dashed var(--border2)}
+.info-authors .lbl{font-size:.9rem;font-weight:700;color:var(--blue);margin-bottom:.25rem}
+.info-authors .val{color:var(--ink)}
 
 /* 摺疊區塊 */
 .acc{background:#fff;border:1px solid var(--border2);border-radius:var(--r);
@@ -298,8 +309,8 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 .calc-note{background:var(--adm-gold-bg);border:1px solid var(--adm-gold-br);border-radius:var(--r);
   padding:.6rem .75rem;margin-bottom:.8rem;font-size:.78rem;color:var(--adm-gold);line-height:1.7}
 .calc-note b{font-weight:700}
-.calc-row{display:flex;align-items:center;justify-content:center;gap:.4rem;
-  font-size:.72rem;color:var(--muted);margin-bottom:.35rem;flex-wrap:wrap}
+.calc-row{display:flex;align-items:center;justify-content:center;gap:.3rem;
+  font-size:.72rem;color:var(--muted);margin-bottom:.25rem;flex-wrap:wrap;line-height:1.3}
 .calc-row .eq{font-weight:700;color:var(--slate)}
 .calc-row .proj{font-weight:700;color:var(--gold);font-size:.85rem}
 
@@ -360,22 +371,23 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
   position:absolute;left:0;right:0;bottom:0;z-index:10;
   background:rgba(255,255,255,.97);backdrop-filter:blur(8px);
   border-top:1px solid var(--border2);box-shadow:0 -3px 14px rgba(42,36,32,.1);
-  padding:.65rem .9rem calc(.65rem + var(--safe-b))
+  padding:.45rem .9rem calc(.45rem + var(--safe-b))
 }
-.sv-total{display:flex;align-items:baseline;justify-content:center;gap:.4rem;margin-bottom:.55rem}
-.sv-total .lbl{font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.06em}
-.sv-total .num{font-size:1.9rem;font-weight:700;color:var(--dark);line-height:1}
+/* 總分與按鈕併排，縮小佔用高度 */
+.sv-total{display:flex;align-items:baseline;justify-content:center;gap:.35rem;margin-bottom:.35rem}
+.sv-total .lbl{font-size:.8rem;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.sv-total .num{font-size:1.4rem;font-weight:700;color:var(--dark);line-height:1}
 .sv-total .num.full{color:var(--gold)}
-.sv-total .den{font-size:.85rem;color:var(--muted);font-weight:600}
-.sv-btns{display:flex;gap:.55rem}
+.sv-total .den{font-size:.82rem;color:var(--muted);font-weight:600}
+.sv-btns{display:flex;gap:.5rem}
 .btn-draft{
-  flex:1;padding:.85rem;background:#fff;border:1.5px solid var(--border);color:var(--slate);
-  border-radius:10px;font-size:.92rem;font-weight:700
+  flex:1;padding:.55rem;background:#fff;border:1.5px solid var(--border);color:var(--slate);
+  border-radius:9px;font-size:.92rem;font-weight:700
 }
 .btn-draft:active{background:var(--bg2)}
 .btn-submit{
-  flex:2;padding:.85rem;background:var(--gold);border:none;color:#fff;
-  border-radius:10px;font-size:.98rem;font-weight:700;letter-spacing:.04em
+  flex:2;padding:.55rem;background:var(--gold);border:none;color:#fff;
+  border-radius:9px;font-size:.98rem;font-weight:700;letter-spacing:.04em
 }
 .btn-submit:active{filter:brightness(.85)}
 .btn-submit:disabled{background:var(--disabled);color:#fff}
@@ -505,7 +517,7 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
   /* 委員清單維持單欄（與手機一致），僅置中限寬 */
   .list{max-width:680px;margin:0 auto;width:100%}
   .progbar,.toolbar{padding-left:1.25rem;padding-right:1.25rem}
-  .sv-body{padding:1.1rem 1.25rem calc(9rem + var(--safe-b));max-width:900px;margin:0 auto;width:100%}
+  .sv-body{padding:1.1rem 1.25rem calc(7.5rem + var(--safe-b));max-width:900px;margin:0 auto;width:100%}
   .sv-foot{padding-left:1.25rem;padding-right:1.25rem}
   .sv-foot-inner{max-width:900px;margin:0 auto}
   .crit-inp{gap:1.1rem}
@@ -524,10 +536,10 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 <div id="loginScreen">
   <div class="lg-wrap">
     <div class="lg-brand">
-      <img src="images/TSMCSD-logo.png" alt="TSMCSD">
+      <div class="lg-logo"><img src="images/TSMCSD-logo.png" alt="TSMCSD"></div>
       <div class="lg-org">TSMCSD 2026 年會暨學術研討會</div>
-      <h1>優秀海報論文評選</h1>
-      <span class="lg-tagline">🏆 年會口頭報告評分系統</span>
+      <h1>優秀海報論文口報評分系統</h1>
+      <span class="lg-tagline">🏆 評審委員登入</span>
       <p>請以秘書處提供之評審帳號密碼登入<br>
       系統會顯示各篇的初審成績供您參考，<br>
       您只需評「口頭報告之結構性、完整性及海報製作品質」一項</p>
@@ -763,6 +775,20 @@ const SHOW_REVIEWER_NAMES = false;
 
 /* 名次選項 */
 const RANK_OPTIONS = ['未定','第一名','第二名','第三名','佳作','未得獎'];
+
+/* 自動帶入名次的預設額度：第一名1、第二名2、第三名3、佳作4（共10篇）；
+   超過者標「未得獎」。仍可於各列下拉手動調整。要改額度改此處即可。 */
+const RANK_PLAN = [
+  { rank:'第一名', count:1 },
+  { rank:'第二名', count:2 },
+  { rank:'第三名', count:3 },
+  { rank:'佳作',   count:4 }
+];
+function rankForIndex(i){
+  let acc=0;
+  for(const seg of RANK_PLAN){ acc+=seg.count; if(i<acc) return seg.rank; }
+  return '未得獎';
+}
 
 /* 送出時使用的識別，避免與初審資料在同一張表互相覆蓋 */
 const AWARD_ID_PREFIX = 'AW_';
@@ -1035,7 +1061,7 @@ function renderList(){
               :'<span class="pstat wait">待評分</span>';
     const myTotal=isDone||hasDraft?calcTotal(d||{}):null;
     const idx=papers.indexOf(p);
-    return '<div class="pcard '+cls+(idx===curIdx?' active':'')+'" onclick="openScore('+idx+')">'
+    return '<div class="pcard '+cls+(idx===curIdx?' active':'')+'" onclick="tapCard('+idx+')">'
       +'<div class="pc-top">'
         +'<span class="pno">'+esc(p.paperNo||'—')+'</span>'
         +(p._cat?'<span class="pcat">'+p._cat+' 類</span>':'')
@@ -1065,6 +1091,13 @@ function isComplete(d){
 /* ══════════ 評分頁 ══════════ */
 /* 委員端一律採手機版型（清單→點入覆蓋抽屜），平板與手機一致，故恆為 false */
 function isWide(){ return false; }
+
+/* 滑動選論文時避免誤點進評分頁：手指移動超過門檻視為捲動，不觸發 */
+let _tapMoved=false, _tapY=null;
+function tapCard(i){
+  if(_tapMoved) return;   // 這一手是捲動，忽略
+  openScore(i);
+}
 
 function openScore(i){
   curIdx=i;
@@ -1149,7 +1182,7 @@ function renderInfo(p){
       +(p._cat?'<span class="pcat">'+p._cat+'｜'+esc(CAT_FULL[p._cat]||'')+'</span>':'')
     +'</div>'
     +'<div class="info-title">'+esc(p.title||'—')+'</div>'
-    +'<div class="info-authors"><b>作者群</b>　'+esc(p.authors||'—')+'</div>';
+    +'<div class="info-authors"><div class="lbl">作者群</div><div class="val">'+fmtAuthors(p.authors)+'</div></div>';
   h+='</div>';
 
   if(abs.length){
@@ -1426,10 +1459,12 @@ async function submitScore(){
 /* 依暫存狀況更新批次送出列（只在有可送出的暫存時顯示）*/
 function updateBatchBar(){
   const bar=el('batchBar'); if(!bar) return;
+  const listEl=el('paperList');
   const ready     =papers.filter(p=>!submittedMap[p.id] && drafts[p.id] && isComplete(drafts[p.id])).length;
   const incomplete=papers.filter(p=>!submittedMap[p.id] && drafts[p.id] && !isComplete(drafts[p.id])).length;
-  if(!ready){ bar.style.display='none'; return; }
+  if(!ready){ bar.style.display='none'; if(listEl) listEl.classList.remove('has-batch'); return; }
   bar.style.display='flex';
+  if(listEl) listEl.classList.add('has-batch');   // 底部預留空間
   el('batchInfo').innerHTML='<b>'+ready+'</b> 篇已暫存待送出'
     +(incomplete?'　<span style="font-size:.78rem;font-weight:500">（'+incomplete+' 篇未填完不送）</span>':'');
 }
@@ -1794,8 +1829,10 @@ async function loadAdmin(){
       const reviews=Array.isArray(p.reviews)?p.reviews:[];
       const totals=reviews.filter(r=>!isRejected(r)).map(r=>Number(r.total)).filter(v=>!isNaN(v));
       return {
-        id:p.id, paperNo:p.paperNo, contactUnit:p.contactUnit, title:p.title, category:p.category,
-        authors:p.authors, reviews:reviews, awardScores:[],
+        id:p.id, paperNo:p.paperNo, title:p.title, category:p.category, authors:p.authors,
+        contactUnit:p.contactUnit, contactDept:p.contactDept,
+        contactTitle:p.contactTitle, contactName:p.contactName,
+        reviews:reviews, awardScores:[],
         _refAvg: totals.length?smartAvg(totals):null   // 書面初審平均分（滿分 100）
       };
     });
@@ -1909,7 +1946,7 @@ function renderAdmin(){
       +(key?' onclick="admSortBy(\''+key+'\')"':'')+'>'+label+ic+'</th>';
   };
   const head='<tr>'
-    +th(46,'名次','pos','c nw')
+    +th(46,'排名','pos','c nw')
     +th(56,'編號','no','nw')
     +'<th>論文題目</th>'
     +th(130,'投稿單位',null,'nw')
@@ -1963,11 +2000,14 @@ function renderAdmin(){
     +'<div class="tbl-wrap"><table class="res-tbl"><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div>';
 }
 
-/* 作者群分行：依常見分隔符（、，,；;／換行）拆成一位一行 */
+/* 作者群呈現：忠實保留投稿者於單一欄位輸入的多行結構
+   （作者名同一行、以「、」分隔並帶上標數字；各服務單位各自一行）。
+   僅把換行轉為 <br>，不拆頓號，如投稿原樣。 */
 function fmtAuthors(s){
-  if(!s) return '—';
-  const parts=String(s).split(/[、，,；;\/\r\n]+/).map(x=>x.trim()).filter(Boolean);
-  return parts.length ? parts.map(esc).join('<br>') : '—';
+  if(!s || !String(s).trim()) return '—';
+  return String(s).replace(/\r\n|\r|\n/g,'\n')
+    .split('\n').map(x=>x.trim()).filter(Boolean)
+    .map(esc).join('<br>');
 }
 
 /* 展開子列：規範 §4.4 — 資訊性欄位不佔欄位，收進子列 */
@@ -2007,10 +2047,12 @@ function autoAssignRanks(){
   const list=computeAdminList().filter(p=>p._final!==null);
   if(!list.length){ showToast('尚無可排名的資料','err'); return; }
   const incomplete=list.filter(p=>p._n<ONSITE_JUDGE_COUNT).length;
-  if(incomplete && !confirm('有 '+incomplete+' 篇尚未滿 '+ONSITE_JUDGE_COUNT+' 位委員評分，\n名次可能會變動。仍要帶入嗎？')) return;
-  list.forEach((p,i)=>{
-    rankOverride[p.id]= i===0?'第一名' : i===1?'第二名' : i===2?'第三名' : '佳作';
-  });
+  const plan=RANK_PLAN.map(s=>s.rank+' '+s.count+' 篇').join('、');
+  let msg='將依總分高低帶入名次：'+plan+'（其餘標未得獎）。\n';
+  if(incomplete) msg+='\n注意：有 '+incomplete+' 篇尚未滿 '+ONSITE_JUDGE_COUNT+' 位委員評分，名次可能會變動。\n';
+  msg+='\n帶入後仍可於各列下拉手動調整。確定帶入？';
+  if(!confirm(msg)) return;
+  list.forEach((p,i)=>{ rankOverride[p.id]=rankForIndex(i); });
   renderAdmin();
   showToast('已依總分帶入名次，可再手動調整','ok');
 }
@@ -2078,8 +2120,9 @@ function showJudgeDetail(pid){
       +(normCat(p.category)?'<span class="chip chip-gray">'+normCat(p.category)+' 類</span>':'')
       +(p.contactUnit?'<span class="chip chip-gray">'+esc(p.contactUnit)+'</span>':'')
     +'</div>'
-    +'<div style="font-size:.85rem;color:var(--slate);line-height:1.7;margin:-.4rem 0 .9rem">'
-      +'<b style="color:var(--muted);font-weight:700">作者群　</b>'+fmtAuthors(p.authors)+'</div>';
+    +'<div style="font-size:.9rem;color:var(--ink);line-height:1.8;margin:-.2rem 0 .9rem">'
+      +'<div style="font-weight:700;color:var(--adm-blue);margin-bottom:.15rem">作者群</div>'
+      +fmtAuthors(p.authors)+'</div>';
 
   // 成績組成
   h+='<div class="tbl-wrap"><table class="res-tbl" style="min-width:0"><thead><tr>'
@@ -2135,28 +2178,19 @@ function exportAwardCSV(){
   if(!admResults||!admResults.papers){ showToast('尚無資料','err'); return; }
   const list=computeAdminList();
 
-  // 現場委員固定 N 位 → 每位一欄，方便對照紙本
-  const judgeCols=[];
-  list.forEach(p=>(p.awardScores||[]).forEach(s=>{
-    if(judgeCols.indexOf(s.reviewer)<0) judgeCols.push(s.reviewer);
-  }));
-
-  const head=['排名','名次','論文編號','論文題目','投稿單位','類別','作者群',
-              '初審平均分(/'+REVIEW_MAX+')']
-    .concat(judgeCols.map(u=>'現場-'+(reviewerNames[u]||u)+'(/'+AWARD_MAX+')'))
-    .concat(['現場平均分(/'+AWARD_MAX+')','已評人數','委員間差距','總分(/'+FINAL_MAX+')','現場評審意見']);
+  const head=['排名','名次','論文編號','論文題目',
+              '投稿單位','部門/科別','職稱','聯絡人','類別','作者群',
+              '初審平均分(/'+REVIEW_MAX+')','現場平均分(/'+AWARD_MAX+')',
+              '委員間差距','總分(/'+FINAL_MAX+')','現場評審意見'];
 
   const rows=list.map((p,i)=>{
-    const byJudge={};
-    (p.awardScores||[]).forEach(s=>{ byJudge[s.reviewer]=s; });
     const cmts=(p.awardScores||[]).filter(s=>s.comment)
       .map(s=>'【'+(reviewerNames[s.reviewer]||s.reviewer)+'】'+s.comment).join('\n');
     return [p._final!==null?(i+1):'', rankOverride[p.id]||p.awardRank||'', p.paperNo||'',
-            p.title||'', p.contactUnit||'', normCat(p.category), p.authors||'',
-            p._refAvg!==null?p._refAvg:'']
-      .concat(judgeCols.map(u=>byJudge[u]?byJudge[u].total:''))
-      .concat([p._onsite!==null?p._onsite:'', p._n+'/'+ONSITE_JUDGE_COUNT,
-               p._gap!==null?p._gap:'', p._final!==null?p._final:'', cmts]);
+            p.title||'', p.contactUnit||'', p.contactDept||'', p.contactTitle||'', p.contactName||'',
+            normCat(p.category), p.authors||'',
+            p._refAvg!==null?p._refAvg:'', p._onsite!==null?p._onsite:'',
+            p._gap!==null?p._gap:'', p._final!==null?p._final:'', cmts];
   });
   const csv=[head].concat(rows)
     .map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
@@ -2171,6 +2205,15 @@ function exportAwardCSV(){
 
 /* ══════════ 啟動 ══════════ */
 (function init(){
+  // 論文清單：區分「點選」與「捲動」，避免滑動時誤點進評分頁
+  const list=el('paperList');
+  if(list){
+    list.addEventListener('touchstart',e=>{ _tapY=e.touches[0].clientY; _tapMoved=false; },{passive:true});
+    list.addEventListener('touchmove',e=>{
+      if(_tapY!==null && Math.abs(e.touches[0].clientY-_tapY)>10) _tapMoved=true;
+    },{passive:true});
+    list.addEventListener('touchend',()=>{ _tapY=null; },{passive:true});
+  }
   // 手機返回鍵關閉評分頁
   window.addEventListener('popstate',()=>{
     if(el('scoreView').classList.contains('on')) closeScore();
