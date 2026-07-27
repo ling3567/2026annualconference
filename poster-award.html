@@ -104,9 +104,9 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 .lg-brand{text-align:center;color:#fff;margin-bottom:1.5rem}
 /* LOGO 加白底卡片，讓深色 LOGO 在藍底上清楚可見 */
 .lg-logo{display:inline-flex;align-items:center;justify-content:center;
-  width:86px;height:86px;border-radius:50%;background:#fff;margin:0 auto .9rem;
-  box-shadow:0 5px 15px rgba(0,0,0,.22)}
-.lg-logo img{width:54px;height:auto;display:block}
+  width:84px;height:84px;border-radius:50%;background:#fff;margin:0 auto .9rem;
+  overflow:hidden;box-shadow:0 5px 15px rgba(0,0,0,.22)}
+.lg-logo img{width:80px;height:80px;object-fit:contain;display:block}
 .lg-org{font-size:.8rem;letter-spacing:.06em;opacity:.85;font-weight:500}
 .lg-brand h1{font-size:1.4rem;margin:.45rem 0 .55rem;letter-spacing:.02em;line-height:1.4}
 .lg-tagline{
@@ -199,11 +199,13 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
   border-radius:var(--r);padding:.85rem .95rem;box-shadow:var(--sh-sm);
   transition:transform .12s,box-shadow .12s
 }
-/* 卡片本身不再可點；進入評分改由 .pc-btn */
-.pc-btn{display:block;width:100%;margin-top:.8rem;padding:.75rem;border:none;border-radius:9px;
-  background:var(--blue);color:#fff;font-size:.98rem;font-weight:700;letter-spacing:.03em}
+/* 卡片本身不再可點；進入評分改由右下角較小的按鈕，縮小可點範圍避免滑動誤觸 */
+.pc-action{margin-top:.8rem;text-align:right}
+.pc-btn{display:inline-block;padding:.5rem 1.15rem;border:none;border-radius:8px;
+  background:var(--blue);color:#fff;font-size:.9rem;font-weight:700;letter-spacing:.03em}
 .pc-btn:active{filter:brightness(.9)}
 .pc-btn.done{background:#fff;border:1.5px solid var(--border);color:var(--slate)}
+.pc-btn.draft{background:var(--gold);color:#fff}   /* 已暫存：與待評分（藍）區別 */
 .pcard.done{border-left-color:var(--adm-green);background:linear-gradient(90deg,var(--adm-green-bg) 0%,#fff 22%)}
 .pcard.draft{border-left-color:var(--gold)}
 .pc-top{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.5rem}
@@ -439,7 +441,7 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 /* ── 資料表格（規範 §4.1）── */
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .res-tbl{table-layout:fixed;width:100%;min-width:1040px;border-collapse:collapse}
-.res-tbl th{padding:.55rem .5rem;font-size:.78rem;font-weight:700;letter-spacing:.04em;
+.res-tbl th{padding:.5rem .5rem;font-size:.8rem;font-weight:700;letter-spacing:0;
   color:var(--main-d);background:var(--bg2);border-bottom:1.5px solid var(--border2);
   white-space:nowrap;text-align:left}
 .res-tbl td{padding:.6rem .5rem;font-size:.85rem;line-height:1.55;
@@ -538,6 +540,12 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
   .crit-inp{gap:1.1rem}
   .stats{grid-template-columns:repeat(4,1fr)}
   .adm-body{max-width:1400px;margin:0 auto;width:100%;padding:1rem 1.25rem}
+  /* 後台深色標題列與分頁列：背景維持滿版，內容對齊到與 adm-body 同一條左（右）邊界，
+     讓「優秀海報論文—評選後台」與下方「即時排名」等內容垂直對齊 */
+  #admApp .topbar,#admApp .adm-tabs{
+    padding-left:max(1.25rem,calc((100% - 1400px)/2 + 1.25rem));
+    padding-right:max(1.25rem,calc((100% - 1400px)/2 + 1.25rem));
+  }
   .ref-summary{flex-wrap:nowrap}
   .info-title{font-size:1.15rem}
 }
@@ -1094,7 +1102,7 @@ function renderList(){
         +(p._refAvg!==null?'<span class="pc-ref">初審 '+p._refAvg+' 分</span>':'')
         +(myTotal!==null?'<span class="pc-mine">我的評分 '+myTotal+'</span>':'')
       +'</div>'
-      +'<button class="pc-btn'+(isDone?' done':'')+'" onclick="tapScore('+idx+')">'+btnLabel+' →</button>'
+      +'<div class="pc-action"><button class="pc-btn'+(isDone?' done':hasDraft?' draft':'')+'" onclick="tapScore('+idx+')">'+btnLabel+' →</button></div>'
     +'</div>';
   }).join('');
 }
@@ -1414,6 +1422,9 @@ function saveDraft(notify){
   if(curIdx<0) return;
   const p=papers[curIdx]; if(!p||submittedMap[p.id]) return;
   const d=readForm();
+  const hasScore=AWARD_CRITERIA.some(c=>d[c.id]!==''&&d[c.id]!==undefined);
+  // 手動按「暫存」但尚未給任何分數 → 不暫存、給提示（避免出現「已暫存」卻是空的）
+  if(notify && !hasScore){ showToast('請先為口頭報告評分','err'); return; }
   drafts[p.id]=d;
   try{ localStorage.setItem('tsmcsd_award_'+me.username+'_'+p.id, JSON.stringify(d)); }catch(e){}
   if(notify){
