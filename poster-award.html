@@ -222,6 +222,7 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 .pc-title{font-size:.95rem;font-weight:600;line-height:1.55;color:var(--ink);margin-bottom:.5rem}
 .pc-meta{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
   font-size:.75rem;color:var(--muted);padding-top:.5rem;border-top:1px dashed var(--border2)}
+.pc-meta:empty{display:none}   /* 無初審分數/我的評分時不顯示，避免留一條虛線 */
 .pc-ref{display:inline-flex;align-items:center;gap:.28rem;background:var(--blue-bg);
   border:1px solid var(--blue-br);color:var(--blue);padding:.12rem .45rem;border-radius:5px;font-weight:700}
 .pc-mine{display:inline-flex;align-items:center;gap:.28rem;font-weight:700;color:var(--gold)}
@@ -553,8 +554,11 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 @media(min-width:820px){
   /* 電腦/平板：論文清單改多欄卡片，一列多篇方便挑選（進入評分仍靠按鈕，不會誤觸）*/
   .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
-    gap:.85rem;max-width:1200px;margin:0 auto;width:100%}
+    gap:.85rem;max-width:1200px;margin:0 auto;width:100%;align-items:stretch}
   .list .empty{grid-column:1/-1}
+  /* 卡片等高，初審分數列與「查看並評分」按鈕靠底部，跨卡片位置一致 */
+  .pcard{display:flex;flex-direction:column}
+  .pc-title{margin-bottom:auto}
   .progbar,.toolbar{padding-left:1.25rem;padding-right:1.25rem}
   /* sv-body 佔滿寬度（卷軸在最右），內容由 .sv-inner 置中限寬 */
   .sv-body{padding:1.1rem 1.25rem calc(7.5rem + var(--safe-b))}
@@ -568,6 +572,11 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
   #admApp .topbar,#admApp .adm-tabs{
     padding-left:max(1.25rem,calc((100% - 1400px)/2 + 1.25rem));
     padding-right:max(1.25rem,calc((100% - 1400px)/2 + 1.25rem));
+  }
+  /* 前台（委員端）：標題列/進度列/工具列內容，對齊到與清單卡片欄（max 1200，內距 .9rem）同一條邊界 */
+  #rvApp .topbar,#rvApp .progbar,#rvApp .toolbar{
+    padding-left:max(.9rem,calc((100% - 1200px)/2 + .9rem));
+    padding-right:max(.9rem,calc((100% - 1200px)/2 + .9rem));
   }
   .ref-summary{flex-wrap:nowrap}
   .info-title{font-size:1.15rem}
@@ -1146,8 +1155,9 @@ function isComplete(d){
 /* 委員端一律採手機版型（清單→點入覆蓋抽屜），平板與手機一致，故恆為 false */
 function isWide(){ return false; }
 
-/* 「查看並評分」按鈕：手指在清單上移動（捲動）時不觸發，只有真正輕點才進入 */
-let _listMoved=false, _listStartY=null;
+/* 「查看並評分」按鈕：手指在清單上有位移（捲動）就不觸發，只有真正輕點才進入。
+   同時偵測水平與垂直位移，門檻 10px；旗標保留到下一次 touchstart 才重置。 */
+let _listMoved=false, _tsX=0, _tsY=0;
 function tapScore(i){
   if(_listMoved) return;   // 這一手是滑動，忽略
   openScore(i);
@@ -2293,13 +2303,13 @@ function exportAwardCSV(){
 /* ══════════ 啟動 ══════════ */
 (function init(){
   // 論文清單：偵測滑動，避免捲動時誤觸「查看並評分」按鈕
+  // 僅用 touch 事件判斷（不碰 scroll，避免桌機滑鼠滾動誤判導致按鈕失效）
   const plist=el('paperList');
   if(plist){
-    plist.addEventListener('touchstart',e=>{ _listStartY=e.touches[0].clientY; _listMoved=false; },{passive:true});
-    plist.addEventListener('touchmove',e=>{
-      if(_listStartY!==null && Math.abs(e.touches[0].clientY-_listStartY)>8) _listMoved=true;
-    },{passive:true});
-    plist.addEventListener('touchend',()=>{ setTimeout(()=>{ _listStartY=null; },50); },{passive:true});
+    const mark=e=>{ const t=e.touches&&e.touches[0]; if(!t)return;
+      if(Math.abs(t.clientX-_tsX)>10 || Math.abs(t.clientY-_tsY)>10) _listMoved=true; };
+    plist.addEventListener('touchstart',e=>{ const t=e.touches[0]; _tsX=t.clientX; _tsY=t.clientY; _listMoved=false; },{passive:true});
+    plist.addEventListener('touchmove',mark,{passive:true});
   }
   // 手機返回鍵關閉評分頁
   window.addEventListener('popstate',()=>{
