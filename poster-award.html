@@ -578,6 +578,12 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
     padding-left:max(.9rem,calc((100% - 1200px)/2 + .9rem));
     padding-right:max(.9rem,calc((100% - 1200px)/2 + .9rem));
   }
+  /* 評分頁：頂部標題列（返回/篇名/上下篇）對齊到與內容欄（sv-inner max 780）同一條邊界，
+     與置中的內容、底部操作列一致 */
+  #scoreView .sv-head{
+    padding-left:max(1.25rem,calc((100% - 780px)/2));
+    padding-right:max(1.25rem,calc((100% - 780px)/2));
+  }
   .ref-summary{flex-wrap:nowrap}
   .info-title{font-size:1.15rem}
 }
@@ -1156,10 +1162,11 @@ function isComplete(d){
 function isWide(){ return false; }
 
 /* 「查看並評分」按鈕：手指在清單上有位移（捲動）就不觸發，只有真正輕點才進入。
-   同時偵測水平與垂直位移，門檻 10px；旗標保留到下一次 touchstart 才重置。 */
-let _listMoved=false, _tsX=0, _tsY=0;
+   偵測到滑動後，隨後一小段時間（600ms）一律忽略點擊——不論瀏覽器何時補送
+   synthetic click 都擋得掉。桌機（無 touch 事件）不受影響，滑鼠點擊照常。 */
+let _listMoved=false, _tsX=0, _tsY=0, _swallowUntil=0;
 function tapScore(i){
-  if(_listMoved) return;   // 這一手是滑動，忽略
+  if(_listMoved || Date.now()<_swallowUntil) return;   // 剛滑動過 → 忽略
   openScore(i);
 }
 
@@ -2307,9 +2314,11 @@ function exportAwardCSV(){
   const plist=el('paperList');
   if(plist){
     const mark=e=>{ const t=e.touches&&e.touches[0]; if(!t)return;
-      if(Math.abs(t.clientX-_tsX)>10 || Math.abs(t.clientY-_tsY)>10) _listMoved=true; };
+      if(Math.abs(t.clientX-_tsX)>10 || Math.abs(t.clientY-_tsY)>10){ _listMoved=true; _swallowUntil=Date.now()+600; } };
     plist.addEventListener('touchstart',e=>{ const t=e.touches[0]; _tsX=t.clientX; _tsY=t.clientY; _listMoved=false; },{passive:true});
     plist.addEventListener('touchmove',mark,{passive:true});
+    // 保險：滑動放開時（touchend）也刷新忽略視窗，涵蓋慣性捲動後才補送的 click
+    plist.addEventListener('touchend',()=>{ if(_listMoved) _swallowUntil=Date.now()+600; },{passive:true});
   }
   // 手機返回鍵關閉評分頁
   window.addEventListener('popstate',()=>{
