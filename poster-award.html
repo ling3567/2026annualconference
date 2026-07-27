@@ -310,8 +310,29 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 .ref-tbl th.avg,.ref-tbl td.avg{background:var(--blue-bg);color:var(--blue);font-weight:700}
 .ref-tbl tr.sum td{background:var(--bg2);font-weight:700;color:var(--ink);border-bottom:none}
 .ref-tbl tr.sum td.avg{background:var(--adm-blue-br)}
-.ref-cmt-hd{font-size:.76rem;font-weight:700;color:var(--main-d);letter-spacing:.06em;
-  margin:.95rem 0 .1rem}
+.ref-cmt-hd{font-size:.8rem;font-weight:700;color:var(--main-d);
+  margin:.95rem 0 .25rem}
+/* 初審評審意見：精簡列（不再用巢狀方框，僅以細線分隔）*/
+.ref-op{padding:.55rem 0;border-top:1px solid var(--border2)}
+.ref-op:first-of-type{border-top:none;padding-top:.1rem}
+.ref-op-h{display:flex;align-items:baseline;gap:.5rem;margin-bottom:.2rem}
+.ref-op-h .who{font-size:.82rem;font-weight:700;color:var(--blue)}
+.ref-op-h .sc{font-size:.78rem;color:var(--muted)}
+.ref-op-t{font-size:.95rem;line-height:1.8;color:var(--ink)}
+/* 口頭報告評分：獨立區塊（金色表頭，對應初審成績的淡藍色表頭）*/
+.fbox{background:#fff;border:1px solid var(--gold-br);border-radius:var(--r);
+  margin-bottom:.85rem;overflow:hidden;box-shadow:var(--sh-sm)}
+.fbox-head{padding:.8rem .95rem;background:var(--gold-bg);color:var(--gold);
+  font-size:.9rem;font-weight:700;display:flex;align-items:center;gap:.4rem}
+.fbox-body{padding:.2rem .95rem .95rem}
+.fitem{padding:.85rem 0}
+.fitem.sep{border-top:1px solid var(--border2)}
+.fitem.empty-warn{background:var(--adm-red-l);margin:0 -.5rem;
+  padding-left:.5rem;padding-right:.5rem;border-radius:8px}
+.fbox-body textarea{width:100%;min-height:92px;padding:.7rem .8rem;border:1.5px solid var(--border2);
+  border-radius:9px;font-size:.92rem;line-height:1.75;background:var(--bg2);resize:vertical}
+.fbox-body textarea:focus{outline:none;border-color:var(--main);background:#fff}
+.cmt-label{display:block;font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:.5rem}
 /* 最終總分換算提示 */
 .calc-note{background:var(--adm-gold-bg);border:1px solid var(--adm-gold-br);border-radius:var(--r);
   padding:.6rem .75rem;margin-bottom:.8rem;font-size:.78rem;color:var(--adm-gold);line-height:1.7}
@@ -530,8 +551,10 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 
 /* ══════════ 平板 ≥ 820px ══════════ */
 @media(min-width:820px){
-  /* 委員清單維持單欄（與手機一致），僅置中限寬 */
-  .list{max-width:780px;margin:0 auto;width:100%}
+  /* 電腦/平板：論文清單改多欄卡片，一列多篇方便挑選（進入評分仍靠按鈕，不會誤觸）*/
+  .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:.85rem;max-width:1200px;margin:0 auto;width:100%}
+  .list .empty{grid-column:1/-1}
   .progbar,.toolbar{padding-left:1.25rem;padding-right:1.25rem}
   /* sv-body 佔滿寬度（卷軸在最右），內容由 .sv-inner 置中限寬 */
   .sv-body{padding:1.1rem 1.25rem calc(7.5rem + var(--safe-b))}
@@ -643,7 +666,7 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
       <div class="sv-total">
         <span class="lbl">口頭報告評分</span>
         <span class="num" id="svTotal">0</span>
-        <span class="den">/ <span id="svMax">20</span></span>
+        <span class="den">/ <span id="svMax">20</span> 分</span>
       </div>
       <div class="sv-btns">
         <button class="btn-draft" onclick="saveDraft(true)">暫存</button>
@@ -769,7 +792,7 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2njUGr6eORWe6
 const AWARD_CRITERIA = [
   { id:'a1',
     label:'口頭報告之結構性、完整性及海報製作品質',
-    desc:'占最終總成績 20%（滿分 20 分）',
+    desc:'',
     max:20 }
 ];
 const AWARD_MAX = AWARD_CRITERIA.reduce((s,c)=>s+c.max,0);
@@ -1290,38 +1313,33 @@ function renderRef(p){
       +used.length+' 位（'+used.map(label).join('、')+'）計入初審平均。</p>';
   }
 
-  /* 初審評審意見（僅採計的委員） */
+  /* 初審評審意見（僅採計的委員）—— 精簡列呈現 */
   const withCmt=used.filter(x=>x.r.comment);
   if(withCmt.length){
     h+='<div class="ref-cmt-hd">初審評審意見</div>';
     used.forEach(x=>{
       if(!x.r.comment) return;
-      h+='<div class="ref-rv"><div class="ref-rv-top">'
-        +'<span class="ref-rv-who">'+label(x)+'</span>'
-        +'<span class="ref-rv-total">'+(x.r.total!=null?x.r.total:'—')+' <small style="color:var(--muted);font-weight:600">/'+REVIEW_MAX+'</small></span>'
-        +'</div>'
-        +'<div class="ref-cmt">'+esc(x.r.comment).replace(/\n/g,'<br>')+'</div>';
-      h+='</div>';
+      h+='<div class="ref-op">'
+        +'<div class="ref-op-h"><span class="who">'+label(x)+'</span>'
+          +'<span class="sc">'+(x.r.total!=null?x.r.total:'—')+' / '+REVIEW_MAX+'</span></div>'
+        +'<div class="ref-op-t">'+esc(x.r.comment).replace(/\n/g,'<br>')+'</div>'
+      +'</div>';
     });
   }
 
   const rejCount=reviews.length-validAll.length;
   if(rejCount) h+='<p style="font-size:.76rem;color:var(--red);margin-top:.6rem">※ 另有 '+rejCount+' 位委員於初審標記退稿，該筆分數未計入上方統計。</p>';
-  h+='<p style="font-size:.74rem;color:var(--muted);margin-top:.7rem;line-height:1.7">'
-    +'※ 以上為<strong>初審成績</strong>，已占最終總分 '+REVIEW_MAX+' 分，<strong>不需重複評分</strong>；'
-    +'請就現場口頭報告與海報實體呈現給分。</p>';
   return h+'</div></div>';
 }
 
 function renderForm(p,d,isDone){
-  let h='<div style="font-size:.95rem;font-weight:700;color:var(--slate);margin:0 0 .7rem .1rem">口頭報告評分</div>';
-  AWARD_CRITERIA.forEach(c=>{
+  let h='<div class="fbox"><div class="fbox-head">🖊 口頭報告評分</div><div class="fbox-body">';
+  AWARD_CRITERIA.forEach((c,i)=>{
     const v=(d[c.id]!==undefined&&d[c.id]!=='')?Number(d[c.id]):'';
-    const filled=v!=='';
-    h+='<div class="crit'+(filled?' filled':'')+'" id="crit_'+c.id+'">'
+    h+='<div class="fitem'+(i>0?' sep':'')+'" id="crit_'+c.id+'">'
       +'<div class="crit-top"><div class="crit-name">'+c.label+'</div>'
       +'<span class="crit-max">'+c.max+' 分</span></div>'
-      +'<div class="crit-desc">'+c.desc+'</div>'
+      +(c.desc?'<div class="crit-desc">'+c.desc+'</div>':'')
       +'<div class="crit-inp">'
         +'<div class="stepper">'
           +'<button type="button" onclick="bump(\''+c.id+'\',-1,'+c.max+')" '+(isDone?'disabled':'')+'>−</button>'
@@ -1337,11 +1355,12 @@ function renderForm(p,d,isDone){
         +'</div>'
       +'</div></div>';
   });
-  h+='<div class="cmt-box"><label for="cmtIn">評審意見<span style="font-weight:500;color:var(--muted);font-size:.8rem">（選填）</span></label>'
+  h+='<div class="fitem sep">'
+    +'<label class="cmt-label" for="cmtIn">評審意見 <span style="font-weight:500;color:var(--muted);font-size:.8rem">（選填）</span></label>'
     +'<textarea id="cmtIn" '+(isDone?'disabled':'')+' placeholder="請就口頭報告的結構性、完整性，以及海報製作品質提供意見…" '
     +'oninput="autoDraft()">'+esc(d.comment||'')+'</textarea>'
-    +'<div class="cmt-hint">評審意見將由秘書處彙整，並可回饋給投稿者。</div></div>';
-  return h;
+    +'</div>';
+  return h+'</div></div>';
 }
 
 function toggleAcc(id){ el(id).classList.toggle('open'); }
@@ -1406,7 +1425,7 @@ function updateTotal(){
       +'<span class="eq">＝</span> <span class="proj">'+proj+'</span> / '+FINAL_MAX
       +'<span style="width:100%;text-align:center;font-size:.66rem">＊最終總分以 '+ONSITE_JUDGE_COUNT+' 位委員的口頭報告平均分計算</span>';
   }else if(p && p._refAvg!==null){
-    calc.innerHTML='初審成績 <b>'+p._refAvg+'</b> / '+REVIEW_MAX+'　·　口頭報告滿分 '+AWARD_MAX+' 分';
+    calc.innerHTML='初審成績 <b>'+p._refAvg+'</b> / '+REVIEW_MAX+' 分';
   }else{
     calc.innerHTML='';
   }
@@ -2212,7 +2231,7 @@ function showJudgeDetail(pid){
     +'</tbody></table></div>';
 
   // 現場委員評分明細（僅一個評分項目，不另設小計）
-  h+='<div class="mdl-sec">現場委員評分（口頭報告，滿分 '+AWARD_MAX+'）</div>';
+  h+='<div class="mdl-sec">現場委員評分（口頭報告）</div>';
   if(!sc.length){
     h+='<p style="font-size:.9rem;color:#718096">尚無現場評分。</p>';
   }else{
