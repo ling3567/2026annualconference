@@ -3,6 +3,10 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<!-- 不快取：讓委員每次開啟都取得最新版，避免拿到舊快取 -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#3a4550">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1139,7 +1143,7 @@ function renderList(){
         +(p._refAvg!==null?'<span class="pc-ref">初審 '+p._refAvg+' 分</span>':'')
         +(myTotal!==null?'<span class="pc-mine">我的評分 '+myTotal+'</span>':'')
       +'</div>'
-      +'<div class="pc-action"><button class="pc-btn'+(isDone?' done':hasDraft?' draft':'')+'" onclick="tapScore('+idx+')">'+btnLabel+' →</button></div>'
+      +'<div class="pc-action"><button class="pc-btn'+(isDone?' done':hasDraft?' draft':'')+'" data-idx="'+idx+'">'+btnLabel+' →</button></div>'
     +'</div>';
   }).join('');
 }
@@ -1160,14 +1164,8 @@ function isComplete(d){
 /* 委員端一律採手機版型（清單→點入覆蓋抽屜），平板與手機一致，故恆為 false */
 function isWide(){ return false; }
 
-/* 「查看並評分」按鈕：手指在清單上有位移（捲動）就不觸發，只有真正輕點才進入。
-   偵測到滑動後，隨後一小段時間（600ms）一律忽略點擊——不論瀏覽器何時補送
-   synthetic click 都擋得掉。桌機（無 touch 事件）不受影響，滑鼠點擊照常。 */
-let _listMoved=false, _tsX=0, _tsY=0, _swallowUntil=0;
-function tapScore(i){
-  if(_listMoved || Date.now()<_swallowUntil) return;   // 剛滑動過 → 忽略
-  openScore(i);
-}
+/* 「查看並評分」進入評分頁的狀態（實際判斷在 init 的清單觸控/點擊委派中） */
+let _listMoved=false, _tsX=0, _tsY=0, _lastTouchEnd=0;
 
 function openScore(i){
   curIdx=i;
@@ -2308,16 +2306,26 @@ function exportAwardCSV(){
 
 /* ══════════ 啟動 ══════════ */
 (function init(){
-  // 論文清單：偵測滑動，避免捲動時誤觸「查看並評分」按鈕
-  // 僅用 touch 事件判斷（不碰 scroll，避免桌機滑鼠滾動誤判導致按鈕失效）
+  // 論文清單：只有在按鈕上「真正輕點」才進入評分；捲動一律不進入。
+  // 做法：以按鈕的 touchend 判斷是否為輕點，並 preventDefault 擋掉捲動後補送的 ghost click。
   const plist=el('paperList');
   if(plist){
-    const mark=e=>{ const t=e.touches&&e.touches[0]; if(!t)return;
-      if(Math.abs(t.clientX-_tsX)>10 || Math.abs(t.clientY-_tsY)>10){ _listMoved=true; _swallowUntil=Date.now()+600; } };
-    plist.addEventListener('touchstart',e=>{ const t=e.touches[0]; _tsX=t.clientX; _tsY=t.clientY; _listMoved=false; },{passive:true});
-    plist.addEventListener('touchmove',mark,{passive:true});
-    // 保險：滑動放開時（touchend）也刷新忽略視窗，涵蓋慣性捲動後才補送的 click
-    plist.addEventListener('touchend',()=>{ if(_listMoved) _swallowUntil=Date.now()+600; },{passive:true});
+    const closestBtn=t=>(t && t.nodeType===1 && t.closest)?t.closest('.pc-btn'):null;
+    plist.addEventListener('touchstart',e=>{ const t=e.touches[0]; if(!t)return; _tsX=t.clientX; _tsY=t.clientY; _listMoved=false; },{passive:true});
+    plist.addEventListener('touchmove',e=>{ const t=e.touches[0]; if(!t)return;
+      if(Math.abs(t.clientX-_tsX)>10 || Math.abs(t.clientY-_tsY)>10) _listMoved=true; },{passive:true});
+    plist.addEventListener('touchend',e=>{
+      const btn=closestBtn(e.target); if(!btn) return;
+      _lastTouchEnd=Date.now();
+      e.preventDefault();                    // 擋掉隨後的 ghost click（捲動誤觸的來源）
+      if(!_listMoved) openScore(Number(btn.getAttribute('data-idx')));   // 沒滑動＝輕點 → 進入
+    },{passive:false});
+    // 桌機滑鼠：以 click 進入（觸控已由 touchend 處理，700ms 內的 click 視為觸控殘留而忽略）
+    plist.addEventListener('click',e=>{
+      const btn=closestBtn(e.target); if(!btn) return;
+      if(Date.now()-_lastTouchEnd<700) return;
+      openScore(Number(btn.getAttribute('data-idx')));
+    });
   }
   // 手機返回鍵關閉評分頁
   window.addEventListener('popstate',()=>{
