@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -939,10 +940,8 @@ async function doLogin(){
     if(r && r.success){
       role='reviewer'; me=r.reviewer;
       reviewerNames=r.reviewerNames||{};
-      // reviewerLogin 回傳的 submitted 可能含本系統的 AW_ 前綴紀錄
-      Object.keys(r.submitted||{}).forEach(k=>{
-        if(String(k).startsWith(AWARD_ID_PREFIX)) submittedMap[String(k).slice(AWARD_ID_PREFIX.length)]=true;
-      });
+      // 「已提交」狀態一律以「優秀海報評分」表（awardGetMyScores）為準，於 reloadPapers 中取得；
+      // 不採用 reviewerLogin 回傳的初審表 AW_ 舊紀錄，避免清空重評後仍顯示「查看評分」。
       sessionStorage.setItem('tsmcsd_award_auth', JSON.stringify({role,me}));
       el('loginScreen').style.display='none';
       el('rvApp').classList.add('on');
