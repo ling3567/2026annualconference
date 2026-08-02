@@ -733,6 +733,26 @@ body { padding-top: 58px; }
 .form-status.error { background: #fdecea; color: #a31b1b; border: 1px solid #f5b7b1; display: block; }
 .form-status.loading { background: var(--ice-blue); color: var(--nav-blue); display: block; }
 
+/* 必填未答時，題目旁的浮動警告標記 */
+.required-warning {
+  display: inline-block;
+  background: #e74c3c;
+  color: var(--white);
+  font-size: 0.72rem; font-weight: 700;
+  padding: 0.22rem 0.6rem;
+  border-radius: 99px;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.35);
+  animation: warnPulse 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes warnPulse {
+  0%   { transform: scale(0.3); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* 滿意度調查：分區標題 + Likert 緊湊樣式 */
 .form-section-header {
   margin: 1.6rem 0 0.9rem;
@@ -1491,7 +1511,7 @@ const POSTERS = {
     { num: '實體14', title: 'AI 虛擬人導入實習生 OSCE 評核之成效：以心衰竭營養照護教案為例', author: '王逸婷', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1yCU8c4SlWzYuSOfDXI6mZDMEoqP336cJ/view' },
     { num: '實體15', title: 'AI生成音訊與製作健康素養衛教教學，提升護理人員脊椎手術照護成效', author: '黃玥玲', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1tAClCkKbdxloCUAppEanl4oHmgPEmC8S/view' },
     { num: '實體16', title: '探討 QCPR APP 介入對行政及醫護人員 CPR 技能之影響與長期維持—以 OSCE 評估為例', author: '張筠菡', org: '中國醫藥大學新竹附設醫院', pdf: 'https://drive.google.com/file/d/1G5jjHbzoFBVlkfTq5TrJX4DE9selsEJg/view' },
-    { num: '實體17', title: '建構髖關節置換手術術後介入客觀結構式臨床技能測驗的組內相關係數與描述性共識指標之互補應用-前驅試驗', author: '詹禹慈', org: '衛生福利部桃園醫院', pdf: 'https://drive.google.com/file/d/1HrNj6AAGjVvFMGdvwBD46YrOfbQBsZpi/view' },
+    { num: '實體17', title: '建構髖關節置換手術術後介入客觀結構式臨床技能測驗的組內相關係數與描述性共識指標之互補應用-前驅試驗', author: '詹禹慈', org: '衛生福利部桃園醫院', pdf: 'https://drive.google.com/file/d/1PJ6PhS9O_rgDDWQuF_nf4mFL52zvZUKM/view' },
     { num: '實體18', title: '以CAP能力試驗檢體建構動態影片考核模式提升RPR判讀一致性之研究', author: '羅佳鈺', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1ODsi7HriRxDxSpUj2bgCLQbfiNG30tn0/view' },
     { num: '實體19', title: '世界咖啡館模式下跨職類醫事學生「未來臨床助益」之構建與差異化分析：以醫學人文概念為例', author: '張家豪', org: '戴德森醫療財團法人嘉義基督教醫院', pdf: 'https://drive.google.com/file/d/11PxH8eilrVqAxlHMmM5UYlDcASX5HAOy/view' },
     { num: '實體20', title: '生成式AI與敘事醫學在藥師培訓中作為專業素養與醫療韌性催化劑之成效評估', author: '黃美珠', org: '中國醫藥大學附設醫院', pdf: 'https://drive.google.com/file/d/1HKpyj3gd8fC7nmn2sNGaaMQx5Hh4PGCG/view' },
@@ -1514,13 +1534,13 @@ const POSTERS = {
     { num: 'EP-03A', title: '情境式教學提升急診病患辨識與引導執行磁振造影檢查之成效', author: '康博勝', org: '義大醫療財團法人義大醫院', pdf: 'https://drive.google.com/file/d/10E-Jk2I0cevGRNPNNGwqxWzuDRB4h-74/view' },
     { num: 'EP-04A', title: 'Integrating Simulation Phantoms and Reflective Practice to Enhance Radiography Interns\' Clinical Communication Skills: A Case of High-Anxiety Mammography Scenarios', author: '黃詩華', org: '義大醫療財團法人義大醫院', pdf: 'https://drive.google.com/file/d/1ctFAqhwNynAKlX-c-vgYjOgN52DZ61Ny/view' },
     { num: 'EP-05A', title: 'Integration of Hybrid Operating Room Techniques with ERAS Protocol in Advanced NSCLC Management', author: '鄭伃婷', org: '臺北市立聯合醫院', pdf: 'https://drive.google.com/file/d/17q_bASPfV9Cc1PNM-jOmfV0SAhCk6Fzb/view' },
-    { num: 'EP-06A', title: '將零碎時間轉化為臨床學習場域：AI虛擬病人於專科護理師OSCE訓練之應用分析', author: '蘇韻如', org: '臺北市立聯合醫院仁愛院區', pdf: 'https://drive.google.com/file/d/1ZjNLMpGAMchyq6jIm6bjXND1C4h_qwqJ/view' },
+    { num: 'EP-06A', title: '將零碎時間轉化為臨床學習場域：AI虛擬病人於專科護理師OSCE訓練之應用分析', author: '蘇韻如', org: '臺北市立聯合醫院仁愛院區', pdf: 'https://drive.google.com/file/d/10Q_TPRvAYL3RU0uUYca7s2ap7L-Yno6K/view' },
     { num: 'EP-07A', title: '電子學習歷程數位轉型之成效與使用者適應性影響探討', author: '黃建中', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1e3So0ev-sdW7xmY0J3SuDrVFToPNYFrD/view' },
     { num: 'EP-08A', title: '情境模擬教學介入對提升專科護理師急救處置自效能之成效探討', author: '鍾筱宣', org: '國立成功大學醫學院附設醫院', pdf: 'https://drive.google.com/file/d/1eTxwROJLL8tfW96l5__xSt8AHKnHlzbm/view' },
     { num: 'EP-09A', title: '情境擬真教學之心肌灌注造影技術操作', author: '邱育琪', org: '義大醫療財團法人義大醫院', pdf: 'https://drive.google.com/file/d/1gC_HJhPkLoCiDCg0aa3HFhjTAnW3ZqmJ/view' },
     { num: 'EP-10A', title: 'Development of a Competency-Based Simulation Training Model for Integrated Airway Management: From Endotracheal Intubation to Patient Transport', author: '蘇博民', org: '國軍左營總醫院', pdf: 'https://drive.google.com/file/d/1GcNJOr0lNlgDnOW1uHT4YNawmPcp_yUF/view' },
-    { num: 'EP-11A', title: '教育者作為效能催化劑：運用Kirkpatrick模式評估混成式BLS訓練在降低成本、時間與碳足跡之成效', author: '劉梅瑛', org: '國立臺灣大學醫學院附設醫院雲林分院', pdf: 'https://drive.google.com/file/d/15qokeG27V7nw4W4nK_yfx1tKnzGrzI0C/view' },
-    { num: 'EP-12A', title: '運用DOPS+口述評量BC ROBO 7 自動備管機與作業系統升級教育訓練', author: '洪永東', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/11KKLB_9pb6JLg2koeXWKBsUm8I6gaZJT/view' },
+    { num: 'EP-11A', title: '教育者作為效能催化劑：運用Kirkpatrick模式評估混成式BLS訓練在降低成本、時間與碳足跡之成效', author: '劉梅瑛', org: '國立臺灣大學醫學院附設醫院雲林分院', pdf: 'https://drive.google.com/file/d/1nuln0_u9hMGSEPWr0d1-VBoYftuxFPAN/view' },
+    { num: 'EP-12A', title: '運用DOPS+口述評量BC ROBO 7 自動備管機與作業系統升級教育訓練', author: '洪永東', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1LJY_zfhsTw0CXDYpwt82jnrfcif19yXm/view' },
     { num: 'EP-13A', title: '以 Vibe Coding 為主軸之 AI 數位賦能工作坊：跨職類醫療人員轉化學習與行為意圖成效之探討', author: '盧英云', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1S6-S3G-ywAnJ5o_roT74Z6dD9udThCTV/view' },
     { num: 'EP-14A', title: '跨團隊高擬真情境模擬教學於 COPD 急性惡化處置之成效初探', author: '蕭惠珊', org: '台灣基督長老教會馬偕醫療財團法人馬偕紀念醫院', pdf: 'https://drive.google.com/file/d/1V7tdx7iPL1gwdlVmp0qGTKZORmw7Xidh/view' },
     { num: 'EP-15A', title: '營養師臨床數位化多媒體教學與傳統見習教學模式成效探討', author: '賴佩吟', org: '淡水馬偕紀念醫院', pdf: 'https://drive.google.com/file/d/1MloFc2KfhgiYtrmBD2aNDAwC0IdMbhVE/view' },
@@ -1535,22 +1555,22 @@ const POSTERS = {
     { num: 'EP-24A', title: '高擬真情境模擬教學於跨團隊合作訓練之二年期學員學習滿意度研究', author: '邱瑜柔', org: '台灣基督長老教會馬偕醫療財團法人馬偕紀念醫院', pdf: 'https://drive.google.com/file/d/1cCSmE8BERswtH85Ws4_KGD6YkBwmuAuq/view' },
     { num: 'EP-25A', title: '運用混成教學與遊戲化教學於「尖銳物品扎傷事件防範」之實踐', author: '邱旅揚', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1h-8Xf_bA2Hpn02ZodVcUdAGeryc3GljI/view' },
     { num: 'EP-26A', title: '虛擬病人評分在營養OSCE中的一致性與系統性偏差', author: '黃琳惠', org: '中國醫藥大學新竹附設醫院', pdf: 'https://drive.google.com/file/d/1mwpHxVhKENX3_CFwvtzw-BDzxHKxPN0W/view' },
-    { num: 'EP-27A', title: '運用客觀結構化臨床考試（OSCE）提升護理臨床教師週邊植入式中心導管（PICC）照護技能', author: '賴麗君', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/11IHR0HV8ng9f6CcInVb0p6KJIfz0vwkE/view' },
+    { num: 'EP-27A', title: '運用客觀結構化臨床考試（OSCE）提升護理臨床教師週邊植入式中心導管（PICC）照護技能', author: '賴麗君', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1bYmrr3tAv6pcqFfv73FvokJaZjSc-RD5/view' },
     { num: 'EP-28A', title: '應用雙軌影片評核與臨床行為指引提升臨床護理教師 DOPS 評分共識之成效', author: '曲天尚', org: '臺北醫學大學附設醫院', pdf: 'https://drive.google.com/file/d/1pZojOYEQ8V5J08hd1iatVKyoqjblnROH/view' },
     { num: 'EP-29A', title: '運用SimMan Critical Care 高擬真模擬器結合OSCE建構急性肺水腫呼吸治療進階課程之教學成效評估', author: '林育禎', org: '國立臺灣大學醫學院附設醫院新竹分院', pdf: 'https://drive.google.com/file/d/1OdPAJT3QhUskk7fT-zpaPsS5JhSnOpYy/view' },
     { num: 'EP-30A', title: 'EPAs導向護理交班訓練對新進護理人員臨床溝通能力之成效', author: '夏美玲', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1MJtW5yy5nv0L0diD__6trdpXG2wghysI/view' },
-    { num: 'EP-31A', title: '運用XR建構提升兒科新進人員靜脈注射流程認知衛教與靜注異常處置', author: '黃薏庭', org: '天成醫療社團法人天晟醫院', pdf: 'https://drive.google.com/file/d/100oLj-LCKAy2z_KR2N9y_pKwQ98C6Kqb/view' },
+    { num: 'EP-31A', title: '運用XR建構提升兒科新進人員靜脈注射流程認知衛教與靜注異常處置', author: '黃薏庭', org: '天成醫療社團法人天晟醫院', pdf: 'https://drive.google.com/file/d/1vRPR4g-jRkyPpc7xkONTDVN3oZWlxpqQ/view' },
     { num: 'EP-32A', title: '從情境沉浸到臨床決策：互動式360教學於產科OSCE之創新教學模式', author: '王淑鈴', org: '淡水馬偕紀念醫院', pdf: 'https://drive.google.com/file/d/1Ahs4qDzi6-5m7tkRY-_mLUAMGGs6RYc8/view' },
     { num: 'EP-33A', title: '運用多元教學策略提升新進護理人員胸管照護能力', author: '胡月華', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1GwIKrT8R4ZhNgjTR0fuMwWT_R2oLkNFC/view' },
     { num: 'EP-34A', title: '人工智慧應用於臨床技能教育回饋之範域文獻回顧', author: '林健禾', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1Wm8UFhE_wnOwVCwxmux19_5FJGLq8_Gv/view' },
     { num: 'EP-35A', title: '運用遊戲式溝通訓練提升護理人員護病衝突應對能力之成效探討', author: '章正俐', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1pmL2o7J2nV8SekmM3J_IABl8QshPafYX/view' },
-    { num: 'EP-36A', title: '從焦慮到信任：AI標準化家長於PGY學員兒童發展評估結果溝通訓練之應用', author: '邱靜芳', org: '衛生福利部部立雙和醫院', pdf: 'https://drive.google.com/file/d/1hPHTn0heVDFmzdoyijtTEtkLwHS-YrJW/view' },
+    { num: 'EP-36A', title: '從焦慮到信任：AI標準化家長於PGY學員兒童發展評估結果溝通訓練之應用', author: '邱靜芳', org: '衛生福利部部立雙和醫院', pdf: 'https://drive.google.com/file/d/1e5-QItKUM4UVwd_ZL0Wt89zILi8TU23T/view' },
     { num: 'EP-37A', title: '不可見的障礙：以體驗式中風模擬提升職能治療實習生之臨床覺察', author: '高婕螢', org: '臺北醫學大學附設醫院', pdf: 'https://drive.google.com/file/d/18BSBkOdTXlkYfXXq42PHcPM4R55sgowG/view' },
     { num: 'EP-38A', title: '提升新進護理人員噴霧吸入治療操作正確率之教育訓練', author: '許麗芳', org: '臺北醫學大學附設醫院', pdf: 'https://drive.google.com/file/d/1XDlYtUGD9Ga_Z4MCxytXmRsviEd5-aIH/view' },
     { num: 'EP-39A', title: '以AI輔助提升物理治療期刊報告參與度與學習成效之探討', author: '彭靖雅', org: '天成醫療社團法人天晟醫院', pdf: 'https://drive.google.com/file/d/19hO2jOtg4UwJ9MDbPKuFVpQePT1K1akl/view' },
     { num: 'EP-40A', title: '應用高擬真模擬訓練提升病房護理人員急救應變之教學經驗分享', author: '杜佩綺', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1NQeocsEwLt-IeZQVXe3pfNggv2JXEfh4/view' },
     { num: 'EP-41A', title: '從患者體驗到治療重設計：以身體化模擬促進職能治療PGY之臨床推理轉變', author: '周詩涵', org: '臺北醫學大學附設醫院', pdf: 'https://drive.google.com/file/d/1LhT0RarkfEURViuUn6dXBDS7NuKncNAj/view' },
-    { num: 'EP-42A', title: '運用實體教學提升護理人員周邊中心靜脈管路(PICC)照護能力', author: '黃鈺芳', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1TqhV5DT8JKI4lNnqHuI4vgDzMGAo1B1X/view' },
+    { num: 'EP-42A', title: '運用實體教學提升護理人員周邊中心靜脈管路(PICC)照護能力', author: '黃鈺芳', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1uXXAfMPLRr9nSJLtbQrgi83p3ZzF_VeC/view' },
     { num: 'EP-43A', title: '視覺記憶導向之急救藥物教學', author: '林彥君', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1DqqeWsE40E8uSEBjO7V3gSW_bwQgIvrh/view' },
     { num: 'EP-44A', title: '胃癌防治：幽門桿菌抗原快篩檢驗與OSCE評量成效', author: '黄郁雯', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/15T7-mHMTAGUPnwMKHZELjLBGLFnr6p7n/view' },
     { num: 'EP-45A', title: '一個漏氣警報，三條病安防線:人工氣道氣囊漏氣的OSCE能力評核', author: '鄭愛琴', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/181oFZCLsaG-GWnGSOrc5sSqTC1FDd_-l/view' },
@@ -1567,7 +1587,7 @@ const POSTERS = {
     { num: 'EP-56B', title: '勝任能力導向臨床訓練成效分析—以重症照護站別為例', author: '陳永銘', org: '奇美醫療財團法人柳營奇美醫院', pdf: 'https://drive.google.com/file/d/1NFpx8f7yNNg78GebK3xQ1eD0DYaIAJBZ/view' },
     { num: 'EP-57B', title: 'FUN Learning Detective: A Gamified Two-Stage Assessment Using Peer Learning and Timed Challenges in Medical Laboratory Internship Training', author: '葉瑩君', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1C8nKyKTurfNlT7VEALelKGdVLogcJQMJ/view' },
     { num: 'EP-58B', title: '利用影片評估物理治療實習生同理心之學習成效', author: '劉天慧', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1uH5kexDjj7aKnWUxOOebuhBbrC5PdP-D/view' },
-    { num: 'EP-59B', title: 'OSCE評分考官訓練對營養科臨床技能評量一致性之影響', author: '陳宛伶', org: '中國醫藥大學新竹附設醫院', pdf: 'https://drive.google.com/file/d/1iLYU9M6pI3QBcNSYq_rOCEfwOhtQp0gC/view' },
+    { num: 'EP-59B', title: 'OSCE評分考官訓練對營養科臨床技能評量一致性之影響', author: '陳宛伶', org: '中國醫藥大學新竹附設醫院', pdf: 'https://drive.google.com/file/d/1SoXh2GFWOeQFm31FPp1vMWMyEIW4zX3B/view' },
     { num: 'EP-60B', title: '運用實體教學提升護理人員靜脈導管注射完正率', author: '葉紜彤', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1g3fPbZxHytyDQcz1c_WjSFII-EDfg8iw/view' },
     { num: 'EP-61B', title: '醫事放射實習生客觀結構式臨床測驗之精簡化：導入 mini-OSCE 之可行性與初步經驗', author: '范芳郡', org: '臺北醫學大學附設醫院', pdf: 'https://drive.google.com/file/d/1ug20ztN_pEpARWZ7Y6AQd89NFFhe50Uc/view' },
     { num: 'EP-62B', title: '牙醫實習生學習風格及客觀結構式臨床測驗成績之關連性', author: '陳昭安', org: '奇美醫療財團法人柳營奇美醫院', pdf: 'https://drive.google.com/file/d/13t9pDMf6p_auE9KjUKHmb5xTUxL01oIf/view' },
@@ -2048,6 +2068,44 @@ function renderLikert(name, label, scale, required, compact = true) {
 }
 
 renderSurveyForm();
+
+/* ════════════════════════════════════════════════════════════════
+   必填欄位「⚠ 請填寫」浮動標記
+   ════════════════════════════════════════════════════════════════ */
+function findQuestionContainer(el) {
+  // 依序找 Likert 題目、chip/stack 群組所在的 form-group
+  return el.closest('.likert-item, .form-group');
+}
+function showRequiredWarning(el) {
+  const c = findQuestionContainer(el);
+  if (!c || c.querySelector('.required-warning')) return;
+  const label = c.querySelector('.q-text, .form-label');
+  if (!label) return;
+  const span = document.createElement('span');
+  span.className = 'required-warning';
+  span.textContent = '⚠ 請填寫';
+  label.appendChild(span);
+}
+function clearRequiredWarning(el) {
+  const c = findQuestionContainer(el);
+  if (!c) return;
+  const w = c.querySelector('.required-warning');
+  if (w) w.remove();
+}
+// invalid 事件不會 bubble，需在 capture 階段接
+document.addEventListener('invalid', (e) => {
+  if (!e.target.closest('#survey-form')) return;
+  showRequiredWarning(e.target);
+}, true);
+// 使用者填入時自動清除該題的警告
+document.addEventListener('change', (e) => {
+  if (!e.target.closest('#survey-form')) return;
+  clearRequiredWarning(e.target);
+});
+document.addEventListener('input', (e) => {
+  if (!e.target.closest('#survey-form')) return;
+  clearRequiredWarning(e.target);
+});
 
 /* 「其他」職類別欄位開合 */
 document.addEventListener('change', (e) => {
