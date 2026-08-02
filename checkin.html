@@ -97,7 +97,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .search-item{display:flex;align-items:center;gap:.55rem;padding:.5rem .65rem;border-radius:var(--radius-sm);cursor:pointer;transition:all .12s;border:1.5px solid transparent}
 .search-item:hover{background:var(--bg)}
 .search-item.active{background:var(--primary-light);border-color:var(--border)}
-.search-item.is-checked .si-avatar{background:var(--success)}
+.search-item.is-checked .si-avatar{}
 .si-avatar{width:30px;height:30px;border-radius:50%;background:#0097B2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
 .si-avatar.nm{background:#CCC1DA}
 .si-info{min-width:0;flex:1}
@@ -113,7 +113,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .profile-top{display:flex;align-items:center;gap:.85rem;margin-bottom:1.1rem}
 .profile-avatar{width:44px;height:44px;border-radius:50%;background:#0097B2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;flex-shrink:0}
 .profile-avatar.nm{background:#CCC1DA}
-.profile-avatar.ck{background:var(--success)}
+.profile-avatar.ck{}
 .profile-name{font-size:1.15rem;font-weight:700;letter-spacing:.02em}
 .profile-badges{display:flex;gap:.3rem;margin-top:.25rem;flex-wrap:wrap}
 .badge{font-size:.64rem;font-weight:600;padding:.15rem .45rem;border-radius:3px;display:inline-flex;align-items:center;gap:.2rem;letter-spacing:.02em}
@@ -717,7 +717,7 @@ function renderCounterTabs(){
   const sorted=[...counters].sort();
   let html=`<button class="counter-tab ${!activeCounterFilter?'active':''}" onclick="setCounterFilter(null)">全部</button>`;
   sorted.forEach(c=>{
-    html+=`<button class="counter-tab ${activeCounterFilter===c?'active':''}" onclick="setCounterFilter('${c}')">第${c}<br>報到台</button>`;
+    html+=`<button class="counter-tab ${activeCounterFilter===c?'active':''}" onclick="setCounterFilter('${c}')"><span style="font-size:.85rem;font-weight:700;display:block;line-height:1">${c}</span><span style="font-size:.6rem;font-weight:500;opacity:.7">報到台</span></button>`;
   });
   tabs.innerHTML=html;
 }
@@ -1117,11 +1117,13 @@ function renderStats(){
   const onsiteCount = giftCheckedIn.filter(r=>r.onsitePaid).length;
 
   const absentCount = registrations.filter(r=>r.absent).length;
+  const memAbsentCount = memAll.filter(r=>r.absent).length;
+  const nonAbsentCount = nonAll.filter(r=>r.absent).length;
 
   document.getElementById('statsOverall').innerHTML=`
-    ${soCard('全體報名',''+t,''+c,pctOf(c,t),'var(--terra)')}
-    ${soCard('會員',''+memAll.length,''+memCk,pctOf(memCk,memAll.length),'var(--primary)')}
-    ${soCard('非會員',''+nonAll.length,''+nonCk,pctOf(nonCk,nonAll.length),'var(--text-muted)')}
+    ${soCard('全體報名',''+t,''+c,pctOf(c,t),'var(--terra)',absentCount)}
+    ${soCard('會員',''+memAll.length,''+memCk,pctOf(memCk,memAll.length),'var(--primary)',memAbsentCount)}
+    ${soCard('非會員',''+nonAll.length,''+nonCk,pctOf(nonCk,nonAll.length),'var(--text-muted)',nonAbsentCount)}
     ${soCardGift('禮品已發放', giftCount, onsiteCount)}
     ${soCardMeal('已報到餐點統計', mealMeat, mealVeg, mealNone, mealOther)}
     ${absentCount>0?soCardAbsent('當日不出席',registrations):''}
@@ -1312,7 +1314,7 @@ function renderStatGroup(title, members, ckCount, rate) {
           return `<div class="sg-member" style="background:${bgColor}">
             <div class="sg-dot" style="background:${dotColor}"></div>
             <span class="sg-mname" style="${absentStyle}">${esc(m.name)}</span>
-            ${m.checked?'<svg style="width:14px;height:14px;stroke:var(--success);stroke-width:2.5;fill:none;flex-shrink:0" viewBox="0 0 24 24"><path d="m9 12 2 2 4-4"/></svg>':''}
+            ${m.checked?'<svg style="width:18px;height:18px;stroke:var(--success);stroke-width:3;fill:none;flex-shrink:0" viewBox="0 0 24 24"><path d="m9 12 2 2 4-4"/></svg>':''}
             ${m.absent?'<span style="font-size:.65rem;color:#bbb">不出席</span>':''}
             ${!m.found?'<span style="font-size:.7rem;color:var(--warning)">(未報名)</span>':''}
           </div>`;
@@ -1322,12 +1324,13 @@ function renderStatGroup(title, members, ckCount, rate) {
   </div>`;
 }
 
-function soCard(label,total,checked,rate,color){
+function soCard(label,total,checked,rate,color,absent){
   return `<div class="so-card">
     <div class="so-label">${label}</div>
     <div class="so-val">${checked} <span style="font-size:.82rem;font-weight:500;color:var(--text-muted)">/ ${total}</span></div>
     <div class="so-bar"><div class="so-bar-fill" style="width:${rate}%;background:${color}"></div></div>
     <div style="font-size:.72rem;color:var(--text-muted);margin-top:.15rem">報到率 ${rate}%</div>
+    ${absent>0?`<div style="font-size:.72rem;color:#999;margin-top:.15rem">不出席 ${absent} 人</div>`:''}
   </div>`;
 }
 
@@ -1355,7 +1358,7 @@ function soCardAbsent(label, regs) {
   const nonAbsent = total - memAbsent;
   return `<div class="so-card">
     <div class="so-label">${label}</div>
-    <div class="so-val" style="color:#999">${total} <span style="font-size:.82rem;font-weight:500">位</span></div>
+    <div class="so-val" style="color:#999">${total} <span style="font-size:.82rem;font-weight:500">人</span></div>
     <div style="display:flex;flex-direction:column;gap:.2rem;margin-top:.3rem">
       <div style="display:flex;justify-content:space-between;font-size:.82rem;color:var(--text-secondary)">
         <span>會員</span><span>${memAbsent} 人</span>
@@ -1371,18 +1374,24 @@ function renderCounterStats() {
   const counters = {};
   registrations.forEach(r => {
     if (!r.counter) return;
-    if (!counters[r.counter]) counters[r.counter] = { total: 0, checked: 0 };
+    if (!counters[r.counter]) counters[r.counter] = { total: 0, checked: 0, absent: 0 };
     counters[r.counter].total++;
     if (r.checkedIn) counters[r.counter].checked++;
+    if (r.absent) counters[r.counter].absent++;
   });
   const keys = Object.keys(counters).sort();
   if (keys.length === 0) return '';
   const rows = keys.map(k => {
     const c = counters[k];
-    const rate = c.total > 0 ? Math.round(c.checked / c.total * 100) : 0;
-    return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem">
+    const expected = c.total - c.absent; // 預期報到人數
+    const allDone = c.checked >= expected && expected > 0;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;gap:.5rem">
       <span>第${k}報到台</span>
-      <span><strong>${c.checked}</strong> / ${c.total}</span>
+      <span style="display:flex;align-items:center;gap:.4rem">
+        <strong>${c.checked}</strong> / ${c.total}
+        ${c.absent>0?`<span style="font-size:.72rem;color:#999">（不出席${c.absent}人）</span>`:''}
+        ${allDone?'<svg style="width:16px;height:16px;stroke:var(--success);stroke-width:2.5;fill:none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>':''}
+      </span>
     </div>`;
   }).join('');
   return `<div class="so-card">
