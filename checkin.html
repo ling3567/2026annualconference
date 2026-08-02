@@ -763,8 +763,6 @@ function getFilteredPool(){
   return registrations.filter(r=>r.counter===activeCounterFilter);
 }
 
-// 預建索引（避免 O(n²) 的 indexOf）
-let regIdx=new Map();
 function buildIndex(){ regIdx=new Map(); registrations.forEach((r,i)=>regIdx.set(r,i)); }
 
 function renderGroupChips(){
