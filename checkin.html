@@ -86,6 +86,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .group-chip{font-size:.7rem;font-weight:600;padding:.22rem .5rem;border-radius:20px;border:1.5px solid var(--border);background:var(--card);color:var(--text-secondary);cursor:pointer;font-family:var(--font);transition:all .15s;white-space:nowrap}
 .group-chip:hover{border-color:var(--terra);color:var(--terra)}
 .group-chip.active{background:var(--terra);border-color:var(--terra);color:#fff}
+
+/* Counter tabs */
+.counter-tabs{display:flex;gap:3px;margin-bottom:.5rem;background:var(--bg);padding:2px;border-radius:var(--radius-sm)}
+.counter-tab{flex:1;text-align:center;padding:.3rem .2rem;border-radius:calc(var(--radius-sm) - 1px);font-size:.7rem;font-weight:600;color:var(--text-muted);cursor:pointer;border:none;background:transparent;font-family:var(--font);transition:all .12s}
+.counter-tab:hover{color:var(--text)}
+.counter-tab.active{background:var(--card);color:var(--text);box-shadow:var(--shadow-sm)}
+.counter-badge{display:inline-block;font-size:.6rem;font-weight:700;background:var(--terra);color:#fff;padding:.1rem .35rem;border-radius:3px;margin-left:.3rem;vertical-align:middle}
 .search-list{display:flex;flex-direction:column;gap:2px}
 .search-item{display:flex;align-items:center;gap:.55rem;padding:.5rem .65rem;border-radius:var(--radius-sm);cursor:pointer;transition:all .12s;border:1.5px solid transparent}
 .search-item:hover{background:var(--bg)}
@@ -221,6 +228,30 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--primary);color:#f0ece7;padding:.55rem 1.1rem;border-radius:var(--radius);font-size:.8rem;font-weight:500;z-index:300;opacity:0;transition:all .25s;white-space:nowrap;box-shadow:0 4px 16px rgba(28,25,23,.2);letter-spacing:.02em}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* Absent state */
+.search-item.is-absent .si-avatar{background:#ccc}
+.search-item.is-absent .si-name{text-decoration:line-through;color:var(--text-muted)}
+.search-item.is-absent .si-org{color:#ccc}
+.si-absent{color:#999;flex-shrink:0;font-size:.65rem;font-weight:600;background:#f0f0f0;padding:.1rem .35rem;border-radius:3px}
+.badge-absent{background:#f0f0f0;color:#999}
+.absent-note-box{grid-column:1/-1;margin-top:.3rem;padding:.5rem .7rem;background:#f5f3f0;border:1.5px solid #ddd;border-radius:6px}
+.absent-note-box .info-label{color:#999}
+.absent-note-box .info-value{color:#777}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:250;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal-box{background:var(--card);border-radius:var(--radius);padding:1.5rem;width:90%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+.modal-box h3{font-size:.95rem;font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem}
+.modal-box textarea{width:100%;padding:.6rem .75rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;font-family:var(--font);resize:vertical;min-height:60px;outline:none}
+.modal-box textarea:focus{border-color:var(--terra)}
+.modal-box .modal-hint{font-size:.72rem;color:var(--text-muted);margin-top:.3rem}
+.modal-actions{display:flex;gap:.5rem;margin-top:1rem;justify-content:flex-end}
+.modal-actions button{padding:.45rem .9rem;border-radius:var(--radius-sm);font-size:.82rem;font-weight:600;font-family:var(--font);cursor:pointer;border:none;transition:all .15s}
+.btn-modal-cancel{background:var(--bg);color:var(--text-muted);border:1.5px solid var(--border) !important}
+.btn-modal-confirm{background:#777;color:#fff}
+.btn-modal-confirm:hover{background:#555}
+
 /* ===== RESPONSIVE ===== */
 
 /* Tablet landscape */
@@ -353,6 +384,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
         <input type="text" id="searchInput" placeholder="姓名或服務單位…" autocomplete="off" autofocus>
       </div>
       <div class="search-hint" id="searchHint">載入中…</div>
+      <div class="counter-tabs" id="counterTabs"></div>
       <div class="group-chips" id="groupChips"></div>
       <div class="search-list" id="searchList"></div>
     </div>
@@ -459,6 +491,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 </div>
 </div>
 
+<!-- ABSENT MODAL -->
+<div class="modal-overlay" id="absentModal">
+  <div class="modal-box">
+    <h3>
+      <svg class="icon-svg" viewBox="0 0 24 24" style="color:#999"><circle cx="12" cy="12" r="10"/><path d="M8 8l8 8M16 8l-8 8"/></svg>
+      標記不出席
+    </h3>
+    <div style="font-size:.85rem;margin-bottom:.6rem">
+      <strong id="absentModalName"></strong> 將被標記為不出席
+    </div>
+    <textarea id="absentModalNote" placeholder="備註原因（選填，例如：來電告知、臨時公務）"></textarea>
+    <div class="modal-hint">備註會顯示在詳細頁，供全體工作人員參考</div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeAbsentModal()">取消</button>
+      <button class="btn-modal-confirm" onclick="confirmAbsent()">確定標記</button>
+    </div>
+  </div>
+</div>
+
 <!-- LOADING -->
 <div class="loading-overlay show" id="loadingOverlay">
   <div class="spinner"></div>
@@ -495,7 +546,8 @@ let groups = [];
 let checkinLog = [];
 let onsitePayMap = {}; // name|idNumber → {meal, time}
 let selectedIndex = -1;
-let activeGroupFilter = null; // currently selected group chip
+let activeGroupFilter = null;
+let activeCounterFilter = null; // '1','2','3','4' or null // currently selected group chip
 let currentPage = 'checkin';
 
 // Boot
@@ -550,7 +602,8 @@ function loadData(){
       updateStats();
       renderLog();
       renderGroupChips();
-      document.getElementById('searchHint').textContent=`共 ${registrations.length} 位報名`;
+      renderCounterTabs();
+      updateSearchHint();
       const q=document.getElementById('searchInput').value.trim();
       if(q) doSearch(q);
       if(selectedIndex>=0) selectPerson(selectedIndex);
@@ -654,6 +707,43 @@ document.getElementById('searchInput').addEventListener('input',function(){
 });
 
 // 群組快篩標籤
+// 報到台篩選標籤
+function renderCounterTabs(){
+  const tabs=document.getElementById('counterTabs');
+  // 收集所有報到台編號
+  const counters=new Set();
+  registrations.forEach(r=>{if(r.counter)counters.add(r.counter)});
+  if(counters.size===0){tabs.innerHTML='';return}
+  const sorted=[...counters].sort();
+  let html=`<button class="counter-tab ${!activeCounterFilter?'active':''}" onclick="setCounterFilter(null)">全部</button>`;
+  sorted.forEach(c=>{
+    html+=`<button class="counter-tab ${activeCounterFilter===c?'active':''}" onclick="setCounterFilter('${c}')">第${c}報到台</button>`;
+  });
+  tabs.innerHTML=html;
+}
+
+function setCounterFilter(c){
+  activeCounterFilter=c;
+  renderCounterTabs();
+  const q=document.getElementById('searchInput').value.trim();
+  if(q||activeGroupFilter) doSearch(q);
+  else {
+    document.getElementById('searchList').innerHTML='';
+    updateSearchHint();
+  }
+}
+
+function updateSearchHint(){
+  const pool=getFilteredPool();
+  const suffix=activeCounterFilter?`（第${activeCounterFilter}報到台）`:'';
+  document.getElementById('searchHint').textContent=`共 ${pool.length} 位報名${suffix}`;
+}
+
+function getFilteredPool(){
+  if(!activeCounterFilter) return registrations;
+  return registrations.filter(r=>r.counter===activeCounterFilter);
+}
+
 function renderGroupChips(){
   const container=document.getElementById('groupChips');
   if(!groups.length){container.innerHTML='';return}
@@ -681,6 +771,8 @@ function toggleGroupFilter(groupName){
 
 function doSearch(q){
   const list=document.getElementById('searchList');
+  const pool=getFilteredPool();
+  const counterSuffix=activeCounterFilter?`（第${activeCounterFilter}報到台）`:'';
 
   // 群組篩選模式
   if(activeGroupFilter){
@@ -688,40 +780,45 @@ function doSearch(q){
     if(!group){list.innerHTML='';return}
     let results=[];
     group.members.forEach(name=>{
-      registrations.forEach((r,i)=>{
-        if(r.name===name) results.push({...r,_idx:i});
+      pool.forEach((r,i)=>{
+        const realIdx=registrations.indexOf(r);
+        if(r.name===name) results.push({...r,_idx:realIdx});
       });
     });
-    // 文字二次篩選
     if(q) results=results.filter(r=>r.name.includes(q)||r.org&&r.org.includes(q));
     results.sort((a,b)=>strokeCollator.compare(a.name,b.name));
-    document.getElementById('searchHint').textContent=`${activeGroupFilter}：${results.length} 位`;
+    document.getElementById('searchHint').textContent=`${activeGroupFilter}：${results.length} 位${counterSuffix}`;
     renderSearchList(results);
     return;
   }
 
   // 一般搜尋模式
-  if(!q){list.innerHTML='';document.getElementById('searchHint').textContent=`共 ${registrations.length} 位報名`;return}
+  if(!q){list.innerHTML='';updateSearchHint();return}
   const nameHits=[];
   const orgHits=[];
-  registrations.forEach((r,i)=>{
-    if(r.name&&r.name.includes(q)) nameHits.push({...r,_idx:i});
-    else if(r.org&&r.org.includes(q)) orgHits.push({...r,_idx:i});
+  pool.forEach((r)=>{
+    const realIdx=registrations.indexOf(r);
+    if(r.name&&r.name.includes(q)) nameHits.push({...r,_idx:realIdx});
+    else if(r.org&&r.org.includes(q)) orgHits.push({...r,_idx:realIdx});
   });
   nameHits.sort((a,b)=>strokeCollator.compare(a.name,b.name));
   orgHits.sort((a,b)=>strokeCollator.compare(a.name,b.name));
   const results=[...nameHits,...orgHits];
-  document.getElementById('searchHint').textContent=results.length?`找到 ${results.length} 位`:`「${q}」— 查無此人`;
+  document.getElementById('searchHint').textContent=results.length?`找到 ${results.length} 位${counterSuffix}`:`「${q}」— 查無此人`;
   renderSearchList(results);
 }
 
 function renderSearchList(results){
   document.getElementById('searchList').innerHTML=results.map(r=>{
     const isMem=r.membership==='本會個人會員';
-    return `<div class="search-item ${r._idx===selectedIndex?'active':''} ${r.checkedIn?'is-checked':''}" onclick="selectPerson(${r._idx})">
+    const isAbsent=r.absent;
+    const ctr=r.counter?`<span class="counter-badge">${r.counter}</span>`:'';
+    const cls=`search-item ${r._idx===selectedIndex?'active':''} ${r.checkedIn?'is-checked':''} ${isAbsent?'is-absent':''}`;
+    return `<div class="${cls}" onclick="selectPerson(${r._idx})">
       <div class="si-avatar ${isMem?'':'nm'}">${r.name[0]}</div>
-      <div class="si-info"><div class="si-name">${esc(r.name)}</div><div class="si-org">${esc(r.org||'')}</div></div>
+      <div class="si-info"><div class="si-name">${esc(r.name)}${ctr}</div><div class="si-org">${esc(r.org||'')}</div></div>
       ${r.checkedIn?'<div class="si-check">'+I.checked+'</div>':''}
+      ${isAbsent?'<span class="si-absent">不出席</span>':''}
     </div>`;
   }).join('');
 }
@@ -762,17 +859,25 @@ function selectPerson(idx){
   }
   else badges+=`<span class="badge badge-nonmember">非會員</span>`;
   if(hasPoster) badges+=`<span class="badge badge-poster">海報發表</span>`;
+  if(r.counter) badges+=`<span class="badge" style="background:#37474f;color:#fff">第${esc(r.counter)}報到台</span>`;
   if(r.checkedIn) badges+=`<span class="badge badge-checkedin">已報到</span>`;
+  if(r.absent) badges+=`<span class="badge badge-absent">不出席</span>`;
   document.getElementById('profileBadges').innerHTML=badges;
 
   const feeDisplay=isMem?(isPaid?(isOnsitePaid?'現場繳費':'已繳'):(isConfirmedNoPay?'確認不繳':'未繳')):'—';
   const fields=[['服務單位',r.org],['部門',r.dept],['職稱',r.title],['職類',r.profession],['聯絡電話',r.phone],['Email',r.email],['會員身分',isMem?'本會個人會員':'非會員'],['會費狀態',feeDisplay]];
   let infoHtml=fields.map(([l,v])=>`<div><div class="info-label">${l}</div><div class="info-value">${esc(v||'—')}</div></div>`).join('');
-  // 備註：有內容時以醒目樣式顯示
+  // 備註
   if(r.note){
     infoHtml+=`<div style="grid-column:1/-1;margin-top:.3rem;padding:.5rem .7rem;background:#fff4ec;border:1.5px solid #e8a06c;border-radius:6px">
       <div class="info-label" style="color:#b5622a">備註</div>
       <div class="info-value" style="color:#8c4517">${esc(r.note)}</div>
+    </div>`;
+  }
+  if(r.absent && r.absentNote){
+    infoHtml+=`<div class="absent-note-box">
+      <div class="info-label">不出席備註</div>
+      <div class="info-value">${esc(r.absentNote)}</div>
     </div>`;
   }
   document.getElementById('infoGrid').innerHTML=infoHtml;
@@ -782,9 +887,9 @@ function selectPerson(idx){
   document.getElementById('actionContent').classList.add('visible');
   let acts='';
 
-  // Badge with serial
-  const badgeLabel = badgeNo ? `發放識別證<div class="as">編號：${esc(badgeNo)}</div>` : '發放識別證';
-  acts+=`<div class="action-card act-default"><div class="ai-wrap">${I.badge}</div><div class="at"><strong>發放識別證</strong>${badgeNo?'<div class="as">編號：'+esc(badgeNo)+'</div>':''}</div></div>`;
+  // Badge card with counter
+  const badgeParts=[badgeNo?'編號：'+esc(badgeNo):'',r.counter?'第'+esc(r.counter)+'報到台':''].filter(Boolean).join('，');
+  acts+=`<div class="action-card act-default"><div class="ai-wrap">${I.badge}</div><div class="at"><strong>發放識別證</strong>${badgeParts?'<div class="as">'+badgeParts+'</div>':''}</div></div>`;
 
   // 餐點：已繳費用午餐資格欄，現場繳費用選擇的餐點
   const eMeal = isOnsitePaid
@@ -838,12 +943,19 @@ function selectPerson(idx){
   document.getElementById('actionList').innerHTML=acts;
 
   // Checkin btn
-  document.getElementById('checkinBar').innerHTML=r.checkedIn
-    ?`<button class="btn-checkin already-done" disabled>${I.checked} 已完成報到</button><button class="btn-undo" onclick="undoCheckin(${idx})">${I.undo} 撤銷</button>`
-    :`<button class="btn-checkin" onclick="doCheckin(${idx})">${I.check} 確認報到</button>`;
+  // Checkin bar: 3 states
+  let barHtml='';
+  if(r.checkedIn){
+    barHtml=`<button class="btn-checkin already-done" disabled>${I.checked} 已完成報到</button><button class="btn-undo" onclick="undoCheckin(${idx})">${I.undo} 撤銷</button>`;
+  } else if(r.absent){
+    barHtml=`<button class="btn-checkin" onclick="absentCheckin(${idx})">${I.check} 臨時出席報到</button><button class="btn-undo" onclick="undoAbsent(${idx})">${I.undo} 還原</button>`;
+  } else {
+    barHtml=`<button class="btn-checkin" onclick="doCheckin(${idx})">${I.check} 確認報到</button><button class="btn-undo" onclick="openAbsentModal(${idx})" style="border-color:#ccc;color:#999">✕ 標記不出席</button>`;
+  }
+  document.getElementById('checkinBar').innerHTML=barHtml;
 
   const q=document.getElementById('searchInput').value.trim();
-  if(q) doSearch(q);
+  if(q||activeGroupFilter) doSearch(q);
   renderLog();
 }
 
@@ -890,6 +1002,72 @@ function onsitePay(idx, meal, e) {
   fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'onsite_pay',name:p.name,idNumber:p.idNumber,meal:meal,time:new Date().toISOString()})}).catch(()=>{});
 }
 
+// ===== ABSENT (不出席) =====
+let pendingAbsentIdx = -1;
+
+function openAbsentModal(idx) {
+  pendingAbsentIdx = idx;
+  const p = registrations[idx];
+  document.getElementById('absentModalName').textContent = p.name;
+  document.getElementById('absentModalNote').value = '';
+  document.getElementById('absentModal').classList.add('show');
+  setTimeout(() => document.getElementById('absentModalNote').focus(), 200);
+}
+
+function closeAbsentModal() {
+  document.getElementById('absentModal').classList.remove('show');
+  pendingAbsentIdx = -1;
+}
+
+function confirmAbsent() {
+  const idx = pendingAbsentIdx;
+  if (idx < 0) return;
+  const note = document.getElementById('absentModalNote').value.trim();
+  closeAbsentModal();
+  markAbsent(idx, note);
+}
+
+function markAbsent(idx, note) {
+  markAction();
+  const p = registrations[idx]; if (!p) return;
+  p.absent = true;
+  p.absentNote = note || '';
+  p.checkedIn = false;
+  selectPerson(idx); updateStats();
+  showToast(`${p.name} 已標記不出席`);
+  fetch(CONFIG.API_URL, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'absent',name:p.name,idNumber:p.idNumber,note:note||''})}).catch(()=>{});
+}
+
+function undoAbsent(idx) {
+  if (!confirm('確定要還原此人的不出席標記嗎？')) return;
+  markAction();
+  const p = registrations[idx]; if (!p) return;
+  p.absent = false;
+  p.absentNote = '';
+  selectPerson(idx); updateStats();
+  showToast(`${p.name} 已還原為未報到`);
+  fetch(CONFIG.API_URL, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'undo_absent',name:p.name,idNumber:p.idNumber})}).catch(()=>{});
+}
+
+function absentCheckin(idx) {
+  if (!confirm('此人原本標記為不出席，確定要為其報到嗎？')) return;
+  markAction();
+  const p = registrations[idx]; if (!p) return;
+  p.absent = false;
+  p.absentNote = '';
+  p.checkedIn = true;
+  const now = new Date();
+  checkinLog.unshift({name:p.name,idNumber:p.idNumber,time:now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}),timestamp:now.toISOString()});
+  sessionStorage.setItem('cl3',JSON.stringify(checkinLog));
+  selectPerson(idx); updateStats();
+  showToast(`${p.name} 臨時出席，報到完成`);
+  // 先送取消不出席，再送報到
+  fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'undo_absent',name:p.name,idNumber:p.idNumber})}).catch(()=>{});
+  setTimeout(()=>{
+    fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'checkin',name:p.name,idNumber:p.idNumber,time:now.toISOString()})}).catch(()=>{});
+  },500);
+}
+
 // Stats
 function updateStats(){
   const t=registrations.length;
@@ -932,12 +1110,16 @@ function renderStats(){
   const giftCount = giftCheckedIn.length;
   const onsiteCount = giftCheckedIn.filter(r=>r.onsitePaid).length;
 
+  const absentCount = registrations.filter(r=>r.absent).length;
+
   document.getElementById('statsOverall').innerHTML=`
     ${soCard('全體報名',''+t,''+c,pctOf(c,t),'var(--terra)')}
     ${soCard('會員',''+memAll.length,''+memCk,pctOf(memCk,memAll.length),'var(--primary)')}
     ${soCard('非會員',''+nonAll.length,''+nonCk,pctOf(nonCk,nonAll.length),'var(--text-muted)')}
     ${soCardGift('禮品已發放', giftCount, onsiteCount)}
     ${soCardMeal('已報到餐點統計', mealMeat, mealVeg, mealNone, mealOther)}
+    ${absentCount>0?soCardSimple('當日不出席',''+absentCount+' 位','#999'):''}
+    ${renderCounterStats()}
   `;
 
   renderGroupStats();
@@ -977,7 +1159,7 @@ function renderGroupStats(){
   container.innerHTML=showGroups.map(g=>{
     const members=g.members.map(name=>{
       const person=registrations.find(r=>r.name===name);
-      return {name, checked:person?person.checkedIn:false, found:!!person};
+      return {name, checked:person?person.checkedIn:false, found:!!person, absent:person?person.absent:false};
     });
     const ckCount=members.filter(m=>m.checked).length;
     const rate=members.length>0?Math.round(ckCount/members.length*100):0;
@@ -1078,7 +1260,7 @@ function renderFieldStats() {
 
   container.innerHTML = keys.map(key => {
     const people = fieldMap[key];
-    const members = people.map(r => ({ name: r.name, checked: r.checkedIn, found: true }));
+    const members = people.map(r => ({ name: r.name, checked: r.checkedIn, found: true, absent: r.absent }));
     const ckCount = members.filter(m => m.checked).length;
     const rate = members.length > 0 ? Math.round(ckCount / members.length * 100) : 0;
     return renderStatGroup(key, members, ckCount, rate);
@@ -1100,11 +1282,15 @@ function renderStatGroup(title, members, ckCount, rate) {
     </div>
     <div class="sg-body">
       <div class="sg-member-list">
-        ${members.map(m=>`<div class="sg-member ${m.checked?'checked':'unchecked'}">
-          <div class="sg-dot"></div>
-          <span class="sg-mname">${esc(m.name)}</span>
-          ${!m.found?'<span style="font-size:.7rem;color:var(--warning)">(未報名)</span>':''}
-        </div>`).join('')}
+        ${members.map(m=>{
+          const absentStyle = m.absent ? 'text-decoration:line-through;color:#ccc' : '';
+          return `<div class="sg-member ${m.checked?'checked':'unchecked'}">
+            <div class="sg-dot" ${m.absent?'style="background:#ccc"':''}></div>
+            <span class="sg-mname" style="${absentStyle}">${esc(m.name)}</span>
+            ${m.absent?'<span style="font-size:.65rem;color:#bbb">不出席</span>':''}
+            ${!m.found?'<span style="font-size:.7rem;color:var(--warning)">(未報名)</span>':''}
+          </div>`;
+        }).join('')}
       </div>
     </div>
   </div>`;
@@ -1125,6 +1311,37 @@ function soCardGift(label, count, onsiteCount) {
     <div class="so-val">${count} <span style="font-size:.82rem;font-weight:500;color:var(--text-muted)">份</span></div>
     <div style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">已繳費會員（含現場繳費）且已報到</div>
     ${onsiteCount>0?`<div style="font-size:.76rem;font-weight:600;color:var(--warning);margin-top:.25rem">其中現場繳費 ${onsiteCount} 人</div>`:''}
+  </div>`;
+}
+
+function soCardSimple(label, value, color) {
+  return `<div class="so-card">
+    <div class="so-label">${label}</div>
+    <div class="so-val" style="color:${color}">${value}</div>
+  </div>`;
+}
+
+function renderCounterStats() {
+  const counters = {};
+  registrations.forEach(r => {
+    if (!r.counter) return;
+    if (!counters[r.counter]) counters[r.counter] = { total: 0, checked: 0 };
+    counters[r.counter].total++;
+    if (r.checkedIn) counters[r.counter].checked++;
+  });
+  const keys = Object.keys(counters).sort();
+  if (keys.length === 0) return '';
+  const rows = keys.map(k => {
+    const c = counters[k];
+    const rate = c.total > 0 ? Math.round(c.checked / c.total * 100) : 0;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem">
+      <span>第${k}報到台</span>
+      <span><strong>${c.checked}</strong> / ${c.total} <span style="color:var(--text-muted);font-size:.75rem">(${rate}%)</span></span>
+    </div>`;
+  }).join('');
+  return `<div class="so-card">
+    <div class="so-label">各報到台報到狀況</div>
+    <div style="display:flex;flex-direction:column;gap:.35rem;margin-top:.4rem">${rows}</div>
   </div>`;
 }
 
