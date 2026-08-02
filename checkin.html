@@ -62,6 +62,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .sync-indicator{width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0;opacity:0;transition:opacity .3s}
 .sync-indicator.syncing{opacity:1;animation:pulse 1s ease infinite}
 @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+.sync-time{font-size:.62rem;color:rgba(255,255,255,.5);white-space:nowrap}
 
 /* ===== PAGE VIEWS ===== */
 .page{display:none}
@@ -88,21 +89,22 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .group-chip.active{background:var(--terra);border-color:var(--terra);color:#fff}
 
 /* Counter tabs */
-.counter-tabs{display:flex;gap:3px;margin-bottom:.5rem;background:var(--bg);padding:2px;border-radius:var(--radius-sm)}
-.counter-tab{flex:1;text-align:center;padding:.3rem .2rem;border-radius:calc(var(--radius-sm) - 1px);font-size:.7rem;font-weight:600;color:var(--text-muted);cursor:pointer;border:none;background:transparent;font-family:var(--font);transition:all .12s;line-height:1.3}
+.counter-tabs{display:flex;gap:3px;margin-bottom:.5rem;background:var(--bg);padding:2px;border-radius:var(--radius-sm);align-items:center}
+.counter-tab{width:36px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:calc(var(--radius-sm) - 1px);font-size:.75rem;font-weight:700;color:var(--text-muted);cursor:pointer;border:none;background:transparent;font-family:var(--font);transition:all .12s;line-height:1;flex-shrink:0}
+.counter-tab:first-of-type{width:auto;padding:0 .5rem}
 .counter-tab:hover{color:var(--text)}
 .counter-tab.active{background:var(--card);color:var(--text);box-shadow:var(--shadow-sm)}
 .counter-badge{display:inline-block;font-size:.6rem;font-weight:700;background:var(--terra);color:#fff;padding:.1rem .35rem;border-radius:3px;margin-left:.3rem;vertical-align:middle}
 .search-list{display:flex;flex-direction:column;gap:2px}
-.search-item{display:flex;align-items:center;gap:.55rem;padding:.5rem .65rem;border-radius:var(--radius-sm);cursor:pointer;transition:all .12s;border:1.5px solid transparent}
+.search-item{display:grid;grid-template-columns:30px 1fr auto auto;align-items:center;gap:.5rem;padding:.45rem .6rem;border-radius:var(--radius-sm);cursor:pointer;transition:all .12s;border:1.5px solid transparent}
 .search-item:hover{background:var(--bg)}
 .search-item.active{background:var(--primary-light);border-color:var(--border)}
 .search-item.is-checked .si-avatar{}
 .si-avatar{width:30px;height:30px;border-radius:50%;background:#0097B2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
 .si-avatar.nm{background:#CCC1DA}
-.si-info{min-width:0;flex:1}
-.si-name{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.si-org{font-size:.7rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.si-info{min-width:0}
+.si-name{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:.3rem}
+.si-org{font-size:.68rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .si-check{color:var(--success);flex-shrink:0}
 
 /* Center: Detail */
@@ -366,6 +368,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
       重新整理
     </button>
     <span class="sync-indicator" id="syncIndicator" title="自動同步中"></span>
+    <span class="sync-time" id="syncTime"></span>
   </div>
 </header>
 
@@ -599,11 +602,13 @@ function loadData(){
         if(p&&!p.checkedIn)p.checkedIn=true;
       });
       showLoading(false);
+      buildIndex();
       updateStats();
       renderLog();
       renderGroupChips();
       renderCounterTabs();
       updateSearchHint();
+      updateSyncTime();
       const q=document.getElementById('searchInput').value.trim();
       if(q) doSearch(q);
       if(selectedIndex>=0) selectPerson(selectedIndex);
@@ -669,7 +674,9 @@ function syncData() {
       });
 
       // 更新統計
+      buildIndex();
       updateStats();
+      updateSyncTime();
       renderGroupChips();
 
       // 重新定位選取的人員
@@ -695,22 +702,32 @@ function syncData() {
 // 標記操作時間（避免同步衝突）
 function markAction() { lastActionTime = Date.now(); }
 
-// Search (name OR org), name matches sorted by stroke count
+// 預建索引（避免 O(n²) 的 indexOf）
+let regIdx=new Map();
+function buildIndex(){ regIdx=new Map(); registrations.forEach((r,i)=>regIdx.set(r,i)); }
+
+// 更新時間顯示
+function updateSyncTime(){
+  const now=new Date();
+  document.getElementById('syncTime').textContent=now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+// Search with debounce
+let searchTimer=null;
 const strokeCollator = new Intl.Collator('zh-Hant-TW-u-co-stroke');
 document.getElementById('searchInput').addEventListener('input',function(){
-  // 輸入文字時清除群組篩選
   if(this.value.trim() && activeGroupFilter){
     activeGroupFilter=null;
     renderGroupChips();
   }
-  doSearch(this.value.trim());
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>doSearch(this.value.trim()),80);
 });
 
 // 群組快篩標籤
 // 報到台篩選標籤
 function renderCounterTabs(){
   const tabs=document.getElementById('counterTabs');
-  // 收集所有報到台編號
   const counters=new Set();
   registrations.forEach(r=>{if(r.counter)counters.add(r.counter)});
   if(counters.size===0){tabs.innerHTML='';return}
@@ -727,19 +744,15 @@ function setCounterFilter(c){
   renderCounterTabs();
   const q=document.getElementById('searchInput').value.trim();
   if(q||activeGroupFilter) doSearch(q);
-  else {
-    document.getElementById('searchList').innerHTML='';
-    updateSearchHint();
-  }
+  else updateSearchHint();
 }
 
 function updateSearchHint(){
   const pool=getFilteredPool();
-  const suffix=activeCounterFilter?`（第${activeCounterFilter}報到台）`:'';
+  const suffix=activeCounterFilter?`（報到${activeCounterFilter}）`:'';
   document.getElementById('searchHint').textContent=`共 ${pool.length} 位報名${suffix}`;
-  // 未搜尋狀態下顯示完整清單
   if(!document.getElementById('searchInput').value.trim() && !activeGroupFilter){
-    const sorted=pool.map((r,i)=>({...r,_idx:registrations.indexOf(r)}));
+    const sorted=pool.map(r=>({...r,_idx:regIdx.get(r)}));
     sorted.sort((a,b)=>strokeCollator.compare(a.name,b.name));
     renderSearchList(sorted);
   }
@@ -749,6 +762,10 @@ function getFilteredPool(){
   if(!activeCounterFilter) return registrations;
   return registrations.filter(r=>r.counter===activeCounterFilter);
 }
+
+// 預建索引（避免 O(n²) 的 indexOf）
+let regIdx=new Map();
+function buildIndex(){ regIdx=new Map(); registrations.forEach((r,i)=>regIdx.set(r,i)); }
 
 function renderGroupChips(){
   const container=document.getElementById('groupChips');
@@ -785,11 +802,9 @@ function doSearch(q){
     const group=groups.find(g=>g.groupName===activeGroupFilter);
     if(!group){list.innerHTML='';return}
     let results=[];
-    group.members.forEach(name=>{
-      pool.forEach((r,i)=>{
-        const realIdx=registrations.indexOf(r);
-        if(r.name===name) results.push({...r,_idx:realIdx});
-      });
+    const memberSet=new Set(group.members);
+    pool.forEach(r=>{
+      if(memberSet.has(r.name)) results.push({...r,_idx:regIdx.get(r)});
     });
     if(q) results=results.filter(r=>r.name.includes(q)||r.org&&r.org.includes(q));
     results.sort((a,b)=>strokeCollator.compare(a.name,b.name));
@@ -802,10 +817,10 @@ function doSearch(q){
   if(!q){updateSearchHint();return}
   const nameHits=[];
   const orgHits=[];
-  pool.forEach((r)=>{
-    const realIdx=registrations.indexOf(r);
-    if(r.name&&r.name.includes(q)) nameHits.push({...r,_idx:realIdx});
-    else if(r.org&&r.org.includes(q)) orgHits.push({...r,_idx:realIdx});
+  pool.forEach(r=>{
+    const idx=regIdx.get(r);
+    if(r.name&&r.name.includes(q)) nameHits.push({...r,_idx:idx});
+    else if(r.org&&r.org.includes(q)) orgHits.push({...r,_idx:idx});
   });
   nameHits.sort((a,b)=>strokeCollator.compare(a.name,b.name));
   orgHits.sort((a,b)=>strokeCollator.compare(a.name,b.name));
@@ -814,8 +829,10 @@ function doSearch(q){
   renderSearchList(results);
 }
 
+const MAX_LIST=100;
 function renderSearchList(results){
-  document.getElementById('searchList').innerHTML=results.map(r=>{
+  const limited=results.slice(0,MAX_LIST);
+  let html=limited.map(r=>{
     const isMem=r.membership==='本會個人會員';
     const isAbsent=r.absent;
     const ctr=r.counter?`<span class="counter-badge">${r.counter}</span>`:'';
@@ -827,6 +844,8 @@ function renderSearchList(results){
       ${isAbsent?'<span class="si-absent">不出席</span>':''}
     </div>`;
   }).join('');
+  if(results.length>MAX_LIST) html+=`<div style="text-align:center;padding:.4rem;font-size:.7rem;color:var(--text-muted)">顯示前 ${MAX_LIST} 筆，共 ${results.length} 筆</div>`;
+  document.getElementById('searchList').innerHTML=html;
 }
 
 // Select
@@ -1384,16 +1403,16 @@ function renderCounterStats() {
     const c = counters[k];
     const expected = c.total - c.absent;
     const allDone = c.checked >= expected && expected > 0;
-    const absentText = c.absent > 0 ? `<span style="color:#999;font-size:.72rem;margin-left:.3rem">不出席${c.absent}</span>` : '';
-    const doneIcon = allDone ? '<svg style="width:14px;height:14px;stroke:var(--success);stroke-width:2.5;fill:none;margin-left:.2rem;vertical-align:middle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>' : '';
-    return `<div style="display:flex;align-items:center;font-size:.82rem;padding:.2rem 0">
-      <span style="width:70px;flex-shrink:0;font-weight:600">報到 ${k}</span>
-      <span style="flex:1"><strong>${c.checked}</strong> / ${c.total}${absentText}${doneIcon}</span>
-    </div>`;
+    return `<tr style="font-size:.82rem;height:28px">
+      <td style="font-weight:600;white-space:nowrap;padding-right:.75rem">報到 ${k}</td>
+      <td style="white-space:nowrap"><strong>${c.checked}</strong> / ${c.total}</td>
+      <td style="white-space:nowrap;color:#999;font-size:.72rem;padding-left:.5rem">${c.absent>0?'不出席'+c.absent:''}</td>
+      <td style="width:20px;text-align:center">${allDone?'<svg style="width:14px;height:14px;stroke:var(--success);stroke-width:2.5;fill:none;vertical-align:middle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>':''}</td>
+    </tr>`;
   }).join('');
   return `<div class="so-card">
     <div class="so-label">各報到台狀況</div>
-    <div style="display:flex;flex-direction:column;gap:.15rem;margin-top:.4rem">${rows}</div>
+    <table style="margin-top:.4rem;border-collapse:collapse;width:100%">${rows}</table>
   </div>`;
 }
 
