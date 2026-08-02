@@ -1165,7 +1165,7 @@ function renderGroupStats(){
   container.innerHTML=showGroups.map(g=>{
     const members=g.members.map(name=>{
       const person=registrations.find(r=>r.name===name);
-      return {name, checked:person?person.checkedIn:false, found:!!person, absent:person?person.absent:false};
+      return {name, checked:person?person.checkedIn:false, found:!!person, absent:person?person.absent:false, isMember:person?person.membership==='本會個人會員':false};
     });
     const ckCount=members.filter(m=>m.checked).length;
     const rate=members.length>0?Math.round(ckCount/members.length*100):0;
@@ -1282,7 +1282,7 @@ function renderFieldStats() {
 
   container.innerHTML = keys.map(key => {
     const people = fieldMap[key];
-    const members = people.map(r => ({ name: r.name, checked: r.checkedIn, found: true, absent: r.absent }));
+    const members = people.map(r => ({ name: r.name, checked: r.checkedIn, found: true, absent: r.absent, isMember: r.membership==='本會個人會員' }));
     const ckCount = members.filter(m => m.checked).length;
     const rate = members.length > 0 ? Math.round(ckCount / members.length * 100) : 0;
     return renderStatGroup(key, members, ckCount, rate);
@@ -1306,9 +1306,13 @@ function renderStatGroup(title, members, ckCount, rate) {
       <div class="sg-member-list">
         ${members.map(m=>{
           const absentStyle = m.absent ? 'text-decoration:line-through;color:#ccc' : '';
-          return `<div class="sg-member ${m.checked?'checked':'unchecked'}">
-            <div class="sg-dot" ${m.absent?'style="background:#ccc"':''}></div>
+          const memberColor = m.isMember ? '#0097B2' : '#CCC1DA';
+          const bgColor = m.checked ? '#edf6f1' : (m.absent ? '#f5f5f5' : (m.isMember ? '#e8f6f8' : '#f3f0f6'));
+          const dotColor = m.checked ? 'var(--success)' : (m.absent ? '#ccc' : memberColor);
+          return `<div class="sg-member" style="background:${bgColor}">
+            <div class="sg-dot" style="background:${dotColor}"></div>
             <span class="sg-mname" style="${absentStyle}">${esc(m.name)}</span>
+            ${m.checked?'<svg style="width:14px;height:14px;stroke:var(--success);stroke-width:2.5;fill:none;flex-shrink:0" viewBox="0 0 24 24"><path d="m9 12 2 2 4-4"/></svg>':''}
             ${m.absent?'<span style="font-size:.65rem;color:#bbb">不出席</span>':''}
             ${!m.found?'<span style="font-size:.7rem;color:var(--warning)">(未報名)</span>':''}
           </div>`;
@@ -1378,7 +1382,7 @@ function renderCounterStats() {
     const rate = c.total > 0 ? Math.round(c.checked / c.total * 100) : 0;
     return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem">
       <span>第${k}報到台</span>
-      <span><strong>${c.checked}</strong> / ${c.total} <span style="color:var(--text-muted);font-size:.75rem">(${rate}%)</span></span>
+      <span><strong>${c.checked}</strong> / ${c.total}</span>
     </div>`;
   }).join('');
   return `<div class="so-card">
@@ -1408,7 +1412,7 @@ function soCardMeal(label, meat, veg, none, other) {
       </div>
       <div style="font-size:.68rem;color:var(--text-muted);margin-top:-.1rem">（未繳費會員或非會員）</div>
     </div>
-    <div style="margin-top:.5rem;padding-top:.4rem;border-top:1px solid var(--border-light);font-size:.78rem;font-weight:700;color:var(--terra)">需備便當：${meat+veg} 份（葷 ${meat} + 素 ${veg}）</div>
+    <div style="margin-top:.5rem;padding-top:.4rem;border-top:1px solid var(--border-light);font-size:.78rem;font-weight:700;color:var(--terra)">需備便當：${meat+veg} 份<br><span style="font-weight:500;font-size:.72rem">（葷 ${meat} + 素 ${veg}）</span></div>
   </div>`;
 }
 
