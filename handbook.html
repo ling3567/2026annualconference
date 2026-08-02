@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -103,14 +102,14 @@ body {
   transform: translateX(-50%) translateY(-6px);
   background: var(--white);
   border: 1px solid var(--pale-blue);
-  border-radius: 10px;
+  border-radius: 10px;      /* 外框圓角 */
   box-shadow: 0 8px 22px rgba(26,93,153,0.1), 0 2px 5px rgba(26,93,153,0.05);
-  padding: 0;
+  padding: 0;               /* 項目頂邊延伸 */
   margin-top: 0.45rem;
   opacity: 0; visibility: hidden;
   transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
   z-index: 100;
-  overflow: hidden; /* 首/尾項目的背景色自然跟隨外框圓弧裁切 */
+  overflow: hidden;         /* 首/尾項目底色自然被外框圓角裁切 */
 }
 .nav-dropdown:hover .nav-submenu,
 .nav-dropdown:focus-within .nav-submenu {
@@ -135,6 +134,7 @@ body {
   text-decoration: none;
   white-space: nowrap;
   border-bottom: 1px solid var(--pale-blue);
+  border-radius: 0;   /* 覆寫 .main-nav a 繼承的 8px 圓角 */
   transition: color 0.15s, background 0.15s;
 }
 .nav-submenu a:last-child { border-bottom: none; }
@@ -554,13 +554,27 @@ body { padding-top: 58px; }
 }
 
 .poster-review {
-  margin-top: 0.7rem; padding: 0.7rem 0.9rem;
+  margin-top: 0.7rem; padding: 0.8rem 1rem;
   background: var(--pale-gold); border-left: 3px solid var(--warm-gold);
   border-radius: 0 8px 8px 0;
-  font-size: 0.85rem; color: var(--text-body); line-height: 1.65;
+  font-size: 0.85rem; color: var(--text-body); line-height: 1.75;
   grid-column: 1 / -1;
 }
-.poster-review strong { color: #8a6418; }
+.poster-review strong {
+  display: block;
+  color: #8a6418;
+  margin-bottom: 0.45rem;
+  font-size: 0.86rem;
+}
+.poster-review p {
+  margin-bottom: 0.6rem;
+  white-space: pre-line;   /* 保留 CSV 內原有 \n 換行 */
+}
+.poster-review p:last-child { margin-bottom: 0; }
+.poster-review p + p {
+  padding-top: 0.6rem;
+  border-top: 1px dashed rgba(212,168,67,0.4);   /* 委員之間有淡淡分隔線 */
+}
 
 .poster-empty {
   text-align: center; padding: 3rem 1rem;
@@ -1063,8 +1077,8 @@ body { padding-top: 58px; }
           <svg class="caret" viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 5 6 8 9 5"/></svg>
         </a>
         <div class="nav-submenu">
-          <a href="#posters" data-subtab="physical">實體海報論文</a>
           <a href="#posters" data-subtab="award">優秀海報論文</a>
+          <a href="#posters" data-subtab="physical">實體海報論文</a>
           <a href="#posters" data-subtab="eposter">E-Poster</a>
         </div>
       </div>
@@ -1269,17 +1283,17 @@ body { padding-top: 58px; }
 <!-- ===== 海報論文 ===== -->
 <section class="section" id="posters">
   <div class="section-head">
-    <span class="tag" id="posters-section-tag">實體海報論文</span>
+    <span class="tag" id="posters-section-tag">優秀海報論文</span>
   </div>
 
   <!-- 子分類由頂部 nav「海報論文 ▾」下拉選單切換；目前分類顯示於上方 section-head -->
 
-  <div class="poster-panel active" id="poster-physical" role="tabpanel">
-    <div class="poster-list" id="poster-list-physical"></div>
+  <div class="poster-panel active" id="poster-award" role="tabpanel">
+    <div class="poster-list" id="poster-list-award"></div>
   </div>
 
-  <div class="poster-panel" id="poster-award" role="tabpanel">
-    <div class="poster-list" id="poster-list-award"></div>
+  <div class="poster-panel" id="poster-physical" role="tabpanel">
+    <div class="poster-list" id="poster-list-physical"></div>
   </div>
 
   <div class="poster-panel" id="poster-eposter" role="tabpanel">
@@ -1458,20 +1472,11 @@ const SPEAKERS = [
    org：機構名稱
    summary：教案概述（可多行；用 \n 換行） */
 const OSCE_CASES = [
-  {
-    num: 'OSCE-01',
-    title: '科技輔助 EPA 導向跨領域全人照護教案 ─ 放射治療頭頸癌青少年之跨團隊全人照護',
-    team: '林佳儀、吳淑鈞、謝梨君',
-    org: '中山醫學大學附設醫院',
-    summary: '本教案專為放射師與營養師設計，測驗全程由實際標準化病人（SP）參與演出，生動演繹面臨放療副作用與吞嚥困難的頭頸癌青少年，真實考驗考生的臨床應變與溝通溫度。本教案具備嚴謹的專家信效度，由跨領域的醫師、社工師及護理師共同進行專業評核與驗證。同時，測驗全面強化 AI 考官應用：在考生與真實 SP 互動時，AI 考官會同步進行語音及語意分析，客觀紀錄放射師的安撫衛教與營養師的介入計畫。透過「AI 精準數據追蹤」結合「跨領域專家回饋」，雙管齊下大幅提升 EPA 評估效能與全人照護實戰力。',
-  },
-  {
-    num: 'OSCE-02',
-    title: '失智症末期進食決策之跨領域全人照護',
-    team: '林舒晴、陳盈汝、黃馨葆',
-    org: '中山醫學大學附設醫院（大慶院區）',
-    summary: '本教案以失智症末期個案為情境，設計醫師、語言治療師與營養師跨領域全人照護 OSCE。學員需整合各專業評估結果，並透過跨領域全人會議討論舒適進食與鼻胃管灌食之利弊，最終與家屬進行以病人為中心的共享決策與衛教。',
-  },
+  { num: 'OSCE-01', title: '失智症末期進食決策之跨領域全人照護', team: '林舒晴、陳盈汝、黃馨葆', org: '中山醫學大學附設醫院(大慶院區)', summary: '本教案以失智症末期個案為情境，設計醫師、語言治療師與營養師跨領域全人照護OSCE。學員需整合各專業評估結果，並透過跨領域全人會議討論舒適進食與鼻胃管灌食之利弊，最終與家屬進行以病人為中心的共享決策與衛教。' },
+  { num: 'OSCE-02', title: '檢驗異常驅動之跨專業即時通報與轉介：\n多發性骨髓瘤案例之OSCE教案設計', team: '徐偉哲、羅佳鈺、王思涵、顏仲逸、曾雅雪、蘇芳汝、葉瑩君、楊于萱', org: '奇美醫療財團法人奇美醫院', summary: '醫檢師是醫療體系中，唯一能在檢驗分析前直接觀察檢體物理特徵的專業人員。當檢體出現異常凝固或分離膠未完全分離時，這並非單純的檢驗技術干擾，而是潛在m-protein發出的「關鍵預警」。透過本OSCE教案，我們旨在訓練學員將這些微小線索轉化為臨床行動力，從而縮短病人確診的延遲，實踐醫檢專業在早期癌症篩補位的關鍵守門人角色。設計從情境觸發到啟動通報流程，以SBAR結構化溝通與與強化跨團隊醫病溝通示範。' },
+  { num: 'OSCE-03', title: '家長親職衛教與跨專業轉介-以6歲ADHD男童為例', team: '陳怡伶、黃佩珍、鐘舜平、羅安琪、董奕君、梁温潔', org: '新光醫療財團法人新光吳火獅紀念醫院', summary: '本教案落實「以家庭為中心」的理念，針對 6 歲 ADHD 男童的在校衝突，測驗考生臨床推理與溝通能力，目標包含提供情緒行為策略、緩解家長焦慮、處理跨代教養衝突，並展現轉介心理師的跨專業協作，實踐全人照護目標。' },
+  { num: 'OSCE-04', title: '壓力性損傷評估照護', team: '陳惠鈴、鄒理萍、郭育伶、陳姿柔、許毓纓、林孟亭、石娉雯、林慧如、林建宇、黃彩桂、李潔美', org: '高雄榮民總醫院', summary: '訓練護理師與營養師對壓力性損傷的照護能力。透過臥床中風病患情境，護理師需執行傷口評估、無菌換藥與會診。營養師負責營養評估、管灌衛教及跨職類交班。旨在提升學員的臨床技能、醫病溝通與團隊合作素養。' },
+  { num: 'OSCE-05', title: '科技輔助EPA導向跨領域全人照護教案_放射治療頭頸癌青少年之跨團隊全人照護', team: '林佳儀、吳淑鈞、謝梨君', org: '中山醫學大學附設醫院', summary: '本教案專為放射師與營養師設計，測驗全程由實際標準化病人（SP）參與演出，生動演繹面臨放療副作用與吞嚥困難的頭頸癌青少年，真實考驗考生的臨床應變與溝通溫度。本教案具備嚴謹的專家信效度，由跨領域的醫師、社工師及護理師共同進行專業評核與驗證。同時，測驗全面強化AI考官應用：在考生與真實SP互動時，AI考官會同步進行語音及語意分析，客觀紀錄放射師的安撫衛教與營養師的介入計畫。透過「AI精準數據追蹤」結合「跨領域專家回饋」，雙管齊下大幅提升EPA評估效能與全人照護實戰力。' },
 ];
 
 /* ----- 海報論文資料（評分後填入；每篇對應獨立 PDF 連結） -----
@@ -1480,32 +1485,103 @@ const OSCE_CASES = [
    評審意見只在 award 類別會顯示。 */
 const POSTERS = {
   physical: [
-    {
-      num: '實體海報01',
-      title: '第2封測試',
-      author: '楊依玲02',
-      org: '中國醫藥大學新竹附設醫院',
-      pdf: 'https://drive.google.com/file/d/1XvnP42x4wW9fxqacqRMhZXewLQN14PHD/view',
-    },
+    { num: '實體11', title: '輸血反應挑戰-護理新兵大闖關', author: '辜馨儀', org: '台灣基督長老教會馬偕醫療財團法人馬偕紀念醫院', pdf: 'https://drive.google.com/file/d/10NXy1zFhHAxE2CrWMnZ3OmvGwbvTSS1k/view' },
+    { num: '實體12', title: '虛擬人互動式情境教學於新進醫事檢驗師面對病患抱怨處理能力之應用與成效評估', author: '李潔美', org: '高雄榮民總醫院', pdf: 'https://drive.google.com/file/d/1Shp4A6PmXL_JdaZQopxQpPCseZ0UjWTT/view' },
+    { num: '實體13', title: '生成式人工智慧結合遊戲化微學習建構自主學習導向之藥學衛教培訓平台：建置與初步成效評估', author: '賴苓芠', org: '中國醫藥大學附設醫院', pdf: 'https://drive.google.com/file/d/11bd2diymu0VtOYr_zqn-anYNsB8wCriG/view' },
+    { num: '實體14', title: 'AI 虛擬人導入實習生 OSCE 評核之成效：以心衰竭營養照護教案為例', author: '王逸婷', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1yCU8c4SlWzYuSOfDXI6mZDMEoqP336cJ/view' },
+    { num: '實體15', title: 'AI生成音訊與製作健康素養衛教教學，提升護理人員脊椎手術照護成效', author: '黃玥玲', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1tAClCkKbdxloCUAppEanl4oHmgPEmC8S/view' },
+    { num: '實體16', title: '探討 QCPR APP 介入對行政及醫護人員 CPR 技能之影響與長期維持—以 OSCE 評估為例', author: '張筠菡', org: '中國醫藥大學新竹附設醫院', pdf: 'https://drive.google.com/file/d/1G5jjHbzoFBVlkfTq5TrJX4DE9selsEJg/view' },
+    { num: '實體17', title: '建構髖關節置換手術術後介入客觀結構式臨床技能測驗的組內相關係數與描述性共識指標之互補應用-前驅試驗', author: '詹禹慈', org: '衛生福利部桃園醫院', pdf: 'https://drive.google.com/file/d/1HrNj6AAGjVvFMGdvwBD46YrOfbQBsZpi/view' },
+    { num: '實體18', title: '以CAP能力試驗檢體建構動態影片考核模式提升RPR判讀一致性之研究', author: '羅佳鈺', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1ODsi7HriRxDxSpUj2bgCLQbfiNG30tn0/view' },
+    { num: '實體19', title: '世界咖啡館模式下跨職類醫事學生「未來臨床助益」之構建與差異化分析：以醫學人文概念為例', author: '張家豪', org: '戴德森醫療財團法人嘉義基督教醫院', pdf: 'https://drive.google.com/file/d/11PxH8eilrVqAxlHMmM5UYlDcASX5HAOy/view' },
+    { num: '實體20', title: '生成式AI與敘事醫學在藥師培訓中作為專業素養與醫療韌性催化劑之成效評估', author: '黃美珠', org: '中國醫藥大學附設醫院', pdf: 'https://drive.google.com/file/d/1HKpyj3gd8fC7nmn2sNGaaMQx5Hh4PGCG/view' },
   ],
   award: [
-    {
-      num: '優秀海報01',
-      title: '第3封測試聽見呼吸背後的人：呼吸治療以病人為中心之人文照護教育模式',
-      author: '楊依玲03',
-      org: '奇美醫療財團法人奇美醫院',
-      pdf: 'https://drive.google.com/file/d/1EKSnTaLZQ-HhMmq7vNHIT1sznnseExQo/view',
-      review: '本研究結合 EPAs 信任等級與數位教具…（評審意見內容）',
-    },
+    { num: '實體01', title: '以自我調整學習融入虛擬病人教學-應用於護理學生實施病歷導讀之學習成效', author: '蔡玉梅', org: '美和科技大學', pdf: 'https://drive.google.com/file/d/1gMvY7wkj1brVRMzlRlHb19GkzeY00268/view', review: '【優點與亮點】 \n1.理論與科技結合具創新性：研究成功將「自我調整學習(SRL)」與「臨床推理」融入虛擬病人教學，針對護理學生被動學習與批判思考較弱的痛點提出具體解方，教學架構(五週的多元介入)設計嚴謹。 \n\n2.成效評估全面且顯著：採用前後測量化分析(成對樣本t檢定)搭配質性反思，研究結果清晰顯示學生在「終身學習」、「克盡職責性」及「病歷閱讀自信心」上皆有顯著提升(p < .05)，教學成效具體且有說服力。 \n【建議與調整方向】 \n1.深化研究設計： 如作者於結論所述，本研究目前為單組前後測之行動研究。未來若能如建議加入對照組(Control Group)進行準實驗研究，將能更有效排除成熟因素等內在效度威脅，強化該教學模式的因果推論。 \n2.海報呈現建議： 由於涉及八項專業核心素養與多項量表分數，建議在海報實體展示時，可以雷達圖(Radar Chart)呈現八項素養的前後測變化，並以表格對照顯著進步的數值，能使複雜的數據一目了然、大幅提升可讀性。' },
+    { num: '實體02', title: '開發線上虛擬病人輔助臨床推理教學架構', author: '何婧嫙', org: '中國醫藥大學附設醫院', pdf: 'https://drive.google.com/file/d/1S8XnJJc4FD-mTARglqgubgYg-G7BzoRZ/view', review: '本海報論文研究動機明確，符合專師培訓轉向臨床推理與疾病鑑別診斷之當前需求。研究設計、樣本數及研究工具皆說明清楚且合宜，研究成果亦相當豐碩，包含受訓人數累積、專師甄審通過率提升、學員能力進步及系統滿意度良好等成效。整體而言，本研究具實務應用價值與推廣潛力，值得肯定。' },
+    { num: '實體03', title: '建構考官評分穩定性與效度監測儀表板：以 OSCE 臨床技能測驗為例', author: '盧英云', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1fI-uj9Aov2w9XduG5YMTuy7b3cWtyD-U/view', review: '●本研究以互動式儀表板即時呈現OSCE考官的評分結果與差異，並透過統計指標協助辨識評分穩定性、鑑別度及評分一致性等問題，是相當創新的考官評分品質監測與回饋系統。此工具能將複雜的評分資料轉化為直觀資訊，協助教學行政人員掌握考官評分樣態，亦可作為考官校準、培訓及後續改善的參考，具有良好的實務應用與推廣價值。\n●本研究針對OSCE考官評分品質監測議題，建構整合統計分析與資料視覺化之互動式儀表板，能即時辨識評分偏誤、評分鑑別度不足及Global Rating與Checklist不一致等問題，主題具高度創新性與實務應用價值。 \n研究方法完整呈現系統架構與核心監測指標，並透過多維度篩選及客製化回饋機制，提供教學行政與考官培訓具體參考依據。此系統有助於建立OSCE評核品質管理機制，提升評分信度與考試公平性。' },
+    { num: '實體04', title: '虛擬標準病人於臨床技能測驗中的應用與表現評估', author: '黃于娟', org: '中國醫藥大學新竹附設醫院', pdf: 'https://drive.google.com/file/d/1N20nBO0EwQRi0bKaZmDXIERfsCmqvF65/view', review: '本研究不僅描述AI虛擬病人於臨床技能測驗中的應用，更進一步建立四分法分析架構，從準確性、劇本依從性、回應時間及評分差異等面向，系統性評估虛擬病人的實際表現。研究亦呈現劇本內錯誤、劇本外不當回應及AI與考官評分差異，有助於具體辨識AI虛擬病人應用於OSCE時的優勢與限制，對後續系統優化及評量品質提升具有良好參考價值。' },
+    { num: '實體05', title: '從沉浸到勝任：運用VR360情境學習結合EPA評量建構物理治療實習生能力導向臨床教學模式', author: '黃婉筠', org: '高雄榮民總醫院', pdf: 'https://drive.google.com/file/d/19C95-uJ3n3M9xg12BxkS1-R9P-FUVaRT/view', review: '●本研究成效指標涵蓋知識、臨床技能與勝任程度，能從不同面向呈現學員的能力進展，因此具有較高的推薦與推廣價值。\n●本研究建構VR360沉浸式情境學習結合EPA評量之能力導向臨床教學模式，整合CBME理念、反思學習及OSCE評量架構，具有高度創新性與臨床教育應用價值。 \n研究結果顯示，介入後學員於核心能力、VR測驗、OSCE表現及EPA等級均呈現一致性提升，顯示本教學模式有助於促進臨床推理能力、病人中心照護及學習自信之提升，具良好教育成效。' },
+    { num: '實體06', title: '壓出心希望—運用 QCPR 即時回饋科技於醫事人員跨專業 CPR 模擬訓練之成效', author: '梁月玲', org: '臺北醫學大學附設醫院', pdf: 'https://drive.google.com/file/d/1AWjxW4rQ1hITacZoAgsByqNFM85IXIee/view', review: '●QCPR可即時量化壓胸速率、深度、回彈、位置及通氣等表現，並立即提供學員具體回饋，是相當客觀且具實用性的訓練評估工具。本研究將QCPR導入跨專業CPR模擬訓練，不僅能協助學員即時修正操作，也能辨識不同職類常見的技術缺失，作為後續個別化及分級訓練的依據，值得持續應用與推廣。\n●專案針對影像醫學部之跨專業團隊（放射師、護理師、行政人員），導入QCPR即時回饋系統進行擬真急救訓練。主題切合臨床高風險痛點，利用數位科技量化核心急救指標，給予個別化回饋，極具客觀性。研究結果成功辨識不同職類的認知與技術缺失，並提出分級訓練之常態化建議，對建構非臨床單位急救安全網具高度貢獻與推廣價值，' },
+    { num: '實體07', title: '整合OSCE與EPA之能力導向語言治療臨床教學模式：以吞嚥障礙訓練為例', author: '陳璟綺', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1lQqTfk_iuguaVXFjiqEdiyrMRAKEce9K/view', review: '本研究結合能力導向醫學教育（CBME）理念，建構整合OSCE、EPA及跨專業學習之語言治療臨床教學模式，並應用於吞嚥障礙訓練，主題具高度教育創新性與實務價值。研究結果顯示學員於吞嚥攝影判讀、FOIS與IDDSI應用、衛教溝通及同理能力皆有顯著進步，EPA信賴等級亦獲提升，顯示該教學模式能有效促進臨床能力養成。 \n建議作者補充研究對象人數、課程執行流程、EPA等級定義及統計分析方法，以提升研究嚴謹度與結果解釋力。' },
+    { num: '實體08', title: '邁向全人照護的臨床評量：生活型態醫學從內隱教學目標到OSCE藍圖之轉化', author: '黃淑芬', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1XVCxZ_fYYq-dKkwPDmXQ171FRhB9yeWR/view', review: '本研究將藥師衛教內容由傳統藥物諮詢進一步延伸至飲食、運動、戒菸等生活型態醫學面向，符合藥師角色朝向病人中心與全人照護發展的趨勢。透過OSCE檢核項目與評分標準，能將原本較為內隱的教學目標轉化為可觀察、可評量的臨床能力，並由多年評量結果呈現學生在生活型態諮詢方面的學習現況與待加強之處，具有良好的教育應用與成果分享價值。' },
+    { num: '實體09', title: '發展在院腦中風緊急應變護理師 OSCE 教案之專家效度評估與流程優化', author: '王維那', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1kXs-iklo5PTbbs7PRjCIpPW6EmAyDuCP/view', review: '●本研究針對在院腦中風緊急應變情境開發護理師OSCE教案，將中風辨識、快速反應小組啟動、檢查準備及治療前整備等重要流程，轉化為可觀察與評量的臨床行為，教案主題具創新性及臨床實用性。研究並導入跨領域專家效度評估，依量化結果與質性意見進行流程及內容修正，使教案更符合實際臨床作業與病人安全需求，其開發成果具有良好的應用價值。\n●本研究能將院內腦中風緊急應變流程轉化為OSCE可觀察、可評核的具體項目，並透過跨領域專家審查，檢視教案內容的重要性、措辭適切性及題意清晰度，具備良好的評量工具發展基礎。' },
+    { num: '實體10', title: '運用AI工具模擬管灌腹瀉OSCE教案評分一致性成效探討', author: '劉美媛', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1kHi91Tg9Xl_skPmynW50PzUUG87Fa7DA/view', review: '●用 ElevenLabs 語音 AI 製作標準化 OSCE 對話，讓每次情境的內容、語氣、節奏都可重複，這個想法很聰明，直接解決了真人 SP 帶來的情境變異問題。再用修正式德菲法處理考官校準，一致性從 78.5% 提升到 92%，三項指標改善幅度達 30% 以上，數字具體、過程清楚。\n●本海報論文研究動機明確，符合目前OSCE考官一致性訓練對降低成本與提升標準化之需求。研究運用生成式AI語音工具製作標準化模擬對話，具創新性與實務應用價值。研究設計、樣本數及研究工具皆說明清楚且合宜，並進一步針對評分一致性不足之項目導入修正式德菲法建立共識，有助於提升OSCE評分品質與考官訓練成效。整體而言，本研究主題切合現場需求，具推廣潛力，值得肯定。' },
   ],
   eposter: [
-    {
-      num: 'EP-01',
-      title: '第1封測試-探討 QCPR APP 介入對行政及醫護人員 CPR 技能之影響與長期維持—以 OSCE 評估為例',
-      author: '楊依玲01',
-      org: '中國醫藥大學新竹附設醫院',
-      pdf: 'https://drive.google.com/file/d/1G_npt2jZjC3e5-Ug29IW7l63ZLiYB_gc/view',
-    },
+    { num: 'EP-01A', title: '擬真情境應用於提升放射師心導管室感控與溝通能力', author: '黃詩華', org: '義大醫療財團法人義大醫院', pdf: 'https://drive.google.com/file/d/1hrD45lYn_sm2usWwGRfbJriUWTaZwoi3/view' },
+    { num: 'EP-02A', title: '培育全人天使：血管攝影模擬教學', author: '溫漢忠', org: '義大醫療財團法人義大醫院', pdf: 'https://drive.google.com/file/d/1j-wwikK6oRjzBAbfiHknAKtyM1ZGn1aU/view' },
+    { num: 'EP-03A', title: '情境式教學提升急診病患辨識與引導執行磁振造影檢查之成效', author: '康博勝', org: '義大醫療財團法人義大醫院', pdf: 'https://drive.google.com/file/d/10E-Jk2I0cevGRNPNNGwqxWzuDRB4h-74/view' },
+    { num: 'EP-04A', title: 'Integrating Simulation Phantoms and Reflective Practice to Enhance Radiography Interns\' Clinical Communication Skills: A Case of High-Anxiety Mammography Scenarios', author: '黃詩華', org: '義大醫療財團法人義大醫院', pdf: 'https://drive.google.com/file/d/1ctFAqhwNynAKlX-c-vgYjOgN52DZ61Ny/view' },
+    { num: 'EP-05A', title: 'Integration of Hybrid Operating Room Techniques with ERAS Protocol in Advanced NSCLC Management', author: '鄭伃婷', org: '臺北市立聯合醫院', pdf: 'https://drive.google.com/file/d/17q_bASPfV9Cc1PNM-jOmfV0SAhCk6Fzb/view' },
+    { num: 'EP-06A', title: '將零碎時間轉化為臨床學習場域：AI虛擬病人於專科護理師OSCE訓練之應用分析', author: '蘇韻如', org: '臺北市立聯合醫院仁愛院區', pdf: 'https://drive.google.com/file/d/1ZjNLMpGAMchyq6jIm6bjXND1C4h_qwqJ/view' },
+    { num: 'EP-07A', title: '電子學習歷程數位轉型之成效與使用者適應性影響探討', author: '黃建中', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1e3So0ev-sdW7xmY0J3SuDrVFToPNYFrD/view' },
+    { num: 'EP-08A', title: '情境模擬教學介入對提升專科護理師急救處置自效能之成效探討', author: '鍾筱宣', org: '國立成功大學醫學院附設醫院', pdf: 'https://drive.google.com/file/d/1eTxwROJLL8tfW96l5__xSt8AHKnHlzbm/view' },
+    { num: 'EP-09A', title: '情境擬真教學之心肌灌注造影技術操作', author: '邱育琪', org: '義大醫療財團法人義大醫院', pdf: 'https://drive.google.com/file/d/1gC_HJhPkLoCiDCg0aa3HFhjTAnW3ZqmJ/view' },
+    { num: 'EP-10A', title: 'Development of a Competency-Based Simulation Training Model for Integrated Airway Management: From Endotracheal Intubation to Patient Transport', author: '蘇博民', org: '國軍左營總醫院', pdf: 'https://drive.google.com/file/d/1GcNJOr0lNlgDnOW1uHT4YNawmPcp_yUF/view' },
+    { num: 'EP-11A', title: '教育者作為效能催化劑：運用Kirkpatrick模式評估混成式BLS訓練在降低成本、時間與碳足跡之成效', author: '劉梅瑛', org: '國立臺灣大學醫學院附設醫院雲林分院', pdf: 'https://drive.google.com/file/d/15qokeG27V7nw4W4nK_yfx1tKnzGrzI0C/view' },
+    { num: 'EP-12A', title: '運用DOPS+口述評量BC ROBO 7 自動備管機與作業系統升級教育訓練', author: '洪永東', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/11KKLB_9pb6JLg2koeXWKBsUm8I6gaZJT/view' },
+    { num: 'EP-13A', title: '以 Vibe Coding 為主軸之 AI 數位賦能工作坊：跨職類醫療人員轉化學習與行為意圖成效之探討', author: '盧英云', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1S6-S3G-ywAnJ5o_roT74Z6dD9udThCTV/view' },
+    { num: 'EP-14A', title: '跨團隊高擬真情境模擬教學於 COPD 急性惡化處置之成效初探', author: '蕭惠珊', org: '台灣基督長老教會馬偕醫療財團法人馬偕紀念醫院', pdf: 'https://drive.google.com/file/d/1V7tdx7iPL1gwdlVmp0qGTKZORmw7Xidh/view' },
+    { num: 'EP-15A', title: '營養師臨床數位化多媒體教學與傳統見習教學模式成效探討', author: '賴佩吟', org: '淡水馬偕紀念醫院', pdf: 'https://drive.google.com/file/d/1MloFc2KfhgiYtrmBD2aNDAwC0IdMbhVE/view' },
+    { num: 'EP-16A', title: '解鎖臨床教師的 AI 助手：人機協作「結構化提示詞設計流程」於臨床教案開發之實踐', author: '莊婉君', org: '臺北榮民總醫院玉里分院', pdf: 'https://drive.google.com/file/d/14yCA9xOgZI3Xot04ZQI2HQ4HPLF9-eQ_/view' },
+    { num: 'EP-17A', title: '利用ISBAR溝通工具協助藥護溝通以提升藥師專業能力與跨領域合作-藥物間之IV Compatibility', author: '許艾瑋', org: '天成醫療社團法人天晟醫院', pdf: 'https://drive.google.com/file/d/1lAkbI5BgdKziNVsE0tg1YM197Vt7WQpO/view' },
+    { num: 'EP-18A', title: '以閉環學習為核心之 MRI 模擬訓練平台：結合操作決策與即時回饋之教學應用', author: '劉名宏', org: '國泰綜合醫院', pdf: 'https://drive.google.com/file/d/1nCEvfGW30t18eChoCEF97xp0HKUsxY3q/view' },
+    { num: 'EP-19A', title: '運用 AI 驅動型 NotebookLM 優化血液檢體採集教育訓練之成效評估', author: '利佳蓉', org: '天成醫療社團法人天晟醫院', pdf: 'https://drive.google.com/file/d/1aC6oJHt3d1h_weAP2V5ywGvW7Kioav4V/view' },
+    { num: 'EP-20A', title: '優化模擬醫學教育：藉由 OSCE 雙向回饋機制提升學員學習成效與優化教案設計', author: '黃雪莉', org: '佛教慈濟醫療財團法人大林慈濟醫院', pdf: 'https://drive.google.com/file/d/1GiMpMepen7Xt1TKr6i-L8mny_h4yrSfT/view' },
+    { num: 'EP-21A', title: '重塑臨床技能教育：呼吸治療師跨領域超音波訓練之學習成效', author: '鍾韋嬋', org: '高雄醫學大學附設中和紀念醫院', pdf: 'https://drive.google.com/file/d/1seztdHKPvCh5Pkt2k8Ba2aI7dbYT59qC/view' },
+    { num: 'EP-22A', title: '病人自控式止痛(PCA)臨床全方位照護與安全實務教案—臨床核心模組與品質改善指引', author: '陳育屏', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1NzCrizrKhCSCMX8KFLnooSf3oiqVrGWW/view' },
+    { num: 'EP-23A', title: '結合人工智慧輔助之乳房攝影影像品質評定教學模組建置與放射師學習成效之初步評估', author: '郭琬琪', org: '天成醫療社團法人天晟醫院', pdf: 'https://drive.google.com/file/d/1MYbv9OkV5VcfJRl-OUsHi57FpSZFsAwz/view' },
+    { num: 'EP-24A', title: '高擬真情境模擬教學於跨團隊合作訓練之二年期學員學習滿意度研究', author: '邱瑜柔', org: '台灣基督長老教會馬偕醫療財團法人馬偕紀念醫院', pdf: 'https://drive.google.com/file/d/1cCSmE8BERswtH85Ws4_KGD6YkBwmuAuq/view' },
+    { num: 'EP-25A', title: '運用混成教學與遊戲化教學於「尖銳物品扎傷事件防範」之實踐', author: '邱旅揚', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1h-8Xf_bA2Hpn02ZodVcUdAGeryc3GljI/view' },
+    { num: 'EP-26A', title: '虛擬病人評分在營養OSCE中的一致性與系統性偏差', author: '黃琳惠', org: '中國醫藥大學新竹附設醫院', pdf: 'https://drive.google.com/file/d/1mwpHxVhKENX3_CFwvtzw-BDzxHKxPN0W/view' },
+    { num: 'EP-27A', title: '運用客觀結構化臨床考試（OSCE）提升護理臨床教師週邊植入式中心導管（PICC）照護技能', author: '賴麗君', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/11IHR0HV8ng9f6CcInVb0p6KJIfz0vwkE/view' },
+    { num: 'EP-28A', title: '應用雙軌影片評核與臨床行為指引提升臨床護理教師 DOPS 評分共識之成效', author: '曲天尚', org: '臺北醫學大學附設醫院', pdf: 'https://drive.google.com/file/d/1pZojOYEQ8V5J08hd1iatVKyoqjblnROH/view' },
+    { num: 'EP-29A', title: '運用SimMan Critical Care 高擬真模擬器結合OSCE建構急性肺水腫呼吸治療進階課程之教學成效評估', author: '林育禎', org: '國立臺灣大學醫學院附設醫院新竹分院', pdf: 'https://drive.google.com/file/d/1OdPAJT3QhUskk7fT-zpaPsS5JhSnOpYy/view' },
+    { num: 'EP-30A', title: 'EPAs導向護理交班訓練對新進護理人員臨床溝通能力之成效', author: '夏美玲', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1MJtW5yy5nv0L0diD__6trdpXG2wghysI/view' },
+    { num: 'EP-31A', title: '運用XR建構提升兒科新進人員靜脈注射流程認知衛教與靜注異常處置', author: '黃薏庭', org: '天成醫療社團法人天晟醫院', pdf: 'https://drive.google.com/file/d/100oLj-LCKAy2z_KR2N9y_pKwQ98C6Kqb/view' },
+    { num: 'EP-32A', title: '從情境沉浸到臨床決策：互動式360教學於產科OSCE之創新教學模式', author: '王淑鈴', org: '淡水馬偕紀念醫院', pdf: 'https://drive.google.com/file/d/1Ahs4qDzi6-5m7tkRY-_mLUAMGGs6RYc8/view' },
+    { num: 'EP-33A', title: '運用多元教學策略提升新進護理人員胸管照護能力', author: '胡月華', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1GwIKrT8R4ZhNgjTR0fuMwWT_R2oLkNFC/view' },
+    { num: 'EP-34A', title: '人工智慧應用於臨床技能教育回饋之範域文獻回顧', author: '林健禾', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1Wm8UFhE_wnOwVCwxmux19_5FJGLq8_Gv/view' },
+    { num: 'EP-35A', title: '運用遊戲式溝通訓練提升護理人員護病衝突應對能力之成效探討', author: '章正俐', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1pmL2o7J2nV8SekmM3J_IABl8QshPafYX/view' },
+    { num: 'EP-36A', title: '從焦慮到信任：AI標準化家長於PGY學員兒童發展評估結果溝通訓練之應用', author: '邱靜芳', org: '衛生福利部部立雙和醫院', pdf: 'https://drive.google.com/file/d/1hPHTn0heVDFmzdoyijtTEtkLwHS-YrJW/view' },
+    { num: 'EP-37A', title: '不可見的障礙：以體驗式中風模擬提升職能治療實習生之臨床覺察', author: '高婕螢', org: '臺北醫學大學附設醫院', pdf: 'https://drive.google.com/file/d/18BSBkOdTXlkYfXXq42PHcPM4R55sgowG/view' },
+    { num: 'EP-38A', title: '提升新進護理人員噴霧吸入治療操作正確率之教育訓練', author: '許麗芳', org: '臺北醫學大學附設醫院', pdf: 'https://drive.google.com/file/d/1XDlYtUGD9Ga_Z4MCxytXmRsviEd5-aIH/view' },
+    { num: 'EP-39A', title: '以AI輔助提升物理治療期刊報告參與度與學習成效之探討', author: '彭靖雅', org: '天成醫療社團法人天晟醫院', pdf: 'https://drive.google.com/file/d/19hO2jOtg4UwJ9MDbPKuFVpQePT1K1akl/view' },
+    { num: 'EP-40A', title: '應用高擬真模擬訓練提升病房護理人員急救應變之教學經驗分享', author: '杜佩綺', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1NQeocsEwLt-IeZQVXe3pfNggv2JXEfh4/view' },
+    { num: 'EP-41A', title: '從患者體驗到治療重設計：以身體化模擬促進職能治療PGY之臨床推理轉變', author: '周詩涵', org: '臺北醫學大學附設醫院', pdf: 'https://drive.google.com/file/d/1LhT0RarkfEURViuUn6dXBDS7NuKncNAj/view' },
+    { num: 'EP-42A', title: '運用實體教學提升護理人員周邊中心靜脈管路(PICC)照護能力', author: '黃鈺芳', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1TqhV5DT8JKI4lNnqHuI4vgDzMGAo1B1X/view' },
+    { num: 'EP-43A', title: '視覺記憶導向之急救藥物教學', author: '林彥君', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1DqqeWsE40E8uSEBjO7V3gSW_bwQgIvrh/view' },
+    { num: 'EP-44A', title: '胃癌防治：幽門桿菌抗原快篩檢驗與OSCE評量成效', author: '黄郁雯', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/15T7-mHMTAGUPnwMKHZELjLBGLFnr6p7n/view' },
+    { num: 'EP-45A', title: '一個漏氣警報，三條病安防線:人工氣道氣囊漏氣的OSCE能力評核', author: '鄭愛琴', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/181oFZCLsaG-GWnGSOrc5sSqTC1FDd_-l/view' },
+    { num: 'EP-46A', title: '多元化教學提升護理人員pigtail導管照護正確率之成效', author: '李矜霈', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1DUfm_Z7ehzxvgd5YFB06K07Fs7Qv6IlG/view' },
+    { num: 'EP-47A', title: '骨科高齡病人術後譫妄之實證轉化：推行多面向照護計畫之臨床運用與成效評值', author: '方怡今', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1MPWXRaIQg1o5g_EG26Xg_7HS1ZF70gZ1/view' },
+    { num: 'EP-48A', title: '建置多元策略教學方案提升護理人員化療照護知能與應變能力', author: '李矜霈', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1UyEyAijyoonbGb-M6wgOzL6x2AWLyZ2H/view' },
+    { num: 'EP-49A', title: '建置多元輔導機制與報告資源專區提升護理人員進階意願與準備信心之成效', author: '黃玥玲', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1YRMtkboXhZa6U3zkIM8QEeooKa2opcp5/view' },
+    { num: 'EP-50A', title: 'Application of Simulation and Objective Structured Clinical Examination in Psychiatric Occupational Therapy Education: A Scoping Review', author: '林健禾', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1_qR167ipi5kGAk7wdx3h0hP8zE460YU0/view' },
+    { num: 'EP-51A', title: '運用智慧化數位衛教工具進行氣喘兒童照顧者照護指導', author: '林芬君', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1H05Gphp2fFDGXRaVjZK5FXOTUg5wl7OK/view' },
+    { num: 'EP-52B', title: '科技輔助EPA導向跨領域全人照護教案：門診焦慮型糖尿病病人—旅遊飲食調整原則及跨領域營養照護', author: '謝梨君', org: '中山醫學大學附設醫院', pdf: 'https://drive.google.com/file/d/1M1rExvB-4te33IrZhD2D6dslWEFHIYLp/view' },
+    { num: 'EP-53B', title: '以DOPS與EPA評估醫事放射實習生在擺位攝影學習之成效', author: '謝明祥', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1IubxFqutAlit2pz77gyKH9Yx58QmgrcQ/view' },
+    { num: 'EP-54B', title: '結合醫學教育能力導向之臨床教師回饋訓練方案之成效', author: '陳姿廷', org: '嘉義長庚紀念醫院', pdf: 'https://drive.google.com/file/d/1Y8fW61rV6f4UiNm5k-p9xXOm4wX8-FA5/view' },
+    { num: 'EP-55B', title: '勝任能力導向臨床訓練之執行狀況檢討', author: '張鈴艷', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1YdqwjVYLWNiXIZHrqFq0aQP1AQafbzxz/view' },
+    { num: 'EP-56B', title: '勝任能力導向臨床訓練成效分析—以重症照護站別為例', author: '陳永銘', org: '奇美醫療財團法人柳營奇美醫院', pdf: 'https://drive.google.com/file/d/1NFpx8f7yNNg78GebK3xQ1eD0DYaIAJBZ/view' },
+    { num: 'EP-57B', title: 'FUN Learning Detective: A Gamified Two-Stage Assessment Using Peer Learning and Timed Challenges in Medical Laboratory Internship Training', author: '葉瑩君', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1C8nKyKTurfNlT7VEALelKGdVLogcJQMJ/view' },
+    { num: 'EP-58B', title: '利用影片評估物理治療實習生同理心之學習成效', author: '劉天慧', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1uH5kexDjj7aKnWUxOOebuhBbrC5PdP-D/view' },
+    { num: 'EP-59B', title: 'OSCE評分考官訓練對營養科臨床技能評量一致性之影響', author: '陳宛伶', org: '中國醫藥大學新竹附設醫院', pdf: 'https://drive.google.com/file/d/1iLYU9M6pI3QBcNSYq_rOCEfwOhtQp0gC/view' },
+    { num: 'EP-60B', title: '運用實體教學提升護理人員靜脈導管注射完正率', author: '葉紜彤', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1g3fPbZxHytyDQcz1c_WjSFII-EDfg8iw/view' },
+    { num: 'EP-61B', title: '醫事放射實習生客觀結構式臨床測驗之精簡化：導入 mini-OSCE 之可行性與初步經驗', author: '范芳郡', org: '臺北醫學大學附設醫院', pdf: 'https://drive.google.com/file/d/1ug20ztN_pEpARWZ7Y6AQd89NFFhe50Uc/view' },
+    { num: 'EP-62B', title: '牙醫實習生學習風格及客觀結構式臨床測驗成績之關連性', author: '陳昭安', org: '奇美醫療財團法人柳營奇美醫院', pdf: 'https://drive.google.com/file/d/13t9pDMf6p_auE9KjUKHmb5xTUxL01oIf/view' },
+    { num: 'EP-63B', title: '於 OSCE 導入信賴等級評估學員 Warfarin 衛教勝任能力之成效分析', author: '張榞玲', org: '童綜合醫療社團法人童綜合醫院', pdf: 'https://drive.google.com/file/d/1IrEQ0bQxjztFz6HPxtxiXHhTeZEe3Vtk/view' },
+    { num: 'EP-64B', title: '運用可信賴專業活動評核提升新進護理人員接新入院病人之成效', author: '鄭麗娟', org: '佛教慈濟醫療財團法人大林慈濟醫院', pdf: 'https://drive.google.com/file/d/1nYtDJFtlPG5a1nUxRPrs2kfJZLV_W8yY/view' },
+    { num: 'EP-65B', title: '結合智慧化衛教建構EPA導向門診護理照護模式—以初次診斷第一型糖尿病學齡期兒童為例', author: '黃子蓉', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/114yAhkCr2jJ9tRkLZGgn86ApvR0vFzQ9/view' },
+    { num: 'EP-66B', title: '建構EPA導向門診護理人員大腸鏡衛教模式之成效探討', author: '楊玟玟', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1OEPOEUHqOTyjA04IJj2LcUkaHju2ORS1/view' },
+    { num: 'EP-67C', title: 'AI 時代下師生溝通的再定位：以人為本的卡牌式師資發展介入設計', author: '王明淑', org: '台灣基督長老教會馬偕醫療財團法人馬偕紀念醫院', pdf: 'https://drive.google.com/file/d/13Q-V8ex-HZBwmhXUBRfJxQj6EqIV9gJm/view' },
+    { num: 'EP-68C', title: '從數據焦慮到共同理解：藥師透過同理溝通與心理安全促進病人提問之照護經驗', author: '楊紫麟', org: '屏東基督教醫院', pdf: 'https://drive.google.com/file/d/1qHNSx_mNAksNibGwEnBN_-FQ9gREzvjx/view' },
+    { num: 'EP-69C', title: '教學思維轉變：運用反思式臨床回饋技巧於呼吸治療職類之成效探討', author: '陳泓甫', org: '佛教慈濟醫療財團法人大林慈濟醫院', pdf: 'https://drive.google.com/file/d/1zkL-9p4mvdqVkofBgGWII3hEQQMcGWs3/view' },
+    { num: 'EP-70C', title: '導入AI生成技術之漫畫版溝通情境模擬教學，提升護理人員人文素養', author: '方怡今', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1liUgGQDqTVkJLAwmPZtILYJyz3eEzeUw/view' },
+    { num: 'EP-71C', title: '藥師樹洞：以短回合數位敘事支持藥師情緒整理與專業認同之原型開發', author: '李承洲', org: '佛教慈濟醫療財團法人大林慈濟醫院', pdf: 'https://drive.google.com/file/d/1LopibxOAbwO3WwuvDH8hW74MP7-Q6t7L/view' },
+    { num: 'EP-72C', title: '多元紓壓與日常客製化關懷提升護理同仁工作滿意度之成效', author: '王芮竹', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1MKYH5K0XXsUitehHh0fYjttxKmnwvnPi/view' },
+    { num: 'EP-73C', title: '聽見呼吸背後的人：呼吸治療以病人為中心之人文照護教育模式', author: '鄭愛琴', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/11SQFfGRdJc0tMc-C8cdK-REggtIWU2D6/view' },
   ],
 };
 
@@ -1742,9 +1818,15 @@ function renderPosters(category, list, opts = {}) {
     const pdfBtn = p.pdf
       ? `<a href="${escapeHtml(p.pdf)}" target="_blank" rel="noopener" class="poster-pdf-btn">📄 PDF</a>`
       : `<span class="poster-pdf-btn disabled">PDF 待提供</span>`;
-    const review = (category === 'award' && p.review)
-      ? `<div class="poster-review"><strong>評審意見：</strong>${escapeHtml(p.review)}</div>`
-      : '';
+    let review = '';
+    if (category === 'award' && p.review) {
+      // 先把多重換行（\n\n 或 \n \n 等）壓成單一換行，避免視覺上出現大空行
+      const cleaned = p.review.replace(/\n[ \t]*\n+/g, '\n');
+      // 以「●」為委員分段標記，切成多段（無「●」則整段為一段）
+      const parts = cleaned.split('●').map(s => s.trim()).filter(Boolean);
+      const paragraphs = parts.map(t => `<p>${escapeHtml(t)}</p>`).join('');
+      review = `<div class="poster-review"><strong>評審意見：</strong>${paragraphs}</div>`;
+    }
     return `
       <div class="poster-item">
         <div class="poster-body">
@@ -1765,8 +1847,8 @@ renderPosters('physical', POSTERS.physical);
 renderPosters('award', POSTERS.award);
 renderPosters('eposter', POSTERS.eposter);
 
-// 初始同步：讓子選單的 active 狀態與預設顯示的「實體海報論文」面板一致
-showPosterSubtab('physical');
+// 初始同步：讓子選單的 active 狀態與預設顯示的「優秀海報論文」面板一致
+showPosterSubtab('award');
 
 /* ════════════════════════════════════════════════════════════════
    4c. OSCE 教案渲染
