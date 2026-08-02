@@ -715,9 +715,9 @@ function renderCounterTabs(){
   registrations.forEach(r=>{if(r.counter)counters.add(r.counter)});
   if(counters.size===0){tabs.innerHTML='';return}
   const sorted=[...counters].sort();
-  let html=`<button class="counter-tab ${!activeCounterFilter?'active':''}" onclick="setCounterFilter(null)">全部</button>`;
+  let html=`<span style="font-size:.68rem;color:var(--text-muted);font-weight:600;padding:0 .3rem;flex-shrink:0">報到</span><button class="counter-tab ${!activeCounterFilter?'active':''}" onclick="setCounterFilter(null)">全部</button>`;
   sorted.forEach(c=>{
-    html+=`<button class="counter-tab ${activeCounterFilter===c?'active':''}" onclick="setCounterFilter('${c}')"><span style="font-size:.85rem;font-weight:700;display:block;line-height:1">${c}</span><span style="font-size:.6rem;font-weight:500;opacity:.7">報到台</span></button>`;
+    html+=`<button class="counter-tab ${activeCounterFilter===c?'active':''}" onclick="setCounterFilter('${c}')">${c}</button>`;
   });
   tabs.innerHTML=html;
 }
@@ -1308,13 +1308,12 @@ function renderStatGroup(title, members, ckCount, rate) {
       <div class="sg-member-list">
         ${members.map(m=>{
           const absentStyle = m.absent ? 'text-decoration:line-through;color:#ccc' : '';
-          const memberColor = m.isMember ? '#0097B2' : '#CCC1DA';
-          const bgColor = m.checked ? '#edf6f1' : (m.absent ? '#f5f5f5' : (m.isMember ? '#e8f6f8' : '#f3f0f6'));
-          const dotColor = m.checked ? 'var(--success)' : (m.absent ? '#ccc' : memberColor);
+          const bgColor = m.absent ? '#f5f5f5' : (m.isMember ? '#e8f6f8' : '#f3f0f6');
+          const dotColor = m.absent ? '#ccc' : (m.isMember ? '#0097B2' : '#CCC1DA');
           return `<div class="sg-member" style="background:${bgColor}">
             <div class="sg-dot" style="background:${dotColor}"></div>
             <span class="sg-mname" style="${absentStyle}">${esc(m.name)}</span>
-            ${m.checked?'<svg style="width:18px;height:18px;stroke:var(--success);stroke-width:3;fill:none;flex-shrink:0" viewBox="0 0 24 24"><path d="m9 12 2 2 4-4"/></svg>':''}
+            ${m.checked?'<svg style="width:16px;height:16px;stroke:var(--success);stroke-width:2;fill:none;flex-shrink:0;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>':''}
             ${m.absent?'<span style="font-size:.65rem;color:#bbb">不出席</span>':''}
             ${!m.found?'<span style="font-size:.7rem;color:var(--warning)">(未報名)</span>':''}
           </div>`;
@@ -1383,20 +1382,18 @@ function renderCounterStats() {
   if (keys.length === 0) return '';
   const rows = keys.map(k => {
     const c = counters[k];
-    const expected = c.total - c.absent; // 預期報到人數
+    const expected = c.total - c.absent;
     const allDone = c.checked >= expected && expected > 0;
-    return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;gap:.5rem">
-      <span>第${k}報到台</span>
-      <span style="display:flex;align-items:center;gap:.4rem">
-        <strong>${c.checked}</strong> / ${c.total}
-        ${c.absent>0?`<span style="font-size:.72rem;color:#999">（不出席${c.absent}人）</span>`:''}
-        ${allDone?'<svg style="width:16px;height:16px;stroke:var(--success);stroke-width:2.5;fill:none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>':''}
-      </span>
+    const absentText = c.absent > 0 ? `<span style="color:#999;font-size:.72rem;margin-left:.3rem">不出席${c.absent}</span>` : '';
+    const doneIcon = allDone ? '<svg style="width:14px;height:14px;stroke:var(--success);stroke-width:2.5;fill:none;margin-left:.2rem;vertical-align:middle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>' : '';
+    return `<div style="display:flex;align-items:center;font-size:.82rem;padding:.2rem 0">
+      <span style="width:70px;flex-shrink:0;font-weight:600">報到 ${k}</span>
+      <span style="flex:1"><strong>${c.checked}</strong> / ${c.total}${absentText}${doneIcon}</span>
     </div>`;
   }).join('');
   return `<div class="so-card">
-    <div class="so-label">各報到台報到狀況</div>
-    <div style="display:flex;flex-direction:column;gap:.35rem;margin-top:.4rem">${rows}</div>
+    <div class="so-label">各報到台狀況</div>
+    <div style="display:flex;flex-direction:column;gap:.15rem;margin-top:.4rem">${rows}</div>
   </div>`;
 }
 
