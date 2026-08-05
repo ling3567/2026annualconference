@@ -1086,19 +1086,20 @@ body {
         <h3>報名資料已送出！</h3>
         <p>感謝您的報名！系統將寄發報名確認信至您填寫的 Email。<br>若已收到確認信，即表示已完成研討會報名，請留意信件通知。</p>
       </div>
+    </div>
 
-      <div class="reg-closed" id="reg-closed">
-        <div class="reg-closed-icon">
-          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--nav-blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-        </div>
-        <h3>報名已截止</h3>
-        <p>感謝您的關注，本次研討會報名已截止。<br>如有任何疑問，請聯繫秘書處。</p>
-        <div class="reg-closed-contact">
-          <p>楊依玲 小姐 ｜ 06-2812811 #57426 ｜ tsmcsd2018@gmail.com</p>
-        </div>
+    <!-- 報名已截止訊息（獨立於 form-container 之外） -->
+    <div class="form-container reg-closed" id="reg-closed" style="margin-top: 2rem;">
+      <div class="reg-closed-icon">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--nav-blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <h3>報名已截止</h3>
+      <p>感謝您的關注，本次研討會報名已截止。<br>如有任何疑問，請聯繫秘書處。</p>
+      <div class="reg-closed-contact">
+        <p>楊依玲 小姐 ｜ 06-2812811 #57426 ｜ tsmcsd2018@gmail.com</p>
       </div>
     </div>
   </div>
@@ -1225,10 +1226,10 @@ function checkRegStatus() {
       try {
         const result = JSON.parse(text);
         if (result.status === 'closed') {
-          // 隱藏報名須知和表單，顯示截止訊息
+          // 隱藏報名須知和表單
           document.querySelector('.reg-notice-card').style.display = 'none';
           document.getElementById('form-container').style.display = 'none';
-          document.getElementById('reg-closed').classList.add('show');
+          // 顯示截止訊息
           document.getElementById('reg-closed').style.display = 'block';
         }
       } catch(e) { /* 查詢失敗時預設保持開放 */ }
