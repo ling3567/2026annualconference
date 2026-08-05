@@ -512,6 +512,26 @@ body {
 .form-success h3 { color: var(--deep-blue); margin-bottom: 0.5rem; font-size: 1.3rem; }
 .form-success p { color: var(--text-muted); font-size: 0.95rem; }
 
+/* Registration closed */
+.reg-closed {
+  display: none; text-align: center; padding: 3rem 1.5rem;
+}
+.reg-closed.show { display: block; }
+.reg-closed-icon { margin-bottom: 1rem; }
+.reg-closed h3 {
+  color: var(--deep-blue); font-size: 1.3rem; margin-bottom: 0.5rem;
+}
+.reg-closed p {
+  color: var(--text-muted); font-size: 0.95rem; line-height: 1.7;
+}
+.reg-closed-contact {
+  margin-top: 1.2rem; padding-top: 1rem;
+  border-top: 1px solid rgba(26,93,153,0.1);
+}
+.reg-closed-contact p {
+  font-size: 0.85rem; color: var(--text-muted);
+}
+
 /* ========== TRANSPORT ========== */
 .transport-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
 .transport-card {
@@ -948,7 +968,7 @@ body {
     </div>
 
     <!-- 報名表單 -->
-    <div class="form-container" style="margin-top: 2rem;">
+    <div class="form-container" style="margin-top: 2rem;" id="form-container">
       <div id="form-area">
         <h3 style="text-align:center; font-size:1.2rem; color:var(--deep-blue); margin-bottom: 0.3rem;">填寫報名資料</h3>
         <p style="text-align:center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.8rem;">標示 <span style="color:var(--coral);">*</span> 為必填欄位</p>
@@ -1066,6 +1086,20 @@ body {
         <h3>報名資料已送出！</h3>
         <p>感謝您的報名！系統將寄發報名確認信至您填寫的 Email。<br>若已收到確認信，即表示已完成研討會報名，請留意信件通知。</p>
       </div>
+
+      <div class="reg-closed" id="reg-closed">
+        <div class="reg-closed-icon">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--nav-blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h3>報名已截止</h3>
+        <p>感謝您的關注，本次研討會報名已截止。<br>如有任何疑問，請聯繫秘書處。</p>
+        <div class="reg-closed-contact">
+          <p>楊依玲 小姐 ｜ 06-2812811 #57426 ｜ tsmcsd2018@gmail.com</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -1118,6 +1152,9 @@ body {
 </footer>
 
 <script>
+// ====== Google Apps Script Web App URL ======
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMyXiyOTd6yYJYUVKPB32aBTj-B3sYq3uNiZJurxCoLv9DxLlMrWkKp0iGYu8-vfCyiw/exec';
+
 // 頁面載入時回到頂部
 if (window.location.hash) {
   history.replaceState(null, '', window.location.pathname);
@@ -1178,6 +1215,27 @@ function addToCalendar(e) {
     container.appendChild(span);
   }
 })();
+
+// 檢查報名開關狀態
+function checkRegStatus() {
+  const url = APPS_SCRIPT_URL + '?action=checkRegStatus';
+  fetch(url)
+    .then(res => res.text())
+    .then(text => {
+      try {
+        const result = JSON.parse(text);
+        if (result.status === 'closed') {
+          // 隱藏報名須知和表單，顯示截止訊息
+          document.querySelector('.reg-notice-card').style.display = 'none';
+          document.getElementById('form-container').style.display = 'none';
+          document.getElementById('reg-closed').classList.add('show');
+          document.getElementById('reg-closed').style.display = 'block';
+        }
+      } catch(e) { /* 查詢失敗時預設保持開放 */ }
+    })
+    .catch(() => { /* 網路錯誤時預設保持開放 */ });
+}
+checkRegStatus();
 
 // Profession other
 function handleProfession() {
@@ -1255,10 +1313,6 @@ function checkMembership() {
       statusEl.style.display = 'none';
     });
 }
-
-// ====== Google Apps Script Web App URL ======
-// 部署 Apps Script 後，將下方 URL 替換為您的 Web App URL
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMyXiyOTd6yYJYUVKPB32aBTj-B3sYq3uNiZJurxCoLv9DxLlMrWkKp0iGYu8-vfCyiw/exec';
 
 // Simple form validation & submit to Google Sheet
 function submitForm() {
