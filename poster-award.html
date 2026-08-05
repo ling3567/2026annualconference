@@ -634,7 +634,7 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
       優秀海報論文評選
       <small id="rvWho"></small>
     </div>
-    <button class="tb-btn" onclick="reloadPapers()" title="重新載入">
+    <button class="tb-btn" onclick="reloadPapers(true)" title="重新載入（清快取重抓）">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
       更新
     </button>
@@ -981,30 +981,46 @@ function doLogout(){
   location.reload();
 }
 
-/* ══════════ 載入入選論文 ══════════
-   優先呼叫專用 action awardGetPapers；
-   若 GAS 尚未加入該 action，自動退回「adminGetDashboard + getDisplayMode」組合，
-   讓本頁在後端還沒更新前就能運作。
-──────────────────────────────────── */
-async function reloadPapers(){
+/* ══════════ 靜態資料本機快取（sessionStorage）══════════
+   優秀海報名單＋初審成績＋摘要在年會期間固定，快取後重載瞬間完成；
+   現場分數（會變動）另外即時取得，不進快取。同一分頁內有效，關閉即清。 */
+const AWARD_CACHE_KEY='tsmcsd_award_dash_v1';
+const AWARD_CACHE_TTL=30*60*1000;   // 30 分鐘
+function getCachedAwardDash(){
+  try{ const s=sessionStorage.getItem(AWARD_CACHE_KEY); if(!s) return null;
+    const o=JSON.parse(s); if(!o||!o.t||Date.now()-o.t>AWARD_CACHE_TTL) return null;
+    return o.dash; }catch(e){ return null; }
+}
+function setCachedAwardDash(dash){
+  try{ sessionStorage.setItem(AWARD_CACHE_KEY, JSON.stringify({t:Date.now(), dash})); }catch(e){}
+}
+function clearAwardCache(){ try{ sessionStorage.removeItem(AWARD_CACHE_KEY); }catch(e){} }
+
+/* 取得優秀海報名單資料：優先用快取，沒有才向後端抓（並存入快取）。force=true 強制重抓 */
+async function getAwardDash(force){
+  let dash = force ? null : getCachedAwardDash();
+  if(dash) return dash;
+  const [d,disp]=await Promise.all([
+    api({action:'adminGetDashboard', forceRefresh:'false', awardOnly:'true'},60000),
+    api({action:'getDisplayMode'},30000)
+  ]);
+  if(!d||!d.success) throw new Error((d&&d.message)||'無法取得論文資料');
+  if(!d.awardOnly && disp&&disp.success&&Array.isArray(disp.data)){   // 舊後端：先前端篩好再快取
+    const modeMap={}; disp.data.forEach(({pid,mode})=>{ modeMap[pid]=mode; });
+    d.papers=(d.papers||[]).filter(p=>modeMap[p.id]==='award'); d.awardOnly=true;
+  }
+  setCachedAwardDash(d);
+  return d;
+}
+
+/* ══════════ 載入入選論文 ══════════ */
+async function reloadPapers(force){
   setLdr(true);
   try{
-    // 只要「優秀海報」那幾篇（awardOnly：後端已篩選，回傳量約縮 10 倍）；
-    // getDisplayMode 作為舊後端的前端篩選備援，兩支並行送出。
-    const [dash,disp]=await Promise.all([
-      api({action:'adminGetDashboard', forceRefresh:'false', awardOnly:'true'},60000),
-      api({action:'getDisplayMode'},30000)
-    ]);
-    if(!dash||!dash.success) throw new Error((dash&&dash.message)||'無法取得論文資料');
+    const dash=await getAwardDash(force);   // 靜態名單：優先本機快取，force 時重抓
     if(dash.reviewerNamesMap) Object.assign(reviewerNames,dash.reviewerNamesMap);
     else (dash.reviewers||[]).forEach(rv=>{ reviewerNames[rv.username]=rv.name||rv.username; });
-    let list;
-    if(dash.awardOnly){ list=dash.papers||[]; }          // 後端已篩選（快）
-    else {                                               // 舊後端：前端用 displayMode 篩選
-      const modeMap={};
-      if(disp&&disp.success&&Array.isArray(disp.data)) disp.data.forEach(({pid,mode})=>{ modeMap[pid]=mode; });
-      list=(dash.papers||[]).filter(p=>modeMap[p.id]==='award');
-    }
+    const list=dash.papers||[];
 
     // ── 整理：計算初審參考分數 ──
     papers=list.map(p=>{
@@ -1226,20 +1242,8 @@ function renderScoreEmpty(){
 function closeScore(){
   el('scoreView').classList.remove('on');
   document.body.style.overflow='';
-  if(isWide()) renderScoreEmpty();
+  curIdx=-1;              // 重置，避免任何動作再依 curIdx 重新開啟評分頁
   renderList();
-}
-
-/* 視窗尺寸切換（平板旋轉等）時，維持一致行為 */
-function onViewportChange(){
-  if(isWide()){
-    document.body.style.overflow='';
-    if(curIdx<0) renderScoreEmpty();
-  }else{
-    // 回到窄螢幕：有選取則以抽屜呈現，否則收起
-    if(curIdx>=0){ el('scoreView').classList.add('on'); }
-    else { el('scoreView').classList.remove('on'); document.body.style.overflow=''; }
-  }
 }
 
 function gotoAdj(delta){
@@ -1911,28 +1915,19 @@ function copyAllCreds(){
 }
 
 /* ══════════ 管理端：排名 ══════════ */
-async function loadAdmin(){
+async function loadAdmin(force){
   setLdr(true);
   el('admNotice').innerHTML='';
   try{
-    // 三支請求全部並行（名單＋展出方式＋現場評分）；adminGetDashboard 帶 awardOnly 只回優秀海報那幾篇
-    const [dash,disp,scoreResp]=await Promise.all([
-      api({action:'adminGetDashboard', forceRefresh:'false', awardOnly:'true'},60000),
-      api({action:'getDisplayMode'},30000),
+    // 名單用本機快取（getAwardDash，force 時重抓）；現場評分永遠即時抓，兩者並行
+    const [dash,scoreResp]=await Promise.all([
+      getAwardDash(force),
       api({action:'awardGetScores'},45000).catch(e=>{ console.warn('awardGetScores：',e.message); return null; })
     ]);
-    if(!dash||!dash.success) throw new Error((dash&&dash.message)||'無法取得論文資料');
     if(dash.reviewerNamesMap) Object.assign(reviewerNames,dash.reviewerNamesMap);
     else (dash.reviewers||[]).forEach(rv=>{ reviewerNames[rv.username]=rv.name||rv.username; });
 
-    // 後端已篩選（awardOnly）則直接用；舊後端則以 displayMode 前端篩選
-    let awardPapers;
-    if(dash.awardOnly){ awardPapers=dash.papers||[]; }
-    else {
-      const modeMap={};
-      if(disp&&disp.success&&Array.isArray(disp.data)) disp.data.forEach(({pid,mode})=>{ modeMap[pid]=mode; });
-      awardPapers=(dash.papers||[]).filter(p=>modeMap[p.id]==='award');
-    }
+    const awardPapers=dash.papers||[];   // getAwardDash 已篩選為優秀海報
     const shortlist=awardPapers.map(p=>{
       const reviews=Array.isArray(p.reviews)?p.reviews:[];
       const totals=reviews.filter(r=>!isRejected(r)).map(r=>Number(r.total)).filter(v=>!isNaN(v));
@@ -2352,9 +2347,9 @@ function exportAwardCSV(){
   window.addEventListener('beforeunload',()=>{
     if(curIdx>=0 && el('scoreView').classList.contains('on')) saveDraft(false);
   });
-  // 視窗尺寸切換（平板旋轉／視窗縮放）時維持三欄/抽屜一致
-  let _rzT=null;
-  window.addEventListener('resize',()=>{ clearTimeout(_rzT); _rzT=setTimeout(onViewportChange,150); });
+  // 註：不再監聽 resize —— 手機捲動會使網址列收合而觸發 resize，
+  //     舊的 onViewportChange 會據此把上次看過的論文重新滑入（滑動誤入的真正原因）。
+  //     三欄版型早已移除（isWide 恆為 false），故不需要任何 resize 處理。
   // session 內重新整理不用再登入
   try{
     const s=JSON.parse(sessionStorage.getItem('tsmcsd_award_auth')||'null');
