@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1057,20 +1056,31 @@ function loadLocalDrafts(){
   }catch(e){}
 }
 
-/* 背景取回本委員已提交的現場評分（不阻塞畫面） */
+/* 取回本委員已提交的現場評分，並以「優秀海報評分」試算表為唯一真相：
+   試算表中已刪除的評分，會一併從本機清除（管理員刪除後即可重新評分）。
+   加 _ts 參數避免瀏覽器（尤其平板）快取舊的 GET 回應。 */
 async function fetchMySubmitted(){
   if(!me) return;
   try{
-    const r=await api({action:'awardGetMyScores', reviewerUsername:me.username},20000);
-    if(r&&r.success&&r.scores){
-      Object.entries(r.scores).forEach(([pid,sc])=>{
-        const clean=String(pid).startsWith(AWARD_ID_PREFIX)?String(pid).slice(AWARD_ID_PREFIX.length):pid;
-        submittedMap[clean]=true;
-        drafts[clean]=Object.assign({},drafts[clean],sc);
-      });
-      renderList();
-    }
-  }catch(e){ /* GAS 尚未支援時靜默略過，以 localStorage 為準 */ }
+    const r=await api({action:'awardGetMyScores', reviewerUsername:me.username, _ts:Date.now()},20000);
+    if(!(r&&r.success)) return;   // 後端無回應時保留現況（不誤清）
+    const submittedNow={};
+    Object.entries(r.scores||{}).forEach(([pid,sc])=>{
+      const clean=String(pid).startsWith(AWARD_ID_PREFIX)?String(pid).slice(AWARD_ID_PREFIX.length):pid;
+      submittedNow[clean]=true;
+      drafts[clean]=Object.assign({},drafts[clean],sc);
+    });
+    // 清除試算表已不存在的「已提交」與其殘留評分（回到「查看並評分」初始狀態）
+    Object.keys(submittedMap).forEach(pid=>{
+      if(!submittedNow[pid]){
+        delete submittedMap[pid];
+        delete drafts[pid];
+        try{ localStorage.removeItem('tsmcsd_award_'+me.username+'_'+pid); }catch(_){}
+      }
+    });
+    Object.keys(submittedNow).forEach(pid=>{ submittedMap[pid]=true; });
+    renderList();
+  }catch(e){ /* 後端無回應時靜默略過，保留現況 */ }
 }
 
 /* ══════════ 清單 ══════════ */
@@ -2318,7 +2328,10 @@ function exportAwardCSV(){
       const btn=closestBtn(e.target); if(!btn) return;
       _lastTouchEnd=Date.now();
       e.preventDefault();                    // 擋掉隨後的 ghost click（捲動誤觸的來源）
-      if(!_listMoved) openScore(Number(btn.getAttribute('data-idx')));   // 沒滑動＝輕點 → 進入
+      // 直接量測「起點→放開點」的位移；有位移就是滑動，不進入（不依賴 touchmove 是否觸發）
+      const t=e.changedTouches && e.changedTouches[0];
+      const moved=_listMoved || (t && (Math.abs(t.clientX-_tsX)>10 || Math.abs(t.clientY-_tsY)>10));
+      if(!moved) openScore(Number(btn.getAttribute('data-idx')));   // 靜止輕點 → 進入
     },{passive:false});
     // 桌機滑鼠：以 click 進入（觸控已由 touchend 處理，700ms 內的 click 視為觸控殘留而忽略）
     plist.addEventListener('click',e=>{
