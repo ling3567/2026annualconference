@@ -160,6 +160,8 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 }
 .tb-btn:active{background:rgba(255,255,255,.26)}
 .tb-btn.solid{background:var(--gold);border-color:var(--gold)}
+#autoBtn svg{width:14px;height:14px;flex-shrink:0}
+#autoBtn.solid svg{animation:spin 1.4s linear infinite;transform-origin:center}   /* 啟用中：箭頭轉動 */
 .tb-stamp{align-self:center;font-size:.72rem;color:rgba(255,255,255,.75);white-space:nowrap}
 
 /* 進度條 */
@@ -529,10 +531,11 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 .mdl-head h3{font-size:1.05rem;font-weight:700;flex:1}
 .mdl-close{background:none;border:none;font-size:1.1rem;color:var(--muted);
   padding:.2rem .5rem;line-height:1}
-.mdl-body{padding:.9rem;max-height:72vh;overflow-y:auto}
+.mdl-body{padding:.9rem;max-height:72vh;overflow-y:auto;font-size:.9rem}
+.mdl-body .res-tbl th,.mdl-body .res-tbl td{font-size:.9rem}
 .mdl-title{font-size:.95rem;font-weight:700;line-height:1.6;color:var(--ink);margin-bottom:.5rem}
 .mdl-tags{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.9rem}
-.mdl-sec{font-size:.78rem;font-weight:700;color:var(--main-d);letter-spacing:.04em;
+.mdl-sec{font-size:.85rem;font-weight:700;color:var(--main-d);letter-spacing:.02em;
   margin:1rem 0 .4rem}
 .mdl-cmt{font-size:.85rem;line-height:1.7;color:var(--slate);background:var(--bg2);
   border-left:3px solid var(--border2);border-radius:6px;padding:.5rem .7rem;margin-bottom:.35rem}
@@ -542,9 +545,9 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 .judge-item{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:.55rem .75rem;
   display:grid;grid-template-columns:1fr auto;align-items:center;gap:.5rem}
 .judge-name{font-size:.9rem;font-weight:700;color:var(--ink)}
-.judge-score{font-size:.85rem;color:#718096;white-space:nowrap}
-.judge-score b{font-size:1.15rem;color:var(--adm-gold)}
-.judge-cmt{grid-column:1/-1;font-size:.85rem;line-height:1.65;color:var(--slate);
+.judge-score{font-size:.9rem;color:#718096;white-space:nowrap}
+.judge-score b{font-size:.95rem;color:var(--adm-gold)}
+.judge-cmt{grid-column:1/-1;font-size:.9rem;line-height:1.7;color:var(--slate);
   background:#fff;border-radius:6px;padding:.4rem .6rem;margin-top:.2rem}
 .mdl-foot{padding:.7rem .9rem;border-top:1px solid var(--border2);
   background:var(--bg2);display:flex;justify-content:flex-end}
@@ -703,7 +706,7 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
       優秀海報論文 — 評選後台
       <small id="admWho"></small>
     </div>
-    <button class="tb-btn" id="autoBtn" onclick="toggleAuto()">⏱ 自動更新</button>
+    <button class="tb-btn" id="autoBtn" onclick="toggleAuto()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>自動更新</button>
     <span class="tb-stamp" id="autoStamp"></span>
     <button class="tb-btn" onclick="doLogout()">登出</button>
   </div>
@@ -2176,14 +2179,20 @@ function toggleAuto(){
   if(_autoTimer){ stopAuto(); showToast('已停止自動更新','info'); }
   else{ startAuto(); showToast('每 '+(AUTO_INTERVAL_MS/1000)+' 秒自動更新現場分數','ok'); refreshScores(); }
 }
+/* 設定自動更新按鈕外觀：sync 旋轉箭頭圖示（啟用時 CSS 會讓它轉動）＋文字 */
+function setAutoBtn(active){
+  const b=el('autoBtn'); if(!b) return;
+  b.classList.toggle('solid',active);
+  b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>'+(active?'自動更新中':'自動更新');
+}
 function startAuto(){
   stopAuto();
   _autoTimer=setInterval(refreshScores,AUTO_INTERVAL_MS);
-  const b=el('autoBtn'); if(b){ b.classList.add('solid'); b.textContent='⏱ 自動更新中'; }
+  setAutoBtn(true);
 }
 function stopAuto(){
   if(_autoTimer){ clearInterval(_autoTimer); _autoTimer=null; }
-  const b=el('autoBtn'); if(b){ b.classList.remove('solid'); b.textContent='⏱ 自動更新'; }
+  setAutoBtn(false);
 }
 /* 顯示最後更新時間 */
 function markUpdated(){
