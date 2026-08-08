@@ -941,8 +941,12 @@ async function doLogin(){
   if(!u||!p){ err.textContent='請輸入帳號與密碼'; err.classList.add('on'); return; }
   setLdr(true);
   try{
-    // 先試評審帳號
-    let r=await api({action:'reviewerLogin', username:u, password:p});
+    // 名單資料非個人化：與登入驗證「並行」預抓並快取，登入成功後 reloadPapers/loadAdmin 直接命中快取
+    // （原本是登入完再抓，兩個慢請求相加；改並行後 ≈ 只等較慢的一個）
+    const prefetch = getAwardDash(false).catch(()=>null);
+    // 先試評審帳號。lite=true：後端只驗證身分＋回傳委員姓名，
+    // 略過「指派論文／OSCE／初審評分明細」等本頁用不到的多次整表讀取 → 登入大幅加快。
+    let r=await api({action:'reviewerLogin', username:u, password:p, lite:'true'});
     if(r && r.success){
       role='reviewer'; me=r.reviewer;
       reviewerNames=r.reviewerNames||{};
@@ -952,7 +956,8 @@ async function doLogin(){
       el('loginScreen').style.display='none';
       el('rvApp').classList.add('on');
       el('rvWho').textContent=me.name+'　委員';
-      await reloadPapers();
+      await prefetch;          // 名單多半已在背景抓好並快取
+      await reloadPapers();    // 命中快取，瞬間完成
       setLdr(false);
       return;
     }
@@ -964,6 +969,7 @@ async function doLogin(){
       el('loginScreen').style.display='none';
       el('admApp').classList.add('on');
       el('admWho').textContent=me.name;
+      await prefetch;
       await loadAdmin();
       setLdr(false);
       return;
@@ -1593,12 +1599,43 @@ async function submitAllDrafts(){
 
   setLdr(true);
   let ok=0; const fail=[];
-  for(const p of pending){
-    try{
-      const res=await submitPaperScore(p, drafts[p.id]);
-      if(res.success) ok++; else fail.push((p.paperNo||p.id)+'（'+res.message+'）');
-    }catch(e){ fail.push((p.paperNo||p.id)+'（連線失敗）'); }
-    renderList();   // 逐篇更新進度與清單狀態
+
+  // ── 優先：批次端點，一趟送出全部（後端一把鎖、一次寫入）→ 大幅縮短等待 ──
+  let batched=false;
+  try{
+    const items=pending.map(p=>{
+      const d=drafts[p.id], scores={};
+      AWARD_CRITERIA.forEach(c=>{ scores[c.id]=Number(d[c.id]); });
+      return { paperId:p.id, paperNo:p.paperNo||'', title:p.title||'',
+               scoresJson:JSON.stringify(scores), total:calcTotal(d), comment:d.comment||'' };
+    });
+    const r=await api({action:'awardSubmitBatch', reviewerUsername:me.username,
+                       reviewerName:me.name||'', itemsJson:JSON.stringify(items)}, 60000);
+    if(r && r.success && Array.isArray(r.results)){
+      batched=true;
+      const byId={}; r.results.forEach(x=>{ byId[String(x.paperId)]=x; });
+      pending.forEach(p=>{
+        const res=byId[String(p.id)];
+        if(res && res.success){
+          ok++; submittedMap[p.id]=true;
+          try{ localStorage.removeItem('tsmcsd_award_'+me.username+'_'+p.id); }catch(e){}
+        }else{
+          fail.push((p.paperNo||p.id)+'（'+((res&&res.message)||'提交失敗')+'）');
+        }
+      });
+      renderList();
+    }
+  }catch(e){ console.warn('awardSubmitBatch 不可用，改用逐篇送出：',e.message); }
+
+  // ── 退回：舊後端沒有批次端點時，維持逐篇送出（原邏輯，穩定保底）──
+  if(!batched){
+    for(const p of pending){
+      try{
+        const res=await submitPaperScore(p, drafts[p.id]);
+        if(res.success) ok++; else fail.push((p.paperNo||p.id)+'（'+res.message+'）');
+      }catch(e){ fail.push((p.paperNo||p.id)+'（連線失敗）'); }
+      renderList();   // 逐篇更新進度與清單狀態
+    }
   }
   setLdr(false);
 
