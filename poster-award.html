@@ -551,6 +551,26 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
   background:#fff;border-radius:6px;padding:.4rem .6rem;margin-top:.2rem}
 .mdl-foot{padding:.7rem .9rem;border-top:1px solid var(--border2);
   background:var(--bg2);display:flex;justify-content:flex-end}
+
+/* ── 自訂確認對話框 ── */
+.cfm-bg{position:fixed;inset:0;background:rgba(42,36,32,.5);z-index:9600;
+  display:none;align-items:center;justify-content:center;padding:1.25rem;backdrop-filter:blur(2px)}
+.cfm-bg.on{display:flex}
+.cfm{background:#fff;border-radius:var(--r);width:100%;max-width:460px;
+  box-shadow:var(--sh-md);overflow:hidden;display:flex;flex-direction:column}
+.cfm-title{padding:1rem 1.15rem .5rem;font-size:1.1rem;font-weight:700;color:var(--ink)}
+.cfm-body{padding:0 1.15rem 1rem;font-size:.95rem;line-height:1.7;color:var(--slate);
+  max-height:60vh;overflow-y:auto}
+.cfm-body ul{list-style:none;margin:.5rem 0;padding:0}
+.cfm-body li{display:flex;justify-content:space-between;gap:1rem;padding:.3rem .6rem;
+  border-radius:6px;background:var(--bg2);margin-bottom:.3rem}
+.cfm-body li b{color:var(--adm-gold);white-space:nowrap}
+.cfm-note{margin-top:.75rem;font-size:.9rem;color:var(--adm-red,#c0392b);font-weight:600}
+.cfm-foot{padding:.8rem 1.15rem 1rem;display:flex;justify-content:flex-end;gap:.6rem}
+.cfm-btn{padding:.6rem 1.4rem;border-radius:10px;font-size:1rem;font-weight:700;
+  border:1px solid transparent;cursor:pointer;min-width:5rem}
+.cfm-cancel{background:#fff;border-color:var(--border2);color:var(--slate)}
+.cfm-ok{background:var(--main);color:#fff}          /* 「確定」固定在最右邊、主色強調 */
 .notice{background:var(--adm-gold-bg);border:1px solid var(--adm-gold-br);color:var(--adm-gold);
   border-radius:10px;padding:.7rem .85rem;font-size:.8rem;line-height:1.75;margin-bottom:.85rem}
 .notice b{font-weight:700}
@@ -798,6 +818,18 @@ h1,h2,h3,h4{font-weight:700;line-height:1.35}
 
 <div class="ldr" id="ldr"><div class="spinner"></div></div>
 
+<!-- 自訂確認對話框（取代瀏覽器原生 confirm，讓「確定」固定在右邊）-->
+<div class="cfm-bg" id="cfmBg" onclick="if(event.target===this)cfmResolve(false)">
+  <div class="cfm">
+    <div class="cfm-title" id="cfmTitle">確認</div>
+    <div class="cfm-body" id="cfmBody"></div>
+    <div class="cfm-foot">
+      <button class="cfm-btn cfm-cancel" id="cfmCancel" onclick="cfmResolve(false)">取消</button>
+      <button class="cfm-btn cfm-ok" id="cfmOk" onclick="cfmResolve(true)">確定</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════════════════════════════════════
    TSMCSD 2026 — 優秀海報論文現場評選
@@ -887,6 +919,24 @@ let backendHasAward = null;  // 專用 GAS action 是否可用
 function el(id){ return document.getElementById(id); }
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function setLdr(v){ el('ldr').classList.toggle('on',!!v); }
+
+/* 自訂確認對話框（回傳 Promise<boolean>）：取代原生 confirm，
+   讓「確定」固定在對話框最右邊、可控版面。opts={title,html,okText,cancelText} */
+let _cfmCb=null;
+function uiConfirm(opts){
+  opts=opts||{};
+  el('cfmTitle').textContent=opts.title||'確認';
+  el('cfmBody').innerHTML=opts.html||'';
+  el('cfmOk').textContent=opts.okText||'確定';
+  el('cfmCancel').textContent=opts.cancelText||'取消';
+  const bg=el('cfmBg'); bg.classList.add('on');
+  return new Promise(res=>{ _cfmCb=res; });
+}
+function cfmResolve(v){
+  el('cfmBg').classList.remove('on');
+  const cb=_cfmCb; _cfmCb=null;
+  if(cb) cb(!!v);
+}
 function showToast(msg,type){
   const t=document.createElement('div');
   t.className='toast '+(type||'info'); t.textContent=msg;
@@ -1591,11 +1641,12 @@ async function submitAllDrafts(){
     showToast(incomplete.length?'暫存的評分尚未填完，請先補齊':'目前沒有可送出的暫存評分','err');
     return;
   }
-  let msg='將一次送出以下 '+pending.length+' 篇評分：\n\n';
-  pending.forEach(p=>{ msg+='・'+(p.paperNo||'')+'　'+calcTotal(drafts[p.id])+' 分\n'; });
-  if(incomplete.length) msg+='\n（另有 '+incomplete.length+' 篇暫存尚未填完，本次不送出）';
-  msg+='\n\n提交後將無法自行修改，確定送出？';
-  if(!confirm(msg)) return;
+  let html='<div>將一次送出以下 <b>'+pending.length+'</b> 篇評分：</div><ul>';
+  pending.forEach(p=>{ html+='<li><span>'+esc(p.paperNo||'')+'</span><b>'+calcTotal(drafts[p.id])+' 分</b></li>'; });
+  html+='</ul>';
+  if(incomplete.length) html+='<div style="font-size:.88rem;color:var(--muted)">（另有 '+incomplete.length+' 篇暫存尚未填完，本次不送出）</div>';
+  html+='<div class="cfm-note">提交後將無法自行修改</div>';
+  if(!await uiConfirm({title:'確認送出', html, okText:'確定送出'})) return;
 
   setLdr(true);
   let ok=0; const fail=[];
