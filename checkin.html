@@ -236,6 +236,24 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .search-item.is-absent .si-org{color:#ccc}
 .si-absent{color:#999;flex-shrink:0;font-size:.65rem;font-weight:600;background:#f0f0f0;padding:.1rem .35rem;border-radius:3px}
 .badge-absent{background:#f0f0f0;color:#999}
+
+/* Proxy */
+.action-card.act-proxy-green{background:#e8f5e9;border-color:#a5d6a7}
+.action-card.act-proxy-green .ai-wrap{background:rgba(58,125,92,.12);color:var(--success)}
+.action-card.act-proxy-green .at{color:#2e7d32}
+.action-card.act-proxy-yellow{background:#fff8e1;border-color:#ffe082}
+.action-card.act-proxy-yellow .ai-wrap{background:rgba(255,160,0,.1);color:#f57f17}
+.action-card.act-proxy-yellow .at{color:#e65100}
+.btn-proxy{background:#f57f17;color:#fff;border:none;padding:.35rem .7rem;border-radius:var(--radius-sm);font-size:.78rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .15s;margin-top:.4rem}
+.btn-proxy:hover{background:#e65100}
+.btn-proxy:disabled{opacity:.4;cursor:not-allowed}
+.btn-proxy-release{background:transparent;color:#999;border:1.5px solid var(--border);padding:.3rem .6rem;border-radius:var(--radius-sm);font-size:.72rem;font-weight:500;font-family:var(--font);cursor:pointer;margin-left:.4rem}
+.btn-proxy-release:hover{border-color:var(--terra);color:var(--terra)}
+.proxy-list{max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);margin-top:.5rem}
+.proxy-item{display:flex;align-items:center;justify-content:space-between;padding:.45rem .6rem;border-bottom:1px solid var(--border-light);cursor:pointer;transition:background .12s;font-size:.82rem}
+.proxy-item:last-child{border-bottom:none}
+.proxy-item:hover{background:#fff8e1}
+.proxy-item.selected{background:#fff3cd}
 .absent-note-box{grid-column:1/-1;margin-top:.3rem;padding:.5rem .7rem;background:#f5f3f0;border:1.5px solid #ddd;border-radius:6px}
 .absent-note-box .info-label{color:#999}
 .absent-note-box .info-value{color:#777}
@@ -422,6 +440,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
       <div class="stat-item">已報到 <strong id="statChecked">-</strong></div>
       <div class="stat-divider"></div>
       <div class="stat-item">報到率 <strong id="statRate">-</strong></div>
+      <div class="stat-divider"></div>
+      <div class="stat-item" id="proxyStatItem" style="display:none">待配對 <strong id="statProxy" style="color:var(--terra)">0</strong></div>
     </div>
     <button class="header-btn active" id="btnPageCheckin" onclick="switchPage('checkin')">
       <svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
@@ -577,6 +597,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   </div>
 </div>
 
+<!-- PROXY ASSIGN MODAL -->
+<div class="modal-overlay" id="proxyModal">
+  <div class="modal-box" style="max-width:420px">
+    <h3>
+      <svg class="icon-svg" viewBox="0 0 24 24" style="color:#f57f17"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-4 4-2-2"/></svg>
+      指派委託書
+    </h3>
+    <div style="font-size:.85rem;margin-bottom:.5rem">
+      受委託人：<strong id="proxyModalDelegate"></strong>
+    </div>
+    <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.3rem">選擇一張待配對委託書：</div>
+    <div class="proxy-list" id="proxyPendingList"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeProxyModal()">取消</button>
+      <button class="btn-proxy" id="proxyConfirmBtn" onclick="confirmProxyAssign()" disabled>確定指派</button>
+    </div>
+  </div>
+</div>
+
 <!-- LOADING -->
 <div class="loading-overlay show" id="loadingOverlay">
   <div class="spinner"></div>
@@ -614,7 +653,9 @@ let checkinLog = [];
 let onsitePayMap = {}; // name|idNumber → {meal, time}
 let selectedIndex = -1;
 let activeGroupFilter = null;
-let activeCounterFilter = null; // '1','2','3','4' or null // currently selected group chip
+let activeCounterFilter = null;
+let proxyData = { list: [], pendingCount: 0 };
+let pendingProxySelect = null; // {delegateIdx, selectedRow} // '1','2','3','4' or null // currently selected group chip
 let currentPage = 'checkin';
 
 // Boot
@@ -647,6 +688,7 @@ function loadData(){
       creditProfessions=d.creditProfessions||[];
       badgeMap=d.badgeMap||{};
       groups=d.groups||[];
+      proxyData=d.proxyData||{list:[],pendingCount:0};
 
       // 現場繳費紀錄：合併到報名資料
       onsitePayMap={};
@@ -720,6 +762,7 @@ function syncData() {
       creditProfessions = d.creditProfessions || [];
       badgeMap = d.badgeMap || {};
       groups = d.groups || [];
+      proxyData = d.proxyData || {list:[],pendingCount:0};
 
       // 合併現場繳費（伺服器端 + 本機暫存）
       onsitePayMap = {};
@@ -1030,6 +1073,32 @@ function selectPerson(idx){
       acts+=ac('act-info',I.pencil,'提醒至「繼續教育積分簽到處」簽名','職類：'+esc(r.profession));
     }
   }
+
+  // 委託書（僅會員顯示）
+  if(proxyData.list.length>0){
+    const pKey=r.name+'|'+(r.org||'')+'|'+(r.profession||'');
+    const proxyAsDelegate=proxyData.list.find(p=>p.delegateName+'|'+p.delegateOrg+'|'+p.delegateProfession===pKey && p.status!=='待配對');
+    const alreadyDelegate=!!proxyAsDelegate;
+    const pendingProxies=proxyData.list.filter(p=>!p.delegateName||p.status==='待配對');
+
+    if(isMem){
+      if(alreadyDelegate){
+        const pInfo=proxyAsDelegate;
+        acts+=`<div class="action-card act-proxy-green"><div class="ai-wrap">${I.check}</div><div class="at">
+          <strong>已受委託 — 發 2 張選票</strong>
+          <div class="as">委託人：${esc(pInfo.delegatorName)}（${esc(pInfo.delegatorOrg)}・${esc(pInfo.delegatorProfession)}）</div>
+          <div style="margin-top:.3rem"><button class="btn-proxy-release" onclick="proxyRelease(${pInfo.row},event)">解除配對</button></div>
+        </div></div>`;
+      } else if(pendingProxies.length>0){
+        acts+=`<div class="action-card act-proxy-yellow"><div class="ai-wrap">${I.dollar}</div><div class="at">
+          <strong>可受委託（待配對 ${pendingProxies.length} 張）</strong>
+          <div class="as">請詢問是否願意代為投票</div>
+          <div><button class="btn-proxy" onclick="openProxyModal(${idx},event)">指派委託書</button></div>
+        </div></div>`;
+      }
+    }
+  }
+
   document.getElementById('actionList').innerHTML=acts;
 
   // Checkin btn
@@ -1158,6 +1227,84 @@ function absentCheckin(idx) {
   },500);
 }
 
+// ===== PROXY (委託書) =====
+function openProxyModal(idx, e) {
+  if(e) e.stopPropagation();
+  const p=registrations[idx];
+  pendingProxySelect={delegateIdx:idx,selectedRow:null};
+  document.getElementById('proxyModalDelegate').textContent=p.name+'（'+(p.org||'')+'・'+(p.profession||'')+'）';
+  document.getElementById('proxyConfirmBtn').disabled=true;
+
+  const pending=proxyData.list.filter(x=>!x.delegateName||x.status==='待配對');
+  document.getElementById('proxyPendingList').innerHTML=pending.length
+    ?pending.map(x=>`<div class="proxy-item" onclick="selectProxyItem(this,${x.row})">
+        <span>${esc(x.delegatorName)}</span>
+        <span style="font-size:.72rem;color:var(--text-muted)">${esc(x.delegatorOrg)}・${esc(x.delegatorProfession)}</span>
+      </div>`).join('')
+    :'<div style="padding:1rem;text-align:center;color:var(--text-muted);font-size:.82rem">沒有待配對的委託書</div>';
+
+  document.getElementById('proxyModal').classList.add('show');
+}
+
+function closeProxyModal(){
+  document.getElementById('proxyModal').classList.remove('show');
+  pendingProxySelect=null;
+}
+
+function selectProxyItem(el, row){
+  document.querySelectorAll('.proxy-item').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected');
+  if(pendingProxySelect) pendingProxySelect.selectedRow=row;
+  document.getElementById('proxyConfirmBtn').disabled=false;
+}
+
+function confirmProxyAssign(){
+  if(!pendingProxySelect||!pendingProxySelect.selectedRow) return;
+  const idx=pendingProxySelect.delegateIdx;
+  const row=pendingProxySelect.selectedRow;
+  const p=registrations[idx];
+  closeProxyModal();
+  markAction();
+
+  const proxy=proxyData.list.find(x=>x.row===row);
+  if(proxy){
+    proxy.delegateName=p.name;
+    proxy.delegateOrg=p.org||'';
+    proxy.delegateProfession=p.profession||'';
+    proxy.status='當日配對';
+    proxyData.pendingCount=proxyData.list.filter(x=>!x.delegateName||x.status==='待配對').length;
+  }
+  selectPerson(idx);
+  updateStats();
+  showToast(`委託書已指派給 ${p.name}`);
+
+  fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    action:'proxy_assign',proxyRow:row,delegateName:p.name,delegateOrg:p.org||'',delegateProfession:p.profession||''
+  })}).catch(()=>{});
+}
+
+function proxyRelease(row, e){
+  if(e) e.stopPropagation();
+  if(!confirm('確定要解除此委託書配對嗎？委託書將退回待配對池。')) return;
+  markAction();
+
+  const proxy=proxyData.list.find(x=>x.row===row);
+  if(proxy){
+    proxy.delegateName='';
+    proxy.delegateOrg='';
+    proxy.delegateProfession='';
+    proxy.status='待配對';
+    proxyData.pendingCount=proxyData.list.filter(x=>!x.delegateName||x.status==='待配對').length;
+  }
+  if(selectedIndex>=0) selectPerson(selectedIndex);
+  updateStats();
+  showToast('委託書已退回待配對池');
+
+  fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    action:'proxy_release',proxyRow:row
+  })}).catch(()=>{});
+}
+
 // Stats
 function updateStats(){
   const t=registrations.length;
@@ -1166,6 +1313,11 @@ function updateStats(){
   document.getElementById('statTotal').textContent=t;
   document.getElementById('statChecked').textContent=c;
   document.getElementById('statRate').textContent=rate+'%';
+  // Proxy counter
+  const pp=proxyData.pendingCount||0;
+  const proxyEl=document.getElementById('proxyStatItem');
+  if(proxyData.list.length>0){proxyEl.style.display='';document.getElementById('statProxy').textContent=pp;}
+  else proxyEl.style.display='none';
 }
 
 function renderStats(){
@@ -1213,6 +1365,7 @@ function renderStats(){
     ${soCardMeal('已報到餐點統計', mealMeat, mealVeg, mealNone, mealOther)}
     ${absentCount>0?soCardAbsent('當日不出席',registrations):''}
     ${renderCounterStats()}
+    ${renderProxyStats()}
   `;
 
   renderGroupStats();
@@ -1450,6 +1603,45 @@ function soCardAbsent(label, regs) {
       </div>
       <div style="display:flex;justify-content:space-between;font-size:.82rem;color:var(--text-muted)">
         <span>非會員</span><span>${nonAbsent} 人</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderProxyStats() {
+  if(!proxyData.list.length) return '';
+  const total=proxyData.list.length;
+  const matched=proxyData.list.filter(p=>p.delegateEmail&&p.status!=='待配對').length;
+  const pending=total-matched;
+  // 應發選票數：已報到會員人數 + 已配對且受委託人已報到的委託票
+  const checkedMembers=registrations.filter(r=>r.checkedIn&&r.membership==='本會個人會員').length;
+  const proxyBallots=proxyData.list.filter(p=>{
+    if(p.status==='待配對'||!p.delegateName) return false;
+    return registrations.some(r=>r.name===p.delegateName&&(r.org||'')===p.delegateOrg&&(r.profession||'')===p.delegateProfession&&r.checkedIn);
+  }).length;
+  const totalBallots=checkedMembers+proxyBallots;
+
+  return `<div class="so-card">
+    <div class="so-label">委託書 / 選票</div>
+    <div style="display:flex;flex-direction:column;gap:.25rem;margin-top:.4rem">
+      <div style="display:flex;justify-content:space-between;font-size:.82rem">
+        <span>委託書總數</span><span><strong>${total}</strong> 張</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.82rem">
+        <span>已配對</span><span>${matched} 張</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;color:var(--terra)">
+        <span>待配對</span><span><strong>${pending}</strong> 張</span>
+      </div>
+      <div style="height:1px;background:var(--border-light);margin:.2rem 0"></div>
+      <div style="display:flex;justify-content:space-between;font-size:.82rem">
+        <span>已報到會員選票</span><span>${checkedMembers} 張</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.82rem">
+        <span>委託票（受託人已到）</span><span>${proxyBallots} 張</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;color:var(--terra);margin-top:.15rem">
+        <span>應發選票總數</span><span>${totalBallots} 張</span>
       </div>
     </div>
   </div>`;
