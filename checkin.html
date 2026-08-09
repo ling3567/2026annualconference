@@ -1130,7 +1130,7 @@ function selectPerson(idx){
     const alreadyDelegate=!!proxyAsDelegate;
     const pendingProxies=proxyData.list.filter(p=>!p.delegateName||p.status==='待配對');
 
-    if(isMem && isPaid){
+    if(isMem && isPaid && !r.absent){
       if(alreadyDelegate){
         const pInfo=proxyAsDelegate;
         acts+=`<div class="action-card act-proxy-green"><div class="ai-wrap">${I.vote}</div><div class="at">
@@ -1145,6 +1145,14 @@ function selectPerson(idx){
           <div><button class="btn-proxy" onclick="openProxyModal(${idx},event)">指派委託書</button></div>
         </div></div>`;
       }
+    } else if(r.absent && alreadyDelegate){
+      // 不出席但已有委託 → 警告需解除
+      const pInfo=proxyAsDelegate;
+      acts+=`<div class="action-card act-special"><div class="ai-wrap">${I.vote}</div><div class="at">
+        <strong>⚠ 此人已不出席，請解除委託</strong>
+        <div class="as">委託人：${esc(pInfo.delegatorName)}（${esc(pInfo.delegatorOrg)}），需改指派給其他出席者</div>
+        <div style="margin-top:.3rem"><button class="btn-proxy-release" onclick="proxyRelease(${pInfo.row},event)">解除配對</button></div>
+      </div></div>`;
     }
   }
 
