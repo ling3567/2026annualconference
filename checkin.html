@@ -100,8 +100,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .search-item:hover{background:var(--bg)}
 .search-item.active{background:var(--primary-light);border-color:var(--border)}
 .search-item.is-checked .si-avatar{}
-.si-avatar{width:30px;height:30px;border-radius:50%;background:#0097B2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
-.si-avatar.nm{background:#CCC1DA}
+.si-avatar{width:30px;height:30px;border-radius:50%;background:#25649E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+.si-avatar.nm{background:#2E6244}
 .si-info{min-width:0}
 .si-name{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:.25rem}
 .si-org{font-size:.68rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -113,14 +113,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .person-profile{display:none;flex-direction:column;height:100%}
 .person-profile.visible{display:flex}
 .profile-top{display:flex;align-items:center;gap:.85rem;margin-bottom:1.1rem}
-.profile-avatar{width:44px;height:44px;border-radius:50%;background:#0097B2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;flex-shrink:0}
-.profile-avatar.nm{background:#CCC1DA}
+.profile-avatar{width:44px;height:44px;border-radius:50%;background:#25649E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;flex-shrink:0}
+.profile-avatar.nm{background:#2E6244}
 .profile-avatar.ck{}
 .profile-name{font-size:1.15rem;font-weight:700;letter-spacing:.02em}
 .profile-badges{display:flex;gap:.3rem;margin-top:.25rem;flex-wrap:wrap}
 .badge{font-size:.64rem;font-weight:600;padding:.15rem .45rem;border-radius:3px;display:inline-flex;align-items:center;gap:.2rem;letter-spacing:.02em}
-.badge-member{background:#e0f4f7;color:#0097B2}
-.badge-nonmember{background:#f0edf3;color:#9689a8}
+.badge-member{background:#e4ecf4;color:#25649E}
+.badge-nonmember{background:#e5efe9;color:#2E6244}
 .badge-paid{background:var(--success-bg);color:var(--success)}
 .badge-unpaid{background:var(--warning-bg);color:var(--warning)}
 .badge-poster{background:var(--accent-bg);color:var(--accent)}
@@ -641,6 +641,7 @@ const I = {
   check:   '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>',
   checked: '<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
   undo:    '<svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>',
+  vote:    '<svg class="icon-svg" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 12l2 2 4-4"/><path d="M9 7h6"/></svg>',
 };
 
 // State
@@ -1081,16 +1082,16 @@ function selectPerson(idx){
     const alreadyDelegate=!!proxyAsDelegate;
     const pendingProxies=proxyData.list.filter(p=>!p.delegateName||p.status==='待配對');
 
-    if(isMem){
+    if(isMem && isPaid){
       if(alreadyDelegate){
         const pInfo=proxyAsDelegate;
-        acts+=`<div class="action-card act-proxy-green"><div class="ai-wrap">${I.check}</div><div class="at">
+        acts+=`<div class="action-card act-proxy-green"><div class="ai-wrap">${I.vote}</div><div class="at">
           <strong>已受委託 — 發 2 張選票</strong>
           <div class="as">委託人：${esc(pInfo.delegatorName)}（${esc(pInfo.delegatorOrg)}・${esc(pInfo.delegatorProfession)}）</div>
           <div style="margin-top:.3rem"><button class="btn-proxy-release" onclick="proxyRelease(${pInfo.row},event)">解除配對</button></div>
         </div></div>`;
       } else if(pendingProxies.length>0){
-        acts+=`<div class="action-card act-proxy-yellow"><div class="ai-wrap">${I.dollar}</div><div class="at">
+        acts+=`<div class="action-card act-proxy-yellow"><div class="ai-wrap">${I.vote}</div><div class="at">
           <strong>可受委託（待配對 ${pendingProxies.length} 張）</strong>
           <div class="as">請詢問是否願意代為投票</div>
           <div><button class="btn-proxy" onclick="openProxyModal(${idx},event)">指派委託書</button></div>
@@ -1546,8 +1547,8 @@ function renderStatGroup(title, members, ckCount, rate) {
       <div class="sg-member-list">
         ${members.map(m=>{
           const absentStyle = m.absent ? 'text-decoration:line-through;color:#ccc' : '';
-          const bgColor = m.absent ? '#f5f5f5' : (m.isMember ? '#e8f6f8' : '#f3f0f6');
-          const dotColor = m.absent ? '#ccc' : (m.isMember ? '#0097B2' : '#CCC1DA');
+          const bgColor = m.absent ? '#f5f5f5' : (m.isMember ? '#e4ecf4' : '#e5efe9');
+          const dotColor = m.absent ? '#ccc' : (m.isMember ? '#25649E' : '#2E6244');
           return `<div class="sg-member" style="background:${bgColor}">
             <div class="sg-dot" style="background:${dotColor}"></div>
             <span class="sg-mname" style="${absentStyle}">${esc(m.name)}</span>
@@ -1611,7 +1612,7 @@ function soCardAbsent(label, regs) {
 function renderProxyStats() {
   if(!proxyData.list.length) return '';
   const total=proxyData.list.length;
-  const matched=proxyData.list.filter(p=>p.delegateEmail&&p.status!=='待配對').length;
+  const matched=proxyData.list.filter(p=>p.delegateName&&p.status!=='待配對').length;
   const pending=total-matched;
   // 應發選票數：已報到會員人數 + 已配對且受委託人已報到的委託票
   const checkedMembers=registrations.filter(r=>r.checkedIn&&r.membership==='本會個人會員').length;
@@ -1638,7 +1639,7 @@ function renderProxyStats() {
         <span>已報到會員選票</span><span>${checkedMembers} 張</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:.82rem">
-        <span>委託票（受託人已到）</span><span>${proxyBallots} 張</span>
+        <span>委託票<br><span style="font-size:.72rem">（受託人已到）</span></span><span>${proxyBallots} 張</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;color:var(--terra);margin-top:.15rem">
         <span>應發選票總數</span><span>${totalBallots} 張</span>
