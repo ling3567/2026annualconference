@@ -138,32 +138,74 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .action-card .at{font-size:.83rem;flex:1}
 .action-card .at strong{font-weight:700}
 .action-card .at .as{font-size:.76rem;opacity:.75;margin-top:.1rem}
-.action-card.act-default{background:var(--primary-light);border-color:#ddd8d1}
-.action-card.act-default .ai-wrap{background:rgba(28,25,23,.08);color:var(--text)}
-.action-card.act-success{background:var(--success-bg);border-color:#c5d8c7}
-.action-card.act-success .ai-wrap{background:rgba(90,125,92,.1);color:var(--success)}
-.action-card.act-warning{background:var(--warning-bg);border-color:#edd9a8}
-.action-card.act-warning .ai-wrap{background:rgba(184,122,32,.1);color:var(--warning)}
-.action-card.act-info{background:var(--primary-light);border-color:#d0d5db}
-.action-card.act-info .ai-wrap{background:rgba(0,0,0,.05);color:var(--text-muted)}
-.action-card.act-accent{background:#fff4ec;border-color:#e8a06c;border-width:2px}
-.action-card.act-accent .ai-wrap{background:#f4dcc8;color:#b5622a}
-.action-card.act-muted{background:#f0efed;border-color:#d5d2cd}
-.action-card.act-muted .ai-wrap{background:rgba(0,0,0,.06);color:#999}
-.action-card.act-muted .at{color:#999}
-.action-card.act-special{background:#fff4ec;border-color:#e8a06c;border-width:2px}
-.action-card.act-special .ai-wrap{background:#f4dcc8;color:#b5622a}
-.action-card.act-special .at{color:#8c4517}
-.action-card.act-special .at strong{color:#b5622a}
-.action-card.act-special .as{color:#a0632e}
+/* 1. 發放識別證 */
+.action-card.act-default{background:#F5F3F0;border-color:#DDD7D0}
+.action-card.act-default .ai-wrap{background:#E8E4DF;color:#6F675F}
+.action-card.act-default .at{color:#332F2B}
+.action-card.act-default .at .as{color:#6F675F}
 
+/* 2. 發放會員禮品＋餐券 */
+.action-card.act-success{background:#EEF5EF;border-color:#B7CCBA}
+.action-card.act-success .ai-wrap{background:#DDEADF;color:#355E3B}
+.action-card.act-success .at{color:#355E3B}
+.action-card.act-success .at .as{color:#5C7A61}
+
+/* 3. 繼續教育積分-完成報到即可 */
+.action-card.act-credit{background:#EEF4F7;border-color:#C5D4DB}
+.action-card.act-credit .ai-wrap{background:#DCE8ED;color:#466B78}
+.action-card.act-credit .at{color:#466B78}
+.action-card.act-credit .at .as{color:#6A8792}
+
+/* 4. 繼續教育積分-需簽名 / 實體海報引導 */
+.action-card.act-info{background:#FFF6E8;border-color:#E7B15C}
+.action-card.act-info .ai-wrap{background:#F8E6C5;color:#9A651A}
+.action-card.act-info .at{color:#9A651A}
+.action-card.act-info .at .as{color:#B07A33}
+.action-card.act-accent{background:#FFF6E8;border-color:#E7B15C}
+.action-card.act-accent .ai-wrap{background:#F8E6C5;color:#9A651A}
+.action-card.act-accent .at{color:#9A651A}
+.action-card.act-accent .at .as{color:#B07A33}
+
+/* 繳費提示 */
+.action-card.act-warning{background:#FFF6E8;border-color:#E7B15C}
+.action-card.act-warning .ai-wrap{background:#F8E6C5;color:#9A651A}
+.action-card.act-warning .at{color:#9A651A}
+.action-card.act-warning .at .as{color:#B07A33}
+
+/* 5. 可受委託 */
+.action-card.act-proxy-yellow{background:#FFF3E8;border-color:#E88A45;border-width:2px}
+.action-card.act-proxy-yellow .ai-wrap{background:#F9E0CC;color:#9B4E18}
+.action-card.act-proxy-yellow .at{color:#9B4E18}
+.action-card.act-proxy-yellow .at strong{color:#9B4E18}
+.action-card.act-proxy-yellow .at .as{color:#B36A3A}
+
+/* 已受委託（發選票）*/
+.action-card.act-proxy-green{background:#EEF5EF;border-color:#B7CCBA}
+.action-card.act-proxy-green .ai-wrap{background:#DDEADF;color:#355E3B}
+.action-card.act-proxy-green .at{color:#355E3B}
+.action-card.act-proxy-green .at .as{color:#5C7A61}
+
+/* E-Poster（僅供參考）*/
+.action-card.act-muted{background:#F5F3F0;border-color:#DDD7D0}
+.action-card.act-muted .ai-wrap{background:#E8E4DF;color:#aaa}
+.action-card.act-muted .at{color:#aaa}
+.action-card.act-muted .at .as{color:#bbb}
+
+/* 8. 異常／需特別處理 */
+.action-card.act-special{background:#FCEEEE;border-color:#D96C6C;border-width:2px}
+.action-card.act-special .ai-wrap{background:#F7DCDC;color:#A33C3C}
+.action-card.act-special .at{color:#A33C3C}
+.action-card.act-special .at strong{color:#A33C3C}
+.action-card.act-special .at .as{color:#B85C5C}
+
+/* 6. 已完成報到 + 7. 撤銷 */
 .checkin-bar{border-top:1px solid var(--border-light);padding:.85rem 0 0;margin-top:.85rem;flex-shrink:0;display:flex;gap:.5rem;align-items:center;width:100%}
 .btn-checkin{flex:1;display:flex;align-items:center;justify-content:center;gap:.4rem;background:var(--terra);color:#fff;border:none;padding:.7rem 1.2rem;border-radius:var(--radius);font-size:.92rem;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .15s;letter-spacing:.02em}
 .btn-checkin:hover{background:#a84a30;transform:translateY(-1px);box-shadow:0 4px 12px rgba(196,90,60,.2)}
 .btn-checkin:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
-.btn-checkin.already-done{background:var(--success-bg);color:var(--success);border:1.5px solid #c5d8c7;cursor:default}
+.btn-checkin.already-done{background:#F4F7F4;color:#6F8A73;border:1.5px solid #D9E3DA;cursor:default}
 .btn-checkin.already-done:hover{transform:none;box-shadow:none}
-.btn-undo{display:flex;align-items:center;gap:.25rem;background:transparent;color:var(--text-muted);border:1.5px solid var(--border);padding:.6rem .8rem;border-radius:var(--radius);font-size:.78rem;font-weight:500;font-family:var(--font);cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-undo{display:flex;align-items:center;gap:.25rem;background:#F8F6F3;color:#7A6F66;border:1.5px solid #D8D2CB;padding:.6rem .8rem;border-radius:var(--radius);font-size:.78rem;font-weight:500;font-family:var(--font);cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn-undo:hover{border-color:var(--terra);color:var(--terra)}
 
 /* Onsite pay buttons */
@@ -244,8 +286,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .action-card.act-proxy-yellow{background:#fff4ec;border-color:#e8a06c;border-width:2px}
 .action-card.act-proxy-yellow .ai-wrap{background:#f4dcc8;color:#b5622a}
 .action-card.act-proxy-yellow .at{color:#8c4517}
-.btn-proxy{background:#f57f17;color:#fff;border:none;padding:.35rem .7rem;border-radius:var(--radius-sm);font-size:.78rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .15s;margin-top:.4rem}
-.btn-proxy:hover{background:#e65100}
+.btn-proxy{background:#E97824;color:#fff;border:none;padding:.35rem .7rem;border-radius:var(--radius-sm);font-size:.78rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .15s;margin-top:.4rem}
+.btn-proxy:hover{background:#c96318}
 .btn-proxy:disabled{opacity:.4;cursor:not-allowed}
 .btn-proxy-release{background:transparent;color:#999;border:1.5px solid var(--border);padding:.3rem .6rem;border-radius:var(--radius-sm);font-size:.72rem;font-weight:500;font-family:var(--font);cursor:pointer;margin-left:.4rem}
 .btn-proxy-release:hover{border-color:var(--terra);color:var(--terra)}
@@ -1075,7 +1117,7 @@ function selectPerson(idx){
   }
   if(needsCredit){
     if(creditInfo.type==='報到即有'){
-      acts+=ac('act-default',I.checked,'繼續教育積分：完成報到即可','職類：'+esc(r.profession)+'，無需額外紙本簽到');
+      acts+=ac('act-credit',I.checked,'繼續教育積分：完成報到即可','職類：'+esc(r.profession)+'，無需額外紙本簽到');
     } else {
       acts+=ac('act-info',I.pencil,'提醒至「繼續教育積分簽到處」簽名','職類：'+esc(r.profession));
     }
