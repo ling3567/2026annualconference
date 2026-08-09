@@ -138,13 +138,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .action-card .at{font-size:.83rem;flex:1}
 .action-card .at strong{font-weight:700}
 .action-card .at .as{font-size:.76rem;opacity:.75;margin-top:.1rem}
-/* 1. 發放識別證 */
-.action-card.act-default{background:#F5F3F0;border-color:#DDD7D0}
-.action-card.act-default .ai-wrap{background:#E8E4DF;color:#6F675F}
-.action-card.act-default .at{color:#332F2B}
-.action-card.act-default .at .as{color:#6F675F}
+/* 1. 發放識別證（淺綠，同屬「發放」但較淡，不易漏看）*/
+.action-card.act-default{background:#F3F8F4;border-color:#C8DCCB}
+.action-card.act-default .ai-wrap{background:#E0ECE2;color:#4A7A52}
+.action-card.act-default .at{color:#3D6844}
+.action-card.act-default .at .as{color:#6B9472}
 
-/* 2. 發放會員禮品＋餐券 */
+/* 2. 發放會員禮品＋餐券（深綠，主要發放項目）*/
 .action-card.act-success{background:#EEF5EF;border-color:#B7CCBA}
 .action-card.act-success .ai-wrap{background:#DDEADF;color:#355E3B}
 .action-card.act-success .at{color:#355E3B}
@@ -190,7 +190,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .action-card.act-muted .ai-wrap{background:#E8E4DF;color:#aaa}
 .action-card.act-muted .at{color:#aaa}
 .action-card.act-muted .at .as{color:#bbb}
-
 /* 8. 異常／需特別處理 */
 .action-card.act-special{background:#FCEEEE;border-color:#D96C6C;border-width:2px}
 .action-card.act-special .ai-wrap{background:#F7DCDC;color:#A33C3C}
@@ -1130,7 +1129,19 @@ function selectPerson(idx){
     const alreadyDelegate=!!proxyAsDelegate;
     const pendingProxies=proxyData.list.filter(p=>!p.delegateName||p.status==='待配對');
 
-    if(isMem && isPaid && !r.absent){
+    // 檢查此人是否為委託人（請假者）
+    const isDelegator=proxyData.list.find(p=>p.delegatorName===r.name && p.delegatorOrg===(r.org||'') && p.delegatorProfession===(r.profession||''));
+
+    if(isDelegator){
+      // 此人是委託人，本人到場 → 提示
+      const delegateInfo = isDelegator.delegateName
+        ? `已委託給：${esc(isDelegator.delegateName)}（${esc(isDelegator.delegateOrg)}）`
+        : '委託書尚未配對';
+      acts+=`<div class="action-card act-special"><div class="ai-wrap">${I.vote}</div><div class="at">
+        <strong>⚠ 此人為委託人（本人到場）</strong>
+        <div class="as">${delegateInfo}<br>本人已到場，請確認是否取消委託、自行投票</div>
+      </div></div>`;
+    } else if(isMem && isPaid && !r.absent){
       if(alreadyDelegate){
         const pInfo=proxyAsDelegate;
         acts+=`<div class="action-card act-proxy-green"><div class="ai-wrap">${I.vote}</div><div class="at">
