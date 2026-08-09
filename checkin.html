@@ -331,95 +331,101 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 
 /* Mobile */
 @media(max-width:480px){
-  .stat-group{display:none}
+  /* Header: show compact stats including 待配對 */
   .app-header{min-height:44px;padding:0 .6rem;padding-top:.35rem;padding-bottom:.35rem}
-  .header-right{justify-content:flex-end;gap:.3rem}
+  .header-right{width:100%;justify-content:space-between}
   .header-btn svg{display:none}
-  .header-btn{font-size:.8rem;padding:.3rem .5rem}
-  .header-left h1{font-size:.92rem}
+  .header-btn{font-size:.82rem;padding:.32rem .55rem}
+  .header-left h1{font-size:.95rem}
   .header-logo-wrap{width:26px;height:26px}
   .header-logo{width:20px;height:20px}
   .sync-time{display:none}
+  .stat-group{display:flex;gap:.35rem}
+  .stat-group .stat-divider{display:none}
+  .stat-item{font-size:.75rem}
+  .stat-item strong{font-size:.85rem}
 
-  .main-layout{min-height:calc(100vh - 60px);overflow:visible}
+  .main-layout{min-height:calc(100vh - 70px);overflow:visible}
   .panel-search{max-height:none}
-  .panel-search .panel-body{padding:.5rem .6rem;overflow:visible}
+  .panel-search .panel-body{padding:.55rem .65rem;overflow:visible}
 
   /* Sticky search */
   .search-box{position:sticky;top:0;z-index:40;background:var(--card);padding:.3rem 0 .4rem;margin-bottom:.3rem}
 
   /* Search */
-  #searchInput{font-size:1rem;padding:.6rem .7rem .6rem 2.4rem}
-  .search-hint{font-size:.85rem}
-  .search-item{grid-template-columns:32px 1fr;gap:.35rem;padding:.5rem .5rem;min-height:46px}
-  .si-avatar{width:32px;height:32px;font-size:.75rem}
-  .si-name{font-size:.92rem;gap:.2rem}
-  .si-org{font-size:.78rem}
-  .si-status-icon{width:18px;height:18px}
-  .counter-badge{min-width:16px;height:16px;font-size:.62rem;padding:0 .25rem}
+  #searchInput{font-size:1.05rem;padding:.65rem .8rem .65rem 2.5rem}
+  .search-hint{font-size:.9rem}
+  .search-item{grid-template-columns:36px 1fr;gap:.4rem;padding:.55rem .55rem;min-height:50px}
+  .si-avatar{width:36px;height:36px;font-size:.82rem}
+  .si-name{font-size:1rem;gap:.25rem}
+  .si-org{font-size:.82rem}
+  .si-status-icon{width:20px;height:20px}
+  .counter-badge{min-width:18px;height:18px;font-size:.68rem;padding:0 .3rem}
 
   /* Counter tabs */
   .counter-tabs{gap:2px;padding:2px}
-  .counter-tab{width:34px;height:32px;font-size:.85rem}
-  .counter-tab:first-of-type{padding:0 .45rem;font-size:.82rem}
+  .counter-tab{width:38px;height:36px;font-size:.9rem}
+  .counter-tab:first-of-type{padding:0 .55rem;font-size:.88rem}
 
   /* Group chips */
-  .group-chip{font-size:.78rem;padding:.25rem .55rem}
+  .group-chip{font-size:.85rem;padding:.3rem .6rem}
 
   /* Detail panel */
-  .panel-header{padding:.6rem .75rem}
-  .panel-header h2{font-size:.82rem}
-  .panel-body{padding:.7rem .8rem}
-  .profile-top{gap:.6rem}
-  .profile-avatar{width:38px;height:38px;font-size:1rem}
-  .profile-name{font-size:1.1rem}
-  .badge{font-size:.72rem;padding:.15rem .4rem}
-  .info-grid{grid-template-columns:1fr;gap:.5rem}
-  .info-label{font-size:.75rem}
-  .info-value{font-size:.92rem}
+  .panel-header{padding:.65rem .8rem}
+  .panel-header h2{font-size:.88rem}
+  .panel-body{padding:.75rem .85rem}
+  .profile-top{gap:.7rem}
+  .profile-avatar{width:42px;height:42px;font-size:1.1rem}
+  .profile-name{font-size:1.2rem}
+  .badge{font-size:.78rem;padding:.18rem .5rem}
+  .info-grid{grid-template-columns:1fr;gap:.55rem}
+  .info-label{font-size:.8rem}
+  .info-value{font-size:1rem}
 
   /* Action cards */
-  .action-card{padding:.65rem .75rem;gap:.5rem}
-  .action-card .ai-wrap{width:30px;height:30px;border-radius:6px}
-  .action-card .at{font-size:.92rem}
-  .action-card .at strong{font-size:.95rem}
-  .action-card .at .as{font-size:.82rem}
-  .btn-checkin{font-size:1rem;padding:.7rem 1rem;border-radius:8px}
-  .btn-undo{font-size:.85rem;padding:.55rem .75rem}
-  .btn-onsite{font-size:.82rem;padding:.35rem .6rem}
-  .checkin-bar{padding:.7rem 0 0;margin-top:.7rem}
+  .action-card{padding:.75rem .85rem;gap:.6rem}
+  .action-card .ai-wrap{width:32px;height:32px;border-radius:7px}
+  .action-card .at{font-size:1rem}
+  .action-card .at strong{font-size:1.02rem}
+  .action-card .at .as{font-size:.88rem}
+  .btn-checkin{font-size:1.1rem;padding:.8rem 1.1rem;border-radius:8px}
+  .btn-undo{font-size:.92rem;padding:.6rem .85rem}
+  .btn-onsite{font-size:.88rem;padding:.4rem .7rem}
+  .btn-proxy{font-size:.88rem;padding:.42rem .8rem}
+  .checkin-bar{padding:.75rem 0 0;margin-top:.75rem}
 
   /* Stats */
-  .stats-page{padding:.6rem}
-  .stats-header h2{font-size:1.1rem}
-  .stats-header p{font-size:.88rem}
-  .stats-overall{grid-template-columns:1fr;gap:.4rem}
-  .so-card .so-val{font-size:1.35rem}
-  .so-card .so-label{font-size:.78rem}
-  .so-card{font-size:.88rem}
-  .stats-tabs .stats-tab{font-size:.85rem;padding:.5rem .45rem}
+  .stats-page{padding:.7rem}
+  .stats-header h2{font-size:1.2rem}
+  .stats-header p{font-size:.92rem}
+  .stats-overall{grid-template-columns:1fr;gap:.45rem}
+  .so-card .so-val{font-size:1.45rem}
+  .so-card .so-label{font-size:.85rem}
+  .so-card{font-size:.92rem}
+  .stats-tabs .stats-tab{font-size:.92rem;padding:.55rem .5rem}
   .sg-member-list{grid-template-columns:1fr}
-  .sg-header h3{font-size:.92rem}
-  .sg-header .sg-stat{font-size:.85rem}
-  .sg-member{font-size:.9rem;padding:.5rem .6rem}
-  #fieldSelect,#groupSelect{font-size:.92rem}
-  #fieldSearchInput{font-size:.92rem}
+  .sg-header h3{font-size:1rem}
+  .sg-header .sg-stat{font-size:.9rem}
+  .sg-member{font-size:.95rem;padding:.55rem .7rem}
+  #fieldSelect,#groupSelect{font-size:1rem}
+  #fieldSearchInput{font-size:1rem}
 
   /* Log */
-  .log-section{padding-top:.5rem}
-  .log-title{font-size:.82rem}
-  .log-list{max-height:85px}
-  .log-item{font-size:.82rem;padding:.3rem .45rem}
+  .log-section{padding-top:.55rem}
+  .log-title{font-size:.85rem}
+  .log-list{max-height:90px}
+  .log-item{font-size:.85rem;padding:.32rem .5rem}
 
   /* Modal */
-  .modal-box{padding:1.2rem;width:92%}
-  .modal-box h3{font-size:1rem}
-  .modal-box textarea{font-size:.95rem;min-height:70px}
-  .modal-actions button{font-size:.92rem;padding:.55rem 1.1rem}
-  .modal-hint{font-size:.78rem}
+  .modal-box{padding:1.3rem;width:94%}
+  .modal-box h3{font-size:1.1rem}
+  .modal-box textarea{font-size:1rem;min-height:75px}
+  .modal-actions button{font-size:1rem;padding:.6rem 1.2rem}
+  .modal-hint{font-size:.85rem}
+  .proxy-item{font-size:.92rem;padding:.6rem .75rem}
 
   /* Toast */
-  .toast{font-size:.85rem;padding:.5rem .9rem;bottom:1rem}
+  .toast{font-size:.92rem;padding:.55rem 1rem;bottom:1rem}
 }
 </style>
 </head>
