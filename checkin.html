@@ -1017,7 +1017,7 @@ function selectPerson(idx){
   const hasPoster=posters.length>0;
   const creditInfo=creditProfessions.find(c=>c.profession===r.profession);
   const needsCredit=!!creditInfo;
-  const badgeNo=badgeMap[r.name]||'';
+  const badgeNo=r.badge||'';
 
   // Center
   document.getElementById('detailEmpty').style.display='none';
@@ -1130,7 +1130,7 @@ function selectPerson(idx){
     const pendingProxies=proxyData.list.filter(p=>!p.delegateName||p.status==='待配對');
 
     // 檢查此人是否為委託人（請假者）
-    const isDelegator=proxyData.list.find(p=>p.delegatorName===r.name && p.delegatorOrg===(r.org||'') && p.delegatorProfession===(r.profession||''));
+    const isDelegator=proxyData.list.find(p=>p.delegatorName===r.name && p.delegatorOrg===(r.org||'') && p.delegatorProfession===(r.profession||'') && p.status!=='已取消');
 
     if(isDelegator){
       // 此人是委託人，本人到場 → 提示
@@ -1140,6 +1140,7 @@ function selectPerson(idx){
       acts+=`<div class="action-card act-special"><div class="ai-wrap">${I.vote}</div><div class="at">
         <strong>⚠ 此人為委託人（本人到場）</strong>
         <div class="as">${delegateInfo}<br>本人已到場，請確認是否取消委託、自行投票</div>
+        <div style="margin-top:.4rem"><button class="btn-proxy" style="background:#D96C6C" onclick="proxyCancel(${isDelegator.row},event)">取消委託</button></div>
       </div></div>`;
     } else if(isMem && isPaid && !r.absent){
       if(alreadyDelegate){
@@ -1370,6 +1371,25 @@ function proxyRelease(row, e){
 
   fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({
     action:'proxy_release',proxyRow:row
+  })}).catch(()=>{});
+}
+
+function proxyCancel(row, e){
+  if(e) e.stopPropagation();
+  if(!confirm('確定取消此委託書？本人已到場將自行投票。')) return;
+  markAction();
+
+  const proxy=proxyData.list.find(x=>x.row===row);
+  if(proxy){
+    proxy.status='已取消';
+    proxyData.pendingCount=proxyData.list.filter(x=>!x.delegateName||x.status==='待配對').length;
+  }
+  if(selectedIndex>=0) selectPerson(selectedIndex);
+  updateStats();
+  showToast('委託書已取消，本人自行投票');
+
+  fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    action:'proxy_cancel',proxyRow:row
   })}).catch(()=>{});
 }
 
