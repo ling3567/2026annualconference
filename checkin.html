@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026年會報到系統 — TSMCSD</title>
+<title>TSMCSD 2026年會 | 報到系統</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -372,19 +372,24 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 
 /* Mobile */
 @media(max-width:480px){
-  /* Header: show compact stats including 待配對 */
-  .app-header{min-height:44px;padding:0 .6rem;padding-top:.35rem;padding-bottom:.35rem}
-  .header-right{width:100%;justify-content:space-between}
-  .header-btn svg{display:none}
-  .header-btn{font-size:.82rem;padding:.32rem .55rem}
-  .header-left h1{font-size:.95rem}
-  .header-logo-wrap{width:26px;height:26px}
-  .header-logo{width:20px;height:20px}
-  .sync-time{display:none}
-  .stat-group{display:flex;gap:.35rem}
+  /* Header: clean two-row layout */
+  .app-header{min-height:auto;padding:.4rem .6rem;flex-wrap:wrap;gap:0}
+  .header-left{width:100%;margin-bottom:.3rem}
+  .header-left h1{font-size:.92rem}
+  .header-logo-wrap{width:24px;height:24px}
+  .header-logo{width:18px;height:18px}
+  .header-right{width:100%;justify-content:space-between;align-items:center;gap:.3rem}
+
+  /* Stats as compact pill bar */
+  .stat-group{display:flex;gap:0;background:rgba(255,255,255,.12);border-radius:6px;padding:2px 6px;align-items:center}
   .stat-group .stat-divider{display:none}
-  .stat-item{font-size:.75rem}
-  .stat-item strong{font-size:.85rem}
+  .stat-item{font-size:.68rem;padding:0 .3rem;white-space:nowrap}
+  .stat-item strong{font-size:.78rem}
+
+  /* Buttons compact */
+  .header-btn svg{display:none}
+  .header-btn{font-size:.72rem;padding:.28rem .45rem}
+  .sync-time{display:none}
 
   .main-layout{min-height:calc(100vh - 70px);overflow:visible}
   .panel-search{max-height:none}
