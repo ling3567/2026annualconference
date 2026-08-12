@@ -51,9 +51,9 @@ body {
   box-shadow: 0 2px 12px rgba(26,93,153,0.2);
 }
 .header-inner {
-  max-width: 1000px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.55rem 1.5rem;
+  max-width: 680px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: flex-start;
+  padding: 0.55rem clamp(0.9rem, 3vw, 1.5rem);
 }
 .header-logo {
   display: flex; align-items: center; gap: 0.6rem;
@@ -69,19 +69,10 @@ body {
   display: block; font-size: 0.72rem; font-weight: 400;
   opacity: 0.85; margin-top: 1px;
 }
-.nav-toggle { display: none; background: none; border: none; color: var(--white); cursor: pointer; padding: 0.4rem; }
-.main-nav { display: flex; gap: 0.1rem; align-items: center; }
-.main-nav a {
-  color: rgba(255,255,255,0.88); text-decoration: none; font-size: 0.85rem;
-  padding: 0.45rem 0.75rem; border-radius: 8px; transition: all 0.2s; font-weight: 500;
-  white-space: nowrap;
-}
-.main-nav a:hover { color: var(--light-gold); background: rgba(255,255,255,0.08); }
-.main-nav a.active { color: var(--light-gold); background: rgba(255,255,255,0.1); }
 
 /* ========== SECTION 基底 ========== */
 .section {
-  max-width: 1000px; margin: 0 auto;
+  max-width: 680px; margin: 0 auto;
   padding: clamp(1.2rem, 3vw, 2rem) clamp(0.9rem, 3vw, 1.5rem) 1rem;
 }
 .section-head {
@@ -104,7 +95,6 @@ body {
   background: var(--white); border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
   padding: clamp(1.2rem, 3.5vw, 2rem) clamp(1rem, 3.5vw, 1.8rem);
-  max-width: 680px; margin: 0 auto;
 }
 .query-card h2 {
   color: var(--deep-blue);
@@ -250,16 +240,6 @@ body {
 
 /* ========== 平板 ========== */
 @media (max-width: 860px) {
-  .nav-toggle { display: block; }
-  .main-nav {
-    display: none; flex-direction: column;
-    position: absolute; top: 100%; left: 0; right: 0;
-    background: rgba(26,93,153,0.98);
-    padding: 0.6rem 1rem 1rem; gap: 0.2rem;
-    border-top: 1px solid rgba(255,255,255,0.1);
-  }
-  .main-nav.open { display: flex; }
-  .main-nav a { padding: 0.75rem 0.8rem; font-size: 0.95rem; }
   .header-logo .logo-text small { display: none; }
 }
 /* ========== 手機 ========== */
@@ -291,17 +271,6 @@ body {
         <small>2026 年會報到台編號查詢</small>
       </span>
     </a>
-    <button class="nav-toggle" onclick="document.querySelector('.main-nav').classList.toggle('open')" aria-label="選單">
-      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    </button>
-    <nav class="main-nav">
-      <a href="#top" class="active">報到台編號</a>
-      <a href="handbook.html#schedule">議程</a>
-      <a href="handbook.html#speakers">講師簡歷</a>
-      <a href="handbook.html#venue">會場資訊</a>
-      <a href="handbook.html#posters">海報論文</a>
-      <a href="handbook.html#osce">OSCE教案</a>
-    </nav>
   </div>
 </header>
 
