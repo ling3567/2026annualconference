@@ -84,7 +84,7 @@ body {
   display: inline-flex; align-items: center;
   background: var(--nav-blue); color: var(--white);
   padding: 0.32rem 0.85rem; border-radius: 6px;
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em;
+  font-size: 0.76rem; font-weight: 700; letter-spacing: 0.1em;
   line-height: 1; flex-shrink: 0;
 }
 .section-head .meta { color: var(--text-muted); font-size: 0.88rem; line-height: 1.55; flex: 1; min-width: 0; }
@@ -182,7 +182,12 @@ body {
   letter-spacing: 0.06em;
   text-shadow: 0 2px 10px rgba(212,168,67,0.35);
 }
-.desk-note { color: var(--text-muted); font-size: clamp(0.78rem, 2vw, 0.86rem); margin-top: 0.45rem; }
+.desk-note {
+  color: var(--text-body); font-size: clamp(0.82rem, 2.2vw, 0.92rem);
+  line-height: 1.65; margin: 0.6rem auto 0; max-width: 22em;
+  padding-top: 0.6rem; border-top: 1px dashed rgba(212,168,67,0.55);
+}
+.desk-note b { color: var(--nav-blue); font-weight: 800; }
 .field-row {
   display: flex; gap: 0.9rem;
   padding: clamp(0.65rem, 2vw, 0.85rem) clamp(1rem, 3vw, 1.3rem);
@@ -248,6 +253,8 @@ body {
   .header-logo { font-size: 0.82rem; }
   .section-head .meta { font-size: 0.8rem; flex-basis: 100%; }
   .search-row { flex-direction: column; }
+  /* column 排列時 flex-basis 會作用在「高度」上，必須歸零避免輸入框被撐高 */
+  #nameInput { flex: 0 0 auto; width: 100%; }
   .btn-search { width: 100%; }
   .field-label { flex-basis: 5.4em; }
 }
@@ -276,7 +283,7 @@ body {
 
 <section class="section">
   <div class="section-head">
-    <span class="tag">CHECK-IN</span>
+    <span class="tag">報到台查詢</span>
     <div class="meta">
       <strong>2026 年 8 月 15 日（六）</strong>　奇美醫院第五醫療大樓 5F 國際會議廳
     </div>
@@ -438,7 +445,8 @@ function render(data, q) {
       html += '<div class="desk-block">' +
               '<div class="desk-label">報到台編號</div>' +
               '<div class="desk-value">' + esc(deskField.value) + '</div>' +
-              '<div class="desk-note">請至此報到台完成報到</div>' +
+              '<div class="desk-note">請攜帶此編號至 <b>' + esc(deskField.value) +
+              ' 號報到台</b>，由工作人員為您完成報到、領取名牌與資料袋</div>' +
               '</div>';
     }
 
