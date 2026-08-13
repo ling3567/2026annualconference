@@ -160,11 +160,6 @@ body {
   flex-wrap: wrap;
 }
 .record-header .name-main { font-size: clamp(1.2rem, 4vw, 1.5rem); font-weight: 800; letter-spacing: 0.08em; }
-.record-header .badge {
-  background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.45);
-  color: var(--white); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
-  padding: 0.26rem 0.8rem; border-radius: 99px; white-space: nowrap;
-}
 /* 報到台編號：整張卡的主角 */
 .desk-block {
   background: linear-gradient(135deg, var(--pale-gold), var(--cream));
@@ -438,8 +433,7 @@ function render(data, q) {
 
     html += '<div class="record">';
     html += '<div class="record-header"><span class="name-main">' +
-            esc(nameField ? nameField.value : q) +
-            '</span><span class="badge">報名成功</span></div>';
+            esc(nameField ? nameField.value : q) + '</span></div>';
 
     if (deskField) {
       html += '<div class="desk-block">' +
