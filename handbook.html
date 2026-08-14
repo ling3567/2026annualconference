@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TSMCSD2026 | 學術研討會手冊</title>
+<title>TSMCSD 2026年會 | 學術研討會手冊</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -610,6 +610,7 @@ body { padding-top: 58px; }
   font-size: 0.88rem; color: var(--text-body);
   display: flex; flex-direction: column; gap: 0.15rem;
   margin-bottom: 0.8rem;
+  word-break: keep-all;   /* 中文字保持完整詞，只在「、」等標點處斷行，姓名不會被拆散 */
 }
 .osce-meta span { display: block; }
 .osce-summary {
@@ -874,8 +875,26 @@ body { padding-top: 58px; }
 .likert-scale input:checked + label .num { color: var(--white); }
 
 @media (max-width: 540px) {
-  .likert-scale label { font-size: 0.65rem; padding: 0.4rem 0.1rem; }
-  .likert-scale label .num { font-size: 0.85rem; }
+  /* 手機版：Likert 量表改為垂直堆疊，每個選項為完整寬度的橫條 */
+  .likert-scale {
+    grid-template-columns: 1fr !important;
+    gap: 0.35rem;
+  }
+  .likert-scale label {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.88rem;
+    text-align: left;
+  }
+  .likert-scale label .num {
+    font-size: 1rem;
+    margin-bottom: 0;
+    min-width: 1.6em;
+    text-align: center;
+  }
 }
 
 /* ========== FOOTER ========== */
@@ -1057,14 +1076,21 @@ body { padding-top: 58px; }
   .agenda-table .topic-title { font-size: 0.96rem; }
   .agenda-table .speaker-info,
   .agenda-table .chair-info {
+    display: flex; gap: 0.35rem;
     margin-top: 0.3rem; font-size: 0.85rem; line-height: 1.6;
     color: var(--text-dark);
   }
+  .agenda-table .speaker-info::before,
+  .agenda-table .chair-info::before {
+    flex-shrink: 0;   /* 讓「講師｜/座長｜」保持固定寬度，換行時內文自動對齊 */
+    font-weight: 600; font-size: 0.78rem;
+    padding-top: 0.1rem;
+  }
   .agenda-table .speaker-info::before {
-    content: '講師｜'; font-weight: 600; color: var(--nav-blue); font-size: 0.78rem;
+    content: '講師｜'; color: var(--nav-blue);
   }
   .agenda-table .chair-info::before {
-    content: '座長｜'; font-weight: 600; color: var(--warm-gold); font-size: 0.78rem;
+    content: '座長｜'; color: var(--warm-gold);
   }
   .agenda-table td:empty { display: none; }
 
@@ -1401,7 +1427,7 @@ const SURVEY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx-L6y0Dpz_gBCk
    ⚡ 課程講義快速切換區 ⚡
    ═══════════════════════════════════════════════════════════════
    會議當日若講師願意分享講義 → 把 URL 填入
-   會議當日若講師不願分享     → 改成空字串 ''  (顯示為「未提供課程簡報」)
+   會議當日若講師不願分享     → 改成空字串 ''  (顯示為「未提供」)
    改完後：GitHub Pages 網頁需推 commit → 約 1~2 分鐘生效
    ══════════════════════════════════════════════════════════════ */
 const HANDOUTS = {
@@ -1514,7 +1540,7 @@ const SPEAKERS = [
    org：機構名稱
    summary：教案概述（可多行；用 \n 換行） */
 const OSCE_CASES = [
-  { num: 'OSCE-01', title: '失智症末期進食決策之跨領域全人照護', team: '林舒晴、陳盈汝、黃馨葆', org: '中山醫學大學附設醫院(大慶院區)', summary: '本教案以失智症末期個案為情境，設計醫師、語言治療師與營養師跨領域全人照護OSCE。學員需整合各專業評估結果，並透過跨領域全人會議討論舒適進食與鼻胃管灌食之利弊，最終與家屬進行以病人為中心的共享決策與衛教。' },
+  { num: 'OSCE-01', title: '失智症末期進食決策之跨領域全人照護', team: '林舒晴、陳盈汝、黃馨葆', org: '中山醫學大學附設醫院', summary: '本教案以失智症末期個案為情境，設計醫師、語言治療師與營養師跨領域全人照護OSCE。學員需整合各專業評估結果，並透過跨領域全人會議討論舒適進食與鼻胃管灌食之利弊，最終與家屬進行以病人為中心的共享決策與衛教。' },
   { num: 'OSCE-02', title: '檢驗異常驅動之跨專業即時通報與轉介：\n多發性骨髓瘤案例之OSCE教案設計', team: '徐偉哲、羅佳鈺、王思涵、顏仲逸、曾雅雪、蘇芳汝、葉瑩君、楊于萱', org: '奇美醫療財團法人奇美醫院', summary: '醫檢師是醫療體系中，唯一能在檢驗分析前直接觀察檢體物理特徵的專業人員。當檢體出現異常凝固或分離膠未完全分離時，這並非單純的檢驗技術干擾，而是潛在m-protein發出的「關鍵預警」。透過本OSCE教案，我們旨在訓練學員將這些微小線索轉化為臨床行動力，從而縮短病人確診的延遲，實踐醫檢專業在早期癌症篩補位的關鍵守門人角色。設計從情境觸發到啟動通報流程，以SBAR結構化溝通與與強化跨團隊醫病溝通示範。' },
   { num: 'OSCE-03', title: '家長親職衛教與跨專業轉介-以6歲ADHD男童為例', team: '陳怡伶、黃佩珍、鐘舜平、羅安琪、董奕君、梁温潔', org: '新光醫療財團法人新光吳火獅紀念醫院', summary: '本教案落實「以家庭為中心」的理念，針對 6 歲 ADHD 男童的在校衝突，測驗考生臨床推理與溝通能力，目標包含提供情緒行為策略、緩解家長焦慮、處理跨代教養衝突，並展現轉介心理師的跨專業協作，實踐全人照護目標。' },
   { num: 'OSCE-04', title: '壓力性損傷評估照護', team: '陳惠鈴、鄒理萍、郭育伶、陳姿柔、許毓纓、林孟亭、石娉雯、林慧如、林建宇、黃彩桂、李潔美', org: '高雄榮民總醫院', summary: '訓練護理師與營養師對壓力性損傷的照護能力。透過臥床中風病患情境，護理師需執行傷口評估、無菌換藥與會診。營養師負責營養評估、管灌衛教及跨職類交班。旨在提升學員的臨床技能、醫病溝通與團隊合作素養。' },
@@ -2137,9 +2163,26 @@ function clearRequiredWarning(el) {
   if (w) w.remove();
 }
 // invalid 事件不會 bubble，需在 capture 階段接
+// 用一個 batch 收集這次驗證的所有未填欄位，之後統一捲動到第一個
+let _invalidBatch = [];
 document.addEventListener('invalid', (e) => {
   if (!e.target.closest('#survey-form')) return;
+  e.preventDefault();     // 抑制瀏覽器原生小提示氣泡（手機版樣式陽春）
   showRequiredWarning(e.target);
+  _invalidBatch.push(e.target);
+  if (_invalidBatch.length === 1) {
+    // microtask 收完所有同步觸發的 invalid 後執行
+    queueMicrotask(() => {
+      const first = _invalidBatch[0];
+      const container = findQuestionContainer(first);
+      if (container) {
+        // scroll-margin-top 補上固定 nav 高度（避免被 nav 遮住）
+        container.style.scrollMarginTop = '80px';
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      _invalidBatch = [];
+    });
+  }
 }, true);
 // 使用者填入時自動清除該題的警告
 document.addEventListener('change', (e) => {
