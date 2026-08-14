@@ -1005,7 +1005,11 @@ body { padding-top: 58px; }
     border-top: 1px solid rgba(255,255,255,0.1);
   }
   .main-nav.open { display: flex; }
-  .main-nav a { padding: 0.7rem 0.8rem; font-size: 0.95rem; }
+  .main-nav a {
+    padding: 0.7rem 0.8rem; font-size: 0.95rem;
+    position: relative; z-index: 2;   /* 保證點擊事件不會被同層元素攔截 */
+    pointer-events: auto;
+  }
   .header-logo .logo-text small { display: none; }
 
   /* 手機：下拉子項目改為內嵌展開，全部置中對齊主 nav 樣式 */
@@ -1076,15 +1080,18 @@ body { padding-top: 58px; }
   .agenda-table .topic-title { font-size: 0.96rem; }
   .agenda-table .speaker-info,
   .agenda-table .chair-info {
-    display: flex; gap: 0.35rem;
+    /* 懸掛縮排：第一行含「講師｜/座長｜」貼齊左緣，之後換行內文對齊姓氏第一字 */
+    padding-left: 3.2em;
+    text-indent: -3.2em;
     margin-top: 0.3rem; font-size: 0.85rem; line-height: 1.6;
     color: var(--text-dark);
   }
   .agenda-table .speaker-info::before,
   .agenda-table .chair-info::before {
-    flex-shrink: 0;   /* 讓「講師｜/座長｜」保持固定寬度，換行時內文自動對齊 */
     font-weight: 600; font-size: 0.78rem;
-    padding-top: 0.1rem;
+    display: inline-block;
+    width: 3.2em;                       /* 保證第一行 prefix 佔的空間 = padding-left */
+    text-indent: 0;
   }
   .agenda-table .speaker-info::before {
     content: '講師｜'; color: var(--nav-blue);
@@ -1766,16 +1773,19 @@ function switchSection(id, opts = {}) {
   }
 }
 
-document.querySelectorAll('.main-nav a[href^="#"]').forEach(a => {
-  // 排除子選單連結（由下方專屬 handler 處理）
-  if (a.closest('.nav-submenu')) return;
-  a.addEventListener('click', (e) => {
+// 事件委派：綁在 .main-nav 上，避免 iOS Safari 對子節點事件的偶發不觸發
+const _mainNav = document.querySelector('.main-nav');
+if (_mainNav) {
+  _mainNav.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a || !_mainNav.contains(a)) return;
+    if (a.closest('.nav-submenu')) return;   // 子選單由 nav-submenu handler 處理
     e.preventDefault();
     const id = a.getAttribute('href').slice(1);
     switchSection(id);
-    document.querySelector('.main-nav').classList.remove('open');
+    _mainNav.classList.remove('open');
   });
-});
+}
 
 /* 跳轉到指定講師卡片（切換到講師簡歷分頁 → 捲到該卡 → 加亮） */
 function goToSpeakerCard(cardId) {
