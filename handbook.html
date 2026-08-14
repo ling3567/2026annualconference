@@ -1080,18 +1080,19 @@ body { padding-top: 58px; }
   .agenda-table .topic-title { font-size: 0.96rem; }
   .agenda-table .speaker-info,
   .agenda-table .chair-info {
-    /* 懸掛縮排：第一行含「講師｜/座長｜」貼齊左緣，之後換行內文對齊姓氏第一字 */
-    padding-left: 3.2em;
-    text-indent: -3.2em;
+    /* 用 absolute 定位 prefix，內文有 padding-left 預留位置，換行自動對齊 */
+    position: relative;
+    padding-left: 2.55rem;
     margin-top: 0.3rem; font-size: 0.85rem; line-height: 1.6;
     color: var(--text-dark);
   }
   .agenda-table .speaker-info::before,
   .agenda-table .chair-info::before {
+    position: absolute;
+    left: 0;
+    top: 0.15em;
     font-weight: 600; font-size: 0.78rem;
-    display: inline-block;
-    width: 3.2em;                       /* 保證第一行 prefix 佔的空間 = padding-left */
-    text-indent: 0;
+    line-height: 1.6;
   }
   .agenda-table .speaker-info::before {
     content: '講師｜'; color: var(--nav-blue);
@@ -1946,7 +1947,7 @@ function renderOSCECases() {
       <span class="osce-num">${escapeHtml(c.num)}</span>
       <div class="osce-title">${escapeHtml(c.title)}</div>
       <div class="osce-meta">
-        <span>投稿團隊：${escapeHtml(c.team)}</span>
+        <span>投稿團隊：${c.team.split('、').map(escapeHtml).join('、<wbr>')}</span>
         <span>機構名稱：${escapeHtml(c.org)}</span>
       </div>
       <div class="osce-summary"><h4>教案概述</h4><p>${escapeHtml(c.summary)}</p></div>
