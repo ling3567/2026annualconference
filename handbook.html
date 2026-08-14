@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>台灣醫事聯合臨床技能發展學會 2026年會員大會暨學術研討會 | 學術研討會手冊</title>
+<title>TSMCSD2026 | 學術研討會手冊</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -988,31 +989,37 @@ body { padding-top: 58px; }
   .main-nav a { padding: 0.7rem 0.8rem; font-size: 0.95rem; }
   .header-logo .logo-text small { display: none; }
 
-  /* 手機：下拉子項目改為內嵌展開（深色 nav 上以淡分隔線分隔） */
+  /* 手機：下拉子項目改為內嵌展開，全部置中對齊主 nav 樣式 */
   .nav-dropdown { width: 100%; }
-  .nav-dropdown-trigger { width: 100%; justify-content: space-between; }
+  .nav-dropdown-trigger {
+    width: 100%;
+    justify-content: center;   /* 觸發按鈕置中（同其他 nav 項目）*/
+    gap: 0.35rem;              /* 「海報論文」與 ▾ 之間微間距 */
+  }
   .nav-dropdown:hover .nav-dropdown-trigger .caret { transform: none; }
   .nav-submenu {
     position: static; opacity: 1; visibility: visible; transform: none;
-    background: transparent;
+    background: rgba(255,255,255,0.06);   /* 淡淡半透明底，暗示為子群組 */
     border: none;
     box-shadow: none;
-    margin: 0.1rem 0 0.4rem 1rem;
-    padding: 0;
+    margin: 0.25rem 1.5rem 0.4rem;        /* 左右對稱縮排，視覺不再靠左 */
+    padding: 0.15rem 0;
     min-width: 0;
-    border-radius: 0;
+    border-radius: 8px;                    /* 子群組整體有柔和邊角 */
     overflow: visible;
   }
   .nav-submenu::before { display: none; }
   .nav-submenu a {
-    padding: 0.6rem 0.8rem; font-size: 0.88rem;
+    padding: 0.55rem 0.8rem;
+    font-size: 0.85rem;                    /* 比主 nav 略小，標示層級 */
+    text-align: center;                    /* 子項目置中 */
     color: rgba(255,255,255,0.85);
     background: transparent;
-    border-bottom: 1px solid rgba(255,255,255,0.12);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
   }
   .nav-submenu a:last-child { border-bottom: none; }
   .nav-submenu a:hover {
-    background: transparent;
+    background: rgba(255,255,255,0.05);
     color: var(--light-gold);
   }
   .nav-submenu a.active {
@@ -1390,6 +1397,21 @@ body { padding-top: 58px; }
 /* ----- Apps Script Web App 網址（部署後填入；見 apps-script-survey.gs） ----- */
 const SURVEY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx-L6y0Dpz_gBCkHYkiUkKVaK3-93q7CoE3tW1aMb5LrwR56cEOn1nryggjvwctw3u8/exec';
 
+/* ══════════════════════════════════════════════════════════════
+   ⚡ 課程講義快速切換區 ⚡
+   ═══════════════════════════════════════════════════════════════
+   會議當日若講師願意分享講義 → 把 URL 填入
+   會議當日若講師不願分享     → 改成空字串 ''  (顯示為「未提供」)
+   改完後：GitHub Pages 網頁需推 commit → 約 1~2 分鐘生效
+   ══════════════════════════════════════════════════════════════ */
+const HANDOUTS = {
+  '蘇益賢': 'https://drive.google.com/file/d/1uIQ08eBEG1EvNL0Xu05TOqZ9PV4nRPGG/view?usp=sharing',
+  '陳志弘': 'https://drive.google.com/file/d/1e15FerxF7PzqTA2Gk7Hr1V5Y4UU2ezDp/view?usp=sharing',
+  '邱俊文': 'https://drive.google.com/file/d/1xIsnY1KPj1ydQ4Vrx8FGDDfbI7nySxMB/view?usp=sharing',
+  '張雅惠': 'https://drive.google.com/file/d/1OY4JfX5LoYHVY4TowpNi_G8INRXiW-76/view?usp=sharing',
+  '張玉喆': 'https://drive.google.com/file/d/1mXBK1IYnNsEOg9c5xXePuKkAbw1fllGd/view?usp=sharing',
+};
+
 /* ----- 講師資料 -----
    id：對應議程連結錨點（議程點講師名時跳到此卡）
    title：顯示在 header 姓名旁的職稱（例 教授／臨床心理師／主任）
@@ -1534,7 +1556,6 @@ const POSTERS = {
     { num: 'EP-03A', title: '情境式教學提升急診病患辨識與引導執行磁振造影檢查之成效', author: '康博勝', org: '義大醫療財團法人義大醫院', pdf: 'https://drive.google.com/file/d/10E-Jk2I0cevGRNPNNGwqxWzuDRB4h-74/view' },
     { num: 'EP-04A', title: 'Integrating Simulation Phantoms and Reflective Practice to Enhance Radiography Interns\' Clinical Communication Skills: A Case of High-Anxiety Mammography Scenarios', author: '黃詩華', org: '義大醫療財團法人義大醫院', pdf: 'https://drive.google.com/file/d/1ctFAqhwNynAKlX-c-vgYjOgN52DZ61Ny/view' },
     { num: 'EP-05A', title: 'Integration of Hybrid Operating Room Techniques with ERAS Protocol in Advanced NSCLC Management', author: '鄭伃婷', org: '臺北市立聯合醫院', pdf: 'https://drive.google.com/file/d/17q_bASPfV9Cc1PNM-jOmfV0SAhCk6Fzb/view' },
-    { num: 'EP-06A', title: '將零碎時間轉化為臨床學習場域：AI虛擬病人於專科護理師OSCE訓練之應用分析', author: '蘇韻如', org: '臺北市立聯合醫院仁愛院區', pdf: 'https://drive.google.com/file/d/10Q_TPRvAYL3RU0uUYca7s2ap7L-Yno6K/view' },
     { num: 'EP-07A', title: '電子學習歷程數位轉型之成效與使用者適應性影響探討', author: '黃建中', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/1e3So0ev-sdW7xmY0J3SuDrVFToPNYFrD/view' },
     { num: 'EP-08A', title: '情境模擬教學介入對提升專科護理師急救處置自效能之成效探討', author: '鍾筱宣', org: '國立成功大學醫學院附設醫院', pdf: 'https://drive.google.com/file/d/1eTxwROJLL8tfW96l5__xSt8AHKnHlzbm/view' },
     { num: 'EP-09A', title: '情境擬真教學之心肌灌注造影技術操作', author: '邱育琪', org: '義大醫療財團法人義大醫院', pdf: 'https://drive.google.com/file/d/1gC_HJhPkLoCiDCg0aa3HFhjTAnW3ZqmJ/view' },
@@ -1599,7 +1620,6 @@ const POSTERS = {
     { num: 'EP-68C', title: '從數據焦慮到共同理解：藥師透過同理溝通與心理安全促進病人提問之照護經驗', author: '楊紫麟', org: '屏東基督教醫院', pdf: 'https://drive.google.com/file/d/1qHNSx_mNAksNibGwEnBN_-FQ9gREzvjx/view' },
     { num: 'EP-69C', title: '教學思維轉變：運用反思式臨床回饋技巧於呼吸治療職類之成效探討', author: '陳泓甫', org: '佛教慈濟醫療財團法人大林慈濟醫院', pdf: 'https://drive.google.com/file/d/1zkL-9p4mvdqVkofBgGWII3hEQQMcGWs3/view' },
     { num: 'EP-70C', title: '導入AI生成技術之漫畫版溝通情境模擬教學，提升護理人員人文素養', author: '方怡今', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1liUgGQDqTVkJLAwmPZtILYJyz3eEzeUw/view' },
-    { num: 'EP-71C', title: '藥師樹洞：以短回合數位敘事支持藥師情緒整理與專業認同之原型開發', author: '李承洲', org: '佛教慈濟醫療財團法人大林慈濟醫院', pdf: 'https://drive.google.com/file/d/1LopibxOAbwO3WwuvDH8hW74MP7-Q6t7L/view' },
     { num: 'EP-72C', title: '多元紓壓與日常客製化關懷提升護理同仁工作滿意度之成效', author: '王芮竹', org: '亞東紀念醫院', pdf: 'https://drive.google.com/file/d/1MKYH5K0XXsUitehHh0fYjttxKmnwvnPi/view' },
     { num: 'EP-73C', title: '聽見呼吸背後的人：呼吸治療以病人為中心之人文照護教育模式', author: '鄭愛琴', org: '奇美醫療財團法人奇美醫院', pdf: 'https://drive.google.com/file/d/11SQFfGRdJc0tMc-C8cdK-REggtIWU2D6/view' },
   ],
@@ -1897,6 +1917,30 @@ function renderOSCECases() {
     </div>`).join('');
 }
 renderOSCECases();
+
+/* ════════════════════════════════════════════════════════════════
+   4d. 課程講義按鈕動態渲染（依 HANDOUTS 常數更新）
+   ════════════════════════════════════════════════════════════════ */
+function renderHandouts() {
+  document.querySelectorAll('[data-handout]').forEach(el => {
+    const name = el.dataset.handout;
+    const url = HANDOUTS[name];
+    if (url && url.trim()) {
+      el.href = url;
+      el.target = '_blank';
+      el.setAttribute('rel', 'noopener');
+      el.classList.remove('disabled');
+      el.textContent = '📄 課程講義';
+    } else {
+      el.removeAttribute('href');
+      el.removeAttribute('target');
+      el.removeAttribute('rel');
+      el.classList.add('disabled');
+      el.textContent = '📄 未提供';
+    }
+  });
+}
+renderHandouts();
 
 /* ════════════════════════════════════════════════════════════════
    4b. 講師簡歷渲染
