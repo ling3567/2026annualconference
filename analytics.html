@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>滿意度調查分析 | 2026 學術研討會</title>
+<title>TSMCSD 2026年會 | 滿意度調查分析</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -426,6 +427,7 @@ function renderAll(json) {
     ${sectionOverall(rows)}
     ${sectionSessions(rows)}
     ${sectionSatisfaction(rows)}
+    ${sectionSegmentation(rows)}
     ${sectionFeedback(rows)}
   `;
 
@@ -434,6 +436,7 @@ function renderAll(json) {
   renderOverallChart(rows);
   renderSessionsChart(rows);
   renderSatisfactionChart(rows);
+  renderSegmentationChart(rows);
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -472,8 +475,8 @@ function sectionOverview(rows, count) {
           <div class="big-number">${avgOverall.toFixed(2)}</div>
           <div class="unit">8 題平均 / 5.0</div>
         </div>
-        <div class="stat-card coral">
-          <h3>推薦意願</h3>
+        <div class="stat-card coral" title="Q8：我願意推薦同事或其他對醫學教育有興趣者參加本學會未來辦理之研討會">
+          <h3>推薦意願（Q8）</h3>
           <div class="big-number">${recommendRate}%</div>
           <div class="unit">同意 + 非常同意</div>
         </div>
@@ -513,6 +516,10 @@ function renderDemographicsCharts(rows) {
   }));
   const profEntries = Object.entries(profs).sort((a, b) => b[1] - a[1]);
 
+  // 動態設定容器高度，確保每個職類都完整顯示（每列約 32px）
+  const profContainer = document.getElementById('chart-profession').parentElement;
+  profContainer.style.height = Math.max(280, profEntries.length * 32 + 40) + 'px';
+
   currentCharts.push(new Chart(document.getElementById('chart-profession'), {
     type: 'bar',
     data: {
@@ -527,11 +534,34 @@ function renderDemographicsCharts(rows) {
     options: {
       indexAxis: 'y',
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      layout: { padding: { right: 30 } },   // 保留右側空間讓數字不被裁切
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: (ctx) => `${ctx.parsed.x} 人` } },
+      },
       scales: {
         x: { beginAtZero: true, ticks: { precision: 0 } },
+        y: { ticks: { font: { size: 12 }, autoSkip: false } },   // 強制顯示所有 label
       },
     },
+    plugins: [{
+      id: 'barValueLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        chart.data.datasets[0].data.forEach((value, i) => {
+          const bar = meta.data[i];
+          if (!bar || value === 0) return;
+          ctx.save();
+          ctx.fillStyle = '#1a2a3a';
+          ctx.font = 'bold 11px "Noto Sans TC", sans-serif';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(value + ' 人', bar.x + 6, bar.y);
+          ctx.restore();
+        });
+      },
+    }],
   }));
 
   // 年資
@@ -763,6 +793,349 @@ function renderSatisfactionChart(rows) {
 }
 
 /* ════════════════════════════════════════════════════════════════
+   8b. 分群深入分析：低滿意 vs 高滿意族群比較
+   ════════════════════════════════════════════════════════════════ */
+function sectionSegmentation(rows) {
+  // 依「任一題（整體評估或場次）曾給 ≤ 2 分」判定為低滿意族群
+  // 這比單看「整體滿意度」寬鬆，能捕捉「整體給高分但個別項目給低分」的受訪者
+  const allKeys = [
+    ...Array.from({length: 8}, (_, i) => '整體評估_' + (i+1)),
+    ...SESSIONS.map(s => '場次_' + s),
+    '整體滿意度',
+  ];
+  function minScoreOf(r) {
+    const nums = allKeys.map(k => Number(r[k])).filter(n => n >= 1 && n <= 5);
+    return nums.length ? Math.min(...nums) : null;
+  }
+  const groups = { high: [], mid: [], low: [] };
+  rows.forEach(r => {
+    const m = minScoreOf(r);
+    if (m === null) return;
+    if (m <= 2) groups.low.push(r);
+    else if (m === 3) groups.mid.push(r);
+    else groups.high.push(r);   // 所有題目都 ≥ 4
+  });
+  const nHigh = groups.high.length, nMid = groups.mid.length, nLow = groups.low.length;
+
+  // 若完全沒人給過 3 分以下（大家都很滿意）→ 顯示提示但不做比較
+  if (nLow === 0 && nMid === 0) {
+    return `
+      <section class="section">
+        <div class="section-head">
+          <span class="tag">SEGMENT ANALYSIS</span>
+          <h2>分群深入分析</h2>
+        </div>
+        <div class="feedback-block">
+          <div class="feedback-empty" style="padding: 2rem 1rem;">
+            🎉 太好了！所有受訪者的每一題評分都 ≥ 4 分，沒有需要特別關注的低滿意群體。
+          </div>
+        </div>
+      </section>`;
+  }
+
+  // 收集所有可比較項目（8 整體評估 + 5 場次）
+  const items = [
+    ...OVERALL_QUESTIONS.map((text, i) => ({
+      shortLabel: `整體 Q${i+1}`,
+      fullText: text,
+      key: '整體評估_' + (i+1),
+    })),
+    ...SESSIONS.map((text, i) => ({
+      shortLabel: `場次 ${i+1}`,
+      fullText: text,
+      key: '場次_' + text,
+    })),
+  ];
+
+  // 計算每項在高/低族群的平均（場次的 N/A 排除）
+  const analysis = items.map(item => {
+    const highScores = groups.high.map(r => Number(r[item.key])).filter(n => n >= 1 && n <= 5);
+    const lowScores = groups.low.map(r => Number(r[item.key])).filter(n => n >= 1 && n <= 5);
+    const highAvg = avg(highScores);
+    const lowAvg = avg(lowScores);
+    return { ...item, highAvg, lowAvg, gap: highAvg - lowAvg };
+  });
+
+  // 找出「低滿意族群仍肯定的題目」= 低組平均 ≥ 3.5
+  const stillPositive = analysis.filter(a => nLow > 0 && a.lowAvg >= 3.5).sort((a, b) => b.lowAvg - a.lowAvg);
+  // 找出「差距最大的題目」= 高低差距 ≥ 1.0
+  const bigGap = analysis.filter(a => nLow > 0 && a.gap >= 1.0).sort((a, b) => b.gap - a.gap);
+
+  // 個案亮點：普通/低族群中，有人給了 5 分的題目（找出「個別驚喜」）
+  const midLowGroup = [...groups.mid, ...groups.low];
+  const outlierBrights = items.map(item => {
+    const fiveScorers = midLowGroup.filter(r => Number(r[item.key]) === 5).length;
+    const fourScorers = midLowGroup.filter(r => Number(r[item.key]) === 4).length;
+    return { ...item, fiveScorers, fourScorers };
+  }).filter(a => a.fiveScorers > 0)
+    .sort((a, b) => b.fiveScorers - a.fiveScorers || b.fourScorers - a.fourScorers);
+
+  return `
+    <section class="section">
+      <div class="section-head">
+        <span class="tag">SEGMENT ANALYSIS</span>
+        <h2>分群深入分析</h2>
+      </div>
+
+      <p style="text-align:center;color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem;line-height:1.6;">
+        依「所有題目中最低分數」進行分群（整體評估 8 題 + 5 場次 + 整體滿意度，共 14 題）
+      </p>
+
+      <div class="stat-grid" style="margin-bottom: 1.2rem">
+        <div class="stat-card gold">
+          <h3>高滿意族群</h3>
+          <div class="big-number">${nHigh}</div>
+          <div class="unit">每一題都 ≥ 4 分</div>
+        </div>
+        <div class="stat-card mist">
+          <h3>普通族群</h3>
+          <div class="big-number">${nMid}</div>
+          <div class="unit">最低分 = 3 分</div>
+        </div>
+        <div class="stat-card coral">
+          <h3>低滿意族群</h3>
+          <div class="big-number">${nLow}</div>
+          <div class="unit">有題目 ≤ 2 分</div>
+        </div>
+      </div>
+
+      ${nLow === 0 ? `
+        <div class="feedback-block">
+          <div class="feedback-empty">目前沒有整體滿意度 ≤ 2 的回覆，暫無「低滿意族群」比較資料。</div>
+        </div>
+      ` : `
+        <div class="chart-card wide" style="margin-bottom: 1rem">
+          <h3>各題平均分數：高滿意族群 vs 低滿意族群</h3>
+          <div class="chart-container" style="height: 500px"><canvas id="chart-segment"></canvas></div>
+        </div>
+
+        ${stillPositive.length > 0 ? `
+          <div class="feedback-block">
+            <h3>💡 低滿意族群仍給予肯定的項目 <span class="count">共 ${stillPositive.length} 項（平均 ≥ 3.5）</span></h3>
+            <div style="padding: 0.5rem 0;">
+              ${stillPositive.map(a => `
+                <div style="display: grid; grid-template-columns: 5.5rem 1fr auto; gap: 0.7rem; padding: 0.55rem 0; border-bottom: 1px dashed var(--pale-blue); align-items: center;">
+                  <span style="font-size: 0.78rem; font-weight: 700; color: var(--nav-blue); background: var(--ice-blue); padding: 0.2rem 0.5rem; border-radius: 5px; text-align: center;">${escapeHtml(a.shortLabel)}</span>
+                  <span style="font-size: 0.87rem; color: var(--text-body); line-height: 1.5;">${escapeHtml(a.fullText)}</span>
+                  <span style="font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;">低組 <strong style="color: var(--warm-gold); font-size: 0.95rem;">${a.lowAvg.toFixed(2)}</strong> ／ 高組 ${a.highAvg.toFixed(2)}</span>
+                </div>
+              `).join('')}
+            </div>
+            <p style="margin-top: 0.7rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6;">
+              💬 這些項目「即使不滿意研討會整體的人也給予肯定」，代表**普遍受歡迎**的內容，未來可作為固定安排。
+            </p>
+          </div>
+        ` : ''}
+
+        ${bigGap.length > 0 ? `
+          <div class="feedback-block">
+            <h3>⚠️ 兩族群評分差距較大的項目 <span class="count">共 ${bigGap.length} 項（差距 ≥ 1.0）</span></h3>
+            <div style="padding: 0.5rem 0;">
+              ${bigGap.map(a => `
+                <div style="display: grid; grid-template-columns: 5.5rem 1fr auto; gap: 0.7rem; padding: 0.55rem 0; border-bottom: 1px dashed var(--pale-blue); align-items: center;">
+                  <span style="font-size: 0.78rem; font-weight: 700; color: var(--coral); background: #fff2ec; padding: 0.2rem 0.5rem; border-radius: 5px; text-align: center;">${escapeHtml(a.shortLabel)}</span>
+                  <span style="font-size: 0.87rem; color: var(--text-body); line-height: 1.5;">${escapeHtml(a.fullText)}</span>
+                  <span style="font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;">差距 <strong style="color: var(--coral); font-size: 0.95rem;">${a.gap.toFixed(2)}</strong>（低 ${a.lowAvg.toFixed(2)} → 高 ${a.highAvg.toFixed(2)}）</span>
+                </div>
+              `).join('')}
+            </div>
+            <p style="margin-top: 0.7rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6;">
+              💬 這些項目「高低滿意族群感受差異大」，可能是低滿意族群主要不滿的來源，適合作為**未來優先改進**方向。
+            </p>
+          </div>
+        ` : ''}
+
+        ${midLowGroup.length > 0 ? (() => {
+          // 每位個案的評分明細（用原始 rows 順序當匿名編號）
+          const cases = midLowGroup.map(r => {
+            const idx = rows.indexOf(r) + 1;
+            const overall = Number(r['整體滿意度']);
+            const prof = r['職類別'] || '(未填)';
+            const profDisplay = (prof === '__OTHER__' || String(prof).startsWith('其他：')) ? '其他' : prof;
+
+            const scoredItems = items.map(item => {
+              const s = Number(r[item.key]);
+              return (s >= 1 && s <= 5) ? { ...item, score: s } : null;
+            }).filter(Boolean);
+
+            const fives = scoredItems.filter(x => x.score === 5);
+            const fours = scoredItems.filter(x => x.score === 4);
+            const lows = scoredItems.filter(x => x.score <= 3);
+            const scoresOnly = scoredItems.map(x => x.score);
+            const min = scoresOnly.length ? Math.min(...scoresOnly) : null;
+            const max = scoresOnly.length ? Math.max(...scoresOnly) : null;
+            const gap = max - min;
+            return { idx, prof: profDisplay, overall, fives, fours, lows, min, max, gap };
+          }).sort((a, b) => b.fives.length - a.fives.length || b.gap - a.gap || a.idx - b.idx);
+          // 顯示全部：先排「有 5 分且落差大」的個案，最後才是「評分平坦」的個案
+
+          if (cases.length === 0) return '';
+
+          return `
+          <div class="feedback-block">
+            <h3>⭐ 個案級評分明細 <span class="count">共 ${cases.length} 位（普通 + 低滿意族群完整列出）</span></h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              下方每張卡片為一位受訪者的評分模式，依「亮點程度」由高至低排列，方便快速掃視。
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 0.9rem;">
+              ${cases.map(c => `
+                <div style="background: var(--white); border: 1px solid var(--pale-blue); border-radius: 12px; padding: 1rem 1.1rem; box-shadow: 0 1px 4px rgba(26,93,153,0.05);">
+                  <!-- Header -->
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; padding-bottom: 0.6rem; border-bottom: 2px solid var(--pale-blue); margin-bottom: 0.7rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                      <span style="background: var(--nav-blue); color: var(--white); padding: 0.25rem 0.7rem; border-radius: 6px; font-size: 0.78rem; font-weight: 700;">案例 #${c.idx}</span>
+                      <span style="font-size: 0.85rem; color: var(--text-body);">${escapeHtml(c.prof)}</span>
+                      <span style="font-size: 0.82rem; color: var(--text-muted);">整體滿意度 <strong style="color: var(--deep-blue);">${c.overall}</strong>　最低分 <strong style="color: var(--coral);">${c.min}</strong>　最高分 <strong style="color: var(--warm-gold);">${c.max}</strong>${c.gap >= 2 ? `　落差 <strong style="color: var(--coral);">${c.gap}</strong>` : ''}</span>
+                    </div>
+                  </div>
+
+                  <!-- 5 star items -->
+                  ${c.fives.length > 0 ? `
+                    <div style="margin-bottom: 0.6rem;">
+                      <div style="font-size: 0.82rem; color: #8a6418; font-weight: 700; margin-bottom: 0.35rem;">🌟 給 5 分（${c.fives.length} 項）</div>
+                      <div style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                        ${c.fives.map(f => `<span style="background: var(--pale-gold); color: #8a6418; padding: 0.22rem 0.55rem; border-radius: 5px; font-size: 0.78rem;" title="${escapeHtml(f.fullText)}">${escapeHtml(f.shortLabel)}</span>`).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+
+                  <!-- 4 star items -->
+                  ${c.fours.length > 0 ? `
+                    <div style="margin-bottom: 0.6rem;">
+                      <div style="font-size: 0.82rem; color: var(--nav-blue); font-weight: 700; margin-bottom: 0.35rem;">👍 給 4 分（${c.fours.length} 項）</div>
+                      <div style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                        ${c.fours.map(f => `<span style="background: var(--ice-blue); color: var(--nav-blue); padding: 0.22rem 0.55rem; border-radius: 5px; font-size: 0.78rem;" title="${escapeHtml(f.fullText)}">${escapeHtml(f.shortLabel)}</span>`).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+
+                  <!-- ≤3 items -->
+                  ${c.lows.length > 0 ? `
+                    <div>
+                      <div style="font-size: 0.82rem; color: var(--coral); font-weight: 700; margin-bottom: 0.35rem;">⚠️ 給 ≤ 3 分（${c.lows.length} 項）</div>
+                      <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                        ${c.lows.map(f => `<div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.28rem 0.5rem; background: #fff2ec; border-left: 3px solid var(--coral); border-radius: 4px;">
+                          <span style="font-size: 0.78rem; font-weight: 700; color: var(--coral); min-width: 2.2rem;">${f.score} 分</span>
+                          <span style="font-size: 0.8rem; color: var(--text-body); flex: 1;">${escapeHtml(f.shortLabel)}：${escapeHtml(f.fullText)}</span>
+                        </div>`).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+
+                  <!-- Interpretation hint (auto-generated) -->
+                  ${(() => {
+                    if (c.fives.length >= 5 && c.lows.length <= 2) {
+                      return `<div style="margin-top: 0.75rem; padding-top: 0.55rem; border-top: 1px dashed var(--pale-blue); font-size: 0.8rem; color: var(--text-muted); line-height: 1.55;">
+                        💬 這位對整體研討會給 ${c.overall} 分，但${c.fives.length >= 10 ? '幾乎所有項目' : c.fives.length + ' 個項目'}都給 5 分。${c.lows.length === 0 ? '沒有明顯不滿的項目，可能只是保守評分。' : `主要不滿意的是：${c.lows.map(l => l.shortLabel).join('、')}，值得訪談了解原因。`}
+                      </div>`;
+                    }
+                    if (c.gap === 0 && c.min === 3) {
+                      return `<div style="margin-top: 0.75rem; padding-top: 0.55rem; border-top: 1px dashed var(--pale-blue); font-size: 0.8rem; color: var(--text-muted); line-height: 1.55;">
+                        💬 全部項目一致給 3 分（普通），無明顯高低亮點。可能是**保守型作答**、或整體感受平淡；適合看開放式回饋補充理解。
+                      </div>`;
+                    }
+                    if (c.min <= 2 && c.fives.length === 0) {
+                      return `<div style="margin-top: 0.75rem; padding-top: 0.55rem; border-top: 1px dashed var(--pale-blue); font-size: 0.8rem; color: var(--text-muted); line-height: 1.55;">
+                        💬 這位對特定項目明確不滿意（${c.lows.filter(l => l.score <= 2).length} 項給 ≤ 2 分），且沒有任何項目給 5 分。屬於**整體感受不佳**的個案，建議查看開放式回饋了解具體原因。
+                      </div>`;
+                    }
+                    if (c.gap >= 2) {
+                      return `<div style="margin-top: 0.75rem; padding-top: 0.55rem; border-top: 1px dashed var(--pale-blue); font-size: 0.8rem; color: var(--text-muted); line-height: 1.55;">
+                        💬 這位的評分**落差較大**（${c.min} ~ ${c.max}），對不同項目感受兩極。可能對某些內容特別有共鳴、對某些不感興趣。
+                      </div>`;
+                    }
+                    return '';
+                  })()}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          `;
+        })() : ''}
+      `}
+    </section>`;
+}
+
+function renderSegmentationChart(rows) {
+  const canvas = document.getElementById('chart-segment');
+  if (!canvas) return;
+
+  // 沿用「任一題最低分」判定，與 sectionSegmentation 一致
+  const allKeys = [
+    ...Array.from({length: 8}, (_, i) => '整體評估_' + (i+1)),
+    ...SESSIONS.map(s => '場次_' + s),
+    '整體滿意度',
+  ];
+  const groups = { high: [], low: [] };
+  rows.forEach(r => {
+    const nums = allKeys.map(k => Number(r[k])).filter(n => n >= 1 && n <= 5);
+    if (!nums.length) return;
+    const m = Math.min(...nums);
+    if (m >= 4) groups.high.push(r);
+    else if (m <= 2) groups.low.push(r);
+  });
+  if (groups.low.length === 0) return;
+
+  const items = [
+    ...OVERALL_QUESTIONS.map((text, i) => ({ shortLabel: `整體 Q${i+1}`, key: '整體評估_' + (i+1), fullText: text })),
+    ...SESSIONS.map((text, i) => ({ shortLabel: `場次 ${i+1}`, key: '場次_' + text, fullText: text })),
+  ];
+
+  const labels = items.map(item => item.shortLabel);
+  const highData = items.map(item => {
+    const scores = groups.high.map(r => Number(r[item.key])).filter(n => n >= 1 && n <= 5);
+    return avg(scores).toFixed(2);
+  });
+  const lowData = items.map(item => {
+    const scores = groups.low.map(r => Number(r[item.key])).filter(n => n >= 1 && n <= 5);
+    return avg(scores).toFixed(2);
+  });
+
+  currentCharts.push(new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: `高滿意族群平均 (N=${groups.high.length})`,
+          data: highData,
+          backgroundColor: '#1A5D99',
+          borderRadius: 4,
+        },
+        {
+          label: `低滿意族群平均 (N=${groups.low.length})`,
+          data: lowData,
+          backgroundColor: '#e07855',
+          borderRadius: 4,
+        },
+      ],
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { boxWidth: 14 } },
+        tooltip: {
+          callbacks: {
+            title: (items) => {
+              const idx = items[0].dataIndex;
+              const dataIdx = idx < 8 ? idx : idx - 8;
+              const src = idx < 8 ? OVERALL_QUESTIONS : SESSIONS;
+              return src[dataIdx];
+            },
+            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.x}`,
+          },
+        },
+      },
+      scales: {
+        x: { beginAtZero: true, max: 5, ticks: { stepSize: 1 } },
+        y: { ticks: { autoSkip: false, font: { size: 11 } } },
+      },
+    },
+  }));
+}
+
+/* ════════════════════════════════════════════════════════════════
    9. 開放式回饋
    ════════════════════════════════════════════════════════════════ */
 function sectionFeedback(rows) {
@@ -778,10 +1151,12 @@ function sectionFeedback(rows) {
         <h2>開放式回饋</h2>
       </div>
       ${fields.map(f => {
-        const responses = rows.map(r => r[f.key]).filter(v => v && String(v).trim());
+        const raw = rows.map(r => r[f.key]).filter(v => v !== undefined && v !== null && String(v).trim());
+        const responses = raw.filter(v => isMeaningfulFeedback(v));
+        const skipped = raw.length - responses.length;
         return `
           <div class="feedback-block">
-            <h3>${escapeHtml(f.label)} <span class="count">${responses.length} 則回應</span></h3>
+            <h3>${escapeHtml(f.label)} <span class="count">${responses.length} 則有效回應${skipped > 0 ? `（過濾 ${skipped} 則空白/無意義填答）` : ''}</span></h3>
             ${responses.length === 0
               ? `<div class="feedback-empty">（尚無回應）</div>`
               : `<div class="feedback-list">${responses.map(t => `<div class="feedback-item">${escapeHtml(String(t))}</div>`).join('')}</div>`
@@ -808,6 +1183,19 @@ function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   })[c]);
+}
+
+// 判斷是否為有意義的回饋（過濾掉「無」、「…」、「nil」、純標點等）
+function isMeaningfulFeedback(v) {
+  const s = String(v ?? '').trim();
+  if (!s) return false;
+  // 常見的「無回饋」字串（不分大小寫）
+  if (/^(無|沒有|沒|沒什麼|皆無|nothing|nil|null|n\/a|na|none|no|x)$/i.test(s)) return false;
+  // 純標點或符號（沒有任何實質內容）
+  if (/^[\.。…—\-_~\/\\，,、;；:：!！?？\s]+$/.test(s)) return false;
+  // 單一中英文字符也視為無意義（例如只填「.」「-」「x」）
+  if (s.length < 2 && !/[一-鿿\w]{2,}/.test(s)) return false;
+  return true;
 }
 
 /* ════════════════════════════════════════════════════════════════
