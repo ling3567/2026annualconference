@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TSMCSD 2026年會 | 報到系統</title>
+<title>2026年會報到系統 — TSMCSD</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -730,9 +730,10 @@ function switchPage(p) {
 }
 
 // Load
-function loadData(){
+function loadData(clearCache){
   showLoading(true);
-  fetch(CONFIG.API_URL+'?action=checkin_list',{redirect:'follow'})
+  const url=CONFIG.API_URL+'?action=checkin_list'+(clearCache?'&clearCache=1':'');
+  fetch(url,{redirect:'follow'})
     .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
     .then(d=>{
       if(d.status==='error') throw new Error(d.message);
@@ -781,7 +782,7 @@ function loadData(){
       showToast('載入失敗');
     });
 }
-function refreshData(){loadData()}
+function refreshData(){loadData(true)}
 
 // ===== AUTO SYNC (每 30 秒背景同步) =====
 let syncTimer = null;
@@ -1204,7 +1205,7 @@ function doCheckin(idx){
   sessionStorage.setItem('cl3',JSON.stringify(checkinLog));
   selectPerson(idx);updateStats();
   showToast(`${p.name} 報到完成`);
-  fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'checkin',name:p.name,idNumber:p.idNumber,time:now.toISOString()})}).catch(()=>{});
+  fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'checkin',name:p.name,idNumber:p.idNumber,profession:p.profession||'',time:now.toISOString()})}).catch(()=>{});
 }
 function undoCheckin(idx){
   markAction();
@@ -1214,7 +1215,7 @@ function undoCheckin(idx){
   sessionStorage.setItem('cl3',JSON.stringify(checkinLog));
   selectPerson(idx);updateStats();
   showToast(`${p.name} 已撤銷報到`);
-  fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'undo_checkin',name:p.name,idNumber:p.idNumber})}).catch(()=>{});
+  fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'undo_checkin',name:p.name,idNumber:p.idNumber,profession:p.profession||''})}).catch(()=>{});
 }
 
 // Onsite payment
@@ -1268,7 +1269,7 @@ function markAbsent(idx, note) {
   p.checkedIn = false;
   selectPerson(idx); updateStats();
   showToast(`${p.name} 已標記不出席`);
-  fetch(CONFIG.API_URL, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'absent',name:p.name,idNumber:p.idNumber,note:note||''})}).catch(()=>{});
+  fetch(CONFIG.API_URL, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'absent',name:p.name,idNumber:p.idNumber,profession:p.profession||'',note:note||''})}).catch(()=>{});
 }
 
 function undoAbsent(idx) {
@@ -1279,7 +1280,7 @@ function undoAbsent(idx) {
   p.absentNote = '';
   selectPerson(idx); updateStats();
   showToast(`${p.name} 已還原為未報到`);
-  fetch(CONFIG.API_URL, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'undo_absent',name:p.name,idNumber:p.idNumber})}).catch(()=>{});
+  fetch(CONFIG.API_URL, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'undo_absent',name:p.name,idNumber:p.idNumber,profession:p.profession||''})}).catch(()=>{});
 }
 
 function absentCheckin(idx) {
@@ -1295,9 +1296,9 @@ function absentCheckin(idx) {
   selectPerson(idx); updateStats();
   showToast(`${p.name} 臨時出席，報到完成`);
   // 先送取消不出席，再送報到
-  fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'undo_absent',name:p.name,idNumber:p.idNumber})}).catch(()=>{});
+  fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'undo_absent',name:p.name,idNumber:p.idNumber,profession:p.profession||''})}).catch(()=>{});
   setTimeout(()=>{
-    fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'checkin',name:p.name,idNumber:p.idNumber,time:now.toISOString()})}).catch(()=>{});
+    fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'checkin',name:p.name,idNumber:p.idNumber,profession:p.profession||'',time:now.toISOString()})}).catch(()=>{});
   },500);
 }
 
