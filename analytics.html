@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>滿意度調查分析 | 2026 學術研討會</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --deep-blue: #1a3a5c;
+  --nav-blue: #1A5D99;
+  --medium-blue: #2c6fA0;
+  --mist-blue: #6a9ec0;
+  --light-blue: #a8cfea;
+  --pale-blue: #d6e9f5;
+  --ice-blue: #eaf3fa;
+  --warm-gold: #d4a843;
+  --light-gold: #f0d68a;
+  --pale-gold: #fdf5e0;
+  --coral: #e07855;
+  --red: #e74c3c;
+  --white: #ffffff;
+  --text-dark: #1a2a3a;
+  --text-body: #2c3e50;
+  --text-muted: #6b7c8d;
+  --card-shadow: 0 4px 20px rgba(26,93,153,0.08);
+  --card-radius: 16px;
+  --font-main: 'Noto Sans TC', 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-main);
+  color: var(--text-body);
+  background: var(--ice-blue);
+  line-height: 1.7;
+  padding-top: 58px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header (與手冊一致的 fixed nav) */
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(26,93,153,0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px rgba(26,93,153,0.2);
+}
+.header-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.55rem 1.5rem;
+}
+.header-logo {
+  display: flex; align-items: center; gap: 0.6rem;
+  color: var(--white); font-weight: 700; font-size: 0.92rem;
+  text-decoration: none;
+}
+.header-logo .logo-img {
+  width: 36px; height: 36px; border-radius: 50%;
+  object-fit: contain; background: rgba(255,255,255,0.95); padding: 2px;
+}
+.header-logo .logo-text { line-height: 1.2; }
+.header-logo .logo-text small {
+  display: block; font-size: 0.72rem; font-weight: 400;
+  opacity: 0.85; margin-top: 1px;
+}
+.header-actions { display: flex; gap: 0.5rem; align-items: center; }
+.back-btn, .refresh-btn {
+  padding: 0.4rem 0.85rem; border-radius: 6px;
+  background: rgba(255,255,255,0.15);
+  color: var(--white); font-size: 0.82rem; font-weight: 500;
+  text-decoration: none; border: none; cursor: pointer;
+  font-family: var(--font-main);
+  transition: background 0.2s;
+  display: inline-flex; align-items: center; gap: 0.3rem;
+}
+.back-btn:hover, .refresh-btn:hover { background: rgba(255,255,255,0.25); }
+
+/* Container */
+.container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+/* Page title */
+.page-title {
+  text-align: center; margin: 1rem 0 2rem;
+}
+.page-title h1 {
+  color: var(--deep-blue);
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 900; margin-bottom: 0.3rem;
+  letter-spacing: 0.05em;
+}
+.page-title .subtitle {
+  color: var(--text-muted); font-size: 0.95rem;
+}
+.page-title .meta {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  margin-top: 0.6rem; padding: 0.35rem 0.9rem;
+  background: var(--white); border-radius: 99px;
+  font-size: 0.82rem; color: var(--text-muted);
+  box-shadow: var(--card-shadow);
+}
+
+/* Section */
+.section {
+  margin-bottom: 2rem;
+}
+.section-head {
+  display: flex; align-items: center; gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+.section-head .tag {
+  display: inline-flex; align-items: center;
+  background: var(--nav-blue); color: var(--white);
+  padding: 0.32rem 0.85rem; border-radius: 6px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em;
+  line-height: 1;
+}
+.section-head h2 {
+  color: var(--deep-blue); font-size: 1.15rem; font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* Stat cards (overview) */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.stat-card {
+  background: var(--white);
+  border-radius: var(--card-radius);
+  padding: 1.3rem 1.2rem;
+  box-shadow: var(--card-shadow);
+  text-align: center;
+  border-top: 4px solid var(--nav-blue);
+}
+.stat-card.gold { border-top-color: var(--warm-gold); }
+.stat-card.coral { border-top-color: var(--coral); }
+.stat-card.mist { border-top-color: var(--mist-blue); }
+.stat-card h3 {
+  color: var(--text-muted); font-size: 0.82rem; font-weight: 500;
+  margin-bottom: 0.55rem; letter-spacing: 0.08em;
+}
+.stat-card .big-number {
+  color: var(--deep-blue); font-size: 2.3rem; font-weight: 900;
+  line-height: 1; margin-bottom: 0.2rem;
+}
+.stat-card .unit {
+  color: var(--text-muted); font-size: 0.78rem;
+}
+
+/* Chart card */
+.chart-grid {
+  display: grid; gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+.chart-card {
+  background: var(--white);
+  border-radius: var(--card-radius);
+  padding: 1.3rem 1.4rem 1.4rem;
+  box-shadow: var(--card-shadow);
+}
+.chart-card h3 {
+  color: var(--deep-blue); font-size: 1rem; font-weight: 700;
+  margin-bottom: 0.9rem; padding-bottom: 0.6rem;
+  border-bottom: 2px solid var(--pale-blue);
+}
+.chart-card .chart-container {
+  position: relative; height: 280px;
+}
+.chart-card.wide {
+  grid-column: 1 / -1;
+}
+.chart-card.wide .chart-container { height: 380px; }
+
+/* Feedback list */
+.feedback-block {
+  background: var(--white);
+  border-radius: var(--card-radius);
+  padding: 1.3rem 1.4rem;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 1rem;
+}
+.feedback-block h3 {
+  color: var(--deep-blue); font-size: 1rem; font-weight: 700;
+  margin-bottom: 0.9rem; padding-bottom: 0.6rem;
+  border-bottom: 2px solid var(--pale-blue);
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.feedback-block h3 .count {
+  font-size: 0.78rem; color: var(--text-muted); font-weight: 400;
+}
+.feedback-list {
+  display: flex; flex-direction: column; gap: 0.6rem;
+  max-height: 400px; overflow-y: auto;
+}
+.feedback-item {
+  padding: 0.7rem 0.85rem;
+  background: var(--ice-blue);
+  border-left: 3px solid var(--nav-blue);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.88rem; color: var(--text-body);
+  line-height: 1.65; white-space: pre-line;
+}
+.feedback-empty {
+  text-align: center; color: var(--text-muted);
+  padding: 1.5rem; font-size: 0.9rem;
+}
+
+/* Loading / Error states */
+.state {
+  text-align: center; padding: 4rem 1rem;
+  color: var(--text-muted);
+}
+.state .icon { font-size: 3rem; margin-bottom: 0.6rem; opacity: 0.6; }
+.state h3 { color: var(--text-dark); margin-bottom: 0.5rem; }
+.state .retry-btn {
+  margin-top: 1rem; padding: 0.6rem 1.4rem;
+  background: var(--nav-blue); color: var(--white);
+  border: none; border-radius: 99px; cursor: pointer;
+  font-family: var(--font-main); font-size: 0.9rem; font-weight: 600;
+}
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 40px; height: 40px;
+  border: 3px solid var(--pale-blue);
+  border-top-color: var(--nav-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 0.8rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Footer */
+.site-footer {
+  background: #1A5D99;
+  color: rgba(255,255,255,0.7);
+  text-align: center; padding: 1.5rem 1.2rem;
+  font-size: 0.82rem; line-height: 1.7;
+  margin-top: 2rem;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .chart-grid { grid-template-columns: 1fr; }
+  .stat-card .big-number { font-size: 1.9rem; }
+  .header-logo .logo-text small { display: none; }
+  .back-btn, .refresh-btn { padding: 0.35rem 0.6rem; font-size: 0.76rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="handbook.html" class="header-logo">
+      <img src="https://raw.githubusercontent.com/ling3567/2026annualconference/main/images/TSMCSD-logo.png" alt="TSMCSD" class="logo-img">
+      <span class="logo-text">
+        台灣醫事聯合臨床技能發展學會
+        <small>2026 滿意度調查分析</small>
+      </span>
+    </a>
+    <div class="header-actions">
+      <a href="handbook.html" class="back-btn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        返回手冊
+      </a>
+      <button class="refresh-btn" id="refresh-btn" title="重新載入資料">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        重新載入
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="page-title">
+    <h1>滿意度調查分析</h1>
+    <p class="subtitle">2026 年會員大會暨學術研討會 · 與會者回饋統計</p>
+    <div class="meta" id="page-meta">
+      <span class="spinner" style="width:12px;height:12px;border-width:2px;margin:0"></span>
+      載入中…
+    </div>
+  </div>
+
+  <div id="content">
+    <!-- Loading state (will be replaced) -->
+    <div class="state">
+      <div class="spinner"></div>
+      <h3>正在載入調查資料…</h3>
+    </div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div>2026 年會員大會暨學術研討會｜滿意度調查分析</div>
+  © 台灣醫事聯合臨床技能發展學會 · All rights reserved.
+</footer>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   1. 設定
+   ════════════════════════════════════════════════════════════════ */
+const DATA_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx-L6y0Dpz_gBCkHYkiUkKVaK3-93q7CoE3tW1aMb5LrwR56cEOn1nryggjvwctw3u8/exec?action=data';
+
+// Likert 色階（5 分色從深藍→暖金→珊瑚→紅）
+const LIKERT_COLORS = {
+  5: '#1A5D99',   // 最正面 - 深藍
+  4: '#6a9ec0',   // 正面 - 淺藍
+  3: '#d4a843',   // 中性 - 金色
+  2: '#e07855',   // 負面 - 珊瑚
+  1: '#e74c3c',   // 最負面 - 紅
+  'N/A': '#cbd5e0', // 灰
+};
+const LIKERT_LABELS_OVERALL = {
+  5: '非常同意', 4: '同意', 3: '普通', 2: '不同意', 1: '非常不同意',
+};
+const LIKERT_LABELS_SESSION = {
+  5: '非常有幫助', 4: '有幫助', 3: '普通', 2: '幫助不大', 1: '完全沒有幫助', 'N/A': '未參與或不適用',
+};
+const LIKERT_LABELS_SATISFACTION = {
+  5: '非常滿意', 4: '滿意', 3: '普通', 2: '不滿意', 1: '非常不滿意',
+};
+
+// 8 題整體評估題目
+const OVERALL_QUESTIONS = [
+  '本次議程主題符合我對臨床教學與醫學教育實務的學習需求',
+  '本次研討會有助於我理解醫學教育目前的重要發展方向',
+  '本次研討會內容兼具理論觀念與實務應用',
+  '本次研討會有助於我思考如何將所學應用於臨床教學、課程設計或教育訓練相關工作',
+  '我能從本次研討會中帶回至少一項可應用於工作場域的做法',
+  '本次研討會整體時數與活動安排適當',
+  '本次活動場地、設備與行政安排能支持學習需求',
+  '我願意推薦同事或其他對醫學教育有興趣者參加本學會未來辦理之研討會',
+];
+
+// 5 場次名稱
+const SESSIONS = [
+  '當壓力成為日常：醫療現場的心理韌性練習',
+  '能力導向醫學教育中的教學設計：從課程架構到臨床實踐',
+  '事半功倍的教學：AI工具在教案製作的應用',
+  '從評量到信賴：OSCE、EPA與CCC連結臨床能力培養與總結性能力評定',
+  '在高壓醫療環境中，如何系統性支持臨床教師的學術發展',
+];
+
+/* Chart.js 預設 */
+Chart.defaults.font.family = "'Noto Sans TC', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#2c3e50';
+
+/* ════════════════════════════════════════════════════════════════
+   2. 資料抓取
+   ════════════════════════════════════════════════════════════════ */
+let currentCharts = [];
+
+async function loadData() {
+  document.getElementById('content').innerHTML = `
+    <div class="state">
+      <div class="spinner"></div>
+      <h3>正在載入調查資料…</h3>
+    </div>`;
+  document.getElementById('page-meta').innerHTML = `
+    <span class="spinner" style="width:12px;height:12px;border-width:2px;margin:0"></span>
+    載入中…`;
+
+  try {
+    const res = await fetch(DATA_ENDPOINT);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || '未知錯誤');
+    renderAll(json);
+  } catch (err) {
+    document.getElementById('content').innerHTML = `
+      <div class="state">
+        <div class="icon">⚠️</div>
+        <h3>資料載入失敗</h3>
+        <p>${escapeHtml(err.message)}</p>
+        <button class="retry-btn" onclick="loadData()">重試</button>
+      </div>`;
+    document.getElementById('page-meta').textContent = '載入失敗';
+  }
+}
+
+document.getElementById('refresh-btn').addEventListener('click', loadData);
+
+/* ════════════════════════════════════════════════════════════════
+   3. 主渲染
+   ════════════════════════════════════════════════════════════════ */
+function renderAll(json) {
+  const rows = json.rows || [];
+  const count = json.count || 0;
+
+  // 更新 meta
+  const now = new Date();
+  const timeStr = now.toLocaleString('zh-TW', { hour12: false });
+  document.getElementById('page-meta').innerHTML =
+    `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+     最後更新：${timeStr}`;
+
+  if (count === 0) {
+    document.getElementById('content').innerHTML = `
+      <div class="state">
+        <div class="icon">📋</div>
+        <h3>目前尚無資料</h3>
+        <p>還沒有人填寫滿意度調查，收到回饋後這頁會自動顯示分析結果。</p>
+        <button class="retry-btn" onclick="loadData()">重新檢查</button>
+      </div>`;
+    return;
+  }
+
+  // 銷毀舊圖表
+  currentCharts.forEach(c => c.destroy());
+  currentCharts = [];
+
+  // 組裝 HTML
+  document.getElementById('content').innerHTML = `
+    ${sectionOverview(rows, count)}
+    ${sectionDemographics(rows)}
+    ${sectionOverall(rows)}
+    ${sectionSessions(rows)}
+    ${sectionSatisfaction(rows)}
+    ${sectionFeedback(rows)}
+  `;
+
+  // 渲染圖表
+  renderDemographicsCharts(rows);
+  renderOverallChart(rows);
+  renderSessionsChart(rows);
+  renderSatisfactionChart(rows);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   4. 概覽數據
+   ════════════════════════════════════════════════════════════════ */
+function sectionOverview(rows, count) {
+  const avgSatisfaction = avg(rows.map(r => Number(r['整體滿意度'])).filter(n => n >= 1 && n <= 5));
+  const avgOverall = avg(rows.flatMap(r =>
+    Array.from({length: 8}, (_, i) => Number(r['整體評估_' + (i+1)])).filter(n => n >= 1 && n <= 5)
+  ));
+  const recommendScores = rows.map(r => Number(r['整體評估_8'])).filter(n => n >= 1 && n <= 5);
+  const willRecommend = recommendScores.filter(n => n >= 4).length;
+  const recommendRate = recommendScores.length > 0
+    ? Math.round((willRecommend / recommendScores.length) * 100)
+    : 0;
+
+  return `
+    <section class="section">
+      <div class="section-head">
+        <span class="tag">OVERVIEW</span>
+        <h2>總覽數據</h2>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <h3>總回覆數</h3>
+          <div class="big-number">${count}</div>
+          <div class="unit">份</div>
+        </div>
+        <div class="stat-card gold">
+          <h3>整體滿意度</h3>
+          <div class="big-number">${avgSatisfaction.toFixed(2)}</div>
+          <div class="unit">平均 / 5.0</div>
+        </div>
+        <div class="stat-card mist">
+          <h3>整體評估平均</h3>
+          <div class="big-number">${avgOverall.toFixed(2)}</div>
+          <div class="unit">8 題平均 / 5.0</div>
+        </div>
+        <div class="stat-card coral">
+          <h3>推薦意願</h3>
+          <div class="big-number">${recommendRate}%</div>
+          <div class="unit">同意 + 非常同意</div>
+        </div>
+      </div>
+    </section>`;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   5. 基本資料
+   ════════════════════════════════════════════════════════════════ */
+function sectionDemographics(rows) {
+  return `
+    <section class="section">
+      <div class="section-head">
+        <span class="tag">DEMOGRAPHICS</span>
+        <h2>基本資料</h2>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>職類別分布</h3>
+          <div class="chart-container"><canvas id="chart-profession"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>擔任臨床教師年資</h3>
+          <div class="chart-container"><canvas id="chart-experience"></canvas></div>
+        </div>
+      </div>
+    </section>`;
+}
+
+function renderDemographicsCharts(rows) {
+  // 職類別
+  const profs = countBy(rows.map(r => {
+    let v = r['職類別'];
+    if (v === '__OTHER__' || (typeof v === 'string' && v.startsWith('其他：'))) return '其他';
+    return v || '(未填)';
+  }));
+  const profEntries = Object.entries(profs).sort((a, b) => b[1] - a[1]);
+
+  currentCharts.push(new Chart(document.getElementById('chart-profession'), {
+    type: 'bar',
+    data: {
+      labels: profEntries.map(e => e[0]),
+      datasets: [{
+        label: '人數',
+        data: profEntries.map(e => e[1]),
+        backgroundColor: '#1A5D99',
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { beginAtZero: true, ticks: { precision: 0 } },
+      },
+    },
+  }));
+
+  // 年資
+  const expOrder = ['否，目前尚未擔任或參與','是，1–3年','是，4–5年','是，6–9年','是，10年以上'];
+  const expCount = countBy(rows.map(r => r['臨床教師年資'] || '(未填)'));
+  const expLabels = expOrder.filter(l => expCount[l] > 0);
+  const expData = expLabels.map(l => expCount[l]);
+
+  currentCharts.push(new Chart(document.getElementById('chart-experience'), {
+    type: 'doughnut',
+    data: {
+      labels: expLabels,
+      datasets: [{
+        data: expData,
+        backgroundColor: ['#cbd5e0', '#6a9ec0', '#2c6fA0', '#1A5D99', '#0f2a47'],
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right', labels: { boxWidth: 14, font: { size: 11 } } },
+      },
+    },
+  }));
+}
+
+/* ════════════════════════════════════════════════════════════════
+   6. 整體評估 (8 題)
+   ════════════════════════════════════════════════════════════════ */
+function sectionOverall(rows) {
+  return `
+    <section class="section">
+      <div class="section-head">
+        <span class="tag">OVERALL</span>
+        <h2>研討會整體評估（8 題）</h2>
+      </div>
+      <div class="chart-card wide">
+        <h3>各題評分分布（滑鼠 hover 看各分數比例）</h3>
+        <div class="chart-container" style="height: 480px"><canvas id="chart-overall"></canvas></div>
+      </div>
+    </section>`;
+}
+
+function renderOverallChart(rows) {
+  // 每題的 5/4/3/2/1 計數
+  const questions = OVERALL_QUESTIONS.map((text, i) => {
+    const key = '整體評估_' + (i+1);
+    const scores = rows.map(r => Number(r[key])).filter(n => n >= 1 && n <= 5);
+    const counts = { 5:0, 4:0, 3:0, 2:0, 1:0 };
+    scores.forEach(s => counts[s]++);
+    const avgS = avg(scores);
+    return { text, i, counts, avgS, total: scores.length };
+  });
+
+  const labels = questions.map(q => `${q.i+1}. ${truncate(q.text, 40)} (平均 ${q.avgS.toFixed(2)})`);
+  const datasets = [5, 4, 3, 2, 1].map(score => ({
+    label: score + ' ' + LIKERT_LABELS_OVERALL[score],
+    data: questions.map(q => q.counts[score]),
+    backgroundColor: LIKERT_COLORS[score],
+  }));
+
+  currentCharts.push(new Chart(document.getElementById('chart-overall'), {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { boxWidth: 14 } },
+        tooltip: {
+          callbacks: {
+            title: (items) => OVERALL_QUESTIONS[items[0].dataIndex],
+            label: (ctx) => {
+              const total = questions[ctx.dataIndex].total;
+              const pct = total > 0 ? Math.round((ctx.parsed.x / total) * 100) : 0;
+              return `${ctx.dataset.label}: ${ctx.parsed.x} 人 (${pct}%)`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: { stacked: true, beginAtZero: true, ticks: { precision: 0 } },
+        y: { stacked: true, ticks: { font: { size: 11 } } },
+      },
+    },
+  }));
+}
+
+/* ════════════════════════════════════════════════════════════════
+   7. 各場次
+   ════════════════════════════════════════════════════════════════ */
+function sectionSessions(rows) {
+  return `
+    <section class="section">
+      <div class="section-head">
+        <span class="tag">SESSIONS</span>
+        <h2>各場次學習收穫（5 場）</h2>
+      </div>
+      <div class="chart-card wide">
+        <h3>各場次評分分布</h3>
+        <div class="chart-container" style="height: 380px"><canvas id="chart-sessions"></canvas></div>
+      </div>
+    </section>`;
+}
+
+function renderSessionsChart(rows) {
+  const questions = SESSIONS.map((text, i) => {
+    const key = '場次_' + text;
+    // 收集所有非空值
+    const allVals = rows.map(r => r[key]).filter(v => v !== undefined && v !== '');
+    const counts = { 5:0, 4:0, 3:0, 2:0, 1:0, 'N/A':0 };
+    let numericSum = 0, numericN = 0;
+    allVals.forEach(v => {
+      if (v === 'N/A') { counts['N/A']++; }
+      else {
+        const n = Number(v);
+        if (n >= 1 && n <= 5) { counts[n]++; numericSum += n; numericN++; }
+      }
+    });
+    const avgS = numericN > 0 ? numericSum / numericN : 0;
+    return { text, i, counts, avgS, total: allVals.length, numericN };
+  });
+
+  const labels = questions.map(q => `場次 ${q.i+1} (平均 ${q.avgS.toFixed(2)}${q.counts['N/A'] > 0 ? '｜N/A ' + q.counts['N/A'] : ''})`);
+  const datasets = [5, 4, 3, 2, 1, 'N/A'].map(score => ({
+    label: score + ' ' + (LIKERT_LABELS_SESSION[score] || ''),
+    data: questions.map(q => q.counts[score]),
+    backgroundColor: LIKERT_COLORS[score],
+  }));
+
+  currentCharts.push(new Chart(document.getElementById('chart-sessions'), {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { boxWidth: 14 } },
+        tooltip: {
+          callbacks: {
+            title: (items) => SESSIONS[items[0].dataIndex],
+            label: (ctx) => {
+              const total = questions[ctx.dataIndex].total;
+              const pct = total > 0 ? Math.round((ctx.parsed.x / total) * 100) : 0;
+              return `${ctx.dataset.label}: ${ctx.parsed.x} 人 (${pct}%)`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: { stacked: true, beginAtZero: true, ticks: { precision: 0 } },
+        y: { stacked: true, ticks: { font: { size: 11 } } },
+      },
+    },
+  }));
+}
+
+/* ════════════════════════════════════════════════════════════════
+   8. 整體滿意度
+   ════════════════════════════════════════════════════════════════ */
+function sectionSatisfaction(rows) {
+  return `
+    <section class="section">
+      <div class="section-head">
+        <span class="tag">SATISFACTION</span>
+        <h2>整體滿意度分布</h2>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>整體滿意度</h3>
+          <div class="chart-container"><canvas id="chart-satisfaction"></canvas></div>
+        </div>
+        <div class="chart-card" id="satisfaction-detail-card">
+          <h3>各評分明細</h3>
+          <div id="satisfaction-detail" style="padding-top: 0.5rem"></div>
+        </div>
+      </div>
+    </section>`;
+}
+
+function renderSatisfactionChart(rows) {
+  const scores = rows.map(r => Number(r['整體滿意度'])).filter(n => n >= 1 && n <= 5);
+  const counts = { 5:0, 4:0, 3:0, 2:0, 1:0 };
+  scores.forEach(s => counts[s]++);
+  const total = scores.length;
+
+  const labels = [5, 4, 3, 2, 1].map(s => `${s} ${LIKERT_LABELS_SATISFACTION[s]}`);
+  const data = [5, 4, 3, 2, 1].map(s => counts[s]);
+  const colors = [5, 4, 3, 2, 1].map(s => LIKERT_COLORS[s]);
+
+  currentCharts.push(new Chart(document.getElementById('chart-satisfaction'), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right', labels: { boxWidth: 14, font: { size: 11 } } },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const pct = total > 0 ? Math.round((ctx.parsed / total) * 100) : 0;
+              return `${ctx.label}: ${ctx.parsed} 人 (${pct}%)`;
+            },
+          },
+        },
+      },
+    },
+  }));
+
+  // 明細列表
+  const detailHtml = [5, 4, 3, 2, 1].map(s => {
+    const c = counts[s];
+    const pct = total > 0 ? Math.round((c / total) * 100) : 0;
+    return `
+      <div style="display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0; border-bottom: 1px dashed var(--pale-blue);">
+        <span style="display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: ${LIKERT_COLORS[s]}; flex-shrink: 0;"></span>
+        <span style="flex: 1; font-size: 0.9rem;">${s} ${LIKERT_LABELS_SATISFACTION[s]}</span>
+        <span style="font-weight: 700; color: var(--deep-blue);">${c}</span>
+        <span style="color: var(--text-muted); font-size: 0.85rem; min-width: 3em; text-align: right;">${pct}%</span>
+      </div>`;
+  }).join('');
+  document.getElementById('satisfaction-detail').innerHTML = detailHtml +
+    `<div style="padding: 0.7rem 0 0; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+      共 <strong style="color: var(--deep-blue)">${total}</strong> 份有效回覆　平均 <strong style="color: var(--deep-blue)">${avg(scores).toFixed(2)}</strong>
+    </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   9. 開放式回饋
+   ════════════════════════════════════════════════════════════════ */
+function sectionFeedback(rows) {
+  const fields = [
+    { key: '最有幫助內容', label: '1. 本次研討會中，對您最有幫助的一項內容是什麼？' },
+    { key: '未來希望主題', label: '2. 未來希望學會再規劃哪些主題或課程？' },
+    { key: '其他建議或回饋', label: '3. 其他建議或回饋' },
+  ];
+  return `
+    <section class="section">
+      <div class="section-head">
+        <span class="tag">FEEDBACK</span>
+        <h2>開放式回饋</h2>
+      </div>
+      ${fields.map(f => {
+        const responses = rows.map(r => r[f.key]).filter(v => v && String(v).trim());
+        return `
+          <div class="feedback-block">
+            <h3>${escapeHtml(f.label)} <span class="count">${responses.length} 則回應</span></h3>
+            ${responses.length === 0
+              ? `<div class="feedback-empty">（尚無回應）</div>`
+              : `<div class="feedback-list">${responses.map(t => `<div class="feedback-item">${escapeHtml(String(t))}</div>`).join('')}</div>`
+            }
+          </div>`;
+      }).join('')}
+    </section>`;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   10. Helpers
+   ════════════════════════════════════════════════════════════════ */
+function avg(nums) {
+  if (!nums.length) return 0;
+  return nums.reduce((a, b) => a + b, 0) / nums.length;
+}
+function countBy(arr) {
+  return arr.reduce((acc, v) => { acc[v] = (acc[v] || 0) + 1; return acc; }, {});
+}
+function truncate(s, n) {
+  return s.length > n ? s.slice(0, n) + '…' : s;
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   初始載入
+   ════════════════════════════════════════════════════════════════ */
+loadData();
+</script>
+
+</body>
+</html>
