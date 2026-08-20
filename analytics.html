@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -253,6 +252,75 @@ body {
   .header-logo .logo-text small { display: none; }
   .back-btn, .refresh-btn { padding: 0.35rem 0.6rem; font-size: 0.76rem; }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   列印 / 匯出 PDF
+   ════════════════════════════════════════════════════════════════ */
+.print-btn {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  background: var(--warm-gold); color: #fff; border: none;
+  padding: 0.4rem 0.8rem; border-radius: 8px;
+  font-family: var(--font-main); font-size: 0.8rem; font-weight: 500;
+  cursor: pointer; transition: background 0.2s;
+}
+.print-btn:hover { background: #c2963a; }
+.chart-print-img { display: none; }
+.print-only { display: none; }
+
+@media print {
+  @page { size: A4 portrait; margin: 12mm 10mm 12mm 10mm; }
+
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html, body {
+    background: #fff !important;
+    padding-top: 0 !important;
+    font-size: 10.5pt;
+    line-height: 1.5;
+  }
+
+  /* 不列印的元素 */
+  .site-header, .site-footer, .header-actions,
+  .back-btn, .refresh-btn, .print-btn,
+  .retry-btn, .no-print, .spinner { display: none !important; }
+
+  .print-only { display: block !important; }
+
+  .container { max-width: none !important; padding: 0 !important; }
+
+  .page-title { margin: 0 0 8mm !important; }
+  .page-title h1 { font-size: 19pt !important; }
+  .page-title .subtitle { font-size: 10pt; }
+  .page-title .meta { box-shadow: none !important; border: 1px solid var(--pale-blue); }
+  .print-org {
+    font-size: 10pt; font-weight: 700; color: var(--nav-blue);
+    letter-spacing: 0.08em; margin-bottom: 0.2rem;
+  }
+
+  /* 區塊不被切斷 */
+  .section { margin-bottom: 7mm !important; break-inside: avoid; page-break-inside: avoid; }
+  .section-head { break-after: avoid; page-break-after: avoid; }
+  .section-head h2 { font-size: 13pt !important; }
+  .chart-card, .stat-card, .feedback-block, .table-wrap, .chart-grid > * {
+    break-inside: avoid; page-break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid var(--pale-blue);
+  }
+
+  /* 圖表改用列印用點陣圖，避免 canvas 縮放失真 */
+  .chart-container, .chart-card .chart-container { height: auto !important; }
+  canvas { display: none !important; }
+  .chart-print-img {
+    display: block !important;
+    width: 100% !important; height: auto !important;
+  }
+
+  a { color: inherit !important; text-decoration: none !important; }
+}
+
 </style>
 </head>
 <body>
@@ -276,6 +344,10 @@ body {
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         重新載入
       </button>
+      <button class="print-btn" id="print-btn" title="匯出成 PDF（列印）">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        匯出 PDF
+      </button>
     </div>
   </div>
 </header>
@@ -283,6 +355,7 @@ body {
 <main class="container">
 
   <div class="page-title">
+    <div class="print-only print-org">台灣醫事聯合臨床技能發展學會</div>
     <h1>滿意度調查分析</h1>
     <p class="subtitle">2026 年會員大會暨學術研討會 · 與會者回饋統計</p>
     <div class="meta" id="page-meta">
@@ -427,8 +500,10 @@ function renderAll(json) {
     ${sectionOverall(rows)}
     ${sectionSessions(rows)}
     ${sectionSatisfaction(rows)}
-    ${sectionSegmentation(rows)}
-    ${sectionFeedback(rows)}
+    <div class="no-print">
+      ${sectionSegmentation(rows)}
+      ${sectionFeedback(rows)}
+    </div>
   `;
 
   // 渲染圖表
@@ -1202,6 +1277,48 @@ function isMeaningfulFeedback(v) {
    初始載入
    ════════════════════════════════════════════════════════════════ */
 loadData();
+
+/* ════════════════════════════════════════════════════════════════
+   14. 列印 / 匯出 PDF
+   ------------------------------------------------------------------
+   Chart.js 的 <canvas> 在列印時會因為容器尺寸改變而失真，
+   因此列印前先把每張圖轉成 PNG <img>，列印結束後再移除。
+   「分群深入分析」與「開放式回饋」以 .no-print 排除，不會列印出來。
+   ════════════════════════════════════════════════════════════════ */
+function preparePrintCharts() {
+  cleanupPrintCharts();
+  currentCharts.forEach(chart => {
+    try {
+      const canvas = chart.canvas;
+      if (!canvas || !canvas.parentNode) return;
+      if (canvas.closest('.no-print')) return;   // 不列印的區塊跳過
+      const img = document.createElement('img');
+      img.className = 'chart-print-img';
+      img.src = chart.toBase64Image('image/png', 1);
+      canvas.parentNode.insertBefore(img, canvas);
+    } catch (e) {
+      console.warn('圖表轉檔失敗：', e);
+    }
+  });
+}
+
+function cleanupPrintCharts() {
+  document.querySelectorAll('.chart-print-img').forEach(img => img.remove());
+}
+
+window.addEventListener('beforeprint', preparePrintCharts);
+window.addEventListener('afterprint', cleanupPrintCharts);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('print-btn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      preparePrintCharts();          // Safari 不支援 beforeprint，先手動處理
+      setTimeout(() => window.print(), 120);
+    });
+  }
+});
+
 </script>
 
 </body>
