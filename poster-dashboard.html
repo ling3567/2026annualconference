@@ -184,6 +184,7 @@ canvas{max-height:240px;}
     <div class="nav-item" onclick="gotoPage('page-mail',this)"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg></span>確認信管理</div>
     <div class="nav-item" onclick="gotoPage('page-member',this)"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></span>會員繳費狀態</div>
     <div class="nav-item" onclick="gotoPage('page-accept',this)"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19 12c0 5-7 10-7 10S5 17 5 12a7 7 0 0 1 14 0z"/></svg></span>錄取通知</div>
+    <div class="nav-item" onclick="gotoPage('page-cert',this)"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><polyline points="8.5,13.5 7,22 12,19.5 17,22 15.5,13.5"/></svg></span>發表證明</div>
     <div class="sidebar-section">編號管理</div>
     <div class="nav-item" onclick="gotoPage('page-renumber',this)"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg></span>投稿編號管理</div>
     <div class="nav-item" onclick="gotoPage('page-finalpdf',this)"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>產生正式收錄 PDF</div>
@@ -316,6 +317,50 @@ canvas{max-height:240px;}
                 <th style="width:5rem">投稿編號</th><th style="width:6rem">公告編號</th><th>論文題目</th><th>通訊作者</th><th>Email</th><th>錄取類型</th><th>錄取信狀態</th>
               </tr></thead>
               <tbody id="acceptBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PAGE: 發表證明 ===== -->
+      <div class="page" id="page-cert">
+        <div class="card" style="margin-bottom:0.75rem">
+          <div class="card-body" style="padding:0.9rem 1.25rem">
+            <div style="font-size:0.85rem;font-weight:700;color:#333;margin-bottom:0.5rem">📁 證書檔案資料夾</div>
+            <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+              <input type="text" id="certFolderId" value="1JlN47ZIe_ziFncc7e3NaVLFciO6_7Ua-"
+                style="flex:1;min-width:260px;padding:0.5rem 0.7rem;border:1.5px solid #ccc;border-radius:8px;font-family:monospace;font-size:0.8rem">
+              <button class="btn btn-sm btn-primary" onclick="scanCertFolder()">🔍 掃描資料夾</button>
+              <span id="certScanInfo" style="font-size:0.8rem;color:#666"></span>
+            </div>
+            <div style="font-size:0.78rem;color:#888;margin-top:0.5rem">
+              檔名須為「海報論文發表證明-<span style="color:#0d47a1">公告編號</span> 通訊作者.pdf」，系統以公告編號比對。
+              資料夾需與本 Apps Script 為同一 Google 帳號，或已分享給該帳號。
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 id="certTitle">發表證明管理</h2>
+            <div class="btn-group">
+              <button class="btn btn-sm btn-primary" onclick="selectCert('all')">全選</button>
+              <button class="btn btn-sm" style="background:#eee;color:#333" onclick="selectCert('none')">取消</button>
+              <button class="btn btn-sm" style="background:#00838f;color:white" onclick="selectCert('unsent')">只選未寄送</button>
+              <button class="btn btn-sm" style="background:#558b2f;color:white" onclick="selectCert('hasfile')">只選有檔案</button>
+              <button class="btn btn-warning" onclick="saveCertFlagChanges()">💾 儲存應發證明變更</button>
+              <button class="btn btn-success" onclick="openCertPreview()">✉️ 預覽並寄發證明</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th style="width:2.5rem"><input type="checkbox" id="certCheckAll" onchange="document.querySelectorAll('.cert-chk:not(:disabled)').forEach(c=>c.checked=this.checked)"></th>
+                <th style="width:5rem">投稿編號</th><th style="width:6.5rem">公告編號</th><th>論文題目</th>
+                <th style="width:5rem">通訊作者</th><th>Email</th>
+                <th style="width:5.5rem">應發證明</th><th style="width:9rem">證書檔案</th><th style="width:7rem">寄送狀態</th>
+              </tr></thead>
+              <tbody id="certBody"></tbody>
             </table>
           </div>
         </div>
@@ -542,6 +587,27 @@ canvas{max-height:240px;}
 </div>
 
 <!-- Acceptance notification modal -->
+<div class="modal-overlay" id="certModal">
+  <div class="modal-box" style="max-width:820px">
+    <div class="modal-header purple"><h2>🎓 發表證明寄發預覽</h2>
+      <button onclick="closeModal('certModal')" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer">✕</button></div>
+    <div class="modal-body">
+      <div id="certSummary" style="font-size:0.85rem;background:#f5f7fa;border-left:3px solid #0d47a1;padding:0.7rem 1rem;border-radius:6px;margin-bottom:0.8rem;line-height:1.9"></div>
+      <div id="certWarn" style="font-size:0.83rem;background:#fff3e0;border-left:4px solid #e65100;color:#bf360c;padding:0.7rem 1rem;border-radius:6px;margin-bottom:0.8rem;display:none"></div>
+      <label style="font-size:0.85rem;font-weight:700;color:#333;display:block;margin-bottom:0.4rem">信件內容範本</label>
+      <div style="font-size:0.78rem;color:#888;margin-bottom:0.4rem">可用變數：<code>{{姓名}}</code>　<code>{{論文清單}}</code></div>
+      <textarea id="certTemplate" style="width:100%;min-height:230px;padding:0.7rem;border:1.5px solid #ccc;border-radius:8px;font-size:0.85rem;line-height:1.7"></textarea>
+      <div style="margin-top:0.8rem;font-size:0.85rem;font-weight:700;color:#333">預覽（第一位收件者）</div>
+      <div id="certPreview" style="border:1.5px solid #eee;border-radius:8px;padding:0.8rem;margin-top:0.4rem;max-height:220px;overflow:auto;font-size:0.85rem;line-height:1.8"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" style="background:#eee;color:#333" onclick="closeModal('certModal')">取消</button>
+      <button class="btn btn-primary" onclick="refreshCertPreview()">🔄 更新預覽</button>
+      <button class="btn btn-success" onclick="sendCertEmails()">📤 確認寄發</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="acceptModal">
   <div class="modal-box" style="max-width:820px">
     <div class="modal-header purple"><h2>🎓 錄取通知編輯與預覽</h2>
@@ -662,7 +728,7 @@ document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==
 // ===== NAV =====
 const pageNames = {
   'page-overview':'投稿總覽','page-mail':'確認信管理','page-member':'會員繳費狀態',
-  'page-renumber':'投稿編號管理','page-finalpdf':'產生正式收錄 PDF','page-stats':'統計分析','page-normalize':'機構名稱調整更新'
+  'page-cert':'發表證明','page-renumber':'投稿編號管理','page-finalpdf':'產生正式收錄 PDF','page-stats':'統計分析','page-normalize':'機構名稱調整更新'
 };
 function gotoPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -750,6 +816,7 @@ function renderAll() {
   renderMailTable();
   renderAcceptTable();
   renderMemberTable();
+  renderCertTable();
   renderRenumberTable();
   renderFpTable();
   renderStats();
@@ -2100,6 +2167,232 @@ async function applyNormalize() {
 }
 
 function getUnitAbbr(u){ if(!u) return '未知'; const m={'亞東':'亞東','奇美':'奇美','台大':'台大','臺大':'台大','長庚':'長庚','馬偕':'馬偕','成大':'成大','高醫':'高醫','榮總':'榮總','北榮':'北榮','中榮':'中榮','高榮':'高榮','屏基':'屏基','彰基':'彰基','嘉基':'嘉基','慈濟':'慈濟','新光':'新光','國泰':'國泰','萬芳':'萬芳','輔大':'輔大','陽明':'陽明','北醫':'北醫'}; for(const k in m) if(u.indexOf(k)!==-1) return m[k]; const c=u.match(/[\u4e00-\u9fff]/g); return c?c.slice(0,2).join(''):u.substring(0,2); }
+// =====================================================
+// ===== 發表證明寄發 =====
+// 欄位配置：Z(25) 公告編號 / AA(26) 應發證明 / AB(27) 證明寄送狀態 / AC(28) 證明寄送時間
+// =====================================================
+const CERT_NO_IDX     = 25;
+const CERT_FLAG_IDX   = 26;
+const CERT_STATUS_IDX = 27;
+const CERT_TIME_IDX   = 28;
+
+let certFiles = {};        // 公告編號 -> {id, name}
+let certFlagChanges = {};  // rowIdx -> 'Y'/'N'
+let certQuota = null;
+
+const CERT_DEFAULT_TMPL = `親愛的 {{姓名}} 您好：
+
+感謝您參與台灣醫事聯合臨床技能發展學會 2026 年會員大會暨學術研討會，並發表海報論文。
+
+隨信附上您的發表證明，請查收：
+
+{{論文清單}}
+
+證明文件為 PDF 格式，如需列印請以 A4 橫向輸出。
+
+若證明內容有誤（姓名、題目、單位等），請於兩週內回覆本信件告知，我們將協助更正。
+
+台灣醫事聯合臨床技能發展學會 敬上`;
+
+function certNoOf(i) { return formatPaperNo(submissions[i][CERT_NO_IDX]) || ''; }
+function certFlagOf(i) {
+  if (certFlagChanges.hasOwnProperty(i)) return certFlagChanges[i];
+  return (submissions[i][CERT_FLAG_IDX] || '').toString().trim().toUpperCase();
+}
+
+async function scanCertFolder() {
+  const url = getUrl();
+  if (!url) { showInfo('請填入 Apps Script URL', 'error'); return; }
+  const fid = document.getElementById('certFolderId').value.trim();
+  if (!fid) { showInfo('請填入資料夾 ID', 'warning'); return; }
+  showInfo('⏳ 掃描資料夾中...', 'info');
+  try {
+    const json = await fetchJsonp(url + '?action=scanCertFolder&folderId=' + encodeURIComponent(fid));
+    if (json.result !== 'success') throw new Error(json.message);
+    certFiles = {};
+    let noKey = 0;
+    json.files.forEach(f => { if (f.no) certFiles[f.no] = f; else noKey++; });
+    certQuota = json.quota;
+    document.getElementById('certScanInfo').textContent =
+      `✅ ${json.folderName}：${json.count} 個 PDF${noKey ? `（${noKey} 個檔名無法解析編號）` : ''}　｜　Gmail 剩餘額度 ${json.quota}`;
+    renderCertTable();
+    showInfo(`✅ 掃描完成，找到 ${json.count} 個 PDF`, 'success');
+  } catch (e) {
+    showInfo('❌ 掃描失敗：' + e.message, 'error');
+  }
+}
+
+function renderCertTable() {
+  const tbody = document.getElementById('certBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  const targets = submissions.map((r, i) => i).filter(i => certFlagOf(i) !== 'N');
+  const withFile = targets.filter(i => certFiles[certNoOf(i)]).length;
+  document.getElementById('certTitle').textContent =
+    `發表證明管理（應發 ${targets.length} 筆／找到檔案 ${withFile} 筆）`;
+
+  submissions.forEach((r, i) => {
+    const flag = certFlagOf(i);
+    const no   = certNoOf(i);
+    const file = certFiles[no];
+    const sent = (r[CERT_STATUS_IDX] || '').toString().includes('已發送');
+    const email = (r[9] || '').trim();
+    const scanned = Object.keys(certFiles).length > 0;
+    const blocked = flag === 'N' || !email || (scanned && !file);
+
+    let fileCell;
+    if (!scanned)      fileCell = '<span style="color:#999">未掃描</span>';
+    else if (file)     fileCell = `<span style="color:#2e7d32" title="${esc(file.name)}">✅ 已找到</span>`;
+    else if (flag==='N') fileCell = '<span style="color:#999">—</span>';
+    else               fileCell = '<span style="color:#c62828;font-weight:700">❌ 缺檔</span>';
+
+    const tr = document.createElement('tr');
+    if (flag === 'N') tr.style.opacity = '0.45';
+    tr.innerHTML = `<td style="text-align:center"><input type="checkbox" class="cert-chk" data-i="${i}" ${blocked ? 'disabled' : ''}></td>
+      <td style="white-space:nowrap"><strong>${esc(r[0] || '')}</strong></td>
+      <td style="white-space:nowrap"><span style="color:#0d47a1;font-weight:600">${esc(no || '—')}</span></td>
+      <td style="min-width:160px;word-break:break-all;line-height:1.4">${esc(r[3] || '')}</td>
+      <td>${esc(r[8] || '')}</td>
+      <td style="font-size:0.8rem;color:${email ? '#555' : '#c62828'}">${esc(email || '（無 Email）')}</td>
+      <td><select class="edit-select" style="font-size:0.78rem" onchange="certFlagChanges[${i}]=this.value;renderCertTable()">
+            <option value="Y" ${flag !== 'N' ? 'selected' : ''}>Y 應發</option>
+            <option value="N" ${flag === 'N' ? 'selected' : ''}>N 不發</option>
+          </select></td>
+      <td style="white-space:nowrap;font-size:0.8rem">${fileCell}</td>
+      <td style="white-space:nowrap"><span class="badge ${sent ? 'badge-sent' : 'badge-unsent'}">${sent ? '✅ 已發送' : '⬜ 未發送'}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function selectCert(mode) {
+  document.querySelectorAll('.cert-chk').forEach(c => {
+    if (c.disabled) { c.checked = false; return; }
+    const i = parseInt(c.dataset.i);
+    const sent = (submissions[i][CERT_STATUS_IDX] || '').toString().includes('已發送');
+    if (mode === 'all')          c.checked = true;
+    else if (mode === 'none')    c.checked = false;
+    else if (mode === 'unsent')  c.checked = !sent;
+    else if (mode === 'hasfile') c.checked = !!certFiles[certNoOf(i)];
+  });
+}
+
+async function saveCertFlagChanges() {
+  const idxList = Object.keys(certFlagChanges).map(k => parseInt(k));
+  if (!idxList.length) { showInfo('沒有任何變更', 'warning'); return; }
+  await runProgress(idxList, async (i) => {
+    const body = new URLSearchParams();
+    body.append('action', 'updateCertFlag');
+    body.append('rowIndex', i + 2);
+    body.append('flag', certFlagChanges[i]);
+    const resp = await fetch(getUrl(), { method: 'POST', body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+    const json = await resp.json();
+    if (json.result !== 'success') throw new Error(json.message);
+    submissions[i][CERT_FLAG_IDX] = certFlagChanges[i];
+  }, i => `更新：${submissions[i][0] || ''}`, () => { certFlagChanges = {}; renderCertTable(); });
+}
+
+// 依 Email 分組：同一通訊作者多篇 → 一封信、多個附件
+function groupCertByEmail(rowIdxList) {
+  const groups = {};
+  rowIdxList.forEach(i => {
+    const r = submissions[i];
+    const email = (r[9] || '').trim().toLowerCase();
+    if (!email) return;
+    if (!groups[email]) groups[email] = { name: r[8] || '', email: r[9] || '', rows: [] };
+    groups[email].rows.push(i);
+  });
+  return Object.values(groups);
+}
+
+function buildCertMail(group, tmpl) {
+  const listHtml = group.rows.map(i => {
+    const r = submissions[i];
+    return `<div style="text-align:left;background:#f5f7fa;border-left:3px solid #0d47a1;padding:8px 12px;margin:6px 0;border-radius:4px">
+      <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">海報編號：</span><span style="color:#1a1a2e;font-weight:bold">${esc(certNoOf(i))}</span></div>
+      <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">論文題目：</span><span style="color:#1a1a2e;font-weight:bold">${esc(r[3] || '')}</span></div>
+    </div>`;
+  }).join('');
+
+  return tmpl.split('\n').map(line => {
+    if (line.indexOf('{{論文清單}}') !== -1) return listHtml;
+    const t = line.replace('{{姓名}}', group.name);
+    if (t.trim() === '') return '<br>';
+    const e = esc(t);
+    if (/^親愛的/.test(t)) return `<p style="color:#0d47a1;font-weight:bold;margin:0 0 16px 0">${e}</p>`;
+    return `<p style="margin:0 0 8px 0">${e}</p>`;
+  }).join('');
+}
+
+function openCertPreview() {
+  const sel = Array.from(document.querySelectorAll('.cert-chk:checked')).map(c => parseInt(c.dataset.i));
+  if (!sel.length) { showInfo('請先勾選要寄發證明的投稿', 'warning'); return; }
+  if (!Object.keys(certFiles).length) { showInfo('請先掃描證書資料夾', 'warning'); return; }
+
+  const groups = groupCertByEmail(sel);
+  const attachCount = sel.filter(i => certFiles[certNoOf(i)]).length;
+  const resend = sel.filter(i => (submissions[i][CERT_STATUS_IDX] || '').toString().includes('已發送'));
+
+  document.getElementById('certSummary').innerHTML =
+    `勾選 <strong>${sel.length}</strong> 筆　→　合併為 <strong>${groups.length}</strong> 封信<br>`
+    + `附件共 <strong>${attachCount}</strong> 個 PDF`
+    + (certQuota !== null ? `　｜　Gmail 剩餘額度 <strong>${certQuota}</strong> 封` : '');
+
+  const warn = document.getElementById('certWarn');
+  const msgs = [];
+  if (resend.length) msgs.push(`其中 ${resend.length} 筆先前已寄送過（${resend.slice(0, 5).map(i => certNoOf(i)).join('、')}${resend.length > 5 ? '...' : ''}），繼續將重複寄送。`);
+  if (certQuota !== null && groups.length > certQuota) msgs.push(`需要 ${groups.length} 封信，超過今日剩餘額度 ${certQuota} 封，建議分批寄送。`);
+  warn.innerHTML = msgs.join('<br>');
+  warn.style.display = msgs.length ? 'block' : 'none';
+
+  const ta = document.getElementById('certTemplate');
+  if (!ta.value.trim()) ta.value = CERT_DEFAULT_TMPL;
+  refreshCertPreview();
+  document.getElementById('certModal').classList.add('show');
+}
+
+function refreshCertPreview() {
+  const sel = Array.from(document.querySelectorAll('.cert-chk:checked')).map(c => parseInt(c.dataset.i));
+  const groups = groupCertByEmail(sel);
+  if (!groups.length) return;
+  document.getElementById('certPreview').innerHTML =
+    buildCertMail(groups[0], document.getElementById('certTemplate').value);
+}
+
+async function sendCertEmails() {
+  const sel = Array.from(document.querySelectorAll('.cert-chk:checked')).map(c => parseInt(c.dataset.i));
+  const tmpl = document.getElementById('certTemplate').value;
+  const groups = groupCertByEmail(sel);
+  closeModal('certModal');
+
+  await runProgress(groups, async (group) => {
+    const htmlBody = buildCertMail(group, tmpl);
+    const fileIds = group.rows.map(i => (certFiles[certNoOf(i)] || {}).id).filter(Boolean);
+    if (!fileIds.length) throw new Error('無附件');
+
+    for (const i of group.rows) {
+      const r = submissions[i];
+      const isFirst = group.rows.indexOf(i) === 0;
+      const body = new URLSearchParams();
+      body.append('action', 'sendCertEmail');
+      body.append('rowIndex', i + 2);
+      body.append('data', JSON.stringify({
+        submissionId: r[0],
+        contactName: group.name,
+        contactEmail: group.email,
+        posterIds: isFirst ? group.rows.map(idx => certNoOf(idx)) : [],
+        fileIds: isFirst ? fileIds : [],
+        htmlBody: htmlBody,
+        skipSend: !isFirst
+      }));
+      const resp = await fetch(getUrl(), { method: 'POST', body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      const json = await resp.json();
+      if (json.result !== 'success') throw new Error(json.message);
+      submissions[i][CERT_STATUS_IDX] = '證明已發送';
+    }
+    if (certQuota !== null) certQuota--;
+  }, group => `寄送：${group.name}（${group.rows.length}篇）`, () => { renderCertTable(); });
+}
+
 </script>
 </body>
 </html>
