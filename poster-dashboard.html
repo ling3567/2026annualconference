@@ -621,8 +621,8 @@ canvas{max-height:240px;}
         <div id="certEditor" contenteditable="true"
           style="min-height:260px;max-height:360px;overflow-y:auto;padding:0.9rem 1rem;border:1.5px solid #ccc;border-top:none;border-radius:0 0 8px 8px;font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;font-size:14px;line-height:1.9;outline:none;background:white"></div>
       </div>
-      <div style="margin-top:0.8rem;font-size:0.85rem;font-weight:700;color:#333">預覽（第一位收件者）</div>
-      <div id="certPreview" style="border:1.5px solid #eee;border-radius:8px;padding:0.8rem;margin-top:0.4rem;max-height:220px;overflow:auto;font-size:0.85rem;line-height:1.8"></div>
+      <div style="margin-top:0.8rem;font-size:0.85rem;font-weight:700;color:#333">預覽（<span id="certPreviewCount">0</span> 封信，逐封列出）</div>
+      <div id="certPreview" style="border:1.5px solid #eee;border-radius:8px;padding:0.8rem;margin-top:0.4rem;max-height:420px;overflow:auto;font-size:0.85rem;line-height:1.8"></div>
     </div>
     <div class="modal-footer">
       <button class="btn" style="background:#eee;color:#333" onclick="closeModal('certModal')">取消</button>
@@ -2392,9 +2392,29 @@ function openCertPreview() {
 function refreshCertPreview() {
   const sel = Array.from(document.querySelectorAll('.cert-chk:checked')).map(c => parseInt(c.dataset.i));
   const groups = groupCertByEmail(sel);
-  if (!groups.length) return;
-  document.getElementById('certPreview').innerHTML =
-    buildCertMail(groups[0], document.getElementById('certEditor').innerHTML);
+  const box = document.getElementById('certPreview');
+  const cnt = document.getElementById('certPreviewCount');
+  if (cnt) cnt.textContent = groups.length;
+  if (!groups.length) { box.innerHTML = '<div style="color:#888;padding:0.5rem">尚未勾選任何投稿</div>'; return; }
+
+  const tmpl = document.getElementById('certEditor').innerHTML;
+  box.innerHTML = groups.map((g, n) => {
+    const files = g.rows.map(i => certFiles[certNoOf(i)]).filter(Boolean);
+    const missing = g.rows.length - files.length;
+    const subject = '【TSMCSD 2026年會】海報論文發表證明 — ' + g.rows.map(i => certNoOf(i)).join('、');
+    const attachHtml = files.map(f => `<div style="font-size:0.75rem;color:#2e7d32;margin-left:1rem">📎 ${esc(f.name)}</div>`).join('')
+      + (missing ? `<div style="font-size:0.75rem;color:#c62828;margin-left:1rem">⚠️ 有 ${missing} 篇找不到證書檔案</div>` : '');
+    return `<div style="border:1.5px solid #ddd;border-radius:8px;margin-bottom:0.9rem;overflow:hidden">
+      <div style="background:#eef2ff;padding:0.5rem 0.8rem;font-size:0.8rem;border-bottom:1px solid #ddd">
+        <div><strong style="color:#0d47a1">${n + 1} / ${groups.length}</strong>　
+          <strong>${esc(g.name)}</strong>　<span style="color:#666">&lt;${esc(g.email)}&gt;</span>
+          <span style="color:#666">　｜　${g.rows.length} 篇</span></div>
+        <div style="color:#555;margin-top:0.2rem">主旨：${esc(subject)}</div>
+        ${attachHtml}
+      </div>
+      <div style="padding:0.8rem">${buildCertMail(g, tmpl)}</div>
+    </div>`;
+  }).join('');
 }
 
 // ===== 證明信件編輯器工具列 =====
