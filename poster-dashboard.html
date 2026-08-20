@@ -595,7 +595,7 @@ canvas{max-height:240px;}
       <div id="certSummary" style="font-size:0.85rem;background:#f5f7fa;border-left:3px solid #0d47a1;padding:0.7rem 1rem;border-radius:6px;margin-bottom:0.8rem;line-height:1.9"></div>
       <div id="certWarn" style="font-size:0.83rem;background:#fff3e0;border-left:4px solid #e65100;color:#bf360c;padding:0.7rem 1rem;border-radius:6px;margin-bottom:0.8rem;display:none"></div>
       <label style="font-size:0.85rem;font-weight:700;color:#333;display:block;margin-bottom:0.4rem">信件內容範本</label>
-      <div style="font-size:0.78rem;color:#888;margin-bottom:0.4rem">可用變數：<code>{{姓名}}</code>　<code>{{論文清單}}</code></div>
+      <div style="font-size:0.78rem;color:#888;margin-bottom:0.4rem">可用變數：<code>{姓名}</code>　<code>{海報清單}</code>　｜　[[藍字強調]]　((黃底提醒))</div>
       <textarea id="certTemplate" style="width:100%;min-height:230px;padding:0.7rem;border:1.5px solid #ccc;border-radius:8px;font-size:0.85rem;line-height:1.7"></textarea>
       <div style="margin-top:0.8rem;font-size:0.85rem;font-weight:700;color:#333">預覽（第一位收件者）</div>
       <div id="certPreview" style="border:1.5px solid #eee;border-radius:8px;padding:0.8rem;margin-top:0.4rem;max-height:220px;overflow:auto;font-size:0.85rem;line-height:1.8"></div>
@@ -2180,19 +2180,30 @@ let certFiles = {};        // 公告編號 -> {id, name}
 let certFlagChanges = {};  // rowIdx -> 'Y'/'N'
 let certQuota = null;
 
-const CERT_DEFAULT_TMPL = `親愛的 {{姓名}} 您好：
+const CERT_DEFAULT_TMPL = `親愛的 {姓名} 先生／小姐 您好：
 
-感謝您參與台灣醫事聯合臨床技能發展學會 2026 年會員大會暨學術研討會，並發表海報論文。
+感謝您投稿並參與台灣醫事聯合臨床技能發展學會「2026年會員大會暨學術研討會」海報論文發表。
 
-隨信附上您的發表證明，請查收：
+隨信提供您的海報論文發表證明，敬請查收：
 
-{{論文清單}}
+{海報清單}
 
-證明文件為 PDF 格式，如需列印請以 A4 橫向輸出。
+■ 發表證明下載期限：[[115年9月30日（星期三）前]]
+ - 請於期限前完成下載留存，逾期恕不另行補寄。
+ - ((如證明內容有誤（姓名、題目、單位等），請於期限前回覆本信件告知，我們將協助更正。))
 
-若證明內容有誤（姓名、題目、單位等），請於兩週內回覆本信件告知，我們將協助更正。
+再次感謝您對本會活動的參與與支持！
 
-台灣醫事聯合臨床技能發展學會 敬上`;
+若有任何問題，歡迎與秘書處聯絡，謝謝。
+
+────────────────────────
+台灣醫事聯合臨床技能發展學會
+秘書處　楊依玲
+Tel：06-2812811 轉 57426
+E-mail：tsmcsd2018@gmail.com
+710402 台南市永康區中華路 901 號
+（教學大樓 3F 教學部）
+────────────────────────`;
 
 function certNoOf(i) { return formatPaperNo(submissions[i][CERT_NO_IDX]) || ''; }
 function certFlagOf(i) {
@@ -2304,23 +2315,27 @@ function groupCertByEmail(rowIdxList) {
   return Object.values(groups);
 }
 
-function buildCertMail(group, tmpl) {
-  const listHtml = group.rows.map(i => {
+// 證書信件的海報卡片：沿用錄取通知樣式，欄位改為「發表形式」
+function buildCertPosterListHtml(group) {
+  return group.rows.map(i => {
     const r = submissions[i];
+    const label = getAcceptTypeLabel(acceptTypeChanges[i] || r[ACCEPT_TYPE_IDX] || '');
     return `<div style="text-align:left;background:#f5f7fa;border-left:3px solid #0d47a1;padding:8px 12px;margin:6px 0;border-radius:4px">
-      <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">海報編號：</span><span style="color:#1a1a2e;font-weight:bold">${esc(certNoOf(i))}</span></div>
+      <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">海報編號：</span><span style="color:#1a1a2e;font-weight:bold">${esc(certNoOf(i) || r[0] || '')}</span></div>
       <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">論文題目：</span><span style="color:#1a1a2e;font-weight:bold">${esc(r[3] || '')}</span></div>
+      <div style="margin:2px 0"><span style="color:#888;font-size:0.85em">發表形式：</span><span style="color:#1a1a2e;font-weight:bold">${esc(label)}</span></div>
     </div>`;
   }).join('');
+}
 
-  return tmpl.split('\n').map(line => {
-    if (line.indexOf('{{論文清單}}') !== -1) return listHtml;
-    const t = line.replace('{{姓名}}', group.name);
-    if (t.trim() === '') return '<br>';
-    const e = esc(t);
-    if (/^親愛的/.test(t)) return `<p style="color:#0d47a1;font-weight:bold;margin:0 0 16px 0">${e}</p>`;
-    return `<p style="margin:0 0 8px 0">${e}</p>`;
-  }).join('');
+// 純文字範本 → HTML（沿用錄取通知的 plainToAcceptEditorHtml，樣式一致）
+function buildCertMail(group, tmplPlain) {
+  const tmplHtml = plainToAcceptEditorHtml(tmplPlain || '');
+  const esc2 = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const body = tmplHtml
+    .replace(/\{姓名\}/g, esc2(group.name))
+    .replace(/\{海報清單\}/g, buildCertPosterListHtml(group));
+  return `<div style="text-align:left;font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif">${body}</div>`;
 }
 
 function openCertPreview() {
