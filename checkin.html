@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TSMCSD2026｜報到系統</title>
+<title>TSMCSD2026｜年會報到系統</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1676,7 +1676,8 @@ function soCardGift(label, count, onsiteCount, noPayCount, specialGiftCount) {
   return `<div class="so-card">
     <div class="so-label">${label}</div>
     <div class="so-val">${totalGift} <span style="font-size:.82rem;font-weight:500;color:var(--text-muted)">份</span></div>
-    <div style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">已繳費會員 ${count} 份${specialGiftCount>0?' ＋ 特殊身分 '+specialGiftCount+' 份':''}</div>
+    <div style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">已繳費會員 ${count} 份</div>
+    ${specialGiftCount>0?`<div style="font-size:.72rem;color:#B85C5C;margin-top:.15rem">特殊身分 ${specialGiftCount} 份</div>`:''}
     ${onsiteCount>0?`<div style="font-size:.76rem;font-weight:600;color:var(--warning);margin-top:.25rem">其中現場繳費 ${onsiteCount} 人</div>`:''}
     ${noPayCount>0?`<div style="font-size:.72rem;color:#999;margin-top:.15rem">會員不繳費 ${noPayCount} 人</div>`:''}
   </div>`;
